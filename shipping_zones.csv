@@ -1,0 +1,5 @@
+id,store_id,name,description,countries,is_active,created_at,updated_at
+550e8400-e29b-41d4-a716-446655440001,550e8400-e29b-41d4-a716-446655440000,"Afrique de l'Ouest","Zone de livraison pour les pays de l'Afrique de l'Ouest","{Sénégal,Mali,Burkina Faso,Côte d'Ivoire,Niger,Guinée,Bénin,Togo,Mauritanie}",true,2024-01-15T10:00:00Z,2024-01-15T10:00:00Z
+550e8400-e29b-41d4-a716-446655440002,550e8400-e29b-41d4-a716-446655440000,"Afrique Centrale","Zone de livraison pour les pays de l'Afrique Centrale","{Cameroun,Tchad,République Centrafricaine,Gabon,République du Congo,République Démocratique du Congo}",true,2024-01-15T10:00:00Z,2024-01-15T10:00:00Z
+550e8400-e29b-41d4-a716-446655440003,550e8400-e29b-41d4-a716-446655440000,"Afrique du Nord","Zone de livraison pour les pays francophones d'Afrique du Nord","{Maroc,Tunisie,Algérie}",true,2024-01-15T10:00:00Z,2024-01-15T10:00:00Z
+550e8400-e29b-41d4-a716-446655440004,550e8400-e29b-41d4-a716-446655440000,"Océan Indien","Zone de livraison pour les îles de l'Océan Indien","{Madagascar,Comores,Seychelles}",true,2024-01-15T10:00:00Z,2024-01-15T10:00:00Z
