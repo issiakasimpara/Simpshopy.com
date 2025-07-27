@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MediaSelector from './MediaSelector';
+import LinkAutocomplete from './LinkAutocomplete';
 
 interface TextImageEditorProps {
   block: TemplateBlock;
@@ -45,6 +46,13 @@ const TextImageEditor = ({ block, onUpdate, onMediaSelect }: TextImageEditorProp
           id="textImageButtonText"
           value={block.content.buttonText || ''}
           onChange={(e) => onUpdate('buttonText', e.target.value)}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textImageButtonLink">Lien du bouton</Label>
+        <LinkAutocomplete
+          value={block.content.buttonLink || ''}
+          onChange={(val) => onUpdate('buttonLink', val)}
         />
       </div>
       <div>

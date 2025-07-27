@@ -31,6 +31,7 @@ export const blockTemplates = [
       title: 'Bienvenue sur notre site',
       subtitle: 'Découvrez nos produits exceptionnels',
       buttonText: 'Découvrir',
+      buttonLink: '',
       backgroundImage: '',
       mediaType: 'image'
     },
@@ -86,6 +87,7 @@ export const blockTemplates = [
       title: 'À propos de nous',
       text: 'Nous sommes une entreprise dédiée à fournir les meilleurs produits à nos clients.',
       buttonText: 'En savoir plus',
+      buttonLink: '',
       imageUrl: '',
       layout: 'image-right'
     },
@@ -104,6 +106,7 @@ export const blockTemplates = [
       title: 'Découvrez notre histoire',
       text: 'Regardez cette vidéo pour mieux comprendre notre mission et nos valeurs.',
       buttonText: 'En savoir plus',
+      buttonLink: '',
       videoUrl: '',
       layout: 'video-right',
       autoplay: false,

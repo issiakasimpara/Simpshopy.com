@@ -1,200 +1,303 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from './use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-interface Domain {
+export interface StoreDomain {
   id: string;
   store_id: string;
+  domain_type: 'subdomain' | 'custom';
   domain_name: string;
-  cloudflare_zone_id?: string;
-  status: 'pending' | 'active' | 'error' | 'verifying';
-  ssl_status: 'pending' | 'active' | 'error' | 'provisioning';
-  is_verified: boolean;
-  last_verified_at?: string;
-  error_message?: string;
+  is_primary: boolean;
+  is_active: boolean;
+  verification_status: 'pending' | 'verified' | 'failed';
   created_at: string;
   updated_at: string;
 }
 
-export const useDomains = (storeId?: string) => {
-  const { toast } = useToast();
+export interface AddDomainData {
+  storeId: string;
+  domainName: string;
+  domainType: 'subdomain' | 'custom';
+}
+
+class DomainService {
+  // Récupérer les domaines d'une boutique
+  async getStoreDomains(storeId: string): Promise<StoreDomain[]> {
+    const { data, error } = await supabase
+      .from('store_domains')
+      .select('*')
+      .eq('store_id', storeId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Erreur récupération domaines:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  // Ajouter un domaine personnalisé
+  async addCustomDomain(storeId: string, domainName: string): Promise<StoreDomain> {
+    // Nettoyer le nom de domaine
+    const cleanDomain = domainName.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+    const { data, error } = await supabase
+      .from('store_domains')
+      .insert({
+        store_id: storeId,
+        domain_type: 'custom',
+        domain_name: cleanDomain,
+        is_primary: false,
+        is_active: false,
+        verification_status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Erreur ajout domaine:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  // Supprimer un domaine
+  async deleteDomain(domainId: string): Promise<void> {
+    const { error } = await supabase
+      .from('store_domains')
+      .delete()
+      .eq('id', domainId);
+
+    if (error) {
+      console.error('❌ Erreur suppression domaine:', error);
+      throw error;
+    }
+  }
+
+  // Définir un domaine comme principal
+  async setPrimaryDomain(storeId: string, domainId: string): Promise<void> {
+    // D'abord, retirer le statut principal de tous les domaines de cette boutique
+    await supabase
+      .from('store_domains')
+      .update({ is_primary: false })
+      .eq('store_id', storeId);
+
+    // Ensuite, définir le nouveau domaine principal
+    const { error } = await supabase
+      .from('store_domains')
+      .update({ is_primary: true })
+      .eq('id', domainId);
+
+    if (error) {
+      console.error('❌ Erreur définition domaine principal:', error);
+      throw error;
+    }
+  }
+
+  // Vérifier un domaine personnalisé
+  async verifyDomain(domainId: string): Promise<boolean> {
+    try {
+      // Récupérer le domaine
+      const { data: domain, error: fetchError } = await supabase
+        .from('store_domains')
+        .select('domain_name')
+        .eq('id', domainId)
+        .single();
+
+      if (fetchError || !domain) {
+        throw new Error('Domaine non trouvé');
+      }
+
+      // Vérifier si le domaine pointe vers notre serveur
+      const response = await fetch(`https://${domain.domain_name}/api/health`, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'SimpShopy-Domain-Verifier/1.0'
+        }
+      });
+
+      const isValid = response.ok;
+
+      // Mettre à jour le statut
+      await supabase
+        .from('store_domains')
+        .update({
+          verification_status: isValid ? 'verified' : 'failed',
+          is_active: isValid,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', domainId);
+
+      return isValid;
+    } catch (error) {
+      console.error('❌ Erreur vérification domaine:', error);
+      
+      // Marquer comme échoué
+      await supabase
+        .from('store_domains')
+        .update({
+          verification_status: 'failed',
+          is_active: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', domainId);
+
+      return false;
+    }
+  }
+
+  // Obtenir la boutique par domaine (pour le routing)
+  async getStoreByDomain(domain: string): Promise<string | null> {
+    const { data, error } = await supabase
+      .rpc('get_store_by_domain', { p_domain: domain });
+
+    if (error) {
+      console.error('❌ Erreur récupération boutique par domaine:', error);
+      return null;
+    }
+
+    return data;
+  }
+}
+
+const domainService = new DomainService();
+
+export const useStoreDomains = (storeId?: string) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  // Récupérer les domaines d'un store
-  const { data: domains, isLoading } = useQuery({
-    queryKey: ['domains', storeId],
-    queryFn: async () => {
-      if (!storeId) return [];
-
-      console.log('Fetching domains for store:', storeId);
-
-      const { data, error } = await supabase
-        .from('domains')
-        .select('*')
-        .eq('store_id', storeId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching domains:', error);
-        throw error;
-      }
-
-      console.log('Domains fetched:', data);
-      return data || [];
-    },
-    enabled: !!storeId,
-    // ⚡ OPTIMISATION: Domaines changent rarement
-    refetchInterval: 10 * 60 * 1000, // 10 minutes au lieu de 30 secondes
-    staleTime: 5 * 60 * 1000, // 5 minutes de cache
-    cacheTime: 30 * 60 * 1000, // Cache pendant 30 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+  // Récupérer les domaines d'une boutique
+  const {
+    data: domains = [],
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['store-domains', storeId],
+    queryFn: () => domainService.getStoreDomains(storeId!),
+    enabled: !!storeId
   });
 
-  // Configurer un nouveau domaine
-  const configureDomain = useMutation({
-    mutationFn: async ({ domainName, storeId }: { domainName: string; storeId: string }) => {
-      console.log('Configuring domain:', domainName, 'for store:', storeId);
-      
-      const { data, error } = await supabase.functions.invoke('cloudflare-domains', {
-        body: {
-          action: 'configure',
-          storeId,
-          domainName: domainName.toLowerCase().trim()
-        }
+  // Ajouter un domaine personnalisé
+  const addCustomDomainMutation = useMutation({
+    mutationFn: ({ storeId, domainName }: { storeId: string; domainName: string }) =>
+      domainService.addCustomDomain(storeId, domainName),
+    onSuccess: (newDomain) => {
+      // Mettre à jour le cache
+      queryClient.setQueryData(['store-domains', storeId], (old: StoreDomain[] = []) => {
+        return [newDomain, ...old];
       });
 
-      console.log('Configuration response:', data, error);
-
-      if (error) {
-        console.error('Configuration error:', error);
-        throw error;
-      }
-      
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      return data;
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
       toast({
-        title: "Domaine configuré !",
-        description: `${variables.domainName} a été configuré avec succès. Configurez maintenant les serveurs de noms chez votre registraire.`,
+        title: "Domaine ajouté !",
+        description: `${newDomain.domain_name} a été ajouté et est en cours de vérification.`,
       });
     },
     onError: (error: any) => {
-      console.error('Domain configuration error:', error);
       toast({
-        title: "Erreur de configuration",
-        description: error.message || "Impossible de configurer le domaine. Vérifiez les logs pour plus de détails.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Vérifier un domaine
-  const verifyDomain = useMutation({
-    mutationFn: async (domainName: string) => {
-      console.log('Verifying domain:', domainName);
-      
-      const { data, error } = await supabase.functions.invoke('cloudflare-domains', {
-        body: {
-          action: 'verify',
-          domainName
-        }
-      });
-
-      console.log('Verification response:', data, error);
-
-      if (error) {
-        console.error('Verification error:', error);
-        throw error;
-      }
-      
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      return data;
-    },
-    onSuccess: (data, domainName) => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      
-      if (data.verified) {
-        toast({
-          title: "Domaine vérifié !",
-          description: `${domainName} est maintenant actif.`,
-        });
-      } else {
-        toast({
-          title: "Vérification en cours",
-          description: "La propagation DNS peut prendre jusqu'à 48h. Statut actuel: " + data.status,
-        });
-      }
-    },
-    onError: (error: any) => {
-      console.error('Domain verification error:', error);
-      toast({
-        title: "Erreur de vérification",
-        description: error.message || "Impossible de vérifier le domaine.",
+        title: "Erreur",
+        description: "Impossible d'ajouter le domaine. " + error.message,
         variant: "destructive",
       });
     },
   });
 
   // Supprimer un domaine
-  const removeDomain = useMutation({
-    mutationFn: async (domainName: string) => {
-      console.log('Removing domain:', domainName);
-      
-      const { data, error } = await supabase.functions.invoke('cloudflare-domains', {
-        body: {
-          action: 'remove',
-          domainName
-        }
+  const deleteDomainMutation = useMutation({
+    mutationFn: (domainId: string) => domainService.deleteDomain(domainId),
+    onSuccess: (_, domainId) => {
+      // Mettre à jour le cache
+      queryClient.setQueryData(['store-domains', storeId], (old: StoreDomain[] = []) => {
+        return old.filter(domain => domain.id !== domainId);
       });
 
-      console.log('Removal response:', data, error);
-
-      if (error) {
-        console.error('Removal error:', error);
-        throw error;
-      }
-      
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      return data;
-    },
-    onSuccess: (data, domainName) => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
       toast({
         title: "Domaine supprimé",
-        description: `${domainName} a été supprimé avec succès.`,
+        description: "Le domaine a été supprimé avec succès.",
       });
     },
     onError: (error: any) => {
-      console.error('Domain removal error:', error);
       toast({
-        title: "Erreur de suppression",
-        description: error.message || "Impossible de supprimer le domaine.",
+        title: "Erreur",
+        description: "Impossible de supprimer le domaine. " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Définir un domaine comme principal
+  const setPrimaryDomainMutation = useMutation({
+    mutationFn: ({ storeId, domainId }: { storeId: string; domainId: string }) =>
+      domainService.setPrimaryDomain(storeId, domainId),
+    onSuccess: () => {
+      // Invalider le cache pour recharger
+      queryClient.invalidateQueries({ queryKey: ['store-domains', storeId] });
+
+      toast({
+        title: "Domaine principal défini",
+        description: "Le domaine principal a été mis à jour.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de définir le domaine principal. " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Vérifier un domaine
+  const verifyDomainMutation = useMutation({
+    mutationFn: (domainId: string) => domainService.verifyDomain(domainId),
+    onSuccess: (isValid) => {
+      // Invalider le cache pour recharger
+      queryClient.invalidateQueries({ queryKey: ['store-domains', storeId] });
+
+      if (isValid) {
+        toast({
+          title: "Domaine vérifié !",
+          description: "Le domaine est maintenant actif et fonctionnel.",
+        });
+      } else {
+        toast({
+          title: "Vérification échouée",
+          description: "Le domaine ne pointe pas vers SimpShopy. Vérifiez votre configuration DNS.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur de vérification",
+        description: "Impossible de vérifier le domaine. " + error.message,
         variant: "destructive",
       });
     },
   });
 
   return {
-    domains: domains || [],
+    domains,
     isLoading,
-    configureDomain: configureDomain.mutateAsync,
-    verifyDomain: verifyDomain.mutateAsync,
-    removeDomain: removeDomain.mutateAsync,
-    isConfiguring: configureDomain.isPending,
-    isVerifying: verifyDomain.isPending,
-    isRemoving: removeDomain.isPending,
+    error,
+    addCustomDomain: addCustomDomainMutation.mutate,
+    deleteDomain: deleteDomainMutation.mutate,
+    setPrimaryDomain: setPrimaryDomainMutation.mutate,
+    verifyDomain: verifyDomainMutation.mutate,
+    isAddingDomain: addCustomDomainMutation.isPending,
+    isDeletingDomain: deleteDomainMutation.isPending,
+    isVerifyingDomain: verifyDomainMutation.isPending
   };
+};
+
+// Hook pour le routing (récupérer la boutique par domaine)
+export const useStoreByDomain = (domain?: string) => {
+  return useQuery({
+    queryKey: ['store-by-domain', domain],
+    queryFn: () => domainService.getStoreByDomain(domain!),
+    enabled: !!domain,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 };

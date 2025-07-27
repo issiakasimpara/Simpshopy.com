@@ -13,6 +13,7 @@ import TrustSection from "@/components/home/TrustSection";
 import PaymentMethodsSection from "@/components/home/PaymentMethodsSection";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import AppLogo from "@/components/ui/AppLogo";
+import Integrations from './Integrations';
 
 const Index = () => {
   const [searchParams] = useSearchParams();

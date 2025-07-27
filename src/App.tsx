@@ -51,11 +51,17 @@ const CustomerOrders = lazy(() => import("./pages/CustomerOrders"));
 const TestStoreUrls = lazy(() => import("./pages/TestStoreUrls"));
 const TestLogo = lazy(() => import("./pages/TestLogo"));
 const TestLogoPlacement = lazy(() => import("./pages/TestLogoPlacement"));
+const Monitoring = lazy(() => import("./pages/Monitoring"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // ⚡ ÉTAPE 3: Monitoring en temps réel (dev uniquement)
 import React, { useState } from 'react';
 import PerformanceMonitor from './components/PerformanceMonitor';
+import SystemDiagnosticPanel from './components/SystemDiagnosticPanel';
+
+// Ajouter l'import pour la page Integrations
+const Integrations = lazy(() => import("./pages/Integrations"));
+const IntegrationDetailPage = lazy(() => import("./pages/IntegrationDetailPage"));
 
 const queryClient = new QueryClient();
 
@@ -379,6 +385,36 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/monitoring"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <Monitoring />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/integrations"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <Integrations />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/integrations/:id"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <IntegrationDetailPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
               </Routes>
             </ErrorBoundary>
@@ -394,6 +430,9 @@ const App = () => {
                 }}
               />
             )}
+
+            {/* 🔍 Panneau de diagnostic système (dev uniquement) */}
+            {import.meta.env.DEV && <SystemDiagnosticPanel />}
           </BrowserRouter>
         </TooltipProvider>
       </CartProvider>

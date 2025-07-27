@@ -14,6 +14,7 @@ import StoreStatusCard from '@/components/store-config/StoreStatusCard';
 import StoreConfigForm from '@/components/store-config/StoreConfigForm';
 import StorePreview from '@/components/store-config/StorePreview';
 import NoStoreSelectedState from '@/components/store-config/NoStoreSelectedState';
+import DomainManager from '@/components/store-config/domain/DomainManager';
 
 const StoreConfig = () => {
   const [showCreateStore, setShowCreateStore] = useState(false);
@@ -170,13 +171,40 @@ const StoreConfig = () => {
                           onViewModeChange={setViewMode}
                         />
 
-                        <StoreConfigForm 
-                          selectedStore={store}
-                          formData={formData}
-                          onFormDataChange={setFormData}
-                          onSubmit={handleSubmit}
-                          isUpdating={isUpdating}
-                        />
+                        <Tabs defaultValue="config" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="config">Configuration</TabsTrigger>
+                            <TabsTrigger value="domains">Domaines</TabsTrigger>
+                            <TabsTrigger value="preview">Aperçu</TabsTrigger>
+                          </TabsList>
+
+                          <TabsContent value="config" className="space-y-6">
+                            <StoreConfigForm
+                              formData={formData}
+                              setFormData={setFormData}
+                              onSubmit={handleSubmit}
+                              isUpdating={isUpdating}
+                            />
+                          </TabsContent>
+
+                          <TabsContent value="domains" className="space-y-6">
+                            {store && (
+                              <DomainManager
+                                storeId={store.id}
+                                storeSlug={store.slug}
+                              />
+                            )}
+                          </TabsContent>
+
+                          <TabsContent value="preview" className="space-y-6">
+                            {store && storeTemplate && (
+                              <StorePreview
+                                store={store}
+                                template={storeTemplate}
+                              />
+                            )}
+                          </TabsContent>
+                        </Tabs>
                       </div>
                     </TabsContent>
                   </Tabs>

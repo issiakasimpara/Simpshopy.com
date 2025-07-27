@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useProducts } from '@/hooks/useProducts';
 import { useVariantAttributeManager } from '@/hooks/useVariantAttributeManager';
 
@@ -30,6 +31,7 @@ interface ProductSubmissionHandlerProps {
 }
 
 export const useProductSubmission = ({ storeId, formData, onSuccess }: ProductSubmissionHandlerProps) => {
+  const queryClient = useQueryClient();
   const { createProduct, isCreating } = useProducts(storeId);
   const { createVariantsWithAttributes } = useVariantAttributeManager();
 
@@ -93,8 +95,7 @@ export const useProductSubmission = ({ storeId, formData, onSuccess }: ProductSu
       console.log('ProductSubmission - Final product data:', productData);
 
       // 1. Créer le produit principal
-      const createdProduct = await createProduct(productData);
-      console.log('ProductSubmission - Product created successfully:', createdProduct);
+      const createdProduct = await createProduct.mutateAsync(productData);
 
       // 2. Créer les variantes si elles existent
       if (formData.variants && formData.variants.length > 0) {
@@ -118,7 +119,16 @@ export const useProductSubmission = ({ storeId, formData, onSuccess }: ProductSu
       }
 
       console.log('ProductSubmission - Product and variants created successfully');
-      onSuccess();
+      
+      // 3. Forcer l'invalidation des queries et fermer le Dialog
+      queryClient.invalidateQueries(['products', storeId]);
+      queryClient.refetchQueries(['products', storeId]);
+      
+      // 4. Fermer le Dialog après un petit délai pour éviter les conflits DOM
+      setTimeout(() => {
+        onSuccess();
+      }, 100);
+      
     } catch (error) {
       console.error('ProductSubmission - Error creating product:', error);
     }

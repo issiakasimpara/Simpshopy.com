@@ -1,400 +1,408 @@
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react'
+import { supabase } from '@/integrations/supabase/client'
 
-// Configuration
-console.log('🔧 Service e-mail configuré pour utiliser Supabase Edge Functions');
-
-export interface OrderEmailData {
-  orderId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-    image?: string;
-  }>;
-  subtotal: number;
-  shipping: number;
-  total: number;
-  shippingAddress: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  storeName: string;
-  storeEmail: string;
-  estimatedDelivery?: string;
-}
+/**
+ * Service d'emails pour Simpshopy
+ * Gestion des emails automatiques et des notifications
+ */
 
 export interface EmailTemplate {
-  to: string;
-  subject: string;
-  html: string;
+  id: string
+  name: string
+  subject: string
+  html: string
+  variables: string[]
+}
+
+export interface EmailLog {
+  id: string
+  order_id: string
+  store_id: string
+  email_type: 'admin' | 'customer'
+  recipient_email: string
+  subject: string
+  status: 'sent' | 'failed' | 'pending'
+  error_message?: string
+  sent_at: string
+}
+
+export interface EmailStats {
+  store_name: string
+  total_emails: number
+  sent_emails: number
+  failed_emails: number
+  success_rate: number
+  last_email_sent: string
 }
 
 class EmailService {
-  private fromEmail = import.meta.env.VITE_FROM_EMAIL || 'noreply@ecom-express.com';
-  private adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@ecom-express.com';
-
   /**
-   * Envoie un e-mail de confirmation de commande au client
+   * Envoyer un email de commande via l'Edge Function
    */
-  async sendOrderConfirmationToCustomer(orderData: OrderEmailData): Promise<boolean> {
+  async sendOrderEmail(orderId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('🔧 Configuration e-mail client:', {
-        from: this.fromEmail,
-        to: orderData.customerEmail,
-        apiKey: import.meta.env.VITE_RESEND_API_KEY ? 'Configurée' : 'Manquante'
-      });
-
-      const template = this.generateCustomerEmailTemplate(orderData);
-
-      const { data, error } = await resend.emails.send({
-        from: this.fromEmail,
-        to: orderData.customerEmail,
-        subject: template.subject,
-        html: template.html,
-      });
+      const { data, error } = await supabase.functions.invoke('send-order-emails', {
+        body: { orderId }
+      })
 
       if (error) {
-        console.error('❌ Erreur détaillée envoi e-mail client:', {
-          error,
-          message: error.message,
-          name: error.name
-        });
-        return false;
+        console.error('📧 Erreur lors de l\'envoi d\'email:', error)
+        return { success: false, error: error.message }
       }
 
-      console.log('✅ E-mail client envoyé:', data?.id);
-      return true;
+      console.log('📧 Email envoyé avec succès:', data)
+      return { success: true }
     } catch (error) {
-      console.error('❌ Erreur service e-mail client:', {
-        error,
-        message: error instanceof Error ? error.message : 'Erreur inconnue',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      return false;
+      console.error('📧 Erreur lors de l\'envoi d\'email:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' }
     }
   }
 
   /**
-   * Envoie un e-mail de notification de nouvelle commande à l'admin
+   * Obtenir les logs d'emails pour une boutique
    */
-  async sendOrderNotificationToAdmin(orderData: OrderEmailData): Promise<boolean> {
+  async getEmailLogs(storeId?: string, limit: number = 50): Promise<EmailLog[]> {
     try {
-      console.log('🔧 Configuration e-mail admin:', {
-        from: this.fromEmail,
-        to: orderData.storeEmail,
-        apiKey: import.meta.env.VITE_RESEND_API_KEY ? 'Configurée' : 'Manquante'
-      });
+      let query = supabase
+        .from('email_logs')
+        .select(`
+          *,
+          orders (
+            customer_name,
+            total_amount
+          ),
+          stores (
+            name
+          )
+        `)
+        .order('sent_at', { ascending: false })
+        .limit(limit)
 
-      const template = this.generateAdminEmailTemplate(orderData);
+      if (storeId) {
+        query = query.eq('store_id', storeId)
+      }
 
-      const { data, error } = await resend.emails.send({
-        from: this.fromEmail,
-        to: orderData.storeEmail,
-        subject: template.subject,
-        html: template.html,
-      });
+      const { data, error } = await query
 
       if (error) {
-        console.error('❌ Erreur détaillée envoi e-mail admin:', {
-          error,
-          message: error.message,
-          name: error.name
-        });
-        return false;
+        console.error('📧 Erreur lors de la récupération des logs:', error)
+        throw error
       }
 
-      console.log('✅ E-mail admin envoyé:', data?.id);
-      return true;
+      return data || []
     } catch (error) {
-      console.error('❌ Erreur service e-mail admin:', {
-        error,
-        message: error instanceof Error ? error.message : 'Erreur inconnue',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      return false;
+      console.error('📧 Erreur lors de la récupération des logs:', error)
+      return []
     }
   }
 
   /**
-   * Envoie les deux e-mails (client + admin) pour une commande
-   * SOLUTION TEMPORAIRE : Simulation pour le développement
+   * Obtenir les statistiques d'emails
    */
-  async sendOrderEmails(orderData: OrderEmailData): Promise<{ customer: boolean; admin: boolean }> {
-    console.log('📧 SIMULATION - Envoi des e-mails pour la commande:', orderData.orderId);
+  async getEmailStats(storeId?: string): Promise<EmailStats[]> {
+    try {
+      const { data, error } = await supabase.rpc('get_email_stats', {
+        p_store_id: storeId || null
+      })
+
+      if (error) {
+        console.error('📧 Erreur lors de la récupération des stats:', error)
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('📧 Erreur lors de la récupération des stats:', error)
+      return []
+    }
+  }
+
+  /**
+   * Obtenir les logs d'emails récents (vue)
+   */
+  async getRecentEmailLogs(limit: number = 20): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('recent_email_logs')
+        .select('*')
+        .order('sent_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('📧 Erreur lors de la récupération des logs récents:', error)
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('📧 Erreur lors de la récupération des logs récents:', error)
+      return []
+    }
+  }
+
+  /**
+   * Tester l'envoi d'email
+   */
+  async testEmailService(): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Créer une commande de test
+      const testOrder = {
+        store_id: 'test-store-id',
+        customer_email: 'test@example.com',
+        customer_name: 'Utilisateur Test',
+        total_amount: 1000,
+        status: 'pending',
+        payment_method: 'Test',
+        shipping_address: {
+          address: 'Adresse de test',
+          city: 'Ville de test',
+          country: 'Pays de test'
+        }
+      }
+
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert(testOrder)
+        .select()
+        .single()
+
+      if (orderError) {
+        console.error('📧 Erreur lors de la création de la commande de test:', orderError)
+        return { success: false, error: orderError.message }
+      }
+
+      // Envoyer l'email de test
+      const emailResult = await this.sendOrderEmail(orderData.id)
+
+      // Supprimer la commande de test
+      await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderData.id)
+
+      return emailResult
+    } catch (error) {
+      console.error('📧 Erreur lors du test d\'email:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' }
+    }
+  }
+
+  /**
+   * Nettoyer les anciens logs d'emails
+   */
+  async cleanupOldEmailLogs(): Promise<{ deleted_count: number; error?: string }> {
+    try {
+      const { data, error } = await supabase.rpc('cleanup_old_email_logs')
+
+      if (error) {
+        console.error('📧 Erreur lors du nettoyage des logs:', error)
+        return { deleted_count: 0, error: error.message }
+      }
+
+      return { deleted_count: data || 0 }
+    } catch (error) {
+      console.error('📧 Erreur lors du nettoyage des logs:', error)
+      return { deleted_count: 0, error: error instanceof Error ? error.message : 'Erreur inconnue' }
+    }
+  }
+
+  /**
+   * Obtenir les templates d'emails disponibles
+   */
+  async getEmailTemplates(): Promise<EmailTemplate[]> {
+    // Templates prédéfinis
+    const templates: EmailTemplate[] = [
+      {
+        id: 'order-confirmation',
+        name: 'Confirmation de commande',
+        subject: '✅ Confirmation de commande #{orderNumber} - {storeName}',
+        html: `
+          <h1>Confirmation de votre commande</h1>
+          <p>Merci pour votre commande #{orderNumber}</p>
+          <p>Montant total: {totalAmount} CFA</p>
+        `,
+        variables: ['orderNumber', 'storeName', 'totalAmount', 'customerName', 'orderDate']
+      },
+      {
+        id: 'new-order-admin',
+        name: 'Nouvelle commande (Admin)',
+        subject: '🎉 Nouvelle commande #{orderNumber} - {storeName}',
+        html: `
+          <h1>Nouvelle commande reçue !</h1>
+          <p>Commande #{orderNumber} de {customerName}</p>
+          <p>Montant: {totalAmount} CFA</p>
+        `,
+        variables: ['orderNumber', 'storeName', 'totalAmount', 'customerName', 'orderDate']
+      }
+    ]
+
+    return templates
+  }
+
+  /**
+   * Vérifier le statut du service d'emails
+   */
+  async checkEmailServiceStatus(): Promise<{
+    resend_configured: boolean
+    edge_function_deployed: boolean
+    database_configured: boolean
+    overall_status: 'healthy' | 'warning' | 'error'
+  }> {
+    const status = {
+      resend_configured: false,
+      edge_function_deployed: false,
+      database_configured: false,
+      overall_status: 'error' as const
+    }
 
     try {
-      // SIMULATION : En développement, on simule l'envoi
-      console.log('📨 E-mail client simulé:', {
-        to: orderData.customerEmail,
-        subject: `🎉 Commande confirmée #${orderData.orderId} - ${orderData.storeName}`,
-        content: 'Confirmation de commande avec détails des produits'
-      });
+      // Vérifier si l'Edge Function est déployée
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('send-order-emails', {
+        body: { test: true }
+      })
 
-      console.log('📨 E-mail admin simulé:', {
-        to: orderData.storeEmail,
-        subject: `🔔 Nouvelle commande #${orderData.orderId} - ${orderData.total.toFixed(2)}€`,
-        content: 'Notification de nouvelle commande avec infos client'
-      });
+      if (!functionError) {
+        status.edge_function_deployed = true
+      }
 
-      // Simuler un délai d'envoi
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Vérifier si la base de données est configurée
+      const { data: dbData, error: dbError } = await supabase
+        .from('email_logs')
+        .select('count')
+        .limit(1)
 
-      // Simuler un succès
-      const results = { customer: true, admin: true };
-      console.log('✅ E-mails simulés envoyés avec succès:', results);
+      if (!dbError) {
+        status.database_configured = true
+      }
 
-      return results;
+      // Vérifier Resend (via un test d'email)
+      const testResult = await this.testEmailService()
+      status.resend_configured = testResult.success
 
+      // Déterminer le statut global
+      const healthyCount = Object.values(status).filter(Boolean).length
+      if (healthyCount === 3) {
+        status.overall_status = 'healthy'
+      } else if (healthyCount >= 1) {
+        status.overall_status = 'warning'
+      } else {
+        status.overall_status = 'error'
+      }
+
+      return status
     } catch (error) {
-      console.error('❌ Erreur simulation e-mails:', error);
-      return { customer: false, admin: false };
+      console.error('📧 Erreur lors de la vérification du statut:', error)
+      return status
     }
-  }
-
-  /**
-   * Génère le template d'e-mail pour le client
-   */
-  private generateCustomerEmailTemplate(orderData: OrderEmailData): EmailTemplate {
-    const itemsHtml = orderData.items.map(item => `
-      <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : ''}
-            <div>
-              <div style="font-weight: 600; color: #1f2937;">${item.name}</div>
-              <div style="color: #6b7280; font-size: 14px;">Quantité: ${item.quantity}</div>
-            </div>
-          </div>
-        </td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">
-          ${(item.price * item.quantity).toFixed(2)}€
-        </td>
-      </tr>
-    `).join('');
-
-    return {
-      to: orderData.customerEmail,
-      subject: `🎉 Commande confirmée #${orderData.orderId} - ${orderData.storeName}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Commande confirmée</title>
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9fafb;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px 24px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🎉 Commande confirmée !</h1>
-              <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Merci pour votre commande ${orderData.customerName}</p>
-            </div>
-
-            <!-- Content -->
-            <div style="padding: 32px 24px;">
-              
-              <!-- Order Info -->
-              <div style="background-color: #f3f4f6; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h2 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px;">📦 Détails de votre commande</h2>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="color: #6b7280;">Numéro de commande:</span>
-                  <span style="font-weight: 600; color: #1f2937;">#${orderData.orderId}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="color: #6b7280;">Boutique:</span>
-                  <span style="font-weight: 600; color: #1f2937;">${orderData.storeName}</span>
-                </div>
-                ${orderData.estimatedDelivery ? `
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: #6b7280;">Livraison estimée:</span>
-                  <span style="font-weight: 600; color: #059669;">${orderData.estimatedDelivery}</span>
-                </div>
-                ` : ''}
-              </div>
-
-              <!-- Items -->
-              <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px;">🛍️ Produits commandés</h3>
-                <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
-                  ${itemsHtml}
-                </table>
-              </div>
-
-              <!-- Total -->
-              <div style="background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="color: #6b7280;">Sous-total:</span>
-                  <span>${orderData.subtotal.toFixed(2)}€</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="color: #6b7280;">Livraison:</span>
-                  <span>${orderData.shipping.toFixed(2)}€</span>
-                </div>
-                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 12px 0;">
-                <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: #1f2937;">
-                  <span>Total:</span>
-                  <span>${orderData.total.toFixed(2)}€</span>
-                </div>
-              </div>
-
-              <!-- Shipping Address -->
-              <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px;">📍 Adresse de livraison</h3>
-                <div style="color: #92400e;">
-                  <div style="font-weight: 600;">${orderData.customerName}</div>
-                  <div>${orderData.shippingAddress.street}</div>
-                  <div>${orderData.shippingAddress.postalCode} ${orderData.shippingAddress.city}</div>
-                  <div>${orderData.shippingAddress.country}</div>
-                  ${orderData.customerPhone ? `<div>📱 ${orderData.customerPhone}</div>` : ''}
-                </div>
-              </div>
-
-              <!-- CTA -->
-              <div style="text-align: center; margin-bottom: 24px;">
-                <a href="#" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                  📱 Suivre ma commande
-                </a>
-              </div>
-
-              <!-- Footer -->
-              <div style="text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-                <p>Merci de votre confiance ! 💙</p>
-                <p>Une question ? Contactez-nous à <a href="mailto:${orderData.storeEmail}" style="color: #667eea;">${orderData.storeEmail}</a></p>
-              </div>
-
-            </div>
-          </div>
-        </body>
-        </html>
-      `
-    };
-  }
-
-  /**
-   * Génère le template d'e-mail pour l'admin
-   */
-  private generateAdminEmailTemplate(orderData: OrderEmailData): EmailTemplate {
-    const itemsHtml = orderData.items.map(item => `
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${item.name}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${(item.price * item.quantity).toFixed(2)}€</td>
-      </tr>
-    `).join('');
-
-    return {
-      to: orderData.storeEmail,
-      subject: `🔔 Nouvelle commande #${orderData.orderId} - ${orderData.total.toFixed(2)}€`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Nouvelle commande</title>
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9fafb;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 32px 24px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🔔 Nouvelle commande !</h1>
-              <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Commande #${orderData.orderId} - ${orderData.total.toFixed(2)}€</p>
-            </div>
-
-            <!-- Content -->
-            <div style="padding: 32px 24px;">
-              
-              <!-- Customer Info -->
-              <div style="background-color: #f0f9ff; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h2 style="margin: 0 0 16px 0; color: #0c4a6e; font-size: 18px;">👤 Informations client</h2>
-                <div style="color: #0c4a6e;">
-                  <div style="margin-bottom: 8px;"><strong>Nom:</strong> ${orderData.customerName}</div>
-                  <div style="margin-bottom: 8px;"><strong>E-mail:</strong> <a href="mailto:${orderData.customerEmail}" style="color: #0284c7;">${orderData.customerEmail}</a></div>
-                  ${orderData.customerPhone ? `<div style="margin-bottom: 8px;"><strong>Téléphone:</strong> ${orderData.customerPhone}</div>` : ''}
-                  <div><strong>Adresse:</strong><br>
-                    ${orderData.shippingAddress.street}<br>
-                    ${orderData.shippingAddress.postalCode} ${orderData.shippingAddress.city}<br>
-                    ${orderData.shippingAddress.country}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Order Items -->
-              <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px;">📦 Produits commandés</h3>
-                <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
-                  <thead>
-                    <tr style="background-color: #f9fafb;">
-                      <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #374151;">Produit</th>
-                      <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #374151;">Qté</th>
-                      <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #374151;">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${itemsHtml}
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Total -->
-              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #166534;">
-                  <span>Sous-total:</span>
-                  <span>${orderData.subtotal.toFixed(2)}€</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #166534;">
-                  <span>Livraison:</span>
-                  <span>${orderData.shipping.toFixed(2)}€</span>
-                </div>
-                <hr style="border: none; border-top: 1px solid #bbf7d0; margin: 12px 0;">
-                <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; color: #166534;">
-                  <span>Total:</span>
-                  <span>${orderData.total.toFixed(2)}€</span>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px;">⚡ Actions à effectuer</h3>
-                <div style="color: #92400e;">
-                  <div style="margin-bottom: 8px;">✅ Préparer la commande</div>
-                  <div style="margin-bottom: 8px;">✅ Organiser l'expédition</div>
-                  <div style="margin-bottom: 8px;">✅ Envoyer le numéro de suivi au client</div>
-                  <div>✅ Mettre à jour le statut de la commande</div>
-                </div>
-              </div>
-
-              <!-- CTA -->
-              <div style="text-align: center; margin-bottom: 24px;">
-                <a href="#" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; margin-right: 12px;">
-                  📋 Voir la commande
-                </a>
-                <a href="mailto:${orderData.customerEmail}" style="display: inline-block; background: #6b7280; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                  ✉️ Contacter le client
-                </a>
-              </div>
-
-              <!-- Footer -->
-              <div style="text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-                <p>Commande reçue le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
-                <p>Boutique: ${orderData.storeName}</p>
-              </div>
-
-            </div>
-          </div>
-        </body>
-        </html>
-      `
-    };
   }
 }
 
-export const emailService = new EmailService();
+export const emailService = new EmailService()
+
+// Hook React pour le service d'emails
+export const useEmailService = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const sendOrderEmail = async (orderId: string) => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const result = await emailService.sendOrderEmail(orderId)
+      if (!result.success) {
+        setError(result.error || 'Erreur inconnue')
+      }
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue'
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getEmailLogs = async (storeId?: string, limit?: number) => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const logs = await emailService.getEmailLogs(storeId, limit)
+      return logs
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue'
+      setError(errorMessage)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getEmailStats = async (storeId?: string) => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const stats = await emailService.getEmailStats(storeId)
+      return stats
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue'
+      setError(errorMessage)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const testEmailService = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const result = await emailService.testEmailService()
+      if (!result.success) {
+        setError(result.error || 'Erreur inconnue')
+      }
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue'
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const checkEmailServiceStatus = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const status = await emailService.checkEmailServiceStatus()
+      return status
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue'
+      setError(errorMessage)
+      return {
+        resend_configured: false,
+        edge_function_deployed: false,
+        database_configured: false,
+        overall_status: 'error' as const
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    isLoading,
+    error,
+    sendOrderEmail,
+    getEmailLogs,
+    getEmailStats,
+    testEmailService,
+    checkEmailServiceStatus,
+    clearError: () => setError(null)
+  }
+}

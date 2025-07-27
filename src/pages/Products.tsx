@@ -19,7 +19,7 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState<Tables<'products'> | null>(null);
   
   const { stores } = useStores();
-  const { products, isLoading, deleteProduct } = useProducts(selectedStoreId);
+  const { products, isLoading, deleteProduct, refetch } = useProducts(selectedStoreId);
 
   // Auto-select the first store when stores are loaded
   useEffect(() => {
@@ -41,6 +41,15 @@ const Products = () => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
       deleteProduct(productId);
     }
+  };
+
+  // Callback pour forcer le refetch après création de produit
+  const handleProductCreated = () => {
+    console.log('Products - Product created, forcing refetch');
+    // Forcer le refetch immédiatement
+    refetch();
+    // Fermer le dialog
+    setShowAddProduct(false);
   };
 
   return (
@@ -92,6 +101,7 @@ const Products = () => {
             open={showAddProduct} 
             onOpenChange={setShowAddProduct}
             storeId={selectedStoreId}
+            onProductCreated={handleProductCreated}
           />
 
           <EditProductDialog 

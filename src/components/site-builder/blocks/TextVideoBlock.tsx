@@ -123,9 +123,15 @@ const TextVideoBlock = ({ block, isEditing, viewMode, onUpdate }: TextVideoBlock
                 <p className={`mb-6 leading-relaxed ${viewMode === 'mobile' ? 'text-sm' : 'text-lg'}`}>
                   {block.content.text || 'Votre texte descriptif ici...'}
                 </p>
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                  {block.content.buttonText || 'En savoir plus'}
-                </button>
+                {block.content.buttonLink ? (
+                  <a href={block.content.buttonLink} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" target={block.content.buttonLink.startsWith('http') ? '_blank' : undefined} rel={block.content.buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}>
+                    {block.content.buttonText || 'En savoir plus'}
+                  </a>
+                ) : (
+                  <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    {block.content.buttonText || 'En savoir plus'}
+                  </button>
+                )}
               </>
             )}
           </div>

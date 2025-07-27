@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Découverte des Endpoints Moneroo</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-section h3 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        button { 
+            padding: 12px 20px; 
+            margin: 8px; 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover { 
+            background: #5a6fd8; 
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-radius: 5px; 
+            white-space: pre-wrap; 
+            font-size: 12px;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460;
+            border-left-color: #17a2b8;
+        }
+        .warning { 
+            background: #fff3cd; 
+            color: #856404;
+            border-left-color: #ffc107;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-info { background: #17a2b8; }
+        .endpoint-result {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        .endpoint-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .endpoint-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .endpoint-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Découverte des Endpoints Moneroo</h1>
+            <p>Test systématique de tous les endpoints possibles de l'API Moneroo</p>
+        </div>
+
+        <!-- Configuration -->
+        <div class="test-section">
+            <h3>⚙️ Configuration</h3>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="apiKey">Clé API Secrète</label>
+                    <input type="text" id="apiKey" value="pvk_4kym2f|01K13TKF19WGJ59VWV3FK6GHH4" placeholder="Votre clé API secrète">
+                </div>
+                <div class="form-group">
+                    <label for="baseUrl">URL de Base</label>
+                    <input type="text" id="baseUrl" value="https://api.moneroo.io/v1" placeholder="URL de base de l'API">
+                </div>
+            </div>
+        </div>
+
+        <!-- Test de Découverte des Endpoints -->
+        <div class="test-section">
+            <h3>🔍 Test de Découverte des Endpoints</h3>
+            <button onclick="discoverEndpoints()">🚀 Découvrir tous les Endpoints</button>
+            <button onclick="testPaymentEndpoints()">💰 Tester Endpoints de Paiement</button>
+            <button onclick="testMethodEndpoints()">🌍 Tester Endpoints de Méthodes</button>
+            <button onclick="testBaseEndpoints()">🏠 Tester Endpoints de Base</button>
+            <div id="discoveryResult" class="result"></div>
+        </div>
+
+        <!-- Test de Création de Paiement -->
+        <div class="test-section">
+            <h3>💰 Test de Création de Paiement</h3>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="amount">Montant (XOF)</label>
+                    <input type="number" id="amount" value="1000" placeholder="1000">
+                </div>
+                <div class="form-group">
+                    <label for="currency">Devise</label>
+                    <select id="currency">
+                        <option value="XOF">XOF (Franc CFA)</option>
+                        <option value="USD">USD (Dollar US)</option>
+                        <option value="EUR">EUR (Euro)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="customerName">Nom du Client</label>
+                    <input type="text" id="customerName" value="Test Customer" placeholder="Nom du client">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email du Client</label>
+                    <input type="email" id="customerEmail" value="test@example.com" placeholder="email@example.com">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="customerPhone">Téléphone du Client</label>
+                <input type="text" id="customerPhone" value="+22507000000" placeholder="+22507000000">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" value="Test de paiement Moneroo" placeholder="Description du paiement">
+            </div>
+            <button onclick="testCreatePayment()">🚀 Tester Création de Paiement</button>
+            <div id="createPaymentResult" class="result"></div>
+        </div>
+
+        <!-- Logs -->
+        <div class="test-section">
+            <h3>📝 Logs Détaillés</h3>
+            <button onclick="clearLogs()">🗑️ Effacer les Logs</button>
+            <div id="logs" class="result info"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let discoveredEndpoints = [];
+
+        // Fonctions utilitaires
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = type === 'success' ? 'status-success' : 
+                               type === 'error' ? 'status-error' : 
+                               type === 'warning' ? 'status-warning' : 'status-info';
+            
+            logsDiv.innerHTML += `<div><span class="status-indicator ${statusClass}"></span>[${timestamp}] ${message}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        function getApiKey() {
+            return document.getElementById('apiKey').value.trim();
+        }
+
+        function getBaseUrl() {
+            return document.getElementById('baseUrl').value.trim();
+        }
+
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = content;
+            element.className = `result ${type}`;
+        }
+
+        function addEndpointResult(endpoint, status, response, type = 'info') {
+            const resultDiv = document.getElementById('discoveryResult');
+            const statusClass = status === 'success' ? 'endpoint-success' : 
+                               status === 'error' ? 'endpoint-error' : 'endpoint-info';
+            
+            resultDiv.innerHTML += `
+                <div class="endpoint-result ${statusClass}">
+                    <strong>${endpoint}</strong> - ${status.toUpperCase()}
+                    <br>${response}
+                </div>
+            `;
+        }
+
+        // Test de découverte des endpoints
+        async function discoverEndpoints() {
+            log('🔍 Début de la découverte des endpoints...', 'info');
+            showResult('discoveryResult', '🔍 Découverte en cours...', 'info');
+
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+
+            // Liste complète des endpoints à tester
+            const allEndpoints = [
+                // Endpoints de base
+                { url: `${baseUrl}/`, method: 'GET', description: 'Root endpoint' },
+                { url: `${baseUrl}/health`, method: 'GET', description: 'Health check' },
+                { url: `${baseUrl}/status`, method: 'GET', description: 'Status endpoint' },
+                { url: `${baseUrl}/api`, method: 'GET', description: 'API info' },
+                
+                // Endpoints de paiement
+                { url: `${baseUrl}/payments`, method: 'GET', description: 'List payments' },
+                { url: `${baseUrl}/payments`, method: 'POST', description: 'Create payment' },
+                { url: `${baseUrl}/payment`, method: 'GET', description: 'Payment info' },
+                { url: `${baseUrl}/payment`, method: 'POST', description: 'Create payment (alt)' },
+                { url: `${baseUrl}/transactions`, method: 'GET', description: 'List transactions' },
+                { url: `${baseUrl}/transactions`, method: 'POST', description: 'Create transaction' },
+                { url: `${baseUrl}/orders`, method: 'GET', description: 'List orders' },
+                { url: `${baseUrl}/orders`, method: 'POST', description: 'Create order' },
+                
+                // Endpoints de méthodes de paiement
+                { url: `${baseUrl}/payment-methods`, method: 'GET', description: 'Payment methods' },
+                { url: `${baseUrl}/payment-methods?country=CI`, method: 'GET', description: 'Payment methods for CI' },
+                { url: `${baseUrl}/methods`, method: 'GET', description: 'Methods (short)' },
+                { url: `${baseUrl}/methods?country=CI`, method: 'GET', description: 'Methods for CI' },
+                { url: `${baseUrl}/available-methods`, method: 'GET', description: 'Available methods' },
+                { url: `${baseUrl}/available-methods?country=CI`, method: 'GET', description: 'Available methods for CI' },
+                { url: `${baseUrl}/methods/CI`, method: 'GET', description: 'Methods for CI (path)' },
+                { url: `${baseUrl}/payment-methods/CI`, method: 'GET', description: 'Payment methods for CI (path)' },
+                
+                // Endpoints de webhook
+                { url: `${baseUrl}/webhooks`, method: 'GET', description: 'Webhooks info' },
+                { url: `${baseUrl}/webhook`, method: 'GET', description: 'Webhook info' },
+                
+                // Endpoints de configuration
+                { url: `${baseUrl}/config`, method: 'GET', description: 'Configuration' },
+                { url: `${baseUrl}/settings`, method: 'GET', description: 'Settings' },
+                
+                // Endpoints de documentation
+                { url: `${baseUrl}/docs`, method: 'GET', description: 'Documentation' },
+                { url: `${baseUrl}/documentation`, method: 'GET', description: 'Documentation (alt)' },
+                { url: `${baseUrl}/api-docs`, method: 'GET', description: 'API docs' },
+                { url: `${baseUrl}/swagger`, method: 'GET', description: 'Swagger docs' },
+                { url: `${baseUrl}/openapi`, method: 'GET', description: 'OpenAPI docs' }
+            ];
+
+            let results = '';
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const endpoint of allEndpoints) {
+                try {
+                    log(`🔍 Test: ${endpoint.method} ${endpoint.url}`, 'info');
+                    
+                    const response = await fetch(endpoint.url, {
+                        method: endpoint.method,
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const responseText = await response.text();
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(responseText);
+                    } catch {
+                        responseData = responseText;
+                    }
+
+                    if (response.ok) {
+                        successCount++;
+                        log(`✅ SUCCÈS: ${endpoint.method} ${endpoint.url}`, 'success');
+                        results += `✅ ${endpoint.method} ${endpoint.url} - ${endpoint.description}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Response: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                        
+                        discoveredEndpoints.push({
+                            url: endpoint.url,
+                            method: endpoint.method,
+                            description: endpoint.description,
+                            status: response.status,
+                            response: responseData
+                        });
+                    } else {
+                        errorCount++;
+                        log(`❌ ÉCHEC: ${endpoint.method} ${endpoint.url} - ${response.status}`, 'error');
+                        results += `❌ ${endpoint.method} ${endpoint.url} - ${endpoint.description}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Error: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    }
+                } catch (error) {
+                    errorCount++;
+                    log(`❌ ERREUR: ${endpoint.method} ${endpoint.url} - ${error.message}`, 'error');
+                    results += `❌ ${endpoint.method} ${endpoint.url} - ${endpoint.description}\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+
+            results = `📊 RÉSULTATS DE LA DÉCOUVERTE\n\n` +
+                     `✅ Endpoints fonctionnels: ${successCount}\n` +
+                     `❌ Endpoints échoués: ${errorCount}\n` +
+                     `📋 Total testé: ${allEndpoints.length}\n\n` +
+                     `🔍 DÉTAILS PAR ENDPOINT:\n\n` + results;
+
+            showResult('discoveryResult', results, successCount > 0 ? 'success' : 'error');
+            log(`🎯 Découverte terminée: ${successCount} succès, ${errorCount} échecs`, 'info');
+        }
+
+        // Test spécifique des endpoints de paiement
+        async function testPaymentEndpoints() {
+            log('💰 Test des endpoints de paiement...', 'info');
+            
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            
+            const paymentEndpoints = [
+                { url: `${baseUrl}/payments`, method: 'POST' },
+                { url: `${baseUrl}/payment`, method: 'POST' },
+                { url: `${baseUrl}/transactions`, method: 'POST' },
+                { url: `${baseUrl}/orders`, method: 'POST' }
+            ];
+
+            const paymentData = {
+                amount: 1000,
+                currency: 'XOF',
+                description: 'Test payment',
+                customer: {
+                    email: 'test@example.com',
+                    name: 'Test Customer',
+                    phone: '+22507000000'
+                },
+                redirect_url: 'https://example.com/success',
+                webhook_url: 'https://hooks.moneroo.io/ho_7s1tdz22h0yg'
+            };
+
+            let results = '💰 TEST DES ENDPOINTS DE PAIEMENT\n\n';
+
+            for (const endpoint of paymentEndpoints) {
+                try {
+                    log(`🔍 Test paiement: ${endpoint.method} ${endpoint.url}`, 'info');
+                    
+                    const response = await fetch(endpoint.url, {
+                        method: endpoint.method,
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(paymentData)
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok) {
+                        log(`✅ Paiement réussi: ${endpoint.url}`, 'success');
+                        results += `✅ ${endpoint.method} ${endpoint.url}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Response: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    } else {
+                        log(`❌ Paiement échoué: ${endpoint.url} - ${response.status}`, 'error');
+                        results += `❌ ${endpoint.method} ${endpoint.url}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Error: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    }
+                } catch (error) {
+                    log(`❌ Erreur paiement: ${endpoint.url} - ${error.message}`, 'error');
+                    results += `❌ ${endpoint.method} ${endpoint.url}\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+
+            showResult('discoveryResult', results, 'info');
+        }
+
+        // Test spécifique des endpoints de méthodes
+        async function testMethodEndpoints() {
+            log('🌍 Test des endpoints de méthodes...', 'info');
+            
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            
+            const methodEndpoints = [
+                `${baseUrl}/payment-methods?country=CI`,
+                `${baseUrl}/methods?country=CI`,
+                `${baseUrl}/available-methods?country=CI`,
+                `${baseUrl}/methods/CI`,
+                `${baseUrl}/payment-methods/CI`
+            ];
+
+            let results = '🌍 TEST DES ENDPOINTS DE MÉTHODES\n\n';
+
+            for (const endpoint of methodEndpoints) {
+                try {
+                    log(`🔍 Test méthode: GET ${endpoint}`, 'info');
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok) {
+                        log(`✅ Méthodes récupérées: ${endpoint}`, 'success');
+                        results += `✅ GET ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Response: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    } else {
+                        log(`❌ Méthodes échouées: ${endpoint} - ${response.status}`, 'error');
+                        results += `❌ GET ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Error: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    }
+                } catch (error) {
+                    log(`❌ Erreur méthodes: ${endpoint} - ${error.message}`, 'error');
+                    results += `❌ GET ${endpoint}\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+
+            showResult('discoveryResult', results, 'info');
+        }
+
+        // Test des endpoints de base
+        async function testBaseEndpoints() {
+            log('🏠 Test des endpoints de base...', 'info');
+            
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            
+            const baseEndpoints = [
+                `${baseUrl}/`,
+                `${baseUrl}/health`,
+                `${baseUrl}/status`,
+                `${baseUrl}/api`
+            ];
+
+            let results = '🏠 TEST DES ENDPOINTS DE BASE\n\n';
+
+            for (const endpoint of baseEndpoints) {
+                try {
+                    log(`🔍 Test base: GET ${endpoint}`, 'info');
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const responseText = await response.text();
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(responseText);
+                    } catch {
+                        responseData = responseText;
+                    }
+
+                    if (response.ok) {
+                        log(`✅ Base OK: ${endpoint}`, 'success');
+                        results += `✅ GET ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Response: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    } else {
+                        log(`❌ Base échoué: ${endpoint} - ${response.status}`, 'error');
+                        results += `❌ GET ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Error: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    }
+                } catch (error) {
+                    log(`❌ Erreur base: ${endpoint} - ${error.message}`, 'error');
+                    results += `❌ GET ${endpoint}\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+
+            showResult('discoveryResult', results, 'info');
+        }
+
+        // Test de création de paiement
+        async function testCreatePayment() {
+            log('🚀 Test de création de paiement...', 'info');
+            
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            
+            const paymentData = {
+                amount: parseInt(document.getElementById('amount').value),
+                currency: document.getElementById('currency').value,
+                description: document.getElementById('description').value,
+                customer: {
+                    email: document.getElementById('customerEmail').value,
+                    name: document.getElementById('customerName').value,
+                    phone: document.getElementById('customerPhone').value
+                },
+                redirect_url: `${window.location.origin}/payment-success`,
+                webhook_url: 'https://hooks.moneroo.io/ho_7s1tdz22h0yg',
+                metadata: {
+                    test: true,
+                    platform: 'simpshopy-test'
+                }
+            };
+
+            // Essayer différents endpoints pour la création de paiement
+            const paymentEndpoints = [
+                `${baseUrl}/payments`,
+                `${baseUrl}/payment`,
+                `${baseUrl}/transactions`,
+                `${baseUrl}/orders`
+            ];
+
+            let results = '🚀 TEST DE CRÉATION DE PAIEMENT\n\n';
+            let success = false;
+
+            for (const endpoint of paymentEndpoints) {
+                try {
+                    log(`🔍 Test création: POST ${endpoint}`, 'info');
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(paymentData)
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok) {
+                        success = true;
+                        log(`✅ Paiement créé avec succès: ${endpoint}`, 'success');
+                        results += `✅ POST ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Payment ID: ${responseData.data?.id || 'N/A'}\n`;
+                        results += `   Payment URL: ${responseData.data?.payment_url || 'N/A'}\n`;
+                        results += `   Response: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                        break;
+                    } else {
+                        log(`❌ Création échouée: ${endpoint} - ${response.status}`, 'error');
+                        results += `❌ POST ${endpoint}\n`;
+                        results += `   Status: ${response.status}\n`;
+                        results += `   Error: ${JSON.stringify(responseData, null, 2)}\n\n`;
+                    }
+                } catch (error) {
+                    log(`❌ Erreur création: ${endpoint} - ${error.message}`, 'error');
+                    results += `❌ POST ${endpoint}\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+
+            if (!success) {
+                results += `\n❌ Aucun endpoint de création de paiement n'a fonctionné.\n`;
+                results += `💡 Vérifiez votre clé API et la documentation Moneroo.\n`;
+            }
+
+            showResult('createPaymentResult', results, success ? 'success' : 'error');
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Outil de découverte des endpoints Moneroo initialisé', 'info');
+            log('📚 Basé sur la documentation officielle: https://docs.moneroo.io/fr', 'info');
+        });
+    </script>
+</body>
+</html> 

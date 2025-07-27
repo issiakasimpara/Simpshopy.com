@@ -105,22 +105,33 @@ export const useOrders = () => {
         estimatedDelivery: orderData.shippingMethod?.delivery_time
       };
 
-      // 3. Envoyer les e-mails (en arrière-plan, ne pas bloquer si ça échoue)
+      // 3. Envoyer les e-mails via l'Edge Function (en arrière-plan, ne pas bloquer si ça échoue)
       try {
-        console.log('📧 Envoi des e-mails de confirmation...');
-        const emailResults = await emailService.sendOrderEmails(emailData);
-        console.log('📊 Résultats e-mails:', emailResults);
+        console.log('📧 Envoi des e-mails de confirmation via Edge Function...');
+        
+        // Appeler l'Edge Function pour envoyer les emails
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-emails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ 
+            orderId: newOrder.id,
+            // Données supplémentaires pour les templates
+            customerName: emailData.customerName,
+            customerEmail: emailData.customerEmail,
+            storeName: emailData.storeName,
+            totalAmount: emailData.total
+          })
+        });
 
-        if (emailResults.customer) {
-          console.log('✅ E-mail client envoyé');
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ E-mails envoyés via Edge Function:', result);
         } else {
-          console.warn('⚠️ Échec envoi e-mail client');
-        }
-
-        if (emailResults.admin) {
-          console.log('✅ E-mail admin envoyé');
-        } else {
-          console.warn('⚠️ Échec envoi e-mail admin');
+          const error = await response.json();
+          console.warn('⚠️ Échec envoi e-mails via Edge Function:', error);
         }
       } catch (emailError) {
         console.error('❌ Erreur envoi e-mails (non bloquant):', emailError);

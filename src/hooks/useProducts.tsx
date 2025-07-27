@@ -62,12 +62,10 @@ export const useProducts = (storeId?: string) => {
       return data;
     },
     onSuccess: (newProduct) => {
-      // Mise à jour optimiste du cache au lieu d'invalidation
-      queryClient.setQueryData(['products', storeId], (old: any) => {
-        if (!old) return [newProduct];
-        return [newProduct, ...old];
-      });
-      
+      // Invalider la query pour forcer un refetch propre
+      queryClient.invalidateQueries(['products', storeId]);
+      // Forcer un refetch immédiat pour s'assurer que les données sont à jour
+      queryClient.refetchQueries(['products', storeId]);
       toast({
         title: "Produit créé !",
         description: "Votre produit a été ajouté avec succès.",
@@ -151,9 +149,9 @@ export const useProducts = (storeId?: string) => {
     isLoading,
     error,
     refetch,
-    createProduct: createProduct.mutateAsync,
-    updateProduct: updateProduct.mutateAsync,
-    deleteProduct: deleteProduct.mutate,
+    createProduct,
+    updateProduct,
+    deleteProduct,
     isCreating: createProduct.isPending,
     isUpdating: updateProduct.isPending,
     isDeleting: deleteProduct.isPending,

@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MediaSelector from './MediaSelector';
+import LinkAutocomplete from './LinkAutocomplete';
 
 interface HeroEditorProps {
   block: TemplateBlock;
@@ -36,6 +37,13 @@ const HeroEditor = ({ block, onUpdate, onMediaSelect }: HeroEditorProps) => {
           id="buttonText"
           value={block.content.buttonText || ''}
           onChange={(e) => onUpdate('buttonText', e.target.value)}
+        />
+      </div>
+      <div>
+        <Label htmlFor="buttonLink">Lien du bouton</Label>
+        <LinkAutocomplete
+          value={block.content.buttonLink || ''}
+          onChange={(val) => onUpdate('buttonLink', val)}
         />
       </div>
       <MediaSelector

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import ProductForm from './products/ProductForm';
@@ -16,7 +16,6 @@ interface FormData {
   inventory_quantity: string;
   status: ProductStatus;
   images: string[];
-  // Champs avancés
   tags: string[];
   weight: string;
   comparePrice: string;
@@ -26,7 +25,6 @@ interface FormData {
   requiresShipping: boolean;
   seoTitle: string;
   seoDescription: string;
-  // Variantes
   variants?: any[];
 }
 
@@ -34,56 +32,52 @@ interface AddProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   storeId: string;
+  onProductCreated?: () => void;
 }
 
-const AddProductDialog = ({ open, onOpenChange, storeId }: AddProductDialogProps) => {
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    description: '',
-    price: '',
-    sku: '',
-    inventory_quantity: '',
-    status: 'draft' as const,
-    images: [],
-    tags: [],
-    weight: '',
-    comparePrice: '',
-    costPrice: '',
-    trackInventory: false,
-    allowBackorders: false,
-    requiresShipping: true,
-    seoTitle: '',
-    seoDescription: '',
-    variants: []
-  });
+// État initial du formulaire
+const initialFormData: FormData = {
+  name: '',
+  description: '',
+  price: '',
+  sku: '',
+  inventory_quantity: '',
+  status: 'draft',
+  images: [],
+  tags: [],
+  weight: '',
+  comparePrice: '',
+  costPrice: '',
+  trackInventory: false,
+  allowBackorders: false,
+  requiresShipping: true,
+  seoTitle: '',
+  seoDescription: '',
+  variants: []
+};
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      sku: '',
-      inventory_quantity: '',
-      status: 'draft',
-      images: [],
-      tags: [],
-      weight: '',
-      comparePrice: '',
-      costPrice: '',
-      trackInventory: false,
-      allowBackorders: false,
-      requiresShipping: true,
-      seoTitle: '',
-      seoDescription: '',
-      variants: []
-    });
-  };
+const AddProductDialog = ({ open, onOpenChange, storeId, onProductCreated }: AddProductDialogProps) => {
+  const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const handleSuccess = () => {
-    console.log('AddProductDialog - Product created successfully, resetting form');
-    resetForm();
-    onOpenChange(false);
-  };
+  // Reset du formulaire quand le dialog se ferme
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset du formulaire quand on ferme
+      setFormData(initialFormData);
+    }
+    onOpenChange(newOpen);
+  }, [onOpenChange]);
+
+  const handleSuccess = useCallback(() => {
+    console.log('AddProductDialog - Product created successfully');
+    // Appeler le callback parent si fourni
+    if (onProductCreated) {
+      onProductCreated();
+    } else {
+      // Fallback : fermer le dialog
+      handleOpenChange(false);
+    }
+  }, [onProductCreated, handleOpenChange]);
 
   const { handleSubmit, isCreating } = useProductSubmission({
     storeId,
@@ -91,14 +85,20 @@ const AddProductDialog = ({ open, onOpenChange, storeId }: AddProductDialogProps
     onSuccess: handleSuccess
   });
 
-  const handleFormDataChange = (data: FormData) => {
-    console.log('AddProductDialog - Form data change (NO AUTO-SAVE):', data);
+  const handleFormDataChange = useCallback((data: FormData) => {
     setFormData(data);
-  };
+  }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="max-w-4xl max-h-[90vh] overflow-y-auto" 
+        aria-describedby="add-product-desc"
+      >
+        <div id="add-product-desc" className="sr-only">
+          Formulaire pour créer un nouveau produit. Remplissez les informations requises.
+        </div>
+        
         <ProductDialogHeader 
           title="Ajouter un nouveau produit"
           formData={formData}
@@ -115,7 +115,7 @@ const AddProductDialog = ({ open, onOpenChange, storeId }: AddProductDialogProps
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
             >
               Annuler
             </Button>

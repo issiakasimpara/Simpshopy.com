@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import MediaSelector from './MediaSelector';
+import LinkAutocomplete from './LinkAutocomplete';
 
 interface TextVideoEditorProps {
   block: TemplateBlock;
@@ -46,6 +47,13 @@ const TextVideoEditor = ({ block, onUpdate, onMediaSelect }: TextVideoEditorProp
           id="textVideoButtonText"
           value={block.content.buttonText || ''}
           onChange={(e) => onUpdate('buttonText', e.target.value)}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textVideoButtonLink">Lien du bouton</Label>
+        <LinkAutocomplete
+          value={block.content.buttonLink || ''}
+          onChange={(val) => onUpdate('buttonLink', val)}
         />
       </div>
       <div>

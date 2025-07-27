@@ -6,225 +6,304 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface OrderEmailData {
-  orderId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-    image?: string;
-  }>;
-  subtotal: number;
-  shipping: number;
-  total: number;
-  shippingAddress: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  storeName: string;
-  storeEmail: string;
-  estimatedDelivery?: string;
+interface OrderData {
+  id: string
+  store_id: string
+  customer_email: string
+  customer_name: string
+  total_amount: number
+  status: string
+  created_at: string
+  shipping_address: any
+  payment_method: string
+  items: any[]
+}
+
+interface StoreData {
+  id: string
+  name: string
+  logo_url: string
+  primary_color: string
+  contact_email: string
+  domain: string
 }
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { orderData }: { orderData: OrderEmailData } = await req.json()
+    const { orderId } = await req.json()
     
-    console.log('📧 Envoi des e-mails pour commande:', orderData.orderId)
-
-    // Configuration Resend
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY non configurée')
+    if (!orderId) {
+      throw new Error('Order ID is required')
     }
 
-    // Template e-mail client
-    const customerEmailHtml = generateCustomerEmailTemplate(orderData)
-    
-    // Template e-mail admin
-    const adminEmailHtml = generateAdminEmailTemplate(orderData)
+    // Initialiser Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Envoyer e-mail client
-    const customerEmailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'onboarding@resend.dev',
-        to: orderData.customerEmail,
-        subject: `🎉 Commande confirmée #${orderData.orderId} - ${orderData.storeName}`,
-        html: customerEmailHtml,
-      }),
-    })
+    // Récupérer les données de la commande
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          *,
+          products (
+            name,
+            price,
+            images
+          )
+        )
+      `)
+      .eq('id', orderId)
+      .single()
 
-    // Envoyer e-mail admin
-    const adminEmailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'onboarding@resend.dev',
-        to: orderData.storeEmail,
-        subject: `🔔 Nouvelle commande #${orderData.orderId} - ${orderData.total.toFixed(2)}€`,
-        html: adminEmailHtml,
-      }),
-    })
-
-    const customerResult = customerEmailResponse.ok
-    const adminResult = adminEmailResponse.ok
-
-    if (!customerResult) {
-      const customerError = await customerEmailResponse.text()
-      console.error('❌ Erreur e-mail client:', customerError)
+    if (orderError || !orderData) {
+      throw new Error(`Order not found: ${orderError?.message}`)
     }
 
-    if (!adminResult) {
-      const adminError = await adminEmailResponse.text()
-      console.error('❌ Erreur e-mail admin:', adminError)
+    // Récupérer les données de la boutique
+    const { data: storeData, error: storeError } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('id', orderData.store_id)
+      .single()
+
+    if (storeError || !storeData) {
+      throw new Error(`Store not found: ${storeError?.message}`)
     }
 
-    console.log('📊 Résultats:', { customer: customerResult, admin: adminResult })
+    // Récupérer l'email de l'admin de la boutique
+    const { data: adminData, error: adminError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', storeData.merchant_id)
+      .single()
+
+    if (adminError || !adminData) {
+      throw new Error(`Admin not found: ${adminError?.message}`)
+    }
+
+    // Envoyer les emails
+    const results = await Promise.allSettled([
+      sendAdminEmail(orderData, storeData, adminData.email),
+      sendCustomerEmail(orderData, storeData)
+    ])
+
+    // Envoyer notification push
+    await sendPushNotification(orderData, storeData)
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        results: { customer: customerResult, admin: adminResult } 
+      JSON.stringify({
+        success: true,
+        message: 'Emails sent successfully',
+        results: results.map((result, index) => ({
+          type: index === 0 ? 'admin' : 'customer',
+          status: result.status,
+          value: result.status === 'fulfilled' ? result.value : result.reason
+        }))
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
-      },
+      }
     )
 
   } catch (error) {
-    console.error('❌ Erreur fonction e-mail:', error)
+    console.error('Error sending order emails:', error)
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
+      JSON.stringify({
+        success: false,
+        error: error.message
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      },
+        status: 400,
+      }
     )
   }
 })
 
-function generateCustomerEmailTemplate(orderData: OrderEmailData): string {
-  const itemsHtml = orderData.items.map(item => `
+async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminEmail: string) {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY')
+  if (!resendApiKey) {
+    throw new Error('RESEND_API_KEY not configured')
+  }
+
+  const adminTemplate = generateAdminEmailTemplate(orderData, storeData)
+  
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Simpshopy <noreply@simpshopy.com>',
+      to: adminEmail,
+      subject: `🎉 Nouvelle commande #${orderData.id.slice(-6)} - ${storeData.name}`,
+      html: adminTemplate,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to send admin email: ${error}`)
+  }
+
+  return await response.json()
+}
+
+async function sendCustomerEmail(orderData: OrderData, storeData: StoreData) {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY')
+  if (!resendApiKey) {
+    throw new Error('RESEND_API_KEY not configured')
+  }
+
+  const customerTemplate = generateCustomerEmailTemplate(orderData, storeData)
+  
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: `${storeData.name} <noreply@simpshopy.com>`,
+      to: orderData.customer_email,
+      subject: `✅ Confirmation de commande #${orderData.id.slice(-6)} - ${storeData.name}`,
+      html: customerTemplate,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to send customer email: ${error}`)
+  }
+
+  return await response.json()
+}
+
+async function sendPushNotification(orderData: OrderData, storeData: StoreData) {
+  // TODO: Implémenter les notifications push
+  // Pour l'instant, on log juste
+  console.log(`🔔 Push notification sent for order ${orderData.id} in store ${storeData.name}`)
+}
+
+function generateAdminEmailTemplate(orderData: OrderData, storeData: StoreData): string {
+  const orderNumber = orderData.id.slice(-6)
+  const formattedDate = new Date(orderData.created_at).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  const totalAmount = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF'
+  }).format(orderData.total_amount)
+
+  const itemsList = orderData.order_items?.map(item => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : ''}
+          ${item.products?.images?.[0] ? 
+            `<img src="${item.products.images[0]}" alt="${item.products.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : 
+            '<div style="width: 50px; height: 50px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>'
+          }
           <div>
-            <div style="font-weight: 600; color: #1f2937;">${item.name}</div>
-            <div style="color: #6b7280; font-size: 14px;">Quantité: ${item.quantity}</div>
+            <div style="font-weight: 600; color: #333;">${item.products?.name || 'Produit'}</div>
+            <div style="color: #666; font-size: 14px;">Quantité: ${item.quantity}</div>
           </div>
         </div>
       </td>
-      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">
-        ${(item.price * item.quantity).toFixed(2)}€
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">
+        ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(item.price)}
       </td>
     </tr>
-  `).join('')
+  `).join('') || ''
 
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="fr">
     <head>
-      <meta charset="utf-8">
+      <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Commande confirmée</title>
+      <title>Nouvelle commande</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
+        .container { max-width: 600px; margin: 0 auto; background: white; }
+        .header { background: ${storeData.primary_color || '#6366f1'}; padding: 30px; text-align: center; }
+        .logo { max-width: 120px; height: auto; }
+        .content { padding: 40px 30px; }
+        .order-number { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .order-number h2 { margin: 0; color: #0c4a6e; font-size: 24px; }
+        .customer-info { background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .total { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .total h3 { margin: 0; color: #166534; font-size: 20px; }
+        .button { display: inline-block; background: ${storeData.primary_color || '#6366f1'}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+      </style>
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9fafb;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px 24px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🎉 Commande confirmée !</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Merci pour votre commande ${orderData.customerName}</p>
+    <body>
+      <div class="container">
+        <div class="header">
+          ${storeData.logo_url ? 
+            `<img src="${storeData.logo_url}" alt="${storeData.name}" class="logo">` :
+            `<h1 style="color: white; margin: 0; font-size: 28px;">${storeData.name}</h1>`
+          }
         </div>
-
-        <!-- Content -->
-        <div style="padding: 32px 24px;">
+        
+        <div class="content">
+          <h1 style="color: #1f2937; margin-bottom: 30px;">🎉 Nouvelle commande reçue !</h1>
           
-          <!-- Order Info -->
-          <div style="background-color: #f3f4f6; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <h2 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px;">📦 Détails de votre commande</h2>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #6b7280;">Numéro de commande:</span>
-              <span style="font-weight: 600; color: #1f2937;">#${orderData.orderId}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #6b7280;">Boutique:</span>
-              <span style="font-weight: 600; color: #1f2937;">${orderData.storeName}</span>
-            </div>
-            ${orderData.estimatedDelivery ? `
-            <div style="display: flex; justify-content: space-between;">
-              <span style="color: #6b7280;">Livraison estimée:</span>
-              <span style="font-weight: 600; color: #059669;">${orderData.estimatedDelivery}</span>
-            </div>
+          <div class="order-number">
+            <h2>Commande #${orderNumber}</h2>
+            <p style="margin: 10px 0 0 0; color: #6b7280;">${formattedDate}</p>
+          </div>
+          
+          <div class="customer-info">
+            <h3 style="margin-top: 0; color: #374151;">👤 Informations client</h3>
+            <p><strong>Nom :</strong> ${orderData.customer_name}</p>
+            <p><strong>Email :</strong> ${orderData.customer_email}</p>
+            ${orderData.shipping_address ? `
+              <p><strong>Adresse :</strong> ${orderData.shipping_address.address || 'Non spécifiée'}</p>
             ` : ''}
+            <p><strong>Méthode de paiement :</strong> ${orderData.payment_method || 'Non spécifiée'}</p>
           </div>
-
-          <!-- Items -->
-          <div style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px;">🛍️ Produits commandés</h3>
-            <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
-              ${itemsHtml}
-            </table>
+          
+          <h3 style="color: #374151;">🛒 Produits commandés</h3>
+          <table class="items-table">
+            <thead>
+              <tr style="background: #f8fafc;">
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Produit</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #e5e7eb;">Prix</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsList}
+            </tbody>
+          </table>
+          
+          <div class="total">
+            <h3>💰 Montant total : ${totalAmount}</h3>
           </div>
-
-          <!-- Total -->
-          <div style="background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #6b7280;">Sous-total:</span>
-              <span>${orderData.subtotal.toFixed(2)}€</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-              <span style="color: #6b7280;">Livraison:</span>
-              <span>${orderData.shipping.toFixed(2)}€</span>
-            </div>
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 12px 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: #1f2937;">
-              <span>Total:</span>
-              <span>${orderData.total.toFixed(2)}€</span>
-            </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${storeData.domain || '#'}" class="button">Voir la commande</a>
           </div>
-
-          <!-- Shipping Address -->
-          <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px;">📍 Adresse de livraison</h3>
-            <div style="color: #92400e;">
-              <div style="font-weight: 600;">${orderData.customerName}</div>
-              <div>${orderData.shippingAddress.street}</div>
-              <div>${orderData.shippingAddress.postalCode} ${orderData.shippingAddress.city}</div>
-              <div>${orderData.shippingAddress.country}</div>
-              ${orderData.customerPhone ? `<div>📱 ${orderData.customerPhone}</div>` : ''}
-            </div>
-          </div>
-
-          <!-- Footer -->
-          <div style="text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-            <p>Merci de votre confiance ! 💙</p>
-            <p>Une question ? Contactez-nous à <a href="mailto:${orderData.storeEmail}" style="color: #667eea;">${orderData.storeEmail}</a></p>
-          </div>
-
+        </div>
+        
+        <div class="footer">
+          <p>Cet email a été envoyé automatiquement par Simpshopy</p>
+          <p>${storeData.name} - ${storeData.contact_email || 'contact@simpshopy.com'}</p>
         </div>
       </div>
     </body>
@@ -232,101 +311,128 @@ function generateCustomerEmailTemplate(orderData: OrderEmailData): string {
   `
 }
 
-function generateAdminEmailTemplate(orderData: OrderEmailData): string {
-  const itemsHtml = orderData.items.map(item => `
+function generateCustomerEmailTemplate(orderData: OrderData, storeData: StoreData): string {
+  const orderNumber = orderData.id.slice(-6)
+  const formattedDate = new Date(orderData.created_at).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  const totalAmount = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF'
+  }).format(orderData.total_amount)
+
+  const itemsList = orderData.order_items?.map(item => `
     <tr>
-      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${item.name}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${(item.price * item.quantity).toFixed(2)}€</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          ${item.products?.images?.[0] ? 
+            `<img src="${item.products.images[0]}" alt="${item.products.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">` : 
+            '<div style="width: 50px; height: 50px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>'
+          }
+          <div>
+            <div style="font-weight: 600; color: #333;">${item.products?.name || 'Produit'}</div>
+            <div style="color: #666; font-size: 14px;">Quantité: ${item.quantity}</div>
+          </div>
+        </div>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">
+        ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(item.price)}
+      </td>
     </tr>
-  `).join('')
+  `).join('') || ''
 
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="fr">
     <head>
-      <meta charset="utf-8">
+      <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Nouvelle commande</title>
+      <title>Confirmation de commande</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
+        .container { max-width: 600px; margin: 0 auto; background: white; }
+        .header { background: ${storeData.primary_color || '#6366f1'}; padding: 30px; text-align: center; }
+        .logo { max-width: 120px; height: auto; }
+        .content { padding: 40px 30px; }
+        .order-number { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .order-number h2 { margin: 0; color: #0c4a6e; font-size: 24px; }
+        .status { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .status h3 { margin: 0; color: #166534; font-size: 18px; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .total { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .total h3 { margin: 0; color: #166534; font-size: 20px; }
+        .button { display: inline-block; background: ${storeData.primary_color || '#6366f1'}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+        .info-box { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; }
+      </style>
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9fafb;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 32px 24px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🔔 Nouvelle commande !</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Commande #${orderData.orderId} - ${orderData.total.toFixed(2)}€</p>
+    <body>
+      <div class="container">
+        <div class="header">
+          ${storeData.logo_url ? 
+            `<img src="${storeData.logo_url}" alt="${storeData.name}" class="logo">` :
+            `<h1 style="color: white; margin: 0; font-size: 28px;">${storeData.name}</h1>`
+          }
         </div>
-
-        <!-- Content -->
-        <div style="padding: 32px 24px;">
+        
+        <div class="content">
+          <h1 style="color: #1f2937; margin-bottom: 30px;">✅ Confirmation de votre commande</h1>
           
-          <!-- Customer Info -->
-          <div style="background-color: #f0f9ff; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <h2 style="margin: 0 0 16px 0; color: #0c4a6e; font-size: 18px;">👤 Informations client</h2>
-            <div style="color: #0c4a6e;">
-              <div style="margin-bottom: 8px;"><strong>Nom:</strong> ${orderData.customerName}</div>
-              <div style="margin-bottom: 8px;"><strong>E-mail:</strong> <a href="mailto:${orderData.customerEmail}" style="color: #0284c7;">${orderData.customerEmail}</a></div>
-              ${orderData.customerPhone ? `<div style="margin-bottom: 8px;"><strong>Téléphone:</strong> ${orderData.customerPhone}</div>` : ''}
-              <div><strong>Adresse:</strong><br>
-                ${orderData.shippingAddress.street}<br>
-                ${orderData.shippingAddress.postalCode} ${orderData.shippingAddress.city}<br>
-                ${orderData.shippingAddress.country}
-              </div>
-            </div>
+          <div class="status">
+            <h3>🎉 Commande confirmée !</h3>
+            <p style="margin: 10px 0 0 0; color: #166534;">Votre commande a été reçue et est en cours de traitement</p>
           </div>
-
-          <!-- Order Items -->
-          <div style="margin-bottom: 24px;">
-            <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px;">📦 Produits commandés</h3>
-            <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
-              <thead>
-                <tr style="background-color: #f9fafb;">
-                  <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #374151;">Produit</th>
-                  <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #374151;">Qté</th>
-                  <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #374151;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsHtml}
-              </tbody>
-            </table>
+          
+          <div class="order-number">
+            <h2>Commande #${orderNumber}</h2>
+            <p style="margin: 10px 0 0 0; color: #6b7280;">${formattedDate}</p>
           </div>
-
-          <!-- Total -->
-          <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #166534;">
-              <span>Sous-total:</span>
-              <span>${orderData.subtotal.toFixed(2)}€</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #166534;">
-              <span>Livraison:</span>
-              <span>${orderData.shipping.toFixed(2)}€</span>
-            </div>
-            <hr style="border: none; border-top: 1px solid #bbf7d0; margin: 12px 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; color: #166534;">
-              <span>Total:</span>
-              <span>${orderData.total.toFixed(2)}€</span>
-            </div>
+          
+          <h3 style="color: #374151;">🛒 Résumé de votre commande</h3>
+          <table class="items-table">
+            <thead>
+              <tr style="background: #f8fafc;">
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Produit</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #e5e7eb;">Prix</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsList}
+            </tbody>
+          </table>
+          
+          <div class="total">
+            <h3>💰 Montant total : ${totalAmount}</h3>
           </div>
-
-          <!-- Actions -->
-          <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px;">⚡ Actions à effectuer</h3>
-            <div style="color: #92400e;">
-              <div style="margin-bottom: 8px;">✅ Préparer la commande</div>
-              <div style="margin-bottom: 8px;">✅ Organiser l'expédition</div>
-              <div style="margin-bottom: 8px;">✅ Envoyer le numéro de suivi au client</div>
-              <div>✅ Mettre à jour le statut de la commande</div>
-            </div>
+          
+          <div class="info-box">
+            <h4 style="margin-top: 0; color: #92400e;">📦 Informations de livraison</h4>
+            <p style="margin: 5px 0; color: #92400e;"><strong>Statut :</strong> En préparation</p>
+            <p style="margin: 5px 0; color: #92400e;"><strong>Délai estimé :</strong> 3-5 jours ouvrables</p>
+            <p style="margin: 5px 0; color: #92400e;"><strong>Méthode de paiement :</strong> ${orderData.payment_method || 'Non spécifiée'}</p>
           </div>
-
-          <!-- Footer -->
-          <div style="text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-            <p>Commande reçue le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
-            <p>Boutique: ${orderData.storeName}</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${storeData.domain || '#'}" class="button">Voir ma commande</a>
           </div>
-
+          
+          <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #374151;">💡 Besoin d'aide ?</h4>
+            <p style="margin: 5px 0; color: #6b7280;">Si vous avez des questions concernant votre commande, n'hésitez pas à nous contacter :</p>
+            <p style="margin: 5px 0; color: #6b7280;"><strong>Email :</strong> ${storeData.contact_email || 'contact@simpshopy.com'}</p>
+            <p style="margin: 5px 0; color: #6b7280;"><strong>Numéro de commande :</strong> #${orderNumber}</p>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Merci de votre confiance !</p>
+          <p>${storeData.name} - ${storeData.contact_email || 'contact@simpshopy.com'}</p>
+          <p>Cet email a été envoyé automatiquement par Simpshopy</p>
         </div>
       </div>
     </body>

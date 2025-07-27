@@ -63,9 +63,15 @@ const HeroContent = ({ block, isEditing, viewMode, onContentUpdate }: HeroConten
       <p className={getSubtitleClasses()}>
         {block.content.subtitle || 'Votre sous-titre accrocheur'}
       </p>
-      <button className={getButtonClasses()}>
-        {block.content.buttonText || 'Découvrir'}
-      </button>
+      {block.content.buttonLink ? (
+        <a href={block.content.buttonLink} className={getButtonClasses()} target={block.content.buttonLink.startsWith('http') ? '_blank' : undefined} rel={block.content.buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}>
+          {block.content.buttonText || 'Découvrir'}
+        </a>
+      ) : (
+        <button className={getButtonClasses()}>
+          {block.content.buttonText || 'Découvrir'}
+        </button>
+      )}
     </>
   );
 };

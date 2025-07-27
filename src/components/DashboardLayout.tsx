@@ -138,6 +138,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { name: "Thèmes", href: "/themes", icon: Palette }, // 🎨 NOUVEAU: Onglet dédié aux thèmes
     { name: "Domaines", href: "/domains", icon: Globe },
     { name: "Paramètres", href: "/settings", icon: Settings },
+    // --- NOUVEAU ONGLET ---
+    { name: "Intégrations", href: "/integrations", icon: ExternalLink },
   ];
 
   return (
