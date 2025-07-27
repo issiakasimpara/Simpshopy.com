@@ -8,7 +8,7 @@ import CartWidget from './blocks/CartWidget';
 import { useCart } from '@/contexts/CartContext';
 import { ArrowLeft, Home, Package, Grid, Phone, Eye, ShoppingBag, Search, User, Heart } from 'lucide-react';
 import { useStores } from '@/hooks/useStores';
-import { useDomains } from '@/hooks/useDomains';
+import { useStoreDomains } from '@/hooks/useDomains';
 import { generateSimpshopyUrl } from '@/utils/domainUtils';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -46,7 +46,7 @@ const SitePreviewContent = ({
   });
   
   // Récupérer les domaines pour afficher la bonne URL
-  const { domains } = useDomains(selectedStore?.id);
+  const { domains } = useStoreDomains(selectedStore?.id);
 
   // Initialiser le panier avec le storeId de la boutique sélectionnée
   useEffect(() => {

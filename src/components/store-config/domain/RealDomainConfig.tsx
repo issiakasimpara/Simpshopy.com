@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Globe, Shield, CheckCircle, Clock, AlertCircle, RefreshCw, Trash2, ExternalLink, Plus } from 'lucide-react';
-import { useDomains } from '@/hooks/useDomains';
+import { useStoreDomains } from '@/hooks/useDomains';
 import DomainConfigurationSteps from './DomainConfigurationSteps';
 import DomainSetupGuide from './DomainSetupGuide';
 
@@ -27,7 +27,7 @@ const RealDomainConfig = ({ selectedStore }: RealDomainConfigProps) => {
     isConfiguring,
     isVerifying,
     isRemoving
-  } = useDomains(selectedStore?.id);
+  } = useStoreDomains(selectedStore?.id);
 
   const validateDomain = (domain: string) => {
     const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
