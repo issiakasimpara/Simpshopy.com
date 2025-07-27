@@ -1,275 +1,238 @@
-# 🌐 GUIDE CONFIGURATION MULTI-DOMAINES SIMPSHOPY
+# 🌐 GUIDE COMPLET : CONFIGURATION DOMAINE SIMPSHOPY.COM
 
-## 🎯 **ARCHITECTURE DOMAINES**
-
-### **Domaine Principal**
-- **simpshopy.com** → Plateforme principale
-- ***.simpshopy.com** → Sous-domaines pour boutiques
-
-### **Domaines Clients**
-- **boutique1.simpshopy.com** → Sous-domaine gratuit
-- **boutique-personnalisee.com** → Domaine client personnalisé
+## 📋 **PRÉREQUIS**
+- ✅ Domaine `simpshopy.com` acheté chez OVH
+- ✅ Application déployée sur Vercel
+- ✅ Tables Supabase configurées
+- ✅ Compte Cloudflare (à créer)
 
 ---
 
-## 🔧 **ÉTAPE 1 : CONFIGURATION DNS OVH**
+## 🎯 **ÉTAPE 1 : CONFIGURATION OVH (DNS)**
 
-### **1. Configuration pour simpshopy.com**
+### **1.1 - Connexion à OVH**
+1. **Ouvre ton navigateur**
+2. **Va sur** [ovh.com](https://ovh.com)
+3. **Clique sur** "Se connecter" (en haut à droite)
+4. **Saisis** ton email et mot de passe OVH
+5. **Clique sur** "Se connecter"
 
-Dans ton panel OVH, configurer :
+### **1.2 - Accès à la gestion du domaine**
+1. **Dans le dashboard OVH**, cherche **"Domaines"**
+2. **Clique sur** "Domaines" dans le menu de gauche
+3. **Trouve** `simpshopy.com` dans la liste
+4. **Clique sur** `simpshopy.com`
 
-#### **A. Enregistrements A**
-```
-simpshopy.com → [IP de ton serveur]
-www.simpshopy.com → [IP de ton serveur]
-```
+### **1.3 - Configuration DNS**
+1. **Dans la page du domaine**, cherche **"Zone DNS"**
+2. **Clique sur** "Zone DNS" dans le menu
+3. **Clique sur** "Modifier la zone"
 
-#### **B. Wildcard pour sous-domaines**
-```
-*.simpshopy.com → [IP de ton serveur]
-```
+### **1.4 - Ajout des enregistrements DNS**
+1. **Cherche** la section "Enregistrements DNS"
+2. **Clique sur** "Ajouter un enregistrement"
 
-#### **C. Configuration Email (Resend)**
-```
-@ → MX → mxa.resend.com (priorité 10)
-@ → TXT → v=spf1 include:spf.resend.com ~all
-```
+#### **Enregistrement A (domaine principal) :**
+- **Type** : A
+- **Nom** : @ (laisse vide)
+- **Valeur** : 76.76.19.36
+- **TTL** : 3600
+- **Clique sur** "Suivant"
+- **Clique sur** "Valider"
 
-### **2. Configuration pour domaines clients**
+#### **Enregistrement CNAME (www) :**
+- **Clique sur** "Ajouter un enregistrement"
+- **Type** : CNAME
+- **Nom** : www
+- **Valeur** : cname.vercel-dns.com
+- **TTL** : 3600
+- **Clique sur** "Suivant"
+- **Clique sur** "Valider"
 
-#### **CNAME Records**
-```
-boutique1.simpshopy.com → simpshopy.com
-boutique2.simpshopy.com → simpshopy.com
-```
-
----
-
-## 🏗️ **ÉTAPE 2 : SYSTÈME DE ROUTING**
-
-### **Structure de base de données**
-
-```sql
--- Table pour gérer les domaines
-CREATE TABLE store_domains (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id UUID REFERENCES stores(id) ON DELETE CASCADE,
-  domain_type TEXT NOT NULL CHECK (domain_type IN ('subdomain', 'custom')),
-  domain_name TEXT NOT NULL UNIQUE,
-  is_primary BOOLEAN DEFAULT false,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-
--- Index pour le routing
-CREATE INDEX idx_store_domains_domain_name ON store_domains(domain_name);
-CREATE INDEX idx_store_domains_store_id ON store_domains(store_id);
-```
-
-### **Logique de routing**
-
-```typescript
-// Fonction pour déterminer la boutique par domaine
-async function getStoreByDomain(domain: string) {
-  // 1. Vérifier si c'est un domaine personnalisé
-  const { data: customDomain } = await supabase
-    .from('store_domains')
-    .select('store_id')
-    .eq('domain_name', domain)
-    .eq('domain_type', 'custom')
-    .eq('is_active', true)
-    .single();
-
-  if (customDomain) {
-    return customDomain.store_id;
-  }
-
-  // 2. Vérifier si c'est un sous-domaine simpshopy.com
-  if (domain.endsWith('.simpshopy.com')) {
-    const subdomain = domain.replace('.simpshopy.com', '');
-    
-    const { data: subdomainStore } = await supabase
-      .from('store_domains')
-      .select('store_id')
-      .eq('domain_name', `${subdomain}.simpshopy.com`)
-      .eq('domain_type', 'subdomain')
-      .eq('is_active', true)
-      .single();
-
-    return subdomainStore?.store_id;
-  }
-
-  return null;
-}
-```
+### **1.5 - Vérification**
+1. **Attends** 5-10 minutes pour la propagation
+2. **Vérifie** que les enregistrements sont bien ajoutés
+3. **Note** les nameservers OVH (seront nécessaires pour Cloudflare)
 
 ---
 
-## 🎨 **ÉTAPE 3 : INTERFACE UTILISATEUR**
+## 🎯 **ÉTAPE 2 : CONFIGURATION CLOUDFLARE**
 
-### **1. Gestionnaire de domaines dans l'app**
+### **2.1 - Création du compte Cloudflare**
+1. **Va sur** [cloudflare.com](https://cloudflare.com)
+2. **Clique sur** "Sign up" (en haut à droite)
+3. **Saisis** ton email
+4. **Saisis** un mot de passe
+5. **Clique sur** "Create Account"
+6. **Vérifie** ton email si demandé
 
-```typescript
-// Composant pour gérer les domaines
-const DomainManager = ({ storeId }: { storeId: string }) => {
-  const [domains, setDomains] = useState([]);
-  const [newCustomDomain, setNewCustomDomain] = useState('');
+### **2.2 - Ajout du domaine**
+1. **Dans le dashboard Cloudflare**, clique sur **"Add a Site"**
+2. **Saisis** `simpshopy.com`
+3. **Clique sur** "Add Site"
+4. **Sélectionne** le plan "Free" (gratuit)
+5. **Clique sur** "Continue"
 
-  // Récupérer les domaines de la boutique
-  const { data: storeDomains } = useQuery({
-    queryKey: ['store-domains', storeId],
-    queryFn: () => getStoreDomains(storeId)
-  });
+### **2.3 - Configuration des nameservers**
+1. **Cloudflare va te donner** 2 nameservers
+2. **Note-les** quelque part (exemple) :
+   - `nina.ns.cloudflare.com`
+   - `rick.ns.cloudflare.com`
 
-  // Ajouter un domaine personnalisé
-  const addCustomDomain = async (domain: string) => {
-    await supabase
-      .from('store_domains')
-      .insert({
-        store_id: storeId,
-        domain_type: 'custom',
-        domain_name: domain,
-        is_primary: false
-      });
-  };
+### **2.4 - Modification des nameservers OVH**
+1. **Retourne sur OVH**
+2. **Va dans** la gestion de `simpshopy.com`
+3. **Clique sur** "Serveurs DNS" dans le menu
+4. **Clique sur** "Modifier les serveurs DNS"
+5. **Remplace** les nameservers actuels par ceux de Cloudflare
+6. **Clique sur** "Valider"
 
-  return (
-    <div>
-      <h3>Domaines de votre boutique</h3>
-      
-      {/* Domaine par défaut */}
-      <div>
-        <strong>Domaine par défaut :</strong>
-        <code>{storeSlug}.simpshopy.com</code>
-      </div>
+### **2.5 - Configuration Cloudflare**
+1. **Retourne sur Cloudflare**
+2. **Attends** que le domaine soit actif (5-10 minutes)
+3. **Clique sur** `simpshopy.com` dans ton dashboard
 
-      {/* Domaines personnalisés */}
-      <div>
-        <h4>Domaines personnalisés</h4>
-        {storeDomains?.filter(d => d.domain_type === 'custom').map(domain => (
-          <div key={domain.id}>
-            <span>{domain.domain_name}</span>
-            <Badge>{domain.is_active ? 'Actif' : 'En attente'}</Badge>
-          </div>
-        ))}
-        
-        <Input 
-          placeholder="mon-domaine.com"
-          value={newCustomDomain}
-          onChange={(e) => setNewCustomDomain(e.target.value)}
-        />
-        <Button onClick={() => addCustomDomain(newCustomDomain)}>
-          Ajouter un domaine
-        </Button>
-      </div>
-    </div>
-  );
-};
-```
+### **2.6 - Configuration DNS Cloudflare**
+1. **Clique sur** "DNS" dans le menu de gauche
+2. **Vérifie** que les enregistrements sont présents
+3. **Pour chaque enregistrement**, clique sur le **nuage orange** (Proxy activé)
+4. **Clique sur** "Save"
 
-### **2. Instructions pour les clients**
+### **2.7 - Configuration SSL/TLS**
+1. **Clique sur** "SSL/TLS" dans le menu
+2. **Sélectionne** "Full (strict)" dans "Encryption mode"
+3. **Clique sur** "Save"
 
-```markdown
-## 🌐 Configuration de votre domaine personnalisé
-
-### **Étape 1 : Acheter votre domaine**
-- Allez sur Namecheap, OVH, ou Google Domains
-- Achetez votre domaine (ex: ma-boutique.com)
-
-### **Étape 2 : Configurer les DNS**
-Ajoutez ces enregistrements dans votre registrar :
-
-#### **Option A : CNAME (Recommandé)**
-```
-www → simpshopy.com
-```
-
-#### **Option B : A Record**
-```
-@ → [IP de SimpShopy]
-www → [IP de SimpShopy]
-```
-
-### **Étape 3 : Ajouter dans SimpShopy**
-1. Allez dans les paramètres de votre boutique
-2. Section "Domaines"
-3. Ajoutez votre domaine personnalisé
-4. Attendez la validation (24-48h)
-
-### **Étape 4 : Activer**
-Une fois validé, votre domaine sera automatiquement activé !
-```
+### **2.8 - Configuration Page Rules**
+1. **Clique sur** "Page Rules" dans le menu
+2. **Clique sur** "Create Page Rule"
+3. **URL** : `*.simpshopy.com/*`
+4. **Settings** : "Always Use HTTPS"
+5. **Clique sur** "Save and Deploy"
 
 ---
 
-## 🔄 **ÉTAPE 4 : VALIDATION AUTOMATIQUE**
+## 🎯 **ÉTAPE 3 : CONFIGURATION VERCEL**
 
-### **Système de vérification**
+### **3.1 - Accès aux paramètres du projet**
+1. **Va sur** [vercel.com](https://vercel.com)
+2. **Connecte-toi** à ton compte
+3. **Clique sur** ton projet `Simpshopy.com`
+4. **Clique sur** "Settings" dans le menu
 
-```typescript
-// Fonction pour vérifier si un domaine pointe vers SimpShopy
-async function validateDomain(domain: string) {
-  try {
-    // Vérifier si le domaine résout vers notre serveur
-    const response = await fetch(`https://${domain}/api/health`);
-    
-    if (response.ok) {
-      // Mettre à jour le statut
-      await supabase
-        .from('store_domains')
-        .update({ is_active: true })
-        .eq('domain_name', domain);
-      
-      return true;
-    }
-  } catch (error) {
-    console.error('Domaine non valide:', domain);
-    return false;
-  }
-}
+### **3.2 - Ajout du domaine**
+1. **Clique sur** "Domains" dans le menu de gauche
+2. **Clique sur** "Add Domain"
+3. **Saisis** `simpshopy.com`
+4. **Clique sur** "Add"
 
-// Vérification périodique
-setInterval(async () => {
-  const { data: pendingDomains } = await supabase
-    .from('store_domains')
-    .select('domain_name')
-    .eq('is_active', false)
-    .eq('domain_type', 'custom');
+### **3.3 - Configuration des sous-domaines**
+1. **Clique sur** "Add Domain" à nouveau
+2. **Saisis** `*.simpshopy.com`
+3. **Clique sur** "Add"
 
-  for (const domain of pendingDomains || []) {
-    await validateDomain(domain.domain_name);
-  }
-}, 1000 * 60 * 60); // Vérifier toutes les heures
-```
+### **3.4 - Vérification**
+1. **Attends** 5-10 minutes
+2. **Vérifie** que les domaines sont "Valid"
+3. **Teste** l'accès à `simpshopy.com`
 
 ---
 
-## 🎯 **AVANTAGES DE CETTE APPROCHE**
+## 🎯 **ÉTAPE 4 : CONFIGURATION SUPABASE**
 
-### **✅ Pour toi (SimpShopy)**
-- **Monétisation** : Services de domaines personnalisés
-- **Scalabilité** : Système multi-tenant
-- **Professionnalisme** : Plateforme complète
+### **4.1 - Vérification des tables**
+1. **Va sur** [supabase.com](https://supabase.com)
+2. **Connecte-toi** à ton projet
+3. **Clique sur** "Table Editor"
+4. **Vérifie** que ces tables existent :
+   - `domains`
+   - `custom_domains`
+   - `store_domains`
 
-### **✅ Pour tes clients**
-- **Gratuit** : Sous-domaine inclus
-- **Flexibilité** : Migration vers domaine personnalisé
-- **Simplicité** : Configuration automatique
+### **4.2 - Configuration des Edge Functions**
+1. **Clique sur** "Edge Functions" dans le menu
+2. **Vérifie** que ces fonctions existent :
+   - `domain-router`
+   - `cloudflare-domains`
 
-### **✅ Technique**
-- **Routage intelligent** : Un seul serveur, plusieurs domaines
-- **Validation automatique** : Pas d'intervention manuelle
-- **Sécurité** : Isolation entre boutiques
+### **4.3 - Variables d'environnement**
+1. **Clique sur** "Settings" → "API"
+2. **Vérifie** que ces variables sont configurées :
+   - `CLOUDFLARE_API_TOKEN`
+   - `VERCEL_API_TOKEN`
 
 ---
 
-## 🚀 **PROCHAINES ÉTAPES**
+## 🎯 **ÉTAPE 5 : TEST ET VÉRIFICATION**
 
-1. **Configurer DNS OVH** pour simpshopy.com
-2. **Créer la table store_domains** dans Supabase
-3. **Implémenter le système de routing**
-4. **Créer l'interface de gestion des domaines**
-5. **Tester avec un domaine personnalisé**
+### **5.1 - Test du domaine principal**
+1. **Ouvre** un nouvel onglet
+2. **Va sur** `https://simpshopy.com`
+3. **Vérifie** que l'app se charge correctement
+4. **Vérifie** que le favicon apparaît
 
-**Veux-tu que je commence par créer la table et le système de routing ?** 🎯 
+### **5.2 - Test des sous-domaines**
+1. **Teste** `https://www.simpshopy.com`
+2. **Vérifie** que ça redirige vers `simpshopy.com`
+
+### **5.3 - Test SSL**
+1. **Vérifie** que le cadenas vert apparaît
+2. **Vérifie** que `http://` redirige vers `https://`
+
+---
+
+## 🎯 **ÉTAPE 6 : CONFIGURATION DES DOMAINES PERSONNALISÉS**
+
+### **6.1 - Test d'un domaine personnalisé**
+1. **Dans ton app**, va dans les paramètres
+2. **Ajoute** un domaine personnalisé de test
+3. **Vérifie** que la vérification fonctionne
+
+### **6.2 - Configuration Cloudflare pour domaines personnalisés**
+1. **Dans Cloudflare**, ajoute le domaine personnalisé
+2. **Configure** les DNS comme pour `simpshopy.com`
+3. **Active** le proxy (nuage orange)
+
+---
+
+## ✅ **CHECKLIST FINALE**
+
+- [ ] OVH DNS configuré
+- [ ] Cloudflare actif et configuré
+- [ ] Vercel domaines ajoutés
+- [ ] Supabase tables vérifiées
+- [ ] SSL/TLS activé
+- [ ] Domaines personnalisés testés
+- [ ] Sous-domaines fonctionnels
+
+---
+
+## 🆘 **EN CAS DE PROBLÈME**
+
+### **DNS ne se propage pas :**
+- Attends 24-48 heures
+- Vérifie les nameservers
+- Contacte OVH support
+
+### **SSL ne fonctionne pas :**
+- Vérifie la configuration Cloudflare
+- Attends 1-2 heures
+- Vérifie les certificats
+
+### **Domaines personnalisés ne marchent pas :**
+- Vérifie la configuration Supabase
+- Teste les Edge Functions
+- Vérifie les variables d'environnement
+
+---
+
+## 📞 **SUPPORT**
+
+- **OVH** : [support.ovh.com](https://support.ovh.com)
+- **Cloudflare** : [support.cloudflare.com](https://support.cloudflare.com)
+- **Vercel** : [vercel.com/support](https://vercel.com/support)
+- **Supabase** : [supabase.com/support](https://supabase.com/support)
+
+---
+
+**🎉 FÉLICITATIONS ! Ton domaine `simpshopy.com` est maintenant configuré pour les sous-domaines et domaines personnalisés !** 
