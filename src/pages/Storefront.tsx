@@ -169,8 +169,42 @@ const Storefront = () => {
         console.log('✅ Template publié trouvé (dernière version publiée)');
         setTemplate(templateData.template_data as Template);
       } else {
-        console.log('⚠️ Aucun template publié trouvé - boutique non accessible');
-        console.log('💡 Vous devez publier votre site au moins une fois depuis le site builder');
+        console.log('⚠️ Aucun template publié trouvé - utilisation du template par défaut');
+        
+        // Utiliser un template par défaut au lieu de bloquer l'accès
+        const defaultTemplate: Template = {
+          id: 'default',
+          name: 'Template par défaut',
+          category: 'default',
+          pages: {
+            home: [
+              {
+                id: 'welcome',
+                type: 'hero',
+                order: 1,
+                data: {
+                  title: `Bienvenue sur ${foundStore.name}`,
+                  subtitle: 'Votre boutique en ligne',
+                  ctaText: 'Voir les produits',
+                  ctaLink: '?page=product'
+                }
+              }
+            ],
+            product: [
+              {
+                id: 'products-list',
+                type: 'product-grid',
+                order: 1,
+                data: {
+                  title: 'Nos produits',
+                  products: productsData || []
+                }
+              }
+            ]
+          }
+        };
+        
+        setTemplate(defaultTemplate);
       }
 
       // 3. Récupérer les produits
@@ -503,7 +537,7 @@ const Storefront = () => {
     return <StorefrontLoader />;
   }
 
-  if (error || !store || !template) {
+  if (error || !store) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -517,6 +551,42 @@ const Storefront = () => {
         </div>
       </div>
     );
+  }
+
+  // Si pas de template, utiliser un template par défaut
+  if (!template) {
+    const defaultTemplate: Template = {
+      id: 'default',
+      name: 'Template par défaut',
+      category: 'default',
+      pages: {
+        home: [
+          {
+            id: 'welcome',
+            type: 'hero',
+            order: 1,
+            data: {
+              title: `Bienvenue sur ${store.name}`,
+              subtitle: 'Votre boutique en ligne',
+              ctaText: 'Voir les produits',
+              ctaLink: '?page=product'
+            }
+          }
+        ],
+        product: [
+          {
+            id: 'products-list',
+            type: 'product-grid',
+            order: 1,
+            data: {
+              title: 'Nos produits',
+              products: products || []
+            }
+          }
+        ]
+      }
+    };
+    setTemplate(defaultTemplate);
   }
 
   const currentPageBlocks = getPageBlocks(currentPage);
