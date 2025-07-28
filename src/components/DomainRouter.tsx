@@ -2,16 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface StoreData {
-  domain: any;
   store: any;
   products: any[];
   siteTemplate: any;
-  metadata: {
-    totalProducts: number;
-    storeActive: boolean;
-    sslEnabled: boolean;
-    lastUpdated: string;
-  };
 }
 
 interface DomainRouterProps {
@@ -47,34 +40,99 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           return;
         }
 
-        // Check for custom domain or subdomain
-        const { data, error: routerError } = await supabase.functions.invoke('domain-router', {
-          body: { hostname },
+        // Check for custom domain
+        const { data: customDomain, error: domainError } = await supabase
+          .from('custom_domains')
+          .select(`
+            id,
+            custom_domain,
+            verified,
+            store_id,
+            stores (
+              id,
+              name,
+              description,
+              logo_url,
+              settings,
+              status
+            )
+          `)
+          .eq('custom_domain', hostname)
+          .eq('verified', true)
+          .single();
+
+        if (domainError || !customDomain) {
+          // Check for subdomain (extract store slug from hostname)
+          const subdomain = hostname.split('.')[0];
+          if (hostname.includes('simpshopy.com') && subdomain !== 'www') {
+            // This is a subdomain, find the store
+            const { data: store, error: storeError } = await supabase
+              .from('stores')
+              .select(`
+                id,
+                name,
+                description,
+                logo_url,
+                settings,
+                status
+              `)
+              .eq('domain', subdomain)
+              .eq('status', 'active')
+              .single();
+
+            if (storeError || !store) {
+              setError('Boutique non trouvée');
+              setIsLoading(false);
+              return;
+            }
+
+            // Get store products
+            const { data: products } = await supabase
+              .from('products')
+              .select(`
+                id,
+                name,
+                description,
+                price,
+                images,
+                status
+              `)
+              .eq('store_id', store.id)
+              .eq('status', 'active');
+
+            setStoreData({
+              store,
+              products: products || [],
+              siteTemplate: null
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          setError('Domaine non trouvé');
+          setIsLoading(false);
+          return;
+        }
+
+        // Custom domain found
+        const { data: products } = await supabase
+          .from('products')
+          .select(`
+            id,
+            name,
+            description,
+            price,
+            images,
+            status
+          `)
+          .eq('store_id', customDomain.store_id)
+          .eq('status', 'active');
+
+        setStoreData({
+          store: customDomain.stores,
+          products: products || [],
+          siteTemplate: null
         });
-
-        if (routerError) {
-          console.error('Domain router error:', routerError);
-          setError('Erreur lors du routage du domaine');
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.error) {
-          console.log('Domain not found:', data.error);
-          setError(data.error);
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.isMainDomain) {
-          setIsMainDomain(true);
-          setIsLoading(false);
-          return;
-        }
-
-        // Custom domain or subdomain found
-        console.log('✅ Store data found:', data);
-        setStoreData(data);
         setIsLoading(false);
 
       } catch (error) {
@@ -125,7 +183,6 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
     // Render storefront for custom domain/subdomain
     return (
       <div className="storefront-container">
-        {/* Storefront content will be rendered here */}
         <div className="text-center p-8">
           <h1 className="text-2xl font-bold mb-4">{storeData.store.name}</h1>
           <p className="text-muted-foreground mb-4">{storeData.store.description}</p>

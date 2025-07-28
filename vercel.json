@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/domain-router",
-      "destination": "/api/domain-router"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
@@ -27,10 +23,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/domain-router": {
-      "maxDuration": 30
-    }
-  }
+  ]
 } 
