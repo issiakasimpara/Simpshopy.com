@@ -64,6 +64,7 @@ export interface Store {
   domain?: string;
   logo_url?: string;
   merchant_id: string;
+  slug?: string;
   status: 'draft' | 'active' | 'suspended';
   settings?: Record<string, any>;
   created_at: string;

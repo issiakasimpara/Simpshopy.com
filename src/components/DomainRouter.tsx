@@ -54,7 +54,8 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
               description,
               logo_url,
               settings,
-              status
+              status,
+              slug
             )
           `)
           .eq('custom_domain', hostname)
@@ -74,9 +75,10 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
                 description,
                 logo_url,
                 settings,
-                status
+                status,
+                slug
               `)
-              .eq('domain', subdomain)
+              .eq('slug', subdomain)
               .eq('status', 'active')
               .single();
 

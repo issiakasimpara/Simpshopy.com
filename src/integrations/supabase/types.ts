@@ -797,6 +797,7 @@ export type Database = {
           merchant_id: string
           name: string
           settings: Json | null
+          slug: string | null
           status: Database["public"]["Enums"]["store_status"]
           updated_at: string
         }
@@ -809,6 +810,7 @@ export type Database = {
           merchant_id: string
           name: string
           settings?: Json | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
         }
@@ -821,6 +823,7 @@ export type Database = {
           merchant_id?: string
           name?: string
           settings?: Json | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
         }
