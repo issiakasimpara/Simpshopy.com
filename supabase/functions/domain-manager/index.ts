@@ -20,12 +20,15 @@ serve(async (req) => {
   try {
     // Parse request body
     const body = await req.json()
-    console.log('Received request:', body)
+    console.log('🔍 Edge Function - Received request body:', JSON.stringify(body, null, 2))
 
-    const { action, customDomain, storeId } = body
+    const { action, customDomain, storeId, domainId } = body
+
+    console.log('🔍 Edge Function - Parsed fields:', { action, customDomain, storeId, domainId })
 
     // Validate required fields
     if (!action) {
+      console.error('❌ Edge Function - Missing action')
       return new Response(
         JSON.stringify({ error: 'Action requise' }),
         { 
@@ -46,11 +49,12 @@ serve(async (req) => {
       }
     )
 
-    console.log('Processing action:', action)
+    console.log('🔍 Edge Function - Processing action:', action)
 
     switch (action) {
       case 'add_domain':
         if (!customDomain || !storeId) {
+          console.error('❌ Edge Function - Missing customDomain or storeId for add_domain')
           return new Response(
             JSON.stringify({ error: 'customDomain et storeId requis' }),
             { 
@@ -59,33 +63,39 @@ serve(async (req) => {
             }
           )
         }
+        console.log('🔍 Edge Function - Calling handleAddDomain')
         return await handleAddDomain(supabaseClient, customDomain, storeId)
       
       case 'verify_domain':
-        if (!customDomain) {
+        if (!domainId) {
+          console.error('❌ Edge Function - Missing domainId for verify_domain')
           return new Response(
-            JSON.stringify({ error: 'customDomain requis' }),
+            JSON.stringify({ error: 'domainId requis' }),
             { 
               status: 400, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
             }
           )
         }
-        return await handleVerifyDomain(supabaseClient, customDomain)
+        console.log('🔍 Edge Function - Calling handleVerifyDomain')
+        return await handleVerifyDomain(supabaseClient, domainId)
       
       case 'delete_domain':
-        if (!customDomain) {
+        if (!domainId) {
+          console.error('❌ Edge Function - Missing domainId for delete_domain')
           return new Response(
-            JSON.stringify({ error: 'customDomain requis' }),
+            JSON.stringify({ error: 'domainId requis' }),
             { 
               status: 400, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
             }
           )
         }
-        return await handleDeleteDomain(supabaseClient, customDomain)
+        console.log('🔍 Edge Function - Calling handleDeleteDomain')
+        return await handleDeleteDomain(supabaseClient, domainId)
       
       default:
+        console.error('❌ Edge Function - Unknown action:', action)
         return new Response(
           JSON.stringify({ error: 'Action non reconnue: ' + action }),
           { 
@@ -96,9 +106,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Error processing request:', error)
+    console.error('❌ Edge Function - Error processing request:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur: ' + error.message }),
+      JSON.stringify({ error: 'Erreur interne: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
