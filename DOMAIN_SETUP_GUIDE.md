@@ -35,7 +35,7 @@
 #### **Enregistrement A (domaine principal) :**
 - **Type** : A
 - **Nom** : @ (laisse vide)
-- **Valeur** : 76.76.19.36
+- **Valeur** : 216.198.79.1
 - **TTL** : 3600
 - **Clique sur** "Suivant"
 - **Clique sur** "Valider"
@@ -44,7 +44,7 @@
 - **Clique sur** "Ajouter un enregistrement"
 - **Type** : CNAME
 - **Nom** : www
-- **Valeur** : cname.vercel-dns.com
+- **Valeur** : 284d8b58845b414f.vercel-dns-017.com
 - **TTL** : 3600
 - **Clique sur** "Suivant"
 - **Clique sur** "Valider"

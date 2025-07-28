@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import CartWidget from "@/components/site-builder/blocks/CartWidget";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import DomainRouter from "@/components/DomainRouter";
 // ⚡ ÉTAPE 2: LAZY LOADING PROGRESSIF
 import { lazy, Suspense } from 'react';
 
