@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { toast } from 'sonner';
+import { useToast } from './use-toast';
 
 export interface CustomDomain {
   id: string;
-  user_id: string;
-  store_id: string;
   custom_domain: string;
-  verification_token: string;
   verified: boolean;
   ssl_enabled: boolean;
-  cloudflare_zone_id?: string;
-  cloudflare_record_id?: string;
+  verification_token: string;
   created_at: string;
   updated_at: string;
 }
@@ -22,6 +18,7 @@ export const useCustomDomains = (storeId?: string) => {
   const [domains, setDomains] = useState<CustomDomain[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Fetch domains for the current user/store
   const fetchDomains = async () => {
@@ -39,7 +36,11 @@ export const useCustomDomains = (storeId?: string) => {
       setDomains(data || []);
     } catch (error) {
       console.error('Error fetching domains:', error);
-      toast.error('Erreur lors du chargement des domaines');
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des domaines",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export const useCustomDomains = (storeId?: string) => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('cloudflare-domain-manager', {
+      const { data, error } = await supabase.functions.invoke('domain-manager', {
         body: {
           action: 'add_domain',
           customDomain: customDomain.toLowerCase().trim(),
@@ -62,7 +63,10 @@ export const useCustomDomains = (storeId?: string) => {
       if (error) throw error;
 
       if (data.success) {
-        toast.success('Domaine ajouté avec succès');
+        toast({
+          title: "Succès",
+          description: "Domaine ajouté avec succès",
+        });
         await fetchDomains();
         return data;
       } else {
@@ -70,7 +74,11 @@ export const useCustomDomains = (storeId?: string) => {
       }
     } catch (error) {
       console.error('Error adding domain:', error);
-      toast.error('Erreur lors de l\'ajout du domaine');
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout du domaine",
+        variant: "destructive"
+      });
       return null;
     } finally {
       setLoading(false);
@@ -81,7 +89,7 @@ export const useCustomDomains = (storeId?: string) => {
   const verifyDomain = async (domainId: string) => {
     setVerifying(domainId);
     try {
-      const { data, error } = await supabase.functions.invoke('cloudflare-domain-manager', {
+      const { data, error } = await supabase.functions.invoke('domain-manager', {
         body: {
           action: 'verify_domain',
           domainId,
@@ -91,16 +99,27 @@ export const useCustomDomains = (storeId?: string) => {
       if (error) throw error;
 
       if (data.verified) {
-        toast.success('Domaine vérifié avec succès ! SSL activé automatiquement.');
+        toast({
+          title: "Succès",
+          description: "Domaine vérifié avec succès ! SSL activé automatiquement.",
+        });
         await fetchDomains();
       } else {
-        toast.error('Vérification échouée. Vérifiez votre configuration DNS.');
+        toast({
+          title: "Erreur",
+          description: "Vérification échouée. Vérifiez votre configuration DNS.",
+          variant: "destructive"
+        });
       }
 
       return data;
     } catch (error) {
       console.error('Error verifying domain:', error);
-      toast.error('Erreur lors de la vérification');
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la vérification",
+        variant: "destructive"
+      });
       return null;
     } finally {
       setVerifying(null);
@@ -111,7 +130,7 @@ export const useCustomDomains = (storeId?: string) => {
   const deleteDomain = async (domainId: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('cloudflare-domain-manager', {
+      const { data, error } = await supabase.functions.invoke('domain-manager', {
         body: {
           action: 'delete_domain',
           domainId,
@@ -121,14 +140,21 @@ export const useCustomDomains = (storeId?: string) => {
       if (error) throw error;
 
       if (data.success) {
-        toast.success('Domaine supprimé avec succès');
+        toast({
+          title: "Succès",
+          description: "Domaine supprimé avec succès",
+        });
         await fetchDomains();
       } else {
         throw new Error('Erreur lors de la suppression');
       }
     } catch (error) {
       console.error('Error deleting domain:', error);
-      toast.error('Erreur lors de la suppression du domaine');
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression du domaine",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
