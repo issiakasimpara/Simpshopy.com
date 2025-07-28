@@ -261,11 +261,11 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="font-medium">{method.name}</div>
+                              <div className="font-medium text-gray-900">{method.name}</div>
                               {method.description && (
-                                <div className="text-sm text-gray-600">{method.description}</div>
+                                <div className="text-sm text-gray-700">{method.description}</div>
                               )}
-                              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                              <div className="flex items-center gap-2 text-sm text-gray-700 mt-1">
                                 <Clock className="h-4 w-4" />
                                 <span>
                                   {method.conditions?.display_text ||
@@ -277,7 +277,7 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-semibold">
+                              <div className="font-semibold text-gray-900">
                                 {method.price === 0 ? (
                                   <span className="text-green-600">Gratuit</span>
                                 ) : (

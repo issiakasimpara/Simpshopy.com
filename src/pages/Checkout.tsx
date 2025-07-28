@@ -543,11 +543,11 @@ const Checkout = () => {
                             )}
                           </div>
                           <div>
-                            <h4 className="font-medium">{method.name}</h4>
+                            <h4 className="font-medium text-gray-900">{method.name}</h4>
                             {method.description && (
-                              <p className="text-sm text-gray-600">{method.description}</p>
+                              <p className="text-sm text-gray-700">{method.description}</p>
                             )}
-                            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-700 mt-1">
                               <Clock className="h-4 w-4" />
                               <span>
                                 {method.conditions?.display_text ||
