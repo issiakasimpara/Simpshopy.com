@@ -23,5 +23,9 @@
         }
       ]
     }
+  ],
+  "domains": [
+    "simpshopy.com",
+    "*.simpshopy.com"
   ]
 } 
