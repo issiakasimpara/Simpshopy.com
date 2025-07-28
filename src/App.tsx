@@ -52,6 +52,7 @@ const CustomerOrders = lazy(() => import("./pages/CustomerOrders"));
 const TestStoreUrls = lazy(() => import("./pages/TestStoreUrls"));
 const TestLogo = lazy(() => import("./pages/TestLogo"));
 const TestLogoPlacement = lazy(() => import("./pages/TestLogoPlacement"));
+const TestDomains = lazy(() => import("./pages/TestDomains"));
 const Monitoring = lazy(() => import("./pages/Monitoring"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -392,6 +393,16 @@ const App = () => {
                   <ProtectedRoute>
                     <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
                       <Monitoring />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/test-domains"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <TestDomains />
                     </Suspense>
                   </ProtectedRoute>
                 }

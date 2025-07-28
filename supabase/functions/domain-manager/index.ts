@@ -6,37 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Vercel API configuration
+// API Tokens
 const VERCEL_API_TOKEN = Deno.env.get('VERCEL_API_TOKEN')
-const VERCEL_TEAM_ID = Deno.env.get('VERCEL_TEAM_ID')
 const VERCEL_PROJECT_ID = Deno.env.get('VERCEL_PROJECT_ID')
+const CLOUDFLARE_API_TOKEN = Deno.env.get('CLOUDFLARE_API_TOKEN')
+const CLOUDFLARE_ZONE_ID = Deno.env.get('CLOUDFLARE_ZONE_ID')
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Parse request body
     const body = await req.json()
-    console.log('🔍 Edge Function - Received request body:', JSON.stringify(body, null, 2))
+    console.log('🔍 Edge Function - Received request:', body)
 
     const { action, customDomain, storeId, domainId } = body
-
-    console.log('🔍 Edge Function - Parsed fields:', { action, customDomain, storeId, domainId })
-
-    // Validate required fields
-    if (!action) {
-      console.error('❌ Edge Function - Missing action')
-      return new Response(
-        JSON.stringify({ error: 'Action requise' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -49,193 +34,139 @@ serve(async (req) => {
       }
     )
 
-    console.log('🔍 Edge Function - Processing action:', action)
-
     switch (action) {
       case 'add_domain':
-        if (!customDomain || !storeId) {
-          console.error('❌ Edge Function - Missing customDomain or storeId for add_domain')
-          return new Response(
-            JSON.stringify({ error: 'customDomain et storeId requis' }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          )
-        }
-        console.log('🔍 Edge Function - Calling handleAddDomain')
         return await handleAddDomain(supabaseClient, customDomain, storeId)
       
       case 'verify_domain':
-        if (!domainId) {
-          console.error('❌ Edge Function - Missing domainId for verify_domain')
-          return new Response(
-            JSON.stringify({ error: 'domainId requis' }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          )
-        }
-        console.log('🔍 Edge Function - Calling handleVerifyDomain')
         return await handleVerifyDomain(supabaseClient, domainId)
       
       case 'delete_domain':
-        if (!domainId) {
-          console.error('❌ Edge Function - Missing domainId for delete_domain')
-          return new Response(
-            JSON.stringify({ error: 'domainId requis' }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          )
-        }
-        console.log('🔍 Edge Function - Calling handleDeleteDomain')
         return await handleDeleteDomain(supabaseClient, domainId)
       
       default:
-        console.error('❌ Edge Function - Unknown action:', action)
         return new Response(
           JSON.stringify({ error: 'Action non reconnue: ' + action }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
     }
 
   } catch (error) {
-    console.error('❌ Edge Function - Error processing request:', error)
+    console.error('❌ Edge Function - Error:', error)
     return new Response(
       JSON.stringify({ error: 'Erreur interne: ' + error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
 
 async function handleAddDomain(supabase: any, customDomain: string, storeId: string) {
   try {
-    console.log('Adding domain:', customDomain, 'for store:', storeId)
+    console.log('🚀 Adding domain:', customDomain, 'for store:', storeId)
 
-    // Get current user ID from auth context
+    // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
     if (userError || !user) {
-      console.error('User not authenticated:', userError)
       return new Response(
         JSON.stringify({ error: 'Utilisateur non authentifié' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Check if store already has a custom domain
-    const { data: existingDomain, error: checkError } = await supabase
+    // Get store info for multi-tenancy
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .select('name, slug')
+      .eq('id', storeId)
+      .single()
+
+    if (storeError || !store) {
+      return new Response(
+        JSON.stringify({ error: 'Boutique non trouvée' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('🏪 Store found:', store)
+
+    // Check if domain already exists
+    const { data: existingDomain } = await supabase
       .from('custom_domains')
-      .select('id, custom_domain')
-      .eq('store_id', storeId)
-      .eq('verified', true)
+      .select('id')
+      .eq('custom_domain', customDomain.toLowerCase().trim())
       .single()
 
     if (existingDomain) {
       return new Response(
-        JSON.stringify({ 
-          error: `Cette boutique a déjà un domaine personnalisé : ${existingDomain.custom_domain}. Supprimez-le d'abord pour en ajouter un nouveau.` 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: `Le domaine ${customDomain} est déjà utilisé` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Check if domain is already used by another store
-    const { data: domainExists, error: domainCheckError } = await supabase
-      .from('custom_domains')
-      .select('id, custom_domain')
-      .eq('custom_domain', customDomain.toLowerCase().trim())
-      .single()
-
-    if (domainExists) {
-      return new Response(
-        JSON.stringify({ 
-          error: `Le domaine ${customDomain} est déjà utilisé par une autre boutique.` 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+    // Add domain to Vercel automatically
+    let vercelResult = null
+    if (VERCEL_API_TOKEN && VERCEL_PROJECT_ID) {
+      try {
+        vercelResult = await addDomainToVercel(customDomain)
+        console.log('✅ Vercel domain added:', vercelResult)
+      } catch (vercelError) {
+        console.error('❌ Vercel error:', vercelError)
+      }
     }
 
-    // Generate verification token
-    const verificationToken = `simpshopy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // Add CNAME to Cloudflare automatically
+    let cloudflareResult = null
+    if (CLOUDFLARE_API_TOKEN && CLOUDFLARE_ZONE_ID) {
+      try {
+        cloudflareResult = await addCnameToCloudflare(customDomain)
+        console.log('✅ Cloudflare CNAME added:', cloudflareResult)
+      } catch (cfError) {
+        console.error('❌ Cloudflare error:', cfError)
+      }
+    }
 
-    // Add domain to database with user_id
+    // Add to database with store info (without store_slug for now)
     const { data, error } = await supabase
       .from('custom_domains')
       .insert({
         custom_domain: customDomain.toLowerCase().trim(),
         store_id: storeId,
         user_id: user.id,
-        verification_token: verificationToken,
+        verification_token: `simpshopy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         verified: false,
-        ssl_enabled: false
+        ssl_enabled: false,
+        vercel_domain_id: vercelResult?.id,
+        cloudflare_record_id: cloudflareResult?.result?.id
       })
       .select()
       .single()
 
     if (error) {
-      console.error('Database error:', error)
+      console.error('❌ Database error:', error)
       return new Response(
         JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine: ' + error.message }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Add domain to Vercel automatically
-    if (VERCEL_API_TOKEN && VERCEL_PROJECT_ID) {
-      try {
-        const vercelResponse = await addDomainToVercel(customDomain)
-        console.log('Vercel domain added:', vercelResponse)
-      } catch (vercelError) {
-        console.error('Vercel error:', vercelError)
-        // Continue even if Vercel fails - user can configure manually
-      }
-    }
-
-    console.log('Domain added successfully:', data)
+    console.log('✅ Domain added successfully:', data)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         domain: data,
-        verificationToken,
+        vercel: vercelResult,
+        cloudflare: cloudflareResult,
         message: 'Domaine ajouté avec succès. Configuration automatique en cours...'
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Add domain error:', error)
+    console.error('❌ Add domain error:', error)
     return new Response(
       JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine: ' + error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 }
@@ -252,8 +183,7 @@ async function addDomainToVercel(domain: string) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: domain,
-      teamId: VERCEL_TEAM_ID || undefined
+      name: domain
     })
   })
 
@@ -265,29 +195,105 @@ async function addDomainToVercel(domain: string) {
   return await response.json()
 }
 
+async function addCnameToCloudflare(domain: string) {
+  if (!CLOUDFLARE_API_TOKEN || !CLOUDFLARE_ZONE_ID) {
+    throw new Error('Cloudflare configuration manquante')
+  }
+
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'CNAME',
+        name: domain,
+        content: 'simpshopy.com',
+        ttl: 1,
+        proxied: true
+      })
+    }
+  )
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Cloudflare API error: ${error}`)
+  }
+
+  return await response.json()
+}
+
 async function verifyDomainInVercel(domain: string) {
   if (!VERCEL_API_TOKEN || !VERCEL_PROJECT_ID) {
     throw new Error('Vercel configuration manquante')
   }
 
-  const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${domain}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${VERCEL_API_TOKEN}`,
+  try {
+    // 1. Check if domain exists in Vercel
+    const vercelResponse = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${domain}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${VERCEL_API_TOKEN}`,
+      }
+    })
+
+    if (!vercelResponse.ok) {
+      console.log(`❌ Domain ${domain} not found in Vercel`)
+      return false
     }
-  })
 
-  if (!response.ok) {
-    throw new Error('Domain not found in Vercel')
+    const domainInfo = await vercelResponse.json()
+    
+    // 2. Check if domain points to our server
+    const healthCheckResponse = await fetch(`https://${domain}/api/health`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(10000)
+    })
+
+    if (healthCheckResponse.ok) {
+      console.log(`✅ Domain ${domain} is accessible and points to our server`)
+      return true
+    }
+
+    // 3. Check DNS resolution
+    try {
+      const dnsResponse = await fetch(`https://dns.google/resolve?name=${domain}`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      })
+      
+      if (dnsResponse.ok) {
+        const dnsData = await dnsResponse.json()
+        if (dnsData.Answer && dnsData.Answer.length > 0) {
+          console.log(`✅ DNS resolved for ${domain}`)
+          // Check if it points to simpshopy.com
+          const answers = dnsData.Answer
+          for (const answer of answers) {
+            if (answer.data && answer.data.includes('simpshopy.com')) {
+              console.log(`✅ Domain ${domain} points to correct server`)
+              return true
+            }
+          }
+        }
+      }
+    } catch (dnsError) {
+      console.log(`❌ DNS check failed for ${domain}:`, dnsError)
+    }
+
+    console.log(`❌ Domain ${domain} is not properly configured`)
+    return false
+  } catch (error) {
+    console.error(`❌ Error verifying domain ${domain}:`, error)
+    return false
   }
-
-  const domainInfo = await response.json()
-  return domainInfo.verification?.status === 'VALID'
 }
 
 async function handleVerifyDomain(supabase: any, domainId: string) {
   try {
-    console.log('Verifying domain:', domainId)
+    console.log('🔍 Verifying domain:', domainId)
 
     // Get domain info
     const { data: domain, error: fetchError } = await supabase
@@ -297,30 +303,48 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
       .single()
 
     if (fetchError || !domain) {
-      console.error('Domain not found:', fetchError)
       return new Response(
         JSON.stringify({ error: 'Domaine non trouvé' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Verify domain in Vercel
+    console.log('🔍 Domain data:', domain)
+
+    // Real verification
     let isVerified = false
     if (VERCEL_API_TOKEN && VERCEL_PROJECT_ID) {
       try {
         isVerified = await verifyDomainInVercel(domain.custom_domain)
-        console.log('Vercel verification result:', isVerified)
+        console.log('✅ Vercel verification result:', isVerified)
       } catch (vercelError) {
-        console.error('Vercel verification error:', vercelError)
-        // Fallback to simple verification
-        isVerified = true
+        console.error('❌ Vercel verification error:', vercelError)
+        isVerified = false
       }
     } else {
-      // Simple verification if Vercel not configured
-      isVerified = true
+      // Fallback DNS check
+      try {
+        const dnsResponse = await fetch(`https://dns.google/resolve?name=${domain.custom_domain}`, {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000)
+        })
+        
+        if (dnsResponse.ok) {
+          const dnsData = await dnsResponse.json()
+          if (dnsData.Answer && dnsData.Answer.length > 0) {
+            const answers = dnsData.Answer
+            for (const answer of answers) {
+              if (answer.data && answer.data.includes('simpshopy.com')) {
+                isVerified = true
+                break
+              }
+            }
+          }
+        }
+      } catch (dnsError) {
+        console.error('❌ DNS verification error:', dnsError)
+        isVerified = false
+      }
     }
 
     // Update domain status
@@ -334,81 +358,52 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
       .eq('id', domainId)
 
     if (updateError) {
-      console.error('Update error:', updateError)
+      console.error('❌ Update error:', updateError)
       return new Response(
         JSON.stringify({ error: 'Erreur lors de la vérification: ' + updateError.message }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Domain verified successfully')
+    console.log('✅ Domain verification completed')
 
     return new Response(
       JSON.stringify({ 
         success: true,
         verified: isVerified,
-        message: isVerified ? 'Domaine vérifié avec succès ! SSL activé automatiquement.' : 'Vérification échouée'
+        message: isVerified ? 'Domaine vérifié avec succès ! SSL activé automatiquement.' : 'Vérification échouée - Configurez vos DNS'
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Verify domain error:', error)
+    console.error('❌ Verify domain error:', error)
     return new Response(
       JSON.stringify({ error: 'Erreur lors de la vérification: ' + error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 }
 
 async function handleDeleteDomain(supabase: any, domainId: string) {
   try {
-    console.log('Deleting domain with ID:', domainId)
+    console.log('🗑️ Deleting domain:', domainId)
 
-    // Get current user ID from auth context
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
-    if (userError || !user) {
-      console.error('User not authenticated:', userError)
-      return new Response(
-        JSON.stringify({ error: 'Utilisateur non authentifié' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    // Fetch domain to get custom_domain and vercel_domain_id
+    // Get domain info
     const { data: domain, error: fetchError } = await supabase
       .from('custom_domains')
-      .select('custom_domain, vercel_domain_id')
+      .select('custom_domain, vercel_domain_id, cloudflare_record_id')
       .eq('id', domainId)
       .single()
 
     if (fetchError || !domain) {
-      console.error('Domain not found:', fetchError)
       return new Response(
         JSON.stringify({ error: 'Domaine non trouvé' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Found domain to delete:', domain)
-
-    // Delete from Vercel if we have the domain ID
+    // Delete from Vercel
     if (VERCEL_API_TOKEN && VERCEL_PROJECT_ID && domain.vercel_domain_id) {
       try {
         const vercelDeleteResponse = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain.custom_domain}`, {
@@ -418,56 +413,68 @@ async function handleDeleteDomain(supabase: any, domainId: string) {
           },
         })
         
-        if (!vercelDeleteResponse.ok) {
-          console.error('Vercel delete error:', vercelDeleteResponse.statusText)
-          // Continue anyway - we'll delete from our database
+        if (vercelDeleteResponse.ok) {
+          console.log('✅ Domain deleted from Vercel')
         } else {
-          console.log('Domain deleted from Vercel successfully')
+          console.error('❌ Vercel delete error:', vercelDeleteResponse.statusText)
         }
       } catch (vercelError) {
-        console.error('Vercel API error:', vercelError)
-        // Continue anyway
+        console.error('❌ Vercel API error:', vercelError)
       }
     }
 
-    // Delete from Supabase
+    // Delete from Cloudflare
+    if (CLOUDFLARE_API_TOKEN && CLOUDFLARE_ZONE_ID && domain.cloudflare_record_id) {
+      try {
+        const cfDeleteResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records/${domain.cloudflare_record_id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+            },
+          }
+        )
+        
+        if (cfDeleteResponse.ok) {
+          console.log('✅ Domain deleted from Cloudflare')
+        } else {
+          console.error('❌ Cloudflare delete error:', cfDeleteResponse.statusText)
+        }
+      } catch (cfError) {
+        console.error('❌ Cloudflare API error:', cfError)
+      }
+    }
+
+    // Delete from database
     const { error: deleteError } = await supabase
       .from('custom_domains')
       .delete()
       .eq('id', domainId)
 
     if (deleteError) {
-      console.error('Database delete error:', deleteError)
+      console.error('❌ Database delete error:', deleteError)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la suppression du domaine: ' + deleteError.message }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Erreur lors de la suppression: ' + deleteError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Domain deleted successfully from database')
+    console.log('✅ Domain deleted successfully')
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Domaine supprimé avec succès'
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Delete domain error:', error)
+    console.error('❌ Delete domain error:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur lors de la suppression du domaine: ' + error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ error: 'Erreur lors de la suppression: ' + error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 } 

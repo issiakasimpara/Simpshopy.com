@@ -1,136 +1,121 @@
-# GUIDE DE CONFIGURATION DES DOMAINES SIMPSHOPY
+# 🌐 GUIDE DE CONFIGURATION DES DOMAINES
 
-## 🚀 CONFIGURATION COMPLÈTE AVEC VERCEL
+## 📋 PRÉREQUIS
 
-### **📋 PRÉREQUIS :**
+### 1. Configuration Vercel ✅ (Déjà fait)
+- ✅ Project ID configuré
+- ✅ Token Vercel configuré
 
-#### **1. 🏠 Configuration Vercel :**
-- ✅ Projet déployé sur Vercel
-- ✅ Domaine principal configuré (`simpshopy.com`)
-- ✅ API Token Vercel généré
+### 2. Configuration Cloudflare (Optionnel mais recommandé)
+Pour une configuration automatique des DNS, ajoutez ces variables :
 
-#### **2. 🔧 Variables d'environnement Supabase :**
-
-**Dans Supabase Dashboard → Settings → Environment Variables :**
-
-```
-VERCEL_API_TOKEN=vercel_xxxxxxxxxxxxxxxxxxxx
-VERCEL_TEAM_ID=team_xxxxxxxxxxxxxxxxxxxx (optionnel)
-VERCEL_PROJECT_ID=prj_xxxxxxxxxxxxxxxxxxxx
+```bash
+# Dans votre fichier .env
+VITE_CLOUDFLARE_TOKEN=your_cloudflare_token
+VITE_CLOUDFLARE_ZONE_ID=your_cloudflare_zone_id
 ```
 
-### **🎯 OBTENIR LES VALEURS VERCEL :**
+## 🔧 CONFIGURATION CLOUDFLARE
 
-#### **1. VERCEL_API_TOKEN :**
-1. **Va sur** [vercel.com/account/tokens](https://vercel.com/account/tokens)
-2. **Clique sur** "Create Token"
-3. **Nom** : `simpshopy-domain-manager`
-4. **Scope** : `Full Account`
-5. **Copie** le token généré
+### Étape 1 : Obtenir le Token Cloudflare
+1. Allez sur https://dash.cloudflare.com/profile/api-tokens
+2. Cliquez sur "Create Token"
+3. Sélectionnez "Custom token"
+4. Permissions nécessaires :
+   - Zone:Zone:Read
+   - Zone:DNS:Edit
+5. Resources : Include: All zones
+6. Copiez le token généré
 
-#### **2. VERCEL_PROJECT_ID :**
-1. **Va sur** [vercel.com/dashboard](https://vercel.com/dashboard)
-2. **Sélectionne** ton projet `simpshopy-com`
-3. **Va dans** "Settings" → "General"
-4. **Copie** le "Project ID"
+### Étape 2 : Obtenir le Zone ID
+1. Dans Cloudflare, sélectionnez votre domaine
+2. Allez dans "Overview"
+3. Copiez le "Zone ID" (32 caractères)
 
-#### **3. VERCEL_TEAM_ID (optionnel) :**
-1. **Si tu as une équipe** Vercel
-2. **Va dans** "Settings" → "General"
-3. **Copie** le "Team ID"
+## 🚀 TEST DU SYSTÈME
 
-### **🔧 CONFIGURATION AUTOMATIQUE :**
+### 1. Exécuter le script SQL
+```sql
+-- Exécutez ce script dans Supabase SQL Editor
+ALTER TABLE custom_domains 
+ADD COLUMN IF NOT EXISTS dns_configured BOOLEAN DEFAULT FALSE;
 
-#### **✅ Ce qui se passe automatiquement :**
-
-1. **Ajout de domaine** :
-   - ✅ **Sauvegarde** en base de données
-   - ✅ **Ajout automatique** dans Vercel
-   - ✅ **Configuration DNS** automatique
-   - ✅ **SSL automatique** activé
-
-2. **Vérification de domaine** :
-   - ✅ **Vérification DNS** réelle
-   - ✅ **Vérification SSL** automatique
-   - ✅ **Mise à jour** du statut
-
-3. **Suppression de domaine** :
-   - ✅ **Suppression** de la base de données
-   - ✅ **Suppression** de Vercel
-   - ✅ **Nettoyage** DNS automatique
-
-### **🚀 AVANTAGES :**
-
-#### **✅ Pour l'utilisateur :**
-- **Configuration zéro** : Tout est automatique
-- **SSL automatique** : Certificats gratuits
-- **DNS automatique** : Pas de configuration manuelle
-- **Vérification instantanée** : Statut en temps réel
-
-#### **✅ Pour toi (développeur) :**
-- **Moins de support** : Tout est automatisé
-- **Moins d'erreurs** : Pas de configuration manuelle
-- **Expérience utilisateur** : Setup en 1 clic
-- **Professionnalisme** : Niveau Shopify
-
-### **📝 EXEMPLE D'UTILISATION :**
-
-#### **1. Utilisateur ajoute un domaine :**
-```
-Input: zeluxo.co
-→ Sauvegarde en base
-→ Ajout automatique Vercel
-→ Configuration DNS automatique
-→ SSL automatique activé
-→ Statut: "Actif et sécurisé"
+UPDATE custom_domains 
+SET dns_configured = verified 
+WHERE dns_configured IS NULL;
 ```
 
-#### **2. Vérification automatique :**
+### 2. Tester l'ajout de domaine
+1. Allez dans votre application
+2. Onglet "Configuration" → "Domaines"
+3. Ajoutez un domaine (ex: test.mon-domaine.com)
+4. Le système va automatiquement :
+   - ✅ Ajouter le domaine sur Vercel
+   - ✅ Configurer les DNS sur Cloudflare
+   - ✅ Vérifier que tout fonctionne
+
+## 🔍 VÉRIFICATION
+
+### Test automatique
+Le système vérifie automatiquement :
+- ✅ Résolution DNS
+- ✅ Configuration SSL
+- ✅ Accessibilité du domaine
+
+### Test manuel
+1. Allez sur `/test-domains`
+2. Entrez votre domaine
+3. Cliquez sur "Vérifier"
+
+## 🛠️ CONFIGURATION MANUELLE (si automatique échoue)
+
+### Vercel
+1. Dashboard Vercel → Votre projet
+2. Settings → Domains
+3. Ajoutez votre domaine
+4. Suivez les instructions DNS
+
+### Cloudflare
+1. DNS → Records
+2. Ajoutez un enregistrement CNAME :
+   - Nom : votre-domaine.com
+   - Cible : simpshopy.com
+   - Proxy : Activé (orange)
+
+## 📊 MONITORING
+
+Le système surveille :
+- ✅ Temps de réponse des domaines
+- ✅ Statut SSL
+- ✅ Configuration DNS
+- ✅ Erreurs de résolution
+
+## 🆘 DÉPANNAGE
+
+### Erreur "Could not find the 'dns_configured' column"
+```sql
+-- Exécutez ce script
+ALTER TABLE custom_domains 
+ADD COLUMN IF NOT EXISTS dns_configured BOOLEAN DEFAULT FALSE;
 ```
-Clic sur "Vérifier"
-→ Vérification DNS réelle
-→ Vérification SSL automatique
-→ Mise à jour statut
-→ Notification: "Domaine vérifié !"
-```
 
-### **🎯 PROCHAINES ÉTAPES :**
+### Domaine ne se vérifie pas
+1. Vérifiez la configuration DNS
+2. Attendez 5-10 minutes pour la propagation
+3. Utilisez `/test-domains` pour diagnostiquer
 
-1. **Configure** les variables d'environnement
-2. **Redéploie** l'Edge Function
-3. **Teste** avec un vrai domaine
-4. **Profite** de l'automatisation !
+### Erreur Vercel/Cloudflare
+1. Vérifiez les tokens dans `.env`
+2. Vérifiez les permissions des tokens
+3. Testez manuellement l'API
 
----
+## 🎯 RÉSULTAT ATTENDU
 
-## 📚 CONFIGURATION MANUELLE (FALLBACK)
+Après configuration, vous devriez avoir :
+- ✅ Domaine ajouté automatiquement sur Vercel
+- ✅ DNS configuré automatiquement sur Cloudflare
+- ✅ SSL activé automatiquement
+- ✅ Domaine accessible en temps réel
+- ✅ Boutique accessible via votre domaine personnalisé
 
-Si l'automatisation Vercel n'est pas configurée, le système fonctionne toujours en mode manuel :
-
-### **🔧 Configuration DNS manuelle :**
-
-#### **Enregistrement CNAME :**
-```
-Type: CNAME
-Nom: @ (ou www)
-Valeur: cname.vercel-dns.com
-TTL: 3600
-```
-
-#### **Enregistrement TXT (vérification) :**
-```
-Type: TXT
-Nom: @
-Valeur: simpshopy-xxxxxxxxx-xxxxxxxxx
-TTL: 3600
-```
-
-### **✅ Vérification manuelle :**
-1. **Configure** les DNS chez ton registrar
-2. **Attends** la propagation (1-24h)
-3. **Clique** sur "Vérifier" dans l'app
-4. **Statut** mis à jour automatiquement
-
----
-
-**🎉 Ton système est maintenant prêt pour l'automatisation complète !** 
+**Testez maintenant avec un vrai domaine !** 🚀 
