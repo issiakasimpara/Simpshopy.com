@@ -13,7 +13,22 @@ serve(async (req) => {
   }
 
   try {
-    const { action, customDomain, storeId } = await req.json()
+    // Parse request body
+    const body = await req.json()
+    console.log('Received request:', body)
+
+    const { action, customDomain, storeId } = body
+
+    // Validate required fields
+    if (!action) {
+      return new Response(
+        JSON.stringify({ error: 'Action requise' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -26,19 +41,48 @@ serve(async (req) => {
       }
     )
 
+    console.log('Processing action:', action)
+
     switch (action) {
       case 'add_domain':
+        if (!customDomain || !storeId) {
+          return new Response(
+            JSON.stringify({ error: 'customDomain et storeId requis' }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
         return await handleAddDomain(supabaseClient, customDomain, storeId)
       
       case 'verify_domain':
+        if (!customDomain) {
+          return new Response(
+            JSON.stringify({ error: 'customDomain requis' }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
         return await handleVerifyDomain(supabaseClient, customDomain)
       
       case 'delete_domain':
+        if (!customDomain) {
+          return new Response(
+            JSON.stringify({ error: 'customDomain requis' }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
         return await handleDeleteDomain(supabaseClient, customDomain)
       
       default:
         return new Response(
-          JSON.stringify({ error: 'Action non reconnue' }),
+          JSON.stringify({ error: 'Action non reconnue: ' + action }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -47,9 +91,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error processing request:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur' }),
+      JSON.stringify({ error: 'Erreur interne du serveur: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -60,15 +104,32 @@ serve(async (req) => {
 
 async function handleAddDomain(supabase: any, customDomain: string, storeId: string) {
   try {
+    console.log('Adding domain:', customDomain, 'for store:', storeId)
+
+    // Get current user ID from auth context
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error('User not authenticated:', userError)
+      return new Response(
+        JSON.stringify({ error: 'Utilisateur non authentifié' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Generate verification token
     const verificationToken = `simpshopy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-    // Add domain to database
+    // Add domain to database with user_id
     const { data, error } = await supabase
       .from('custom_domains')
       .insert({
         custom_domain: customDomain.toLowerCase().trim(),
         store_id: storeId,
+        user_id: user.id,
         verification_token: verificationToken,
         verified: false,
         ssl_enabled: false
@@ -79,13 +140,15 @@ async function handleAddDomain(supabase: any, customDomain: string, storeId: str
     if (error) {
       console.error('Database error:', error)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine' }),
+        JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine: ' + error.message }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
+
+    console.log('Domain added successfully:', data)
 
     return new Response(
       JSON.stringify({ 
@@ -103,7 +166,7 @@ async function handleAddDomain(supabase: any, customDomain: string, storeId: str
   } catch (error) {
     console.error('Add domain error:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine' }),
+      JSON.stringify({ error: 'Erreur lors de l\'ajout du domaine: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -114,6 +177,8 @@ async function handleAddDomain(supabase: any, customDomain: string, storeId: str
 
 async function handleVerifyDomain(supabase: any, domainId: string) {
   try {
+    console.log('Verifying domain:', domainId)
+
     // Get domain info
     const { data: domain, error: fetchError } = await supabase
       .from('custom_domains')
@@ -122,6 +187,7 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
       .single()
 
     if (fetchError || !domain) {
+      console.error('Domain not found:', fetchError)
       return new Response(
         JSON.stringify({ error: 'Domaine non trouvé' }),
         { 
@@ -148,13 +214,15 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
     if (updateError) {
       console.error('Update error:', updateError)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la vérification' }),
+        JSON.stringify({ error: 'Erreur lors de la vérification: ' + updateError.message }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
+
+    console.log('Domain verified successfully')
 
     return new Response(
       JSON.stringify({ 
@@ -171,7 +239,7 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
   } catch (error) {
     console.error('Verify domain error:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur lors de la vérification' }),
+      JSON.stringify({ error: 'Erreur lors de la vérification: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -182,6 +250,8 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
 
 async function handleDeleteDomain(supabase: any, domainId: string) {
   try {
+    console.log('Deleting domain:', domainId)
+
     const { error } = await supabase
       .from('custom_domains')
       .delete()
@@ -190,13 +260,15 @@ async function handleDeleteDomain(supabase: any, domainId: string) {
     if (error) {
       console.error('Delete error:', error)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la suppression' }),
+        JSON.stringify({ error: 'Erreur lors de la suppression: ' + error.message }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
+
+    console.log('Domain deleted successfully')
 
     return new Response(
       JSON.stringify({ 
@@ -212,7 +284,7 @@ async function handleDeleteDomain(supabase: any, domainId: string) {
   } catch (error) {
     console.error('Delete domain error:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur lors de la suppression' }),
+      JSON.stringify({ error: 'Erreur lors de la suppression: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
