@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +15,11 @@ import {
   Trash2,
   Shield,
   ExternalLink,
-  Info
+  Info,
+  Clock
 } from 'lucide-react';
 import { useCustomDomains } from '@/hooks/useCustomDomains';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 interface CustomDomainManagerProps {
   storeId: string;
@@ -26,29 +27,40 @@ interface CustomDomainManagerProps {
 }
 
 const CustomDomainManager = ({ storeId, storeName }: CustomDomainManagerProps) => {
-  const { domains, loading, verifying, addDomain, verifyDomain, deleteDomain } = useCustomDomains(storeId);
   const [newDomain, setNewDomain] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [verifying, setVerifying] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const { domains, loading, addDomain, verifyDomain, deleteDomain } = useCustomDomains(storeId);
+  const { toast } = useToast();
 
   const handleAddDomain = async () => {
-    if (!newDomain.trim()) {
-      toast.error('Veuillez entrer un nom de domaine');
-      return;
-    }
-
-    // Validation basique du domaine
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(newDomain)) {
-      toast.error('Format de domaine invalide');
-      return;
-    }
-
+    if (!newDomain.trim()) return;
+    
     setIsAdding(true);
-    const result = await addDomain(newDomain);
-    if (result) {
+    try {
+      await addDomain(newDomain.trim());
       setNewDomain('');
+      toast.success('Domaine ajouté avec succès');
+    } catch (error) {
+      console.error('Error adding domain:', error);
+      toast.error('Erreur lors de l\'ajout du domaine');
     }
     setIsAdding(false);
+  };
+
+  const handleDeleteDomain = async (domainId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce domaine ?')) return;
+    
+    setDeleting(domainId);
+    try {
+      await deleteDomain(domainId);
+      toast.success('Domaine supprimé avec succès');
+    } catch (error) {
+      console.error('Error deleting domain:', error);
+      toast.error('Erreur lors de la suppression du domaine');
+    }
+    setDeleting(null);
   };
 
   const copyToClipboard = (text: string) => {
@@ -147,7 +159,7 @@ const CustomDomainManager = ({ storeId, storeName }: CustomDomainManagerProps) =
                           </Badge>
                         ) : (
                           <Badge variant="secondary">
-                            <AlertCircle className="h-3 w-3 mr-1" />
+                            <Clock className="h-3 w-3 mr-1" />
                             En attente
                           </Badge>
                         )}
@@ -172,9 +184,14 @@ const CustomDomainManager = ({ storeId, storeName }: CustomDomainManagerProps) =
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => deleteDomain(domain.id)}
+                      onClick={() => handleDeleteDomain(domain.id)}
+                      disabled={deleting === domain.id}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {deleting === domain.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -221,11 +238,11 @@ const CustomDomainManager = ({ storeId, storeName }: CustomDomainManagerProps) =
                         <div>
                           <label className="font-medium text-muted-foreground">Valeur</label>
                           <div className="flex items-center justify-between bg-background p-2 rounded border">
-                            <span className="font-mono text-xs">malibashopy.com</span>
+                            <span className="font-mono text-xs">simpshopy.com</span>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => copyToClipboard('malibashopy.com')}
+                              onClick={() => copyToClipboard('simpshopy.com')}
                             >
                               <Copy className="h-3 w-3" />
                             </Button>

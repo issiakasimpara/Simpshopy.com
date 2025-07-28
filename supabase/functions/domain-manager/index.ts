@@ -125,6 +125,45 @@ async function handleAddDomain(supabase: any, customDomain: string, storeId: str
       )
     }
 
+    // Check if store already has a custom domain
+    const { data: existingDomain, error: checkError } = await supabase
+      .from('custom_domains')
+      .select('id, custom_domain')
+      .eq('store_id', storeId)
+      .eq('verified', true)
+      .single()
+
+    if (existingDomain) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Cette boutique a déjà un domaine personnalisé : ${existingDomain.custom_domain}. Supprimez-le d'abord pour en ajouter un nouveau.` 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Check if domain is already used by another store
+    const { data: domainExists, error: domainCheckError } = await supabase
+      .from('custom_domains')
+      .select('id, custom_domain')
+      .eq('custom_domain', customDomain.toLowerCase().trim())
+      .single()
+
+    if (domainExists) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Le domaine ${customDomain} est déjà utilisé par une autre boutique.` 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Generate verification token
     const verificationToken = `simpshopy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
@@ -323,36 +362,74 @@ async function handleVerifyDomain(supabase: any, domainId: string) {
 
 async function handleDeleteDomain(supabase: any, domainId: string) {
   try {
-    console.log('Deleting domain:', domainId)
+    console.log('Deleting domain with ID:', domainId)
 
-    // Get domain info before deletion
-    const { data: domain } = await supabase
+    // Get current user ID from auth context
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error('User not authenticated:', userError)
+      return new Response(
+        JSON.stringify({ error: 'Utilisateur non authentifié' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Fetch domain to get custom_domain and vercel_domain_id
+    const { data: domain, error: fetchError } = await supabase
       .from('custom_domains')
-      .select('custom_domain')
+      .select('custom_domain, vercel_domain_id')
       .eq('id', domainId)
       .single()
 
-    // Delete from Vercel if configured
-    if (domain && VERCEL_API_TOKEN && VERCEL_PROJECT_ID) {
+    if (fetchError || !domain) {
+      console.error('Domain not found:', fetchError)
+      return new Response(
+        JSON.stringify({ error: 'Domaine non trouvé' }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('Found domain to delete:', domain)
+
+    // Delete from Vercel if we have the domain ID
+    if (VERCEL_API_TOKEN && VERCEL_PROJECT_ID && domain.vercel_domain_id) {
       try {
-        await deleteDomainFromVercel(domain.custom_domain)
-        console.log('Domain deleted from Vercel')
+        const vercelDeleteResponse = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain.custom_domain}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${VERCEL_API_TOKEN}`,
+          },
+        })
+        
+        if (!vercelDeleteResponse.ok) {
+          console.error('Vercel delete error:', vercelDeleteResponse.statusText)
+          // Continue anyway - we'll delete from our database
+        } else {
+          console.log('Domain deleted from Vercel successfully')
+        }
       } catch (vercelError) {
-        console.error('Vercel deletion error:', vercelError)
-        // Continue even if Vercel deletion fails
+        console.error('Vercel API error:', vercelError)
+        // Continue anyway
       }
     }
 
-    // Delete from database
-    const { error } = await supabase
+    // Delete from Supabase
+    const { error: deleteError } = await supabase
       .from('custom_domains')
       .delete()
       .eq('id', domainId)
 
-    if (error) {
-      console.error('Delete error:', error)
+    if (deleteError) {
+      console.error('Database delete error:', deleteError)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la suppression: ' + error.message }),
+        JSON.stringify({ error: 'Erreur lors de la suppression du domaine: ' + deleteError.message }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -360,11 +437,11 @@ async function handleDeleteDomain(supabase: any, domainId: string) {
       )
     }
 
-    console.log('Domain deleted successfully')
+    console.log('Domain deleted successfully from database')
 
     return new Response(
       JSON.stringify({ 
-        success: true,
+        success: true, 
         message: 'Domaine supprimé avec succès'
       }),
       { 
@@ -376,31 +453,11 @@ async function handleDeleteDomain(supabase: any, domainId: string) {
   } catch (error) {
     console.error('Delete domain error:', error)
     return new Response(
-      JSON.stringify({ error: 'Erreur lors de la suppression: ' + error.message }),
+      JSON.stringify({ error: 'Erreur lors de la suppression du domaine: ' + error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
   }
-}
-
-async function deleteDomainFromVercel(domain: string) {
-  if (!VERCEL_API_TOKEN || !VERCEL_PROJECT_ID) {
-    throw new Error('Vercel configuration manquante')
-  }
-
-  const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains/${domain}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${VERCEL_API_TOKEN}`,
-    }
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Vercel API error: ${error}`)
-  }
-
-  return await response.json()
 } 

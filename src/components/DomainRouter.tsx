@@ -24,10 +24,11 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
         setError(null);
 
         const hostname = window.location.hostname;
-        console.log('🔍 Checking domain:', hostname);
+        console.log('🔍 Domain Router - Checking hostname:', hostname);
 
         // Skip routing for localhost during development
         if (hostname === 'localhost' || hostname.includes('localhost')) {
+          console.log('🔍 Development mode - skipping routing');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
@@ -35,10 +36,13 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
 
         // Check if this is the main domain
         if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
+          console.log('🔍 Main domain detected');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
         }
+
+        console.log('🔍 Checking for custom domain:', hostname);
 
         // Check for custom domain
         const { data: customDomain, error: domainError } = await supabase
@@ -62,83 +66,91 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           .eq('verified', true)
           .single();
 
-        if (domainError || !customDomain) {
-          // Check for subdomain (extract store slug from hostname)
-          const subdomain = hostname.split('.')[0];
-          if (hostname.includes('simpshopy.com') && subdomain !== 'www') {
-            // This is a subdomain, find the store
-            const { data: store, error: storeError } = await supabase
-              .from('stores')
-              .select(`
-                id,
-                name,
-                description,
-                logo_url,
-                settings,
-                status,
-                slug
-              `)
-              .eq('slug', subdomain)
-              .eq('status', 'active')
-              .single();
+        if (!domainError && customDomain) {
+          console.log('🔍 Custom domain found:', customDomain);
+          
+          // Custom domain found - load store data
+          const { data: products } = await supabase
+            .from('products')
+            .select(`
+              id,
+              name,
+              description,
+              price,
+              images,
+              status
+            `)
+            .eq('store_id', customDomain.store_id)
+            .eq('status', 'active');
 
-            if (storeError || !store) {
-              setError('Boutique non trouvée');
-              setIsLoading(false);
-              return;
-            }
-
-            // Get store products
-            const { data: products } = await supabase
-              .from('products')
-              .select(`
-                id,
-                name,
-                description,
-                price,
-                images,
-                status
-              `)
-              .eq('store_id', store.id)
-              .eq('status', 'active');
-
-            setStoreData({
-              store,
-              products: products || [],
-              siteTemplate: null
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          setError('Domaine non trouvé');
+          setStoreData({
+            store: customDomain.stores,
+            products: products || [],
+            siteTemplate: null
+          });
           setIsLoading(false);
           return;
         }
 
-        // Custom domain found
-        const { data: products } = await supabase
-          .from('products')
-          .select(`
-            id,
-            name,
-            description,
-            price,
-            images,
-            status
-          `)
-          .eq('store_id', customDomain.store_id)
-          .eq('status', 'active');
+        // Check for subdomain
+        const subdomain = hostname.split('.')[0];
+        console.log('🔍 Checking subdomain:', subdomain);
+        
+        if (hostname.includes('simpshopy.com') && subdomain !== 'www') {
+          // This is a subdomain, find the store
+          const { data: store, error: storeError } = await supabase
+            .from('stores')
+            .select(`
+              id,
+              name,
+              description,
+              logo_url,
+              settings,
+              status,
+              slug
+            `)
+            .eq('slug', subdomain)
+            .eq('status', 'active')
+            .single();
 
-        setStoreData({
-          store: customDomain.stores,
-          products: products || [],
-          siteTemplate: null
-        });
+          if (storeError || !store) {
+            console.log('🔍 Store not found for subdomain:', subdomain);
+            setError('Boutique non trouvée');
+            setIsLoading(false);
+            return;
+          }
+
+          console.log('🔍 Store found for subdomain:', store);
+
+          // Get store products
+          const { data: products } = await supabase
+            .from('products')
+            .select(`
+              id,
+              name,
+              description,
+              price,
+              images,
+              status
+            `)
+            .eq('store_id', store.id)
+            .eq('status', 'active');
+
+          setStoreData({
+            store,
+            products: products || [],
+            siteTemplate: null
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('🔍 No matching domain found');
+        setError('Domaine non trouvé');
         setIsLoading(false);
 
       } catch (error) {
-        console.error('Domain routing error:', error);
+        console.error('❌ Domain routing error:', error);
         setError('Erreur lors du chargement de la boutique');
         setIsLoading(false);
       }
