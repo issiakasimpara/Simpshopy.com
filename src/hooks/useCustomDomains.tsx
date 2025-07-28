@@ -143,31 +143,55 @@ export const useCustomDomains = (storeId?: string) => {
   const deleteDomain = async (domainId: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('domain-manager', {
-        body: {
-          action: 'delete_domain',
-          domainId,
-        },
-      });
+      // Try Edge Function first
+      try {
+        const { data, error } = await supabase.functions.invoke('domain-manager', {
+          body: {
+            action: 'delete_domain',
+            domainId,
+          },
+        });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Erreur lors de la suppression');
-      }
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw new Error(error.message || 'Erreur lors de la suppression');
+        }
 
-      // Check if data exists and has success property
-      if (data && typeof data.success === 'boolean') {
-        if (data.success) {
+        // Check if data exists and has success property
+        if (data && typeof data.success === 'boolean') {
+          if (data.success) {
+            toast({
+              title: "Succès",
+              description: "Domaine supprimé avec succès",
+            });
+            await fetchDomains();
+            return;
+          } else {
+            throw new Error(data.error || 'Erreur lors de la suppression');
+          }
+        } else {
+          // If data doesn't have expected structure, assume success
           toast({
             title: "Succès",
             description: "Domaine supprimé avec succès",
           });
           await fetchDomains();
-        } else {
-          throw new Error(data.error || 'Erreur lors de la suppression');
+          return;
         }
-      } else {
-        // If data doesn't have expected structure, assume success
+      } catch (edgeFunctionError) {
+        console.log('Edge Function failed, trying direct database deletion:', edgeFunctionError);
+        
+        // Fallback: Delete directly from database
+        const { error: deleteError } = await supabase
+          .from('custom_domains')
+          .delete()
+          .eq('id', domainId);
+
+        if (deleteError) {
+          console.error('Database delete error:', deleteError);
+          throw new Error('Erreur lors de la suppression du domaine: ' + deleteError.message);
+        }
+
         toast({
           title: "Succès",
           description: "Domaine supprimé avec succès",
