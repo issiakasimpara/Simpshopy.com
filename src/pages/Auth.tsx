@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Store, AlertCircle } from 'lucide-react';
+import { Store, AlertCircle, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AppLogo from '@/components/ui/AppLogo';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState('');
   const [signUpData, setSignUpData] = useState({
     email: '',
     password: '',
@@ -58,11 +60,13 @@ const Auth = () => {
         variant: "destructive"
       });
     } else {
+      // Afficher l'écran de confirmation d'email
+      setConfirmationEmail(signUpData.email);
+      setShowEmailConfirmation(true);
       toast({
         title: "Inscription réussie !",
-        description: "Vous pouvez maintenant vous connecter à votre compte.",
+        description: "Vérifiez votre email pour confirmer votre compte.",
       });
-      navigate('/dashboard');
     }
     
     setIsLoading(false);
@@ -75,11 +79,18 @@ const Auth = () => {
     const { error } = await signIn(signInData.email, signInData.password);
     
     if (error) {
+      let errorMessage = error.message;
+      
+      // Gérer les erreurs spécifiques de confirmation d'email
+      if (error.message.includes('Email not confirmed')) {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte de réception.";
+      } else if (error.message === 'Invalid login credentials') {
+        errorMessage = "Email ou mot de passe incorrect";
+      }
+      
       toast({
         title: "Erreur de connexion",
-        description: error.message === 'Invalid login credentials'
-          ? "Email ou mot de passe incorrect"
-          : error.message,
+        description: errorMessage,
         variant: "destructive"
       });
     } else {
@@ -92,6 +103,102 @@ const Auth = () => {
     
     setIsLoading(false);
   };
+
+  const handleResendConfirmation = async () => {
+    setIsLoading(true);
+    
+    const { error } = await signUp(
+      confirmationEmail, 
+      signUpData.password, 
+      signUpData.firstName, 
+      signUpData.lastName
+    );
+    
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de renvoyer l'email de confirmation",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Email renvoyé !",
+        description: "Vérifiez votre boîte de réception.",
+      });
+    }
+    
+    setIsLoading(false);
+  };
+
+  // Si on affiche la confirmation d'email
+  if (showEmailConfirmation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-block">
+              <AppLogo size="lg" useRealLogo={true} />
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <Mail className="h-8 w-8 text-blue-600" />
+              </div>
+              <CardTitle>Confirmez votre email</CardTitle>
+              <CardDescription>
+                Nous avons envoyé un lien de confirmation à
+              </CardDescription>
+              <div className="font-medium text-blue-600 mt-2">{confirmationEmail}</div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Étapes à suivre :</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>Vérifiez votre boîte de réception</li>
+                      <li>Cliquez sur le lien de confirmation</li>
+                      <li>Vous serez automatiquement connecté</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center text-sm text-gray-600">
+                <p>Vous n'avez pas reçu l'email ?</p>
+                <Button
+                  variant="link"
+                  className="text-blue-600 p-0 h-auto"
+                  onClick={handleResendConfirmation}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Envoi..." : "Renvoyer l'email"}
+                </Button>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowEmailConfirmation(false)}
+              >
+                Retour à la connexion
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <div className="text-center mt-6">
+            <Link to="/" className="text-sm text-gray-600 hover:text-gray-900">
+              ← Retour à l'accueil
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -211,6 +318,19 @@ const Auth = () => {
                       onChange={(e) => setSignUpData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       required
                     />
+                  </div>
+                  
+                  {/* Information sur la confirmation d'email */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Mail className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium">Confirmation d'email requise</p>
+                        <p className="text-xs mt-1">
+                          Après l'inscription, vous recevrez un email de confirmation pour activer votre compte.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
