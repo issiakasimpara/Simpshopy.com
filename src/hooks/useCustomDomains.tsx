@@ -96,15 +96,28 @@ export const useCustomDomains = (storeId?: string) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Erreur lors de la vérification');
+      }
 
-      if (data.verified) {
-        toast({
-          title: "Succès",
-          description: "Domaine vérifié avec succès ! SSL activé automatiquement.",
-        });
-        await fetchDomains();
+      // Check if data exists and has verified property
+      if (data && typeof data.verified === 'boolean') {
+        if (data.verified) {
+          toast({
+            title: "Succès",
+            description: "Domaine vérifié avec succès ! SSL activé automatiquement.",
+          });
+          await fetchDomains();
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Vérification échouée. Vérifiez votre configuration DNS.",
+            variant: "destructive"
+          });
+        }
       } else {
+        // If data doesn't have expected structure, assume verification failed
         toast({
           title: "Erreur",
           description: "Vérification échouée. Vérifiez votre configuration DNS.",
@@ -117,7 +130,7 @@ export const useCustomDomains = (storeId?: string) => {
       console.error('Error verifying domain:', error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de la vérification",
+        description: error.message || "Erreur lors de la vérification",
         variant: "destructive"
       });
       return null;
@@ -137,22 +150,35 @@ export const useCustomDomains = (storeId?: string) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Erreur lors de la suppression');
+      }
 
-      if (data.success) {
+      // Check if data exists and has success property
+      if (data && typeof data.success === 'boolean') {
+        if (data.success) {
+          toast({
+            title: "Succès",
+            description: "Domaine supprimé avec succès",
+          });
+          await fetchDomains();
+        } else {
+          throw new Error(data.error || 'Erreur lors de la suppression');
+        }
+      } else {
+        // If data doesn't have expected structure, assume success
         toast({
           title: "Succès",
           description: "Domaine supprimé avec succès",
         });
         await fetchDomains();
-      } else {
-        throw new Error('Erreur lors de la suppression');
       }
     } catch (error) {
       console.error('Error deleting domain:', error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de la suppression du domaine",
+        description: error.message || "Erreur lors de la suppression du domaine",
         variant: "destructive"
       });
     } finally {
