@@ -1,106 +1,269 @@
 
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle } from 'lucide-react';
-import { useNavigate, useLocation, useSearchParams, useParams } from 'react-router-dom';
-import { useCart } from '@/contexts/CartContext';
-import { useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, XCircle, Clock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { MonerooService } from '@/services/monerooService';
+
+interface PaymentStatus {
+  status: 'success' | 'pending' | 'failed' | 'cancelled';
+  message: string;
+  orderNumber?: string;
+  amount?: number;
+  currency?: string;
+}
 
 const PaymentSuccess = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { storeSlug } = useParams();
-  const { clearCart } = useCart();
-
-  // Vérifier si nous sommes dans l'aperçu ou dans une boutique publique
-  const isInPreview = searchParams.get('preview') === 'true' ||
-                     window.self !== window.top;
-  const isInStorefront = location.pathname.includes('/store/');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Vider le panier après un paiement réussi
-    clearCart();
-  }, [clearCart]);
-
-  const handleReturnToShop = () => {
-    console.log('🔘 Button clicked - handleReturnToShop');
-    console.log('🖼️ isInPreview:', isInPreview);
-    console.log('🏪 isInStorefront:', isInStorefront);
-    console.log('🏪 storeSlug from params:', storeSlug);
-    console.log('🌐 Current pathname:', location.pathname);
-
-    // Extraire le storeSlug depuis l'URL si pas disponible dans les params
-    let detectedStoreSlug = storeSlug;
-    if (!detectedStoreSlug && location.pathname.includes('/store/')) {
-      const pathParts = location.pathname.split('/');
-      const storeIndex = pathParts.indexOf('store');
-      if (storeIndex !== -1 && pathParts[storeIndex + 1]) {
-        detectedStoreSlug = pathParts[storeIndex + 1];
-        console.log('🔍 Detected storeSlug from URL:', detectedStoreSlug);
-      }
-    }
-
-    if (isInPreview) {
-      console.log('📤 In preview mode - sending message to parent');
-      // Si nous sommes dans l'aperçu, envoyer un message au parent
+    const handlePaymentReturn = async () => {
       try {
-        window.parent.postMessage({ type: 'CLOSE_PREVIEW' }, '*');
-        console.log('✅ Message sent to close preview');
+        // Récupérer les paramètres de l'URL
+        const monerooPaymentId = searchParams.get('monerooPaymentId');
+        const monerooPaymentStatus = searchParams.get('monerooPaymentStatus');
+        const orderNumber = searchParams.get('order');
+        const preview = searchParams.get('preview');
+
+        console.log('🔍 Paramètres de retour:', {
+          monerooPaymentId,
+          monerooPaymentStatus,
+          orderNumber,
+          preview
+        });
+
+        // Si c'est un aperçu, simuler le succès
+        if (preview === 'true') {
+          setPaymentStatus({
+            status: 'success',
+            message: 'Paiement simulé avec succès (mode aperçu)',
+            orderNumber: orderNumber || 'PREVIEW-001'
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Si pas d'ID de paiement, afficher une erreur
+        if (!monerooPaymentId) {
+          setPaymentStatus({
+            status: 'failed',
+            message: 'Aucun ID de paiement trouvé'
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Vérifier le statut du paiement avec Moneroo
+        const paymentResult = await MonerooService.verifyPayment(monerooPaymentId);
+        console.log('📡 Résultat vérification Moneroo:', paymentResult);
+
+        // Mettre à jour le statut dans la base de données
+        const { error: updateError } = await supabase
+          .from('payments')
+          .update({ 
+            status: paymentResult.data.status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('moneroo_payment_id', monerooPaymentId);
+
+        if (updateError) {
+          console.error('❌ Erreur mise à jour paiement:', updateError);
+        }
+
+        // Déterminer le statut et le message
+        let status: PaymentStatus['status'];
+        let message: string;
+
+        switch (paymentResult.data.status) {
+          case 'completed':
+            status = 'success';
+            message = 'Paiement effectué avec succès !';
+            break;
+          case 'pending':
+            status = 'pending';
+            message = 'Paiement en cours de traitement...';
+            break;
+          case 'failed':
+            status = 'failed';
+            message = 'Le paiement a échoué';
+            break;
+          case 'cancelled':
+            status = 'cancelled';
+            message = 'Paiement annulé';
+            break;
+          default:
+            status = 'failed';
+            message = 'Statut de paiement inconnu';
+        }
+
+        setPaymentStatus({
+          status,
+          message,
+          orderNumber: orderNumber || paymentResult.data.metadata?.order_number,
+          amount: paymentResult.data.amount,
+          currency: paymentResult.data.currency
+        });
+
+        // Afficher une notification
+        if (status === 'success') {
+          toast({
+            title: "Paiement réussi !",
+            description: "Votre commande a été confirmée",
+          });
+        } else if (status === 'failed') {
+          toast({
+            title: "Paiement échoué",
+            description: "Veuillez réessayer ou contacter le support",
+            variant: "destructive"
+          });
+        }
+
       } catch (error) {
-        console.error('❌ Error sending message:', error);
+        console.error('❌ Erreur traitement retour paiement:', error);
+        setPaymentStatus({
+          status: 'failed',
+          message: 'Erreur lors du traitement du paiement'
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } else if (isInStorefront && detectedStoreSlug) {
-      console.log('🏪 In storefront - navigating to store home:', detectedStoreSlug);
-      // Si nous sommes dans une boutique publique, retourner à l'accueil de cette boutique
-      navigate(`/store/${detectedStoreSlug}`);
-    } else {
-      console.log('🔄 Default navigation to platform home');
-      // Navigation par défaut vers la page d'accueil de la plateforme
-      navigate('/');
+    };
+
+    handlePaymentReturn();
+  }, [searchParams, toast]);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="h-12 w-12 text-green-500" />;
+      case 'pending':
+        return <Clock className="h-12 w-12 text-yellow-500" />;
+      case 'failed':
+      case 'cancelled':
+        return <XCircle className="h-12 w-12 text-red-500" />;
+      default:
+        return <AlertCircle className="h-12 w-12 text-gray-500" />;
     }
   };
 
-  const handleViewOrders = () => {
-    console.log('Button clicked - handleViewOrders');
-    
-    // Vérifier si nous sommes dans une iframe (mode aperçu du site builder)
-    const isInIframe = window.self !== window.top;
-    console.log('Is in iframe:', isInIframe);
-    
-    if (isInIframe) {
-      // Si nous sommes dans l'aperçu, on peut soit naviguer vers une page de suivi,
-      // soit indiquer que cette fonctionnalité sera disponible sur le vrai site
-      console.log('In preview mode - showing customer orders page');
-      window.parent.postMessage({ type: 'NAVIGATE_TO_CUSTOMER_ORDERS' }, '*');
-    } else {
-      // Navigation normale vers la page de suivi des commandes clients
-      console.log('Navigating to customer orders page');
-      navigate('/mes-commandes');
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <Badge className="bg-green-100 text-green-800">Succès</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800">En attente</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-800">Échoué</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-gray-100 text-gray-800">Annulé</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg font-semibold">Traitement du paiement...</p>
+          <p className="text-muted-foreground">Veuillez patienter</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <Card>
-          <CardContent className="text-center py-12">
-            <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-500" />
-            <h1 className="text-3xl font-bold mb-4">Paiement réussi !</h1>
-            <p className="text-gray-600 mb-6">
-              Merci pour votre commande. Vous recevrez un email de confirmation sous peu.
-            </p>
-            <div className="space-y-4">
-              <Button onClick={handleReturnToShop} className="w-full">
-                Retour à la boutique
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            {paymentStatus && getStatusIcon(paymentStatus.status)}
+          </div>
+          <CardTitle className="text-2xl">
+            {paymentStatus?.status === 'success' ? 'Paiement réussi !' : 'Résultat du paiement'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {paymentStatus && (
+            <>
+              <div className="text-center">
+                <p className="text-lg mb-2">{paymentStatus.message}</p>
+                {getStatusBadge(paymentStatus.status)}
+              </div>
+
+              {paymentStatus.orderNumber && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Numéro de commande</p>
+                  <p className="font-mono font-semibold">{paymentStatus.orderNumber}</p>
+                </div>
+              )}
+
+              {paymentStatus.amount && paymentStatus.currency && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Montant payé</p>
+                  <p className="font-semibold text-lg">
+                    {new Intl.NumberFormat('fr-FR', {
+                      style: 'currency',
+                      currency: paymentStatus.currency
+                    }).format(paymentStatus.amount / 100)}
+                  </p>
+                </div>
+              )}
+
+              {paymentStatus.status === 'success' && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">✅ Prochaines étapes :</h4>
+                  <ul className="text-sm text-green-700 space-y-1">
+                    <li>• Vous recevrez un email de confirmation</li>
+                    <li>• Le marchand sera notifié de votre commande</li>
+                    <li>• Suivez votre commande dans votre espace client</li>
+                  </ul>
+                </div>
+              )}
+
+              {paymentStatus.status === 'failed' && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  <h4 className="font-semibold text-red-800 mb-2">❌ Que faire maintenant ?</h4>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    <li>• Vérifiez les informations de votre carte</li>
+                    <li>• Assurez-vous d'avoir suffisamment de fonds</li>
+                    <li>• Contactez le support si le problème persiste</li>
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex flex-col space-y-2">
+            <Button 
+              onClick={() => navigate('/')} 
+              className="w-full"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour à l'accueil
+            </Button>
+            
+            {paymentStatus?.status === 'failed' && (
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(-1)}
+                className="w-full"
+              >
+                Réessayer le paiement
               </Button>
-              <Button variant="outline" onClick={handleViewOrders} className="w-full">
-                Suivre mes commandes
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

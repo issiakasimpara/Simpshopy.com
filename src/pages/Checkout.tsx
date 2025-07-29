@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
+import { MonerooService } from '@/services/monerooService';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
@@ -305,21 +306,72 @@ const Checkout = () => {
 
       // Créer la commande
       createOrder(orderData, {
-        onSuccess: (order) => {
+        onSuccess: async (order) => {
           console.log('✅ Commande créée:', order);
 
-          // Vider le panier
-          clearCart();
+          try {
+            // Initialiser le paiement Moneroo
+            const paymentData = {
+              amount: Math.round(getTotalWithShipping() * 100), // Convertir en centimes
+              currency: 'XOF', // Franc CFA
+              description: `Commande #${order.order_number} - ${storeInfo.name}`,
+              return_url: `${window.location.origin}/payment-success?order=${order.order_number}`,
+              customer: {
+                email: customerInfo.email,
+                first_name: customerInfo.firstName,
+                last_name: customerInfo.lastName,
+                phone: customerInfo.phone,
+                address: customerInfo.address,
+                city: customerInfo.city,
+                country: customerInfo.country,
+                zip: customerInfo.postalCode
+              },
+              metadata: {
+                order_id: order.id,
+                order_number: order.order_number,
+                store_id: storeInfo.id,
+                store_name: storeInfo.name
+              },
+              storeId: storeInfo.id,
+              orderId: order.id
+            };
 
-          // Rediriger vers la page de succès avec le numéro de commande
-          const successUrl = storeSlug
-            ? `/store/${storeSlug}/payment-success?order=${order.order_number}`
-            : `/payment-success?order=${order.order_number}`;
-          navigate(successUrl);
+            console.log('💳 Initialisation du paiement Moneroo:', paymentData);
+
+            // Initialiser le paiement
+            const paymentResult = await MonerooService.initializePayment(paymentData);
+
+            console.log('✅ Paiement initialisé:', paymentResult);
+
+            // Vider le panier
+            clearCart();
+
+            // Rediriger vers la page de paiement Moneroo
+            window.location.href = paymentResult.data.checkout_url;
+
+          } catch (paymentError) {
+            console.error('❌ Erreur paiement Moneroo:', paymentError);
+            
+            toast({
+              title: "Erreur de paiement",
+              description: "Impossible d'initialiser le paiement. Veuillez réessayer.",
+              variant: "destructive"
+            });
+
+            // En cas d'erreur, rediriger vers la page de succès quand même
+            const successUrl = storeSlug
+              ? `/store/${storeSlug}/payment-success?order=${order.order_number}`
+              : `/payment-success?order=${order.order_number}`;
+            navigate(successUrl);
+          }
         },
         onError: (error) => {
           console.error('❌ Erreur création commande:', error);
-          throw error;
+          toast({
+            title: "Erreur",
+            description: "Impossible de créer la commande. Veuillez réessayer.",
+            variant: "destructive"
+          });
         }
       });
 

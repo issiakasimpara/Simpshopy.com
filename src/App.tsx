@@ -32,6 +32,7 @@ const Testimonials = lazy(() => import("./pages/Testimonials"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const TestSave = lazy(() => import("./pages/TestSave"));
 const TestMarkets = lazy(() => import("./pages/TestMarkets"));
+// const MonerooTest = lazy(() => import("./pages/MonerooTest")); // Supprimé
 
 // ÉTAPE 2B: Pages de configuration (lazy loading)
 const Categories = lazy(() => import("./pages/Categories"));
@@ -204,6 +205,13 @@ const App = () => {
               <Route path="/store/:storeSlug/cart" element={<Cart />} />
               <Route path="/store/:storeSlug/checkout" element={<Checkout />} />
               <Route path="/store/:storeSlug/payment-success" element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <PaymentSuccess />
+                </Suspense>
+              } />
+              
+              {/* Route globale de succès de paiement */}
+              <Route path="/payment-success" element={
                 <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
                   <PaymentSuccess />
                 </Suspense>
