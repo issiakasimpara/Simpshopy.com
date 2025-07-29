@@ -245,12 +245,10 @@ const Checkout = () => {
       return;
     }
 
-
-
     setIsProcessing(true);
 
     try {
-      console.log('🛒 Début du processus de commande...');
+      console.log('🛒 Début du processus de paiement...');
 
       // Si nous sommes en mode aperçu, simuler la commande
       if (isInPreview) {
@@ -274,7 +272,45 @@ const Checkout = () => {
         await loadShippingMethods(storeInfo.id, detectedCountry);
       }
 
-      // Préparer les données de commande
+      // Générer un numéro de commande temporaire
+      const tempOrderNumber = `TEMP-${Date.now()}`;
+
+      // Initialiser le paiement Moneroo AVANT de créer la commande
+      const paymentData = {
+        amount: Math.round(getTotalWithShipping() * 100), // Convertir en centimes
+        currency: 'XOF', // Franc CFA
+        description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
+        return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
+        customer: {
+          email: customerInfo.email,
+          first_name: customerInfo.firstName,
+          last_name: customerInfo.lastName,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          country: customerInfo.country,
+          zip: customerInfo.postalCode
+        },
+        metadata: {
+          temp_order_number: tempOrderNumber,
+          store_id: storeInfo.id,
+          store_name: storeInfo.name,
+          customer_info: JSON.stringify(customerInfo),
+          items: JSON.stringify(items),
+          shipping_method: JSON.stringify(selectedShippingMethod),
+          shipping_cost: shippingCost,
+          total_amount: getTotalWithShipping()
+        }
+      };
+
+      console.log('💳 Initialisation du paiement Moneroo:', paymentData);
+
+      // Initialiser le paiement Moneroo
+      const paymentResult = await MonerooService.initializePayment(paymentData);
+
+      console.log('✅ Paiement initialisé:', paymentResult);
+
+      // Sauvegarder les données de commande dans sessionStorage pour les récupérer après paiement
       const orderData = {
         storeId: storeInfo.id,
         storeName: storeInfo.name,
@@ -299,87 +335,25 @@ const Checkout = () => {
                         'Délai non spécifié',
           price: selectedShippingMethod.price || 0
         } : null,
-        shippingCountry: detectedCountryCode
+        shippingCountry: detectedCountryCode,
+        monerooPaymentId: paymentResult.data.id,
+        tempOrderNumber
       };
 
-      console.log('📝 Création de la commande:', orderData);
+      // Sauvegarder dans sessionStorage
+      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
 
-      // Créer la commande
-      createOrder(orderData, {
-        onSuccess: async (order) => {
-          console.log('✅ Commande créée:', order);
+      // Vider le panier
+      clearCart();
 
-          try {
-            // Initialiser le paiement Moneroo
-            const paymentData = {
-              amount: Math.round(getTotalWithShipping() * 100), // Convertir en centimes
-              currency: 'XOF', // Franc CFA
-              description: `Commande #${order.order_number} - ${storeInfo.name}`,
-              return_url: `${window.location.origin}/payment-success?order=${order.order_number}`,
-              customer: {
-                email: customerInfo.email,
-                first_name: customerInfo.firstName,
-                last_name: customerInfo.lastName,
-                phone: customerInfo.phone,
-                address: customerInfo.address,
-                city: customerInfo.city,
-                country: customerInfo.country,
-                zip: customerInfo.postalCode
-              },
-              metadata: {
-                order_id: order.id,
-                order_number: order.order_number,
-                store_id: storeInfo.id,
-                store_name: storeInfo.name
-              },
-              storeId: storeInfo.id,
-              orderId: order.id
-            };
-
-            console.log('💳 Initialisation du paiement Moneroo:', paymentData);
-
-            // Initialiser le paiement
-            const paymentResult = await MonerooService.initializePayment(paymentData);
-
-            console.log('✅ Paiement initialisé:', paymentResult);
-
-            // Vider le panier
-            clearCart();
-
-            // Rediriger vers la page de paiement Moneroo
-            window.location.href = paymentResult.data.checkout_url;
-
-          } catch (paymentError) {
-            console.error('❌ Erreur paiement Moneroo:', paymentError);
-            
-            toast({
-              title: "Erreur de paiement",
-              description: "Impossible d'initialiser le paiement. Veuillez réessayer.",
-              variant: "destructive"
-            });
-
-            // En cas d'erreur, rediriger vers la page de succès quand même
-            const successUrl = storeSlug
-              ? `/store/${storeSlug}/payment-success?order=${order.order_number}`
-              : `/payment-success?order=${order.order_number}`;
-            navigate(successUrl);
-          }
-        },
-        onError: (error) => {
-          console.error('❌ Erreur création commande:', error);
-          toast({
-            title: "Erreur",
-            description: "Impossible de créer la commande. Veuillez réessayer.",
-            variant: "destructive"
-          });
-        }
-      });
+      // Rediriger vers la page de paiement Moneroo
+      window.location.href = paymentResult.data.checkout_url;
 
     } catch (error: any) {
       console.error('❌ Erreur checkout:', error);
       toast({
-        title: "Erreur de commande",
-        description: error.message || "Une erreur est survenue lors de la commande.",
+        title: "Erreur",
+        description: error.message || "Une erreur s'est produite lors du checkout.",
         variant: "destructive"
       });
     } finally {

@@ -8,6 +8,7 @@ import { CheckCircle, XCircle, Clock, AlertCircle, ArrowLeft } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { MonerooService } from '@/services/monerooService';
+import { useOrders } from '@/hooks/useOrders';
 
 interface PaymentStatus {
   status: 'success' | 'pending' | 'failed' | 'cancelled';
@@ -21,6 +22,7 @@ const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { createOrder } = useOrders();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,12 +33,14 @@ const PaymentSuccess = () => {
         const monerooPaymentId = searchParams.get('monerooPaymentId');
         const monerooPaymentStatus = searchParams.get('monerooPaymentStatus');
         const orderNumber = searchParams.get('order');
+        const tempOrder = searchParams.get('temp_order');
         const preview = searchParams.get('preview');
 
         console.log('🔍 Paramètres de retour:', {
           monerooPaymentId,
           monerooPaymentStatus,
           orderNumber,
+          tempOrder,
           preview
         });
 
@@ -86,6 +90,11 @@ const PaymentSuccess = () => {
           case 'completed':
             status = 'success';
             message = 'Paiement effectué avec succès !';
+            
+            // Si c'est un paiement réussi, créer la commande
+            if (tempOrder) {
+              await createOrderFromPayment(tempOrder, monerooPaymentId, paymentResult);
+            }
             break;
           case 'pending':
             status = 'pending';
@@ -137,8 +146,53 @@ const PaymentSuccess = () => {
       }
     };
 
+    const createOrderFromPayment = async (tempOrder: string, monerooPaymentId: string, paymentResult: any) => {
+      try {
+        // Récupérer les données de commande depuis sessionStorage
+        const orderDataString = sessionStorage.getItem('pendingOrderData');
+        if (!orderDataString) {
+          console.error('❌ Données de commande non trouvées');
+          return;
+        }
+
+        const orderData = JSON.parse(orderDataString);
+        console.log('📝 Création de la commande depuis le paiement:', orderData);
+
+        // Créer la commande
+        createOrder(orderData, {
+          onSuccess: (order) => {
+            console.log('✅ Commande créée après paiement:', order);
+            
+            // Mettre à jour le paiement avec l'ID de commande
+            supabase
+              .from('payments')
+              .update({ 
+                order_id: order.id,
+                updated_at: new Date().toISOString()
+              })
+              .eq('moneroo_payment_id', monerooPaymentId);
+
+            // Nettoyer sessionStorage
+            sessionStorage.removeItem('pendingOrderData');
+
+            // Mettre à jour le statut avec le vrai numéro de commande
+            setPaymentStatus(prev => prev ? {
+              ...prev,
+              orderNumber: order.order_number
+            } : prev);
+          },
+          onError: (error) => {
+            console.error('❌ Erreur création commande après paiement:', error);
+          }
+        });
+
+      } catch (error) {
+        console.error('❌ Erreur création commande depuis paiement:', error);
+      }
+    };
+
     handlePaymentReturn();
-  }, [searchParams, toast]);
+  }, [searchParams, toast, createOrder]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
