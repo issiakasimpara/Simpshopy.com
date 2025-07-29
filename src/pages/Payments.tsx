@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,8 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 const Payments = () => {
-  const { stores, currentStore } = useStores();
+  const navigate = useNavigate();
+  const { stores, store: currentStore } = useStores();
   const { payments, paymentStats, isLoading, verifyPayment } = usePayments(currentStore?.id);
   const { toast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
@@ -72,7 +74,35 @@ const Payments = () => {
           <div className="text-center">
             <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucune boutique sélectionnée</h3>
-            <p className="text-muted-foreground">Sélectionnez une boutique pour voir les paiements</p>
+            <p className="text-muted-foreground mb-4">
+              {stores.length > 0 
+                ? "Sélectionnez une boutique pour voir les paiements"
+                : "Vous n'avez pas encore créé de boutique"
+              }
+            </p>
+            {stores.length === 0 && (
+              <Button onClick={() => navigate('/dashboard')}>
+                Créer une boutique
+              </Button>
+            )}
+            {stores.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Vos boutiques :</p>
+                {stores.map((store) => (
+                  <Button 
+                    key={store.id} 
+                    variant="outline" 
+                    onClick={() => {
+                      // Ici on pourrait implémenter un système de sélection de boutique
+                      // Pour l'instant, on redirige vers le dashboard
+                      navigate('/dashboard');
+                    }}
+                  >
+                    {store.name}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
