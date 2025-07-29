@@ -3,8 +3,22 @@ import axios from 'axios';
 const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
 const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
+// Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
+export const convertToMonerooAmount = (amountInCFA: number): number => {
+  // Moneroo attend le montant en centimes (sans décimales)
+  // Ex: 1500 CFA → 150000 centimes
+  return Math.round(amountInCFA * 100);
+};
+
+// Fonction utilitaire pour afficher le montant correctement
+export const formatMonerooAmount = (amountInCentimes: number): string => {
+  // Convertir les centimes en CFA pour l'affichage
+  const amountInCFA = amountInCentimes / 100;
+  return `${amountInCFA.toFixed(0)} CFA`;
+};
+
 export interface MonerooPaymentData {
-  amount: number;
+  amount: number; // Montant en centimes (ex: 150000 pour 1500 CFA)
   currency: string;
   description: string;
   return_url: string;

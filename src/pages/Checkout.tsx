@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
-import { MonerooService } from '@/services/monerooService';
+import { MonerooService, convertToMonerooAmount } from '@/services/monerooService';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
@@ -274,8 +274,16 @@ const Checkout = () => {
       const tempOrderNumber = `TEMP-${Date.now()}`;
 
       // Initialiser le paiement Moneroo AVANT de créer la commande
+      const totalAmountCFA = getTotalWithShipping();
+      const totalAmountCentimes = convertToMonerooAmount(totalAmountCFA);
+      
+      console.log('💰 CONVERSION MONTANT:');
+      console.log('- Montant original (CFA):', totalAmountCFA);
+      console.log('- Montant converti (centimes):', totalAmountCentimes);
+      console.log('- Montant affiché sur Moneroo sera:', (totalAmountCentimes / 100), 'CFA');
+
       const paymentData = {
-        amount: Math.round(getTotalWithShipping() * 100), // Convertir en centimes
+        amount: totalAmountCentimes, // Utiliser la fonction utilitaire
         currency: 'XOF', // Franc CFA
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
@@ -297,7 +305,7 @@ const Checkout = () => {
           items: JSON.stringify(items),
           shipping_method: JSON.stringify(selectedShippingMethod),
           shipping_cost: shippingCost,
-          total_amount: getTotalWithShipping()
+          total_amount: totalAmountCFA // Garder le montant original en CFA
         }
       };
 
