@@ -1,10 +1,9 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import CustomDomainManager from '@/components/domains/CustomDomainManager';
 import { useStores } from '@/hooks/useStores';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Globe, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Globe, AlertCircle, Construction } from 'lucide-react';
 
 const CustomDomains = () => {
   const { store, isLoading } = useStores();
@@ -52,10 +51,23 @@ const CustomDomains = () => {
           </div>
         </div>
         
-        <CustomDomainManager 
-          storeId={store.id} 
-          storeName={store.name}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Construction className="h-5 w-5" />
+              Fonctionnalité en développement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              La gestion des domaines personnalisés est actuellement en cours de développement.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Cette fonctionnalité permettra bientôt d'ajouter et gérer des domaines personnalisés 
+              pour votre boutique, avec configuration automatique SSL et DNS.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
