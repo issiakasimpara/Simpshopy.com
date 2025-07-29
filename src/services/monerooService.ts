@@ -5,10 +5,10 @@ const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
 // Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
 export const convertToMonerooAmount = (amountInCFA: number): number => {
-  // Moneroo semble afficher le montant tel qu'il est reçu
-  // Test: Envoyer en CFA entiers au lieu de centimes
-  // Ex: 1500 CFA → 1500 (pas 150000)
-  return Math.round(amountInCFA);
+  // Moneroo semble automatiquement multiplier par 100
+  // Solution: Diviser par 100 pour compenser
+  // Ex: 2500 CFA → 25 → 2500 FCFA affiché
+  return Math.round(amountInCFA / 100);
 };
 
 // Fonction utilitaire pour afficher le montant correctement
@@ -19,7 +19,7 @@ export const formatMonerooAmount = (amountInCentimes: number): string => {
 };
 
 export interface MonerooPaymentData {
-  amount: number; // Montant en CFA entiers (ex: 1500 pour 1500 CFA)
+  amount: number; // Montant divisé par 100 (ex: 25 pour 2500 CFA) car Moneroo multiplie par 100
   currency: string;
   description: string;
   return_url: string;

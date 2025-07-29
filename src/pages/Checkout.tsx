@@ -279,8 +279,8 @@ const Checkout = () => {
       
       console.log('💰 CONVERSION MONTANT:');
       console.log('- Montant original (CFA):', totalAmountCFA);
-      console.log('- Montant envoyé à Moneroo (CFA):', totalAmountCentimes);
-      console.log('- Montant affiché sur Moneroo devrait être:', totalAmountCentimes, 'CFA');
+      console.log('- Montant envoyé à Moneroo (divisé par 100):', totalAmountCentimes);
+      console.log('- Montant affiché sur Moneroo devrait être:', (totalAmountCentimes * 100), 'CFA');
 
       const paymentData = {
         amount: totalAmountCentimes, // Utiliser la fonction utilitaire
