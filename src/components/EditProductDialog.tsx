@@ -115,7 +115,7 @@ const EditProductDialog = ({ open, onOpenChange, product, storeId }: EditProduct
       console.log('EditProductDialog - Variants to save:', formData.variants);
 
       // 1. Mettre à jour le produit principal
-      await updateProduct({
+      await updateProduct.mutateAsync({
         id: product.id,
         name: formData.name,
         description: formData.description || null,
