@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
 const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
@@ -34,48 +36,47 @@ export interface MonerooPaymentResponse {
 export class MonerooService {
   static async initializePayment(paymentData: MonerooPaymentData): Promise<MonerooPaymentResponse> {
     try {
-      const response = await fetch(`${MONEROO_API_URL}/payments/initialize`, {
-        method: 'POST',
+      const response = await axios.post(`${MONEROO_API_URL}/payments/initialize`, paymentData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${MONEROO_API_KEY}`,
           'Accept': 'application/json'
-        },
-        body: JSON.stringify(paymentData)
+        }
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Erreur lors de l\'initialisation du paiement');
+      if (response.status !== 201) {
+        throw new Error(`Request failed with status ${response.status}`);
       }
 
-      return result;
-    } catch (error) {
+      return response.data;
+    } catch (error: any) {
       console.error('Erreur Moneroo:', error);
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Erreur lors de l\'initialisation du paiement');
+      }
       throw error;
     }
   }
 
   static async verifyPayment(paymentId: string): Promise<any> {
     try {
-      const response = await fetch(`${MONEROO_API_URL}/payments/${paymentId}`, {
-        method: 'GET',
+      const response = await axios.get(`${MONEROO_API_URL}/payments/${paymentId}`, {
         headers: {
           'Authorization': `Bearer ${MONEROO_API_KEY}`,
           'Accept': 'application/json'
         }
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Erreur lors de la vérification du paiement');
+      if (response.status !== 200) {
+        throw new Error(`Request failed with status ${response.status}`);
       }
 
-      return result;
-    } catch (error) {
+      return response.data;
+    } catch (error: any) {
       console.error('Erreur vérification Moneroo:', error);
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Erreur lors de la vérification du paiement');
+      }
       throw error;
     }
   }

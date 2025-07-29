@@ -11,7 +11,6 @@ import { useCart } from '@/contexts/CartContext';
 import { Trash2, CreditCard, Loader2, Truck, Clock, DollarSign } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { useOrders } from '@/hooks/useOrders';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
@@ -23,7 +22,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { storeSlug } = useParams();
-  const { createOrder, isCreating } = useOrders();
   const { toast } = useToast();
 
   // Détecter si nous sommes dans l'aperçu
@@ -696,9 +694,9 @@ const Checkout = () => {
                 <Button
                   className="w-full"
                   onClick={handleCheckout}
-                  disabled={items.length === 0 || isProcessing || isCreating || isLoadingLocation || (shippingMethods.length > 0 && !selectedShippingMethod)}
+                  disabled={items.length === 0 || isProcessing || isLoadingLocation || (shippingMethods.length > 0 && !selectedShippingMethod)}
                 >
-                  {(isProcessing || isCreating) ? (
+                  {(isProcessing) ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Traitement en cours...
