@@ -49,8 +49,8 @@ export const usePayments = (storeId?: string) => {
       // 1. Initialiser le paiement avec Moneroo
       const monerooResponse = await MonerooService.initializePayment({
         ...paymentData,
-        currency: 'USD', // Devise USD selon documentation Moneroo
-        methods: ['qr_ngn', 'bank_transfer_ngn', 'card'] // Méthodes de paiement supportées
+        currency: 'XOF' // Devise XOF selon documentation Moneroo
+        // Pas de methods pour laisser Moneroo choisir automatiquement
       });
 
       // 2. Sauvegarder dans la base de données

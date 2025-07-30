@@ -5,25 +5,20 @@ const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
 // Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
 export const convertToMonerooAmount = (amountInCFA: number): number => {
-  // Selon la documentation Moneroo, le montant doit être en centimes USD
-  // 1 USD ≈ 620 CFA (taux approximatif)
-  // Ex: 1500 CFA → 1500/620 ≈ 2.42 USD → 242 centimes
-  const usdAmount = amountInCFA / 620; // Conversion CFA vers USD
-  const centsAmount = Math.round(usdAmount * 100); // Conversion USD vers centimes
-  return centsAmount;
+  // Selon la documentation Moneroo, pour XOF, le montant est envoyé tel quel
+  // Ex: 1500 CFA → 1500 (pas de conversion nécessaire)
+  return Math.round(amountInCFA);
 };
 
 // Fonction utilitaire pour afficher le montant correctement
-export const formatMonerooAmount = (amountInCentimes: number): string => {
-  // Convertir les centimes USD vers CFA pour l'affichage
-  const amountInUSD = amountInCentimes / 100;
-  const amountInCFA = amountInUSD * 620; // Conversion USD vers CFA
+export const formatMonerooAmount = (amountInCFA: number): string => {
+  // Pour XOF, le montant est déjà en CFA
   return `${Math.round(amountInCFA)} CFA`;
 };
 
 export interface MonerooPaymentData {
-  amount: number; // Montant en centimes USD selon documentation Moneroo
-  currency: string; // Devise USD selon documentation Moneroo
+  amount: number; // Montant en CFA selon documentation Moneroo
+  currency: string; // Devise XOF selon documentation Moneroo
   description: string;
   return_url: string;
   customer: {

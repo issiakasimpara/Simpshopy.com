@@ -283,8 +283,8 @@ const Checkout = () => {
       console.log('- Montant affiché sur Moneroo devrait être:', formatMonerooAmount(totalAmountCentimes));
 
       const paymentData = {
-        amount: totalAmountCentimes, // Montant en centimes USD
-        currency: 'USD', // Devise USD selon documentation Moneroo
+        amount: totalAmountCentimes, // Montant en CFA
+        currency: 'XOF', // Devise XOF selon documentation Moneroo
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
         customer: {
@@ -297,7 +297,7 @@ const Checkout = () => {
           country: customerInfo.country,
           zip: customerInfo.postalCode
         },
-        methods: ['qr_ngn', 'bank_transfer_ngn', 'card'], // Méthodes de paiement supportées
+        // Pas de methods pour laisser Moneroo choisir automatiquement
         metadata: {
           temp_order_number: tempOrderNumber,
           store_id: storeInfo.id,
