@@ -47,7 +47,11 @@ export const usePayments = (storeId?: string) => {
   const initializePayment = useMutation({
     mutationFn: async (paymentData: MonerooPaymentData & { storeId: string; orderId?: string }) => {
       // 1. Initialiser le paiement avec Moneroo
-      const monerooResponse = await MonerooService.initializePayment(paymentData);
+      const monerooResponse = await MonerooService.initializePayment({
+        ...paymentData,
+        currency: 'USD', // Devise USD selon documentation Moneroo
+        methods: ['qr_ngn', 'bank_transfer_ngn', 'card'] // Méthodes de paiement supportées
+      });
 
       // 2. Sauvegarder dans la base de données
       const { data, error } = await supabase

@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
-import { MonerooService, convertToMonerooAmount } from '@/services/monerooService';
+import { MonerooService, convertToMonerooAmount, formatMonerooAmount } from '@/services/monerooService';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
@@ -279,12 +279,12 @@ const Checkout = () => {
       
       console.log('💰 CONVERSION MONTANT:');
       console.log('- Montant original (CFA):', totalAmountCFA);
-      console.log('- Montant envoyé à Moneroo (original):', totalAmountCentimes);
-      console.log('- Montant affiché sur Moneroo devrait être:', totalAmountCentimes, 'CFA');
+      console.log('- Montant envoyé à Moneroo (centimes USD):', totalAmountCentimes);
+      console.log('- Montant affiché sur Moneroo devrait être:', formatMonerooAmount(totalAmountCentimes));
 
       const paymentData = {
-        amount: totalAmountCentimes, // Utiliser la fonction utilitaire
-        currency: 'XOF', // Franc CFA
+        amount: totalAmountCentimes, // Montant en centimes USD
+        currency: 'USD', // Devise USD selon documentation Moneroo
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
         customer: {
@@ -297,6 +297,7 @@ const Checkout = () => {
           country: customerInfo.country,
           zip: customerInfo.postalCode
         },
+        methods: ['qr_ngn', 'bank_transfer_ngn', 'card'], // Méthodes de paiement supportées
         metadata: {
           temp_order_number: tempOrderNumber,
           store_id: storeInfo.id,

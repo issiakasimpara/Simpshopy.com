@@ -5,22 +5,25 @@ const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
 // Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
 export const convertToMonerooAmount = (amountInCFA: number): number => {
-  // Selon la documentation Moneroo, le montant est affiché tel qu'il est envoyé
-  // Pas de multiplication ou division automatique
-  // Ex: 1500 CFA → 1500 CFA affiché
-  return Math.round(amountInCFA);
+  // Selon la documentation Moneroo, le montant doit être en centimes USD
+  // 1 USD ≈ 620 CFA (taux approximatif)
+  // Ex: 1500 CFA → 1500/620 ≈ 2.42 USD → 242 centimes
+  const usdAmount = amountInCFA / 620; // Conversion CFA vers USD
+  const centsAmount = Math.round(usdAmount * 100); // Conversion USD vers centimes
+  return centsAmount;
 };
 
 // Fonction utilitaire pour afficher le montant correctement
 export const formatMonerooAmount = (amountInCentimes: number): string => {
-  // Convertir les centimes en CFA pour l'affichage
-  const amountInCFA = amountInCentimes / 100;
-  return `${amountInCFA.toFixed(0)} CFA`;
+  // Convertir les centimes USD vers CFA pour l'affichage
+  const amountInUSD = amountInCentimes / 100;
+  const amountInCFA = amountInUSD * 620; // Conversion USD vers CFA
+  return `${Math.round(amountInCFA)} CFA`;
 };
 
 export interface MonerooPaymentData {
-  amount: number; // Montant original en CFA (ex: 1500 pour 1500 CFA) selon documentation Moneroo
-  currency: string;
+  amount: number; // Montant en centimes USD selon documentation Moneroo
+  currency: string; // Devise USD selon documentation Moneroo
   description: string;
   return_url: string;
   customer: {
@@ -66,6 +69,12 @@ export class MonerooService {
       return response.data;
     } catch (error: any) {
       console.error('Erreur Moneroo:', error);
+      
+      // Gestion spécifique de l'erreur 429 (limite API dépassée)
+      if (error.response?.status === 429) {
+        throw new Error('Limite de requêtes API dépassée. Veuillez attendre 10-15 minutes avant de réessayer.');
+      }
+      
       if (error.response) {
         throw new Error(error.response.data?.message || 'Erreur lors de l\'initialisation du paiement');
       }
@@ -89,6 +98,12 @@ export class MonerooService {
       return response.data;
     } catch (error: any) {
       console.error('Erreur vérification Moneroo:', error);
+      
+      // Gestion spécifique de l'erreur 429 (limite API dépassée)
+      if (error.response?.status === 429) {
+        throw new Error('Limite de requêtes API dépassée. Veuillez attendre 10-15 minutes avant de réessayer.');
+      }
+      
       if (error.response) {
         throw new Error(error.response.data?.message || 'Erreur lors de la vérification du paiement');
       }
