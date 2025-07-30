@@ -141,7 +141,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
 
       // Rediriger vers l'éditeur de template directement
       console.log('🔄 Redirection vers l\'éditeur...');
-      navigate(`/site-builder/${selectedTemplate}`);
+      navigate(`/store-config/site-builder/editor/${selectedTemplate}`);
     } catch (error) {
       console.error('Erreur lors de la création de la boutique:', error);
     }

@@ -252,22 +252,23 @@ const Storefront = () => {
 
     if (brandingData.favicon) {
       try {
-        // Supprimer les anciens favicons
-        const existingFavicons = document.querySelectorAll("link[rel*='icon']");
-        existingFavicons.forEach(favicon => favicon.remove());
+        // Supprimer seulement les favicons personnalisés des boutiques (pas le favicon principal SimpShopy)
+        const existingCustomFavicons = document.querySelectorAll("link[rel*='icon'][data-custom='true']");
+        existingCustomFavicons.forEach(favicon => favicon.remove());
 
-        // Créer un nouveau favicon
+        // Créer un nouveau favicon personnalisé
         const link = document.createElement('link');
         link.rel = 'icon';
         link.type = 'image/x-icon';
         link.href = brandingData.favicon;
+        link.setAttribute('data-custom', 'true'); // Marquer comme favicon personnalisé
 
         // Ajouter au head
         document.getElementsByTagName('head')[0].appendChild(link);
 
-        console.log('✅ Favicon mis à jour:', brandingData.favicon.substring(0, 50) + '...');
+        console.log('✅ Favicon personnalisé mis à jour:', brandingData.favicon.substring(0, 50) + '...');
       } catch (error) {
-        console.error('❌ Erreur mise à jour favicon:', error);
+        console.error('❌ Erreur mise à jour favicon personnalisé:', error);
       }
     }
 
