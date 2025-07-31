@@ -2,14 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Store, ShoppingCart, BarChart3, CreditCard, Globe, Zap, Shield, HeadphonesIcon } from "lucide-react";
+import { ArrowRight, HeadphonesIcon } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
+import FeaturesSection from "@/components/home/FeaturesSection";
+import ComparisonSection from "@/components/home/ComparisonSection";
 import StatsSection from "@/components/home/StatsSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CtaSection from "@/components/home/CtaSection";
-import TrustSection from "@/components/home/TrustSection";
+
 import PaymentMethodsSection from "@/components/home/PaymentMethodsSection";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import AppLogo from "@/components/ui/AppLogo";
@@ -64,29 +67,19 @@ const Index = () => {
       </div>
     );
   }
-  const iconMap = {
-    store: Store,
-    'shopping-cart': ShoppingCart,
-    'bar-chart': BarChart3,
-    'credit-card': CreditCard,
-    globe: Globe,
-    zap: Zap
-  };
 
-  const featuresWithIcons = features.map(feature => ({
-    ...feature,
-    icon: iconMap[feature.icon as keyof typeof iconMap] || Store
-  }));
-
-  const plans = getAllPricingPlans().map(plan => ({
-    name: plan.name,
-    price: plan.formattedPrice.replace(' CFA', ''),
-    period: "CFA/mois",
-    description: plan.description,
-    features: plan.features,
-    popular: plan.popular || false,
-    badge: plan.popular ? "Le plus populaire" : (plan.name === "Enterprise" ? "Nouveau" : null)
-  }));
+  const plans = getAllPricingPlans().map(plan => {
+    const isPopular = plan.name === "Pro" || plan.name === "Premium";
+    return {
+      name: plan.name,
+      price: plan.formattedPrice.replace(' CFA', ''),
+      period: "CFA/mois",
+      description: plan.description,
+      features: plan.features,
+      popular: isPopular,
+      badge: isPopular ? "Le plus populaire" : (plan.name === "Enterprise" ? "Nouveau" : null)
+    };
+  });
 
   return (
     <div className="min-h-screen">
@@ -99,6 +92,7 @@ const Index = () => {
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Fonctionnalités</a>
               <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Tarifs</a>
               <a href="#testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Témoignages</a>
+              <a href="#why-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Pourquoi nous choisir</a>
               <a href="#support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Support</a>
             </nav>
             <div className="flex items-center space-x-4">
@@ -118,43 +112,16 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Trust Section */}
-      <TrustSection />
+      {/* How It Works Section */}
+      <HowItWorksSection />
+
+      {/* Features Section */}
+      <FeaturesSection />
+
+
 
       {/* Stats Section */}
       <StatsSection />
-
-      {/* Features Section */}
-      <section id="features" className="py-20 px-4 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Tout ce dont vous avez besoin pour réussir
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Une plateforme révolutionnaire avec l'intelligence artificielle au cœur de chaque fonctionnalité
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuresWithIcons.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group bg-gradient-to-br from-white to-gray-50">
-                <CardHeader className="text-center pb-4">
-                  <div className="mx-auto mb-6 p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center text-gray-600 leading-relaxed text-base">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -237,69 +204,51 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <section id="why-us">
+        <ComparisonSection />
+      </section>
+
       {/* CTA Section */}
       <CtaSection />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-16 px-4">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div className="md:col-span-2">
-              <div className="mb-6">
-                <AppLogo textClassName="text-white" />
-              </div>
-              <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
-                La plateforme e-commerce simple et efficace pour les entrepreneurs africains. Vendez en ligne facilement.
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <AppLogo />
+              <p className="mt-4 text-gray-400">
+                La plateforme e-commerce tout-en-un pour l'Afrique
               </p>
-              <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
-                  <span className="text-sm">📘</span>
-                </div>
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
-                  <span className="text-sm">🐦</span>
-                </div>
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
-                  <span className="text-sm">💼</span>
-                </div>
-              </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-6 text-lg">Produit</h3>
-              <ul className="space-y-3 text-gray-400">
+              <h3 className="font-semibold mb-4">Produit</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Fonctionnalités</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Tarifs</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Templates</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Intégrations</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-6 text-lg">Support</h3>
-              <ul className="space-y-3 text-gray-400">
+              <h3 className="font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Communauté</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Communauté</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-6 text-lg">Entreprise</h3>
-              <ul className="space-y-3 text-gray-400">
+              <h3 className="font-semibold mb-4">Entreprise</h3>
+              <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">À propos</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Carrières</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Presse</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400">&copy; 2024 Simpshopy. Tous droits réservés. Fait avec ❤️ pour l'Afrique.</p>
-              <div className="flex space-x-6 mt-4 md:mt-0">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Confidentialité</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">CGU</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Cookies</a>
-              </div>
-            </div>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 SimpShopy. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
