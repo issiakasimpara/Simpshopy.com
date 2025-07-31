@@ -4,9 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw, ShoppingCart, Mail, Trash2 } from 'lucide-react';
 import { useStores } from '@/hooks/useStores';
 import { useOrders } from '@/hooks/useOrders';
+import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
 import { useToast } from '@/hooks/use-toast';
 import { Order } from '@/services/orderService';
 import { getOrderStatusBadge, getPaymentStatusBadge, formatCurrency } from '@/utils/orderUtils';
@@ -26,11 +28,20 @@ const Orders = () => {
     refetchOrders
   } = useOrders();
 
+  const {
+    abandonedCarts,
+    isLoading: isLoadingAbandoned,
+    fetchAbandonedCarts,
+    deleteAbandonedCart,
+    sendReminderEmail
+  } = useAbandonedCarts(store?.id);
+
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders');
 
   useEffect(() => {
     filterOrders();
@@ -63,8 +74,6 @@ const Orders = () => {
     setStatusFilter(value);
   };
 
-
-
   const handleStatusChange = (orderId: string, newStatus: string) => {
     updateOrderStatus({ orderId, status: newStatus });
   };
@@ -83,7 +92,10 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-
+  const handleRefreshAll = () => {
+    refetchOrders();
+    fetchAbandonedCarts();
+  };
 
   return (
     <DashboardLayout>
@@ -95,117 +107,217 @@ const Orders = () => {
               Gestion des commandes
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Visualisez et gérez les commandes de votre boutique ({orders.length} commande{orders.length !== 1 ? 's' : ''})
+              Visualisez et gérez les commandes et paniers abandonnés de votre boutique
             </p>
           </div>
           <Button
-            onClick={() => refetchOrders()}
+            onClick={handleRefreshAll}
             variant="outline"
             size="sm"
             className="flex items-center gap-2"
-            disabled={isLoading}
+            disabled={isLoading || isLoadingAbandoned}
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading || isLoadingAbandoned ? 'animate-spin' : ''}`} />
             Actualiser
           </Button>
         </div>
 
-        {/* Filters */}
-        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Rechercher une commande..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <Select onValueChange={handleStatusFilterChange}>
-                  <SelectTrigger className="w-full bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="Filtrer par statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    <SelectItem value="pending">En attente</SelectItem>
-                    <SelectItem value="confirmed">Confirmée</SelectItem>
-                    <SelectItem value="processing">En traitement</SelectItem>
-                    <SelectItem value="shipped">Expédiée</SelectItem>
-                    <SelectItem value="delivered">Livrée</SelectItem>
-                    <SelectItem value="cancelled">Annulée</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Commandes ({orders.length})
+            </TabsTrigger>
+            <TabsTrigger value="abandoned" className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              Paniers abandonnés ({abandonedCarts.length})
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Orders List */}
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement des commandes...</p>
-          </div>
-        ) : filteredOrders.length === 0 ? (
-          <Card className="shadow-lg border-0">
-            <CardContent className="text-center py-16">
-              <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-2xl w-fit mx-auto mb-6">
-                <Package className="h-12 w-12 mx-auto text-blue-600" />
+          {/* Onglet Commandes */}
+          <TabsContent value="orders" className="space-y-6">
+            {/* Filters */}
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Rechercher une commande..."
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                      className="bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <Select onValueChange={handleStatusFilterChange}>
+                      <SelectTrigger className="w-full bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500">
+                        <SelectValue placeholder="Filtrer par statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="confirmed">Confirmée</SelectItem>
+                        <SelectItem value="processing">En traitement</SelectItem>
+                        <SelectItem value="shipped">Expédiée</SelectItem>
+                        <SelectItem value="delivered">Livrée</SelectItem>
+                        <SelectItem value="cancelled">Annulée</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Orders List */}
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement des commandes...</p>
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                Aucune commande trouvée
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg max-w-md mx-auto">
-                Il n'y a aucune commande correspondant à vos critères de recherche.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {filteredOrders.map(order => (
-              <Card key={order.id} className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="flex-1 space-y-2">
-                      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                        Commande #{order.order_number}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        <Calendar className="inline-block h-4 w-4 mr-1" />
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Client: {order.customer_name || order.customer_email}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {getOrderStatusBadge(order.status)}
-                      <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                        {formatCurrency(order.total_amount, order.currency)}
-                      </p>
-                    </div>
+            ) : filteredOrders.length === 0 ? (
+              <Card className="shadow-lg border-0">
+                <CardContent className="text-center py-16">
+                  <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-2xl w-fit mx-auto mb-6">
+                    <Package className="h-12 w-12 mx-auto text-blue-600" />
                   </div>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleViewOrder(order)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Voir
-                    </Button>
-                    <Button>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Modifier
-                    </Button>
-                  </div>
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                    Aucune commande trouvée
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg max-w-md mx-auto">
+                    Il n'y a aucune commande correspondant à vos critères de recherche.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="space-y-6">
+                {filteredOrders.map(order => (
+                  <Card key={order.id} className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex-1 space-y-2">
+                          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                            Commande #{order.order_number}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            <Calendar className="inline-block h-4 w-4 mr-1" />
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            Client: {order.customer_name || order.customer_email}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {getOrderStatusBadge(order.status)}
+                          <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                            {formatCurrency(order.total_amount, order.currency)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleViewOrder(order)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir
+                        </Button>
+                        <Button>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Onglet Paniers abandonnés */}
+          <TabsContent value="abandoned" className="space-y-6">
+            {isLoadingAbandoned ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement des paniers abandonnés...</p>
+              </div>
+            ) : abandonedCarts.length === 0 ? (
+              <Card className="shadow-lg border-0">
+                <CardContent className="text-center py-16">
+                  <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-2xl w-fit mx-auto mb-6">
+                    <ShoppingCart className="h-12 w-12 mx-auto text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                    Aucun panier abandonné
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg max-w-md mx-auto">
+                    Excellent ! Tous vos clients finalisent leurs achats.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {abandonedCarts.map(cart => (
+                  <Card key={cart.id} className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                              Session #{cart.session_id.slice(-8)}
+                            </h3>
+                            <Badge variant={cart.days_abandoned > 7 ? "destructive" : cart.days_abandoned > 3 ? "secondary" : "default"}>
+                              {cart.days_abandoned} jour{cart.days_abandoned > 1 ? 's' : ''}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            <Calendar className="inline-block h-4 w-4 mr-1" />
+                            {new Date(cart.created_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            {cart.items.length} article{cart.items.length > 1 ? 's' : ''} • 
+                            {cart.customer_email ? ` Client: ${cart.customer_email}` : ' Client anonyme'}
+                          </p>
+                          <div className="text-sm text-gray-500">
+                            Articles: {cart.items.map(item => `${item.name} (${item.quantity})`).join(', ')}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                            {formatCurrency(cart.total_value, 'XOF')}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Valeur perdue
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => sendReminderEmail(cart)}
+                          disabled={!cart.customer_email}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          Envoyer rappel
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deleteAbandonedCart(cart.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Supprimer
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Modal des détails de commande */}

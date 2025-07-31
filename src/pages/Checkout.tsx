@@ -16,9 +16,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
 import { MonerooService, convertToMonerooAmount, formatMonerooAmount } from '@/services/monerooService';
+import { useCartSessions } from '@/hooks/useCartSessions';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
+  const { saveCartSession } = useCartSessions();
   const navigate = useNavigate();
   const location = useLocation();
   const { storeSlug } = useParams();
@@ -269,6 +271,21 @@ const Checkout = () => {
       if (shippingMethods.length === 0 && detectedCountry) {
         await loadShippingMethods(storeInfo.id, detectedCountry);
       }
+
+      // Sauvegarder les informations du client dans la session de panier
+      // pour pouvoir suivre les paniers abandonnés
+      const customerInfoForSession = {
+        email: customerInfo.email,
+        name: `${customerInfo.firstName} ${customerInfo.lastName}`,
+        phone: customerInfo.phone,
+        address: customerInfo.address,
+        city: customerInfo.city,
+        country: customerInfo.country,
+        postal_code: customerInfo.postalCode
+      };
+
+      // Sauvegarder la session de panier avec les informations client
+      await saveCartSession(storeInfo.id, items, customerInfoForSession);
 
       // Générer un numéro de commande temporaire
       const tempOrderNumber = `TEMP-${Date.now()}`;

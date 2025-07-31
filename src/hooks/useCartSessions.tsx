@@ -169,11 +169,7 @@ export const useCartSessions = () => {
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde de la session:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder le panier.",
-        variant: "destructive"
-      });
+      // Ne pas afficher d'erreur toast pour les sessions de panier car c'est normal
       return null;
     } finally {
       setIsLoading(false);
