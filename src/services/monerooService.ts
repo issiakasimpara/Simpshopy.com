@@ -47,23 +47,59 @@ export interface MonerooPaymentResponse {
 }
 
 export class MonerooService {
+  private static isInitializing = false;
+
   static async initializePayment(paymentData: MonerooPaymentData): Promise<MonerooPaymentResponse> {
+    // Éviter les appels multiples
+    if (this.isInitializing) {
+      console.log('⏳ Paiement Moneroo déjà en cours d\'initialisation...');
+      throw new Error('Paiement déjà en cours d\'initialisation');
+    }
+
+    this.isInitializing = true;
+
     try {
+      console.log('🚀 Initialisation paiement Moneroo...');
+      
       const response = await axios.post(`${MONEROO_API_URL}/payments/initialize`, paymentData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${MONEROO_API_KEY}`,
           'Accept': 'application/json'
-        }
+        },
+        timeout: 30000 // Timeout de 30 secondes
       });
 
-      if (response.status !== 201) {
+      console.log('📡 Réponse Moneroo:', response.data);
+
+      // Vérifier si la réponse contient une erreur
+      if (response.data && response.data.success === false) {
+        throw new Error(response.data.message || 'Erreur lors de l\'initialisation du paiement');
+      }
+
+      // Si la réponse contient un message de succès, c'est normal
+      if (response.data && response.data.message && response.data.message.includes('successfully')) {
+        console.log('✅ Paiement Moneroo initialisé avec succès');
+        return {
+          success: true,
+          message: response.data.message,
+          data: response.data.data || response.data
+        };
+      }
+
+      // Vérifier le statut HTTP
+      if (response.status !== 201 && response.status !== 200) {
         throw new Error(`Request failed with status ${response.status}`);
       }
 
-      return response.data;
+      console.log('✅ Paiement Moneroo initialisé avec succès');
+      return {
+        success: true,
+        message: 'Paiement initialisé avec succès',
+        data: response.data.data || response.data
+      };
     } catch (error: any) {
-      console.error('Erreur Moneroo:', error);
+      console.error('❌ Erreur Moneroo:', error);
       
       // Gestion spécifique de l'erreur 429 (limite API dépassée)
       if (error.response?.status === 429) {
@@ -74,6 +110,8 @@ export class MonerooService {
         throw new Error(error.response.data?.message || 'Erreur lors de l\'initialisation du paiement');
       }
       throw error;
+    } finally {
+      this.isInitializing = false;
     }
   }
 

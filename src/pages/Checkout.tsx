@@ -142,27 +142,25 @@ const Checkout = () => {
 
       // 1. Test zones
       const { data: zones, error: zonesError } = await supabase
-        .from('shipping_zones')
+        .from('shipping_zones' as any)
         .select('*')
         .eq('store_id', storeId);
 
       if (zonesError) {
         console.error('❌ Erreur zones:', zonesError);
-        setShippingMethods([]);
         return;
       }
       console.log('🌍 ZONES:', zones);
 
       // 2. Test méthodes sans JOIN
       const { data: methods, error: methodsError } = await supabase
-        .from('shipping_methods')
+        .from('shipping_methods' as any)
         .select('*')
         .eq('store_id', storeId)
         .eq('is_active', true);
 
       if (methodsError) {
         console.error('❌ Erreur méthodes:', methodsError);
-        setShippingMethods([]);
         return;
       }
       console.log('📦 MÉTHODES:', methods);
@@ -173,7 +171,7 @@ const Checkout = () => {
       let availableMethods: any[] = [];
 
       if (methods && methods.length > 0) {
-        for (const method of methods) {
+        for (const method of methods as any[]) {
           // Si la méthode n'a pas de zone (globale), elle est disponible partout
           if (!method.shipping_zone_id) {
             console.log(`🌍 ${method.name} - Méthode GLOBALE (disponible partout)`);
@@ -182,7 +180,7 @@ const Checkout = () => {
           }
 
           // Sinon, vérifier si le pays de l'utilisateur est dans la zone
-          const zone = zones?.find(z => z.id === method.shipping_zone_id);
+          const zone = (zones as any[])?.find((z: any) => z.id === method.shipping_zone_id);
           if (zone && zone.countries && zone.countries.includes(userCountryCode)) {
             console.log(`✅ ${method.name} - Disponible pour ${userCountryCode} (Zone: ${zone.name})`);
             availableMethods.push(method);
@@ -194,8 +192,6 @@ const Checkout = () => {
 
       console.log('\n🎯 RÉSULTAT FINAL:', availableMethods.length, 'méthodes disponibles pour', userCountryCode);
 
-      setShippingMethods(availableMethods);
-
       // Sélectionner automatiquement la première méthode si disponible
       if (availableMethods.length > 0) {
         setSelectedShippingMethod(availableMethods[0]);
@@ -206,7 +202,6 @@ const Checkout = () => {
       }
     } catch (error) {
       console.error('❌ Erreur chargement méthodes:', error);
-      setShippingMethods([]);
     }
   };
 
@@ -217,63 +212,32 @@ const Checkout = () => {
   };
 
   const handleCheckout = async () => {
-    // Validation des champs requis
-    if (!customerInfo.email || !customerInfo.firstName || !customerInfo.lastName || !customerInfo.address) {
-      toast({
-        title: "Informations manquantes",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive"
-      });
+    if (isProcessing) {
+      console.log('⏳ Checkout déjà en cours, ignoré');
       return;
     }
-
-    if (items.length === 0) {
-      toast({
-        title: "Panier vide",
-        description: "Ajoutez des produits avant de passer commande.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (shippingMethods.length > 0 && !selectedShippingMethod) {
-      toast({
-        title: "Méthode de livraison manquante",
-        description: "Veuillez sélectionner une méthode de livraison.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    
     setIsProcessing(true);
-
+    
     try {
-      console.log('🛒 Début du processus de paiement...');
-
-      // Si nous sommes en mode aperçu, simuler la commande
-      if (isInPreview) {
-        console.log('📱 Mode aperçu - simulation de commande');
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler le traitement
-        const successUrl = storeSlug
-          ? `/store/${storeSlug}/payment-success?preview=true`
-          : '/payment-success?preview=true';
-        navigate(successUrl);
+      // Validation des informations client
+      if (!customerInfo.email || !customerInfo.firstName || !customerInfo.lastName || !customerInfo.address) {
+        toast({
+          title: "Informations manquantes",
+          description: "Veuillez remplir tous les champs obligatoires.",
+          variant: "destructive"
+        });
         return;
       }
 
-      // Récupérer les informations de la boutique depuis l'URL ou le contexte
+      console.log('🚀 Début du processus de checkout...');
+
       const storeInfo = await getStoreInfo();
       if (!storeInfo) {
         throw new Error('Impossible de récupérer les informations de la boutique');
       }
 
-      // Charger les méthodes de livraison si pas encore fait
-      if (shippingMethods.length === 0 && detectedCountry) {
-        await loadShippingMethods(storeInfo.id, detectedCountry);
-      }
-
       // Sauvegarder les informations du client dans la session de panier
-      // pour pouvoir suivre les paniers abandonnés
       const customerInfoForSession = {
         email: customerInfo.email,
         name: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -284,24 +248,16 @@ const Checkout = () => {
         postal_code: customerInfo.postalCode
       };
 
-      // Sauvegarder la session de panier avec les informations client
+      console.log('💾 Sauvegarde session avec infos client...');
       await saveCartSession(storeInfo.id, items, customerInfoForSession);
 
-      // Générer un numéro de commande temporaire
       const tempOrderNumber = `TEMP-${Date.now()}`;
-
-      // Initialiser le paiement Moneroo AVANT de créer la commande
       const totalAmountCFA = getTotalWithShipping();
       const totalAmountCentimes = convertToMonerooAmount(totalAmountCFA);
-      
-      console.log('💰 CONVERSION MONTANT:');
-      console.log('- Montant original (CFA):', totalAmountCFA);
-      console.log('- Montant envoyé à Moneroo (centimes USD):', totalAmountCentimes);
-      console.log('- Montant affiché sur Moneroo devrait être:', formatMonerooAmount(totalAmountCentimes));
 
       const paymentData = {
-        amount: totalAmountCentimes, // Montant en CFA
-        currency: 'XOF', // Devise XOF selon documentation Moneroo
+        amount: totalAmountCentimes,
+        currency: 'XOF',
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
         customer: {
@@ -314,7 +270,6 @@ const Checkout = () => {
           country: customerInfo.country,
           zip: customerInfo.postalCode
         },
-        // Pas de methods pour laisser Moneroo choisir automatiquement
         metadata: {
           temp_order_number: tempOrderNumber,
           store_id: storeInfo.id,
@@ -322,62 +277,46 @@ const Checkout = () => {
           customer_info: JSON.stringify(customerInfo),
           items: JSON.stringify(items),
           shipping_method: JSON.stringify(selectedShippingMethod),
-          shipping_cost: shippingCost,
-          total_amount: totalAmountCFA // Garder le montant original en CFA
+          shipping_cost: shippingCost.toString(),
+          total_amount: totalAmountCFA.toString()
         }
       };
 
-      console.log('💳 Initialisation du paiement Moneroo:', paymentData);
-
-      // Initialiser le paiement Moneroo
+      console.log('💳 Initialisation paiement Moneroo...');
       const paymentResult = await MonerooService.initializePayment(paymentData);
-
-      console.log('✅ Paiement initialisé:', paymentResult);
-
-      // Sauvegarder les données de commande dans sessionStorage pour les récupérer après paiement
-      const orderData = {
-        storeId: storeInfo.id,
-        storeName: storeInfo.name,
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-          product_id: item.product_id
-        })),
-        customerInfo,
-        paymentMethod,
-        totalAmount: getTotalWithShipping(),
-        currency: 'CFA',
-        shippingCost: shippingCost,
-        shippingMethod: selectedShippingMethod ? {
-          id: selectedShippingMethod.id,
-          name: selectedShippingMethod.name,
-          delivery_time: selectedShippingMethod.estimated_days ||
-                        selectedShippingMethod.conditions?.display_text ||
-                        'Délai non spécifié',
-          price: selectedShippingMethod.price || 0
-        } : null,
-        shippingCountry: detectedCountryCode,
-        monerooPaymentId: paymentResult.data.id,
-        tempOrderNumber
-      };
-
-      // Sauvegarder dans sessionStorage
-      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
-
-      // Vider le panier
-      clearCart();
-
-      // Rediriger vers la page de paiement Moneroo
-      window.location.href = paymentResult.data.checkout_url;
-
+      
+      if (paymentResult.success && paymentResult.data?.checkout_url) {
+        // Stocker les données de commande temporairement
+        sessionStorage.setItem('tempOrderData', JSON.stringify({
+          tempOrderNumber,
+          storeInfo,
+          customerInfo,
+          items,
+          selectedShippingMethod,
+          totalAmountCFA
+        }));
+        
+        console.log('✅ Paiement initialisé avec succès, redirection...');
+        
+        // Afficher un message de succès avant la redirection
+        toast({
+          title: "Paiement initialisé",
+          description: "Redirection vers la page de paiement...",
+          variant: "default"
+        });
+        
+        // Rediriger vers Moneroo après un court délai
+        setTimeout(() => {
+          window.location.href = paymentResult.data.checkout_url;
+        }, 1000);
+      } else {
+        throw new Error(paymentResult.message || 'Erreur lors de l\'initialisation du paiement');
+      }
     } catch (error: any) {
-      console.error('❌ Erreur checkout:', error);
+      console.error('❌ Erreur lors du checkout:', error);
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur s'est produite lors du checkout.",
+        description: error.message || "Une erreur est survenue lors du traitement de votre commande.",
         variant: "destructive"
       });
     } finally {

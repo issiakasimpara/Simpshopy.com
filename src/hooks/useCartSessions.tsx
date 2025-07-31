@@ -123,53 +123,76 @@ export const useCartSessions = () => {
     items: CartItem[],
     customerInfo?: any
   ): Promise<CartSession | null> => {
-    const currentSessionId = sessionId || getOrCreateSessionId();
-    if (!currentSessionId) return null;
-    
+    // Éviter les appels multiples
+    if (isLoading) {
+      console.log('⏳ Sauvegarde déjà en cours, ignoré');
+      return null;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Vérifier si la session existe
+      const currentSessionId = getOrCreateSessionId();
+      console.log('💾 Sauvegarde session de panier:', {
+        sessionId: currentSessionId,
+        storeId,
+        itemsCount: items.length,
+        customerInfo
+      });
+
+      // First, try to fetch an existing session
       const existingSession = await getCartSession(storeId);
-      
-      const sessionData = {
-        session_id: currentSessionId,
-        store_id: storeId,
-        items: items as any,
-        customer_info: customerInfo || null
-      };
-      
+
+      let data;
+      let error;
+
       if (existingSession) {
-        // Mettre à jour la session existante
-        const { data, error } = await supabase
+        // If session exists, update it
+        console.log('🔄 Mise à jour de la session existante:', existingSession.id);
+        ({ data, error } = await supabase
           .from('cart_sessions')
-          .update(sessionData)
+          .update({
+            items: items as any,
+            customer_info: customerInfo || {},
+            updated_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // Extend expiration
+          })
           .eq('id', existingSession.id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return {
-          ...data,
-          items: safeConvertToCartItems(data.items)
-        };
+          .select()); // Add .select() to get the updated data
       } else {
-        // Créer une nouvelle session
-        const { data, error } = await supabase
+        // If no session exists, insert a new one
+        console.log('➕ Insertion d\'une nouvelle session.');
+        ({ data, error } = await supabase
           .from('cart_sessions')
-          .insert(sessionData)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return {
-          ...data,
-          items: safeConvertToCartItems(data.items)
-        };
+          .insert({
+            session_id: currentSessionId,
+            store_id: storeId,
+            items: items as any,
+            customer_info: customerInfo || {},
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .select()); // Add .select() to get the inserted data
       }
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la session:', error);
-      // Ne pas afficher d'erreur toast pour les sessions de panier car c'est normal
+
+      if (error) {
+        console.error('❌ Erreur sauvegarde session:', error);
+        toast({
+          title: 'Erreur lors de la sauvegarde de la session',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
+
+      console.log('✅ Session sauvegardée avec succès:', data);
+      return data && data[0] ? data[0] : null;
+
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la sauvegarde de la session:', error);
+      toast({
+        title: 'Erreur inattendue',
+        description: error.message || 'Impossible de sauvegarder la session de panier.',
+        variant: 'destructive',
+      });
       return null;
     } finally {
       setIsLoading(false);
