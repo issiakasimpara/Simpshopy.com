@@ -53,19 +53,19 @@ const ComparisonSection = () => {
 
   const stats = [
     {
-      number: "2,500+",
+      number: "1,500+",
       label: "Boutiques créées"
     },
     {
-      number: "50K+",
+      number: "25K+",
       label: "Ventes réalisées"
     },
     {
-      number: "15+",
+      number: "10+",
       label: "Pays couverts"
     },
     {
-      number: "4.9/5",
+      number: "4.8/5",
       label: "Note client"
     }
   ];

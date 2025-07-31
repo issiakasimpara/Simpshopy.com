@@ -9,7 +9,6 @@ import HeroSection from "@/components/home/HeroSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import ComparisonSection from "@/components/home/ComparisonSection";
-import StatsSection from "@/components/home/StatsSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CtaSection from "@/components/home/CtaSection";
 
@@ -118,10 +117,10 @@ const Index = () => {
       {/* Features Section */}
       <FeaturesSection />
 
-
-
-      {/* Stats Section */}
-      <StatsSection />
+      {/* Why Choose Us Section */}
+      <section id="why-us">
+        <ComparisonSection />
+      </section>
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -190,7 +189,7 @@ const Index = () => {
             </h2>
             <p className="text-xl text-gray-600 mb-12 leading-relaxed">
               Notre équipe d'experts e-commerce français vous accompagne à chaque étape. 
-              Chat en direct, documentation complète et communauté active de +10,000 membres.
+              Chat en direct, documentation complète et communauté active de +5,000 membres.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 hover:bg-white">
@@ -202,11 +201,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section id="why-us">
-        <ComparisonSection />
       </section>
 
       {/* CTA Section */}
