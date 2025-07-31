@@ -11,13 +11,13 @@ const ComparisonSection = () => {
     },
     {
       icon: DollarSign,
-      title: "Prix abordables en CFA",
-      description: "Pas de frais cachés, tarifs transparents en francs CFA, accessible à tous"
+      title: "Prix abordables en devises locales",
+      description: "Pas de frais cachés, tarifs transparents en devises africaines, accessible à tous"
     },
     {
       icon: Users,
-      title: "Support en français 24/7",
-      description: "Équipe locale qui comprend vos besoins et votre culture"
+      title: "Support multilingue 24/7",
+      description: "Équipe locale en français et anglais qui comprend vos besoins"
     },
     {
       icon: Zap,
