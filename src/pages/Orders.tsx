@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw, ShoppingCart, Mail, Trash2 } from 'lucide-react';
+import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw, ShoppingCart, Mail, Trash2, TrendingUp, DollarSign, Users } from 'lucide-react';
 import { useStores } from '@/hooks/useStores';
 import { useOrders } from '@/hooks/useOrders';
 import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
@@ -30,6 +30,7 @@ const Orders = () => {
 
   const {
     abandonedCarts,
+    stats: abandonedStats,
     isLoading: isLoadingAbandoned,
     fetchAbandonedCarts,
     deleteAbandonedCart,
@@ -237,6 +238,67 @@ const Orders = () => {
 
           {/* Onglet Paniers abandonnés */}
           <TabsContent value="abandoned" className="space-y-6">
+            {/* Statistiques des paniers abandonnés */}
+            {abandonedStats.totalAbandoned > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border-red-200/50 dark:border-red-800/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-red-600 dark:text-red-400">Total abandonnés</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{abandonedStats.totalAbandoned}</p>
+                      </div>
+                      <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+                        <ShoppingCart className="h-5 w-5 text-red-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200/50 dark:border-orange-800/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Valeur perdue</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{formatCurrency(abandonedStats.totalValue, 'XOF')}</p>
+                      </div>
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                        <DollarSign className="h-5 w-5 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200/50 dark:border-blue-800/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Récent (24h)</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{abandonedStats.recentAbandoned}</p>
+                      </div>
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                        <TrendingUp className="h-5 w-5 text-blue-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200/50 dark:border-green-800/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-600 dark:text-green-400">Taux conversion</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{abandonedStats.conversionRate.toFixed(1)}%</p>
+                      </div>
+                      <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                        <Users className="h-5 w-5 text-green-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {isLoadingAbandoned ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>

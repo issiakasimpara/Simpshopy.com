@@ -16,6 +16,8 @@ export interface AbandonedCartsStats {
   totalValue: number;
   averageValue: number;
   recentAbandoned: number; // Paniers abandonnés dans les dernières 24h
+  potentialRevenue: number; // Revenu potentiel si tous les paniers étaient convertis
+  conversionRate: number; // Taux de conversion (commandes / (commandes + paniers abandonnés))
 }
 
 export const useAbandonedCarts = (storeId?: string) => {
@@ -24,7 +26,9 @@ export const useAbandonedCarts = (storeId?: string) => {
     totalAbandoned: 0,
     totalValue: 0,
     averageValue: 0,
-    recentAbandoned: 0
+    recentAbandoned: 0,
+    potentialRevenue: 0,
+    conversionRate: 0
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -41,19 +45,42 @@ export const useAbandonedCarts = (storeId?: string) => {
       console.log('📊 Calcul des statistiques paniers abandonnés pour storeId:', storeId);
 
       // Récupérer toutes les sessions de panier pour cette boutique
-      const { data: cartSessions, error } = await supabase
+      const { data: cartSessions, error: cartError } = await supabase
         .from('cart_sessions')
         .select('*')
         .eq('store_id', storeId)
         .not('items', 'eq', '[]')
         .not('items', 'is', null);
 
-      if (error) {
-        console.error('Erreur lors de la récupération des stats paniers abandonnés:', error);
+      if (cartError) {
+        console.error('Erreur lors de la récupération des sessions de panier:', cartError);
         return;
       }
 
+      // Récupérer tous les emails des clients avec des commandes complétées
+      const { data: completedOrders, error: ordersError } = await supabase
+        .from('public_orders')
+        .select('customer_email')
+        .eq('store_id', storeId)
+        .in('status', ['confirmed', 'processing', 'shipped', 'delivered'])
+        .not('customer_email', 'is', null);
+
+      if (ordersError) {
+        console.error('Erreur lors de la récupération des commandes complétées:', ordersError);
+        return;
+      }
+
+      // Créer un set des emails qui ont des commandes complétées
+      const completedEmails = new Set(completedOrders?.map(order => order.customer_email) || []);
+      console.log('✅ Emails avec commandes complétées:', Array.from(completedEmails));
+
+      // Filtrer les sessions qui n'ont PAS de commandes complétées pour le même email
       const abandoned = (cartSessions || [])
+        .filter(session => {
+          const customerInfo = session.customer_info as any || {};
+          const customerEmail = customerInfo.email;
+          return !customerEmail || !completedEmails.has(customerEmail);
+        })
         .map(session => {
           const items = Array.isArray(session.items) ? session.items as any[] : [];
           const totalValue = items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
@@ -71,17 +98,29 @@ export const useAbandonedCarts = (storeId?: string) => {
           } as AbandonedCart;
         });
 
+      console.log('🔍 Sessions totales:', cartSessions?.length || 0);
+      console.log('✅ Emails avec commandes complétées:', completedEmails.size);
+      console.log('❌ Sessions abandonnées (filtrées):', abandoned.length);
+
       // Calculer les statistiques
       const totalAbandoned = abandoned.length;
       const totalValue = abandoned.reduce((sum, cart) => sum + cart.total_value, 0);
       const averageValue = totalAbandoned > 0 ? totalValue / totalAbandoned : 0;
       const recentAbandoned = abandoned.filter(cart => cart.days_abandoned <= 1).length;
+      const potentialRevenue = totalValue; // Revenu potentiel si tous les paniers étaient convertis
+
+      // Calculer le taux de conversion
+      const totalOrders = completedOrders?.length || 0;
+      const totalSessions = cartSessions?.length || 0;
+      const conversionRate = totalSessions > 0 ? (totalOrders / totalSessions) * 100 : 0;
 
       const newStats: AbandonedCartsStats = {
         totalAbandoned,
         totalValue,
         averageValue,
-        recentAbandoned
+        recentAbandoned,
+        potentialRevenue,
+        conversionRate
       };
 
       console.log('📊 Stats paniers abandonnés calculées:', newStats);
@@ -111,23 +150,41 @@ export const useAbandonedCarts = (storeId?: string) => {
       console.log('🔍 Recherche des paniers abandonnés pour storeId:', storeId);
 
       // Récupérer toutes les sessions de panier pour cette boutique
-      const { data: cartSessions, error } = await supabase
+      const { data: cartSessions, error: cartError } = await supabase
         .from('cart_sessions')
         .select('*')
         .eq('store_id', storeId)
         .not('items', 'eq', '[]')
         .not('items', 'is', null);
 
-      console.log('📊 Résultat de la requête cart_sessions:', { data: cartSessions, error });
-
-      if (error) {
-        console.error('Erreur lors de la récupération des paniers abandonnés:', error);
+      if (cartError) {
+        console.error('Erreur lors de la récupération des sessions de panier:', cartError);
         return;
       }
 
-      // Pour l'instant, considérer tous les paniers comme abandonnés
-      // (on peut améliorer cette logique plus tard)
+      // Récupérer tous les emails des clients avec des commandes complétées
+      const { data: completedOrders, error: ordersError } = await supabase
+        .from('public_orders')
+        .select('customer_email')
+        .eq('store_id', storeId)
+        .in('status', ['confirmed', 'processing', 'shipped', 'delivered'])
+        .not('customer_email', 'is', null);
+
+      if (ordersError) {
+        console.error('Erreur lors de la récupération des commandes complétées:', ordersError);
+        return;
+      }
+
+      // Créer un set des emails qui ont des commandes complétées
+      const completedEmails = new Set(completedOrders?.map(order => order.customer_email) || []);
+
+      // Filtrer les sessions qui n'ont PAS de commandes complétées pour le même email
       const abandoned = (cartSessions || [])
+        .filter(session => {
+          const customerInfo = session.customer_info as any || {};
+          const customerEmail = customerInfo.email;
+          return !customerEmail || !completedEmails.has(customerEmail);
+        })
         .map(session => {
           const items = Array.isArray(session.items) ? session.items as any[] : [];
           const totalValue = items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
