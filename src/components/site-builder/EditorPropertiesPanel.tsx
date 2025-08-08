@@ -18,6 +18,11 @@ import ComparisonEditor from './editors/ComparisonEditor';
 import GuaranteesEditor from './editors/GuaranteesEditor';
 import AnnouncementBarEditor from './editors/AnnouncementBarEditor';
 import BrandingEditor from './editors/BrandingEditor';
+import RoutinesEditor from './editors/RoutinesEditor';
+import MenuEditor from './editors/MenuEditor';
+import CategoriesEditor from './editors/CategoriesEditor';
+import SportsEditor from './editors/SportsEditor';
+import RoomsEditor from './editors/RoomsEditor';
 import StylePanel from './StylePanel';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -100,6 +105,16 @@ const EditorPropertiesPanel = ({
         return <ComparisonEditor block={selectedBlock} onUpdate={handleUpdate} />;
       case 'guarantees':
         return <GuaranteesEditor block={selectedBlock} onUpdate={handleUpdate} />;
+      case 'routines':
+        return <RoutinesEditor block={selectedBlock} onUpdate={handleUpdate} />;
+      case 'menu':
+        return <MenuEditor block={selectedBlock} onUpdate={handleUpdate} />;
+      case 'categories':
+        return <CategoriesEditor block={selectedBlock} onUpdate={handleUpdate} />;
+      case 'sports':
+        return <SportsEditor block={selectedBlock} onUpdate={handleUpdate} />;
+      case 'rooms':
+        return <RoomsEditor block={selectedBlock} onUpdate={handleUpdate} />;
       default:
         return <div className="p-4 text-gray-500">Aucun éditeur disponible pour ce type de bloc</div>;
     }

@@ -15,6 +15,8 @@ import StoreConfigForm from '@/components/store-config/StoreConfigForm';
 import StorePreview from '@/components/store-config/StorePreview';
 import NoStoreSelectedState from '@/components/store-config/NoStoreSelectedState';
 import DomainManager from '@/components/store-config/domain/DomainManager';
+import { supabase } from '@/integrations/supabase/client';
+import { Template } from '@/types/template';
 
 const StoreConfig = () => {
   const [showCreateStore, setShowCreateStore] = useState(false);
@@ -22,6 +24,8 @@ const StoreConfig = () => {
   const { store, hasStore, updateStore, isUpdating, isLoading, refetchStores } = useStores();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
+  const [storeTemplate, setStoreTemplate] = useState<Template | null>(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
   
   // Form data for the single store
   const [formData, setFormData] = useState({
@@ -31,6 +35,44 @@ const StoreConfig = () => {
     status: (store?.status || 'draft') as 'draft' | 'active' | 'suspended',
   });
 
+  // Fonction pour récupérer le template actuel de la boutique
+  const fetchCurrentTemplate = async (storeId: string) => {
+    if (!storeId) return;
+    
+    setTemplateLoading(true);
+    try {
+      // Récupérer le template publié le plus récent
+      const { data: templateData, error } = await supabase
+        .from('site_templates')
+        .select('template_data, template_id')
+        .eq('store_id', storeId)
+        .eq('is_published', true)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erreur lors de la récupération du template:', error);
+        // Utiliser le template par défaut
+        setStoreTemplate(preBuiltTemplates[0]);
+        return;
+      }
+
+      if (templateData) {
+        console.log('✅ Template actuel trouvé:', templateData.template_id);
+        setStoreTemplate(templateData.template_data as Template);
+      } else {
+        console.log('⚠️ Aucun template publié trouvé, utilisation du template par défaut');
+        setStoreTemplate(preBuiltTemplates[0]);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération du template:', error);
+      setStoreTemplate(preBuiltTemplates[0]);
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
   // Rafraîchir les données quand l'utilisateur change ou quand on arrive sur la page
   useEffect(() => {
     if (user && !authLoading) {
@@ -38,6 +80,13 @@ const StoreConfig = () => {
       refetchStores();
     }
   }, [user, authLoading, refetchStores]);
+
+  // Récupérer le template quand la boutique change
+  useEffect(() => {
+    if (store?.id) {
+      fetchCurrentTemplate(store.id);
+    }
+  }, [store?.id]);
 
   // Update form data when store changes
   useEffect(() => {
@@ -50,9 +99,6 @@ const StoreConfig = () => {
       });
     }
   }, [store]);
-
-  // Get template for the store (for demo, we'll use the first template)
-  const storeTemplate = store ? preBuiltTemplates[0] : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +143,7 @@ const StoreConfig = () => {
   };
 
   // Afficher un état de chargement pendant que l'authentification se charge
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || templateLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -154,7 +200,7 @@ const StoreConfig = () => {
                           </Link>
                         </TabsTrigger>
                         <TabsTrigger value="site-builder" asChild className="flex items-center gap-3 h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50">
-                          <Link to="/store-config/site-builder/editor/fashion-modern">
+                          <Link to={`/store-config/site-builder/editor/${storeTemplate?.id || 'fashion-modern'}`}>
                             <div className="p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg data-[state=active]:bg-white/20">
                               <Palette className="h-4 w-4" />
                             </div>
@@ -188,21 +234,17 @@ const StoreConfig = () => {
                           </TabsContent>
 
                           <TabsContent value="domains" className="space-y-6">
-                            {store && (
-                              <DomainManager
-                                storeId={store.id}
-                                storeSlug={store.slug}
-                              />
-                            )}
+                            <DomainManager 
+                              selectedStore={store}
+                              onSubmit={handleDomainSubmit}
+                            />
                           </TabsContent>
 
                           <TabsContent value="preview" className="space-y-6">
-                            {store && storeTemplate && (
-                              <StorePreview
-                                store={store}
-                                template={storeTemplate}
-                              />
-                            )}
+                            <StorePreview 
+                              selectedStore={store}
+                              onViewModeChange={setViewMode}
+                            />
                           </TabsContent>
                         </Tabs>
                       </div>
@@ -212,9 +254,7 @@ const StoreConfig = () => {
               )}
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-8">
-              <NoStoreSelectedState onCreateStore={() => setShowCreateStore(true)} />
-            </div>
+            <NoStoreSelectedState onCreateStore={() => setShowCreateStore(true)} />
           )}
         </div>
       </div>

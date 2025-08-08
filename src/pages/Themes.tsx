@@ -9,23 +9,91 @@ import CreateStoreDialog from '@/components/CreateStoreDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Palette, Eye, Sparkles, Layout, ShoppingBag } from 'lucide-react';
+import { Palette, Eye, Sparkles, Layout, ShoppingBag, Check } from 'lucide-react';
+import { useSiteTemplates } from '@/hooks/useSiteTemplates';
+import { useToast } from '@/hooks/use-toast';
+import { siteTemplateService } from '@/services/siteTemplateService';
 
 const Themes = () => {
   const navigate = useNavigate();
   const [showCreateStore, setShowCreateStore] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [isChangingTheme, setIsChangingTheme] = useState<string | null>(null);
   const { store, hasStore, isLoading, refetchStores } = useStores();
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
 
-  // Rediriger vers la galerie de thèmes
-  useEffect(() => {
-    navigate('/themes/gallery', { replace: true });
-  }, [navigate]);
+  // Fonction pour changer le thème d'une boutique existante
+  const handleThemeChange = async (templateId: string) => {
+    if (!store) {
+      toast({
+        title: "Erreur",
+        description: "Aucune boutique trouvée. Veuillez créer une boutique d'abord.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsChangingTheme(templateId);
+
+    try {
+      // Récupérer le template sélectionné
+      const templateData = preBuiltTemplates.find(t => t.id === templateId);
+      if (!templateData) {
+        throw new Error('Template non trouvé');
+      }
+
+      // Sauvegarder le nouveau template et le publier
+      await siteTemplateService.saveTemplate(
+        store.id,
+        templateId,
+        templateData,
+        true // Publier directement
+      );
+
+      // Invalider le cache pour forcer le rechargement
+      const cacheKey = `${store.id}_${templateId}`;
+      localStorage.removeItem(`template_cache_${cacheKey}`);
+      
+      // Nettoyer tous les caches de templates pour cette boutique
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('template_cache_') && key.includes(store.id)) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      toast({
+        title: "Thème changé avec succès !",
+        description: `Votre boutique utilise maintenant le thème "${templateData.name}". Redirection vers l'éditeur...`,
+      });
+
+      // Attendre un peu pour que la base de données se synchronise
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Rediriger vers l'éditeur pour personnaliser le nouveau thème
+      navigate(`/store-config/site-builder/editor/${templateId}`);
+
+    } catch (error) {
+      console.error('Erreur lors du changement de thème:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de changer le thème. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChangingTheme(null);
+    }
+  };
 
   const handleThemeSelect = (themeId: string) => {
-    setSelectedTheme(themeId);
-    setShowCreateStore(true);
+    if (hasStore) {
+      // Si on a une boutique, changer le thème
+      handleThemeChange(themeId);
+    } else {
+      // Si pas de boutique, ouvrir le formulaire de création
+      setSelectedTheme(themeId);
+      setShowCreateStore(true);
+    }
   };
 
   const handleStoreCreated = () => {
@@ -77,6 +145,14 @@ const Themes = () => {
                 </p>
               </div>
             )}
+
+            {hasStore && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 text-sm">
+                  <strong>🎨 Changement de thème :</strong> Cliquez sur "Utiliser ce thème" pour changer le thème de votre boutique existante !
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Galerie de thèmes SEULEMENT */}
@@ -102,7 +178,11 @@ const Themes = () => {
                         {template.category}
                       </Badge>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/store-config/site-builder/preview/${template.id}`)}
+                        >
                           <Eye className="h-3 w-3 mr-1" />
                           Aperçu
                         </Button>
@@ -110,9 +190,28 @@ const Themes = () => {
                           size="sm"
                           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           onClick={() => handleThemeSelect(template.id)}
+                          disabled={isChangingTheme === template.id}
                         >
-                          <ShoppingBag className="h-3 w-3 mr-1" />
-                          {hasStore ? "Changer" : "Utiliser ce thème"}
+                          {isChangingTheme === template.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1" />
+                              Changement...
+                            </>
+                          ) : (
+                            <>
+                              {hasStore ? (
+                                <>
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Utiliser ce thème
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingBag className="h-3 w-3 mr-1" />
+                                  Utiliser ce thème
+                                </>
+                              )}
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>

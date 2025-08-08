@@ -23,6 +23,11 @@ const ComparisonBlock = React.lazy(() => import('./blocks/ComparisonBlock'));
 const CartBlock = React.lazy(() => import('./blocks/CartBlock'));
 const CheckoutBlock = React.lazy(() => import('./blocks/CheckoutBlock'));
 const GuaranteesBlock = React.lazy(() => import('./blocks/GuaranteesBlock'));
+const RoutinesBlock = React.lazy(() => import('./blocks/RoutinesBlock'));
+const MenuBlock = React.lazy(() => import('./blocks/MenuBlock'));
+const CategoriesBlock = React.lazy(() => import('./blocks/CategoriesBlock'));
+const SportsBlock = React.lazy(() => import('./blocks/SportsBlock'));
+const RoomsBlock = React.lazy(() => import('./blocks/RoomsBlock'));
 const DefaultBlock = React.lazy(() => import('./blocks/DefaultBlock'));
 
 // Composant de chargement sophistiqué
@@ -110,6 +115,16 @@ const BlockRenderer = memo(({
       return <CheckoutBlock {...blockProps} />;
     case 'guarantees':
       return <GuaranteesBlock {...blockProps} />;
+    case 'routines':
+      return <RoutinesBlock {...blockProps} />;
+    case 'menu':
+      return <MenuBlock {...blockProps} />;
+    case 'categories':
+      return <CategoriesBlock {...blockProps} />;
+    case 'sports':
+      return <SportsBlock {...blockProps} />;
+    case 'rooms':
+      return <RoomsBlock {...blockProps} />;
     default:
       return <DefaultBlock {...blockProps} />;
     }

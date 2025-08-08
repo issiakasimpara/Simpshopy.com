@@ -2,19 +2,24 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Palette, Eye, Sparkles, Grid, Star, Zap } from "lucide-react";
+import { Palette, Eye, Sparkles, Grid, Star, Zap, Check } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { preBuiltTemplates } from "@/data/preBuiltTemplates";
 import { templateCategories } from "@/data/templateCategories";
 import TemplateCategoriesSection from "@/components/site-builder/TemplateCategoriesSection";
 import { useStores } from "@/hooks/useStores";
+import { useSiteTemplates } from "@/hooks/useSiteTemplates";
+import { useToast } from "@/hooks/use-toast";
+import { siteTemplateService } from "@/services/siteTemplateService";
 
 const SiteBuilder = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { store } = useStores();
+  const { store, hasStore } = useStores();
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isChangingTheme, setIsChangingTheme] = useState<string | null>(null);
 
   // Redirection conditionnelle selon le contexte
   useEffect(() => {
@@ -63,6 +68,68 @@ const SiteBuilder = () => {
     return previewImages[category] || previewImages.default;
   };
 
+  // Fonction pour changer le thème d'une boutique existante
+  const handleThemeChange = async (templateId: string) => {
+    if (!store) {
+      toast({
+        title: "Erreur",
+        description: "Aucune boutique trouvée. Veuillez créer une boutique d'abord.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsChangingTheme(templateId);
+
+    try {
+      // Récupérer le template sélectionné
+      const templateData = preBuiltTemplates.find(t => t.id === templateId);
+      if (!templateData) {
+        throw new Error('Template non trouvé');
+      }
+
+      // Sauvegarder le nouveau template et le publier
+      await siteTemplateService.saveTemplate(
+        store.id,
+        templateId,
+        templateData,
+        true // Publier directement
+      );
+
+      // Invalider le cache pour forcer le rechargement
+      const cacheKey = `${store.id}_${templateId}`;
+      localStorage.removeItem(`template_cache_${cacheKey}`);
+      
+      // Nettoyer tous les caches de templates pour cette boutique
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('template_cache_') && key.includes(store.id)) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      toast({
+        title: "Thème changé avec succès !",
+        description: `Votre boutique utilise maintenant le thème "${templateData.name}". Redirection vers l'éditeur...`,
+      });
+
+      // Attendre un peu pour que la base de données se synchronise
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Rediriger vers l'éditeur pour personnaliser le nouveau thème
+      navigate(`/store-config/site-builder/editor/${templateId}`);
+
+    } catch (error) {
+      console.error('Erreur lors du changement de thème:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de changer le thème. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChangingTheme(null);
+    }
+  };
+
   // Si on est en train de rediriger, afficher un loading
   if (location.pathname === '/store-config/site-builder' && store) {
     return (
@@ -100,7 +167,9 @@ const SiteBuilder = () => {
                   <p className="text-lg text-muted-foreground font-medium mt-2 flex items-center gap-2">
                     <Zap className="h-5 w-5 text-amber-500" />
                     {isThemeGallery
-                      ? 'Choisissez un thème pour créer votre boutique'
+                      ? hasStore 
+                        ? 'Choisissez un nouveau thème pour votre boutique'
+                        : 'Choisissez un thème pour créer votre boutique'
                       : 'Choisissez un template et personnalisez votre boutique'
                     }
                   </p>
@@ -222,17 +291,40 @@ const SiteBuilder = () => {
                         className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
                         onClick={() => {
                           if (isThemeGallery) {
-                            // Si on est dans la galerie de thèmes, ouvrir le formulaire de création de boutique
-                            // TODO: Implémenter l'ouverture du formulaire avec le thème sélectionné
-                            console.log('Créer boutique avec thème:', template.id);
+                            if (hasStore) {
+                              // Si on a une boutique, changer le thème
+                              handleThemeChange(template.id);
+                            } else {
+                              // Si pas de boutique, ouvrir le formulaire de création
+                              console.log('Créer boutique avec thème:', template.id);
+                            }
                           } else {
                             // Si on est dans la personnalisation, aller à l'éditeur
                             navigate(`/store-config/site-builder/editor/${template.id}`);
                           }
                         }}
+                        disabled={isChangingTheme === template.id}
                       >
-                        <Palette className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
-                        {isThemeGallery ? 'Utiliser ce thème' : 'Utiliser'}
+                        {isChangingTheme === template.id ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                            Changement...
+                          </>
+                        ) : (
+                          <>
+                            {isThemeGallery && hasStore ? (
+                              <>
+                                <Check className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                                Utiliser ce thème
+                              </>
+                            ) : (
+                              <>
+                                <Palette className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                                {isThemeGallery ? 'Utiliser ce thème' : 'Utiliser'}
+                              </>
+                            )}
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
