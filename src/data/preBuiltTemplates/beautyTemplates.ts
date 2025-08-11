@@ -76,32 +76,7 @@ const beautyHomeBlocks = [
     },
     order: 3
   },
-  {
-    id: 'routines-beauty-1',
-    type: 'routines',
-    content: {
-      title: 'Routines de Soin',
-      subtitle: 'Conseils personnalisés selon votre type de peau',
-      routines: [
-        {
-          title: 'Routine Matin',
-          steps: ['Nettoyant', 'Sérum', 'Crème hydratante', 'Protection solaire'],
-          skinType: 'Tous types'
-        },
-        {
-          title: 'Routine Soir',
-          steps: ['Démaquillant', 'Nettoyant', 'Sérum', 'Crème de nuit'],
-          skinType: 'Tous types'
-        }
-      ]
-    },
-    styles: {
-      backgroundColor: '#ffffff',
-      textColor: '#000000',
-      padding: '80px 0',
-    },
-    order: 4
-  },
+
   {
     id: 'testimonials-beauty-1',
     type: 'testimonials',

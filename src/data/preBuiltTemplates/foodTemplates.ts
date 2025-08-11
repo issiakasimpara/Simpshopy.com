@@ -77,42 +77,7 @@ const foodHomeBlocks = [
     },
     order: 3
   },
-  {
-    id: 'menu-food-1',
-    type: 'menu',
-    content: {
-      title: 'Notre Carte',
-      subtitle: 'Découvrez nos spécialités',
-      categories: [
-        {
-          name: 'Entrées',
-          description: 'Amuse-bouches et salades',
-          productCount: 12
-        },
-        {
-          name: 'Plats',
-          description: 'Plats principaux',
-          productCount: 18
-        },
-        {
-          name: 'Desserts',
-          description: 'Pâtisseries maison',
-          productCount: 8
-        },
-        {
-          name: 'Boissons',
-          description: 'Vins et cocktails',
-          productCount: 15
-        }
-      ]
-    },
-    styles: {
-      backgroundColor: '#fef3c7',
-      textColor: '#000000',
-      padding: '80px 0',
-    },
-    order: 4
-  },
+
   {
     id: 'testimonials-food-1',
     type: 'testimonials',

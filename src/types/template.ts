@@ -1,6 +1,6 @@
 export interface TemplateBlock {
   id: string;
-  type: 'hero' | 'products' | 'product-detail' | 'text-image' | 'text-video' | 'video' | 'testimonials' | 'newsletter' | 'contact' | 'gallery' | 'features' | 'team' | 'faq' | 'before-after' | 'footer' | 'cart' | 'checkout' | 'comparison' | 'guarantees' | 'announcement' | 'branding' | 'routines' | 'menu' | 'categories' | 'sports' | 'rooms';
+  type: 'hero' | 'products' | 'product-detail' | 'text-image' | 'text-video' | 'video' | 'testimonials' | 'newsletter' | 'contact' | 'gallery' | 'features' | 'team' | 'faq' | 'before-after' | 'footer' | 'cart' | 'checkout' | 'comparison' | 'guarantees' | 'announcement' | 'branding';
   content: any;
   styles: {
     backgroundColor?: string;

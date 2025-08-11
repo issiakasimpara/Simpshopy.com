@@ -13,7 +13,7 @@ const BlockLibrary = ({ onBlockAdd }: BlockLibraryProps) => {
     'announcement', 'branding', 'hero', 'products', 'product-detail', 'text-image', 'text-video', 'video',
     'testimonials', 'newsletter', 'contact', 'gallery', 'features',
     'team', 'faq', 'before-after', 'footer', 'cart', 'checkout', 'comparison', 'guarantees',
-    'routines', 'menu', 'categories', 'sports', 'rooms'
+
   ];
 
   const handleAddBlock = (blockTemplate: any) => {

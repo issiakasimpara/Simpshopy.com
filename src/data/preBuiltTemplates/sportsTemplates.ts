@@ -76,46 +76,7 @@ const sportsHomeBlocks = [
     },
     order: 3
   },
-  {
-    id: 'sports-sports-1',
-    type: 'sports',
-    content: {
-      title: 'Nos Sports',
-      subtitle: 'Équipements spécialisés par discipline',
-      sports: [
-        {
-          name: 'Football',
-          icon: '⚽',
-          description: 'Chaussures, ballons, équipements',
-          productCount: 45
-        },
-        {
-          name: 'Basketball',
-          icon: '🏀',
-          description: 'Ballons, chaussures, accessoires',
-          productCount: 32
-        },
-        {
-          name: 'Fitness',
-          icon: '💪',
-          description: 'Vêtements, équipements, nutrition',
-          productCount: 28
-        },
-        {
-          name: 'Running',
-          icon: '🏃',
-          description: 'Chaussures, vêtements, accessoires',
-          productCount: 24
-        }
-      ]
-    },
-    styles: {
-      backgroundColor: '#1e40af',
-      textColor: '#ffffff',
-      padding: '80px 0',
-    },
-    order: 4
-  },
+
   {
     id: 'testimonials-sports-1',
     type: 'testimonials',

@@ -76,46 +76,7 @@ const homeHomeBlocks = [
     },
     order: 3
   },
-  {
-    id: 'rooms-home-1',
-    type: 'rooms',
-    content: {
-      title: 'Inspirations par Pièce',
-      subtitle: 'Découvrez nos suggestions par espace',
-      rooms: [
-        {
-          name: 'Salon',
-          icon: '🛋️',
-          description: 'Mobilier confortable et élégant',
-          productCount: 45
-        },
-        {
-          name: 'Chambre',
-          icon: '🛏️',
-          description: 'Literie et mobilier de chambre',
-          productCount: 32
-        },
-        {
-          name: 'Cuisine',
-          icon: '🍳',
-          description: 'Équipements et accessoires',
-          productCount: 28
-        },
-        {
-          name: 'Salle de bain',
-          icon: '🚿',
-          description: 'Accessoires et décoration',
-          productCount: 24
-        }
-      ]
-    },
-    styles: {
-      backgroundColor: '#fef3c7',
-      textColor: '#000000',
-      padding: '80px 0',
-    },
-    order: 4
-  },
+
   {
     id: 'testimonials-home-1',
     type: 'testimonials',

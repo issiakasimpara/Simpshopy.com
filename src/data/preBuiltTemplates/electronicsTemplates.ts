@@ -76,46 +76,7 @@ const electronicsHomeBlocks = [
     },
     order: 3
   },
-  {
-    id: 'categories-electronics-1',
-    type: 'categories',
-    content: {
-      title: 'Nos Catégories',
-      subtitle: 'Trouvez ce qui vous convient',
-      categories: [
-        {
-          name: 'Smartphones',
-          icon: '📱',
-          description: 'Derniers modèles disponibles',
-          productCount: 45
-        },
-        {
-          name: 'Ordinateurs',
-          icon: '💻',
-          description: 'PC et MacBook',
-          productCount: 32
-        },
-        {
-          name: 'Gaming',
-          icon: '🎮',
-          description: 'Consoles et accessoires',
-          productCount: 28
-        },
-        {
-          name: 'Audio',
-          icon: '🎧',
-          description: 'Casques et enceintes',
-          productCount: 56
-        }
-      ]
-    },
-    styles: {
-      backgroundColor: '#1e293b',
-      textColor: '#ffffff',
-      padding: '80px 0',
-    },
-    order: 4
-  },
+
   {
     id: 'testimonials-electronics-1',
     type: 'testimonials',
