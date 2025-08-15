@@ -138,7 +138,12 @@ serve(async (req) => {
     }
 
     const accountData = await accountResponse.json()
-    console.log('✅ Informations du compte récupérées:', accountData.account_name)
+    console.log('✅ Informations du compte récupérées:', accountData)
+    
+    // Extraire les informations du compte depuis les métadonnées OAuth
+    const accountName = accountData.login?.login_email || accountData.account_name || 'Compte Mailchimp'
+    const dataCenter = accountData.dc || 'us1'
+    const apiEndpoint = `https://${dataCenter}.api.mailchimp.com/3.0/`
 
     // Sauvegarder l'intégration dans la base de données
     console.log('💾 Sauvegarde de l\'intégration...')
@@ -168,11 +173,11 @@ serve(async (req) => {
           token_expires_at: new Date(Date.now() + tokenData.expires_in * 1000),
           provider_user_id: accountData.user_id,
           provider_account_id: accountData.account_id,
-          metadata: {
-            account_name: accountData.account_name,
-            dc: accountData.dc,
-            api_endpoint: accountData.api_endpoint
-          },
+                     metadata: {
+             account_name: accountName,
+             dc: dataCenter,
+             api_endpoint: apiEndpoint
+           },
           updated_at: new Date()
         })
         .eq('id', existingIntegration.id)
@@ -193,11 +198,11 @@ serve(async (req) => {
           token_expires_at: new Date(Date.now() + tokenData.expires_in * 1000),
           provider_user_id: accountData.user_id,
           provider_account_id: accountData.account_id,
-          metadata: {
-            account_name: accountData.account_name,
-            dc: accountData.dc,
-            api_endpoint: accountData.api_endpoint
-          }
+                     metadata: {
+             account_name: accountName,
+             dc: dataCenter,
+             api_endpoint: apiEndpoint
+           }
         })
         .select('id')
         .single()
@@ -214,14 +219,14 @@ serve(async (req) => {
         integration_id: integrationId,
         action: 'oauth_installation',
         status: 'success',
-        data: {
-          account_name: accountData.account_name,
-          dc: accountData.dc
-        }
+                 data: {
+           account_name: accountName,
+           dc: dataCenter
+         }
       })
 
-    // Rediriger vers le dashboard avec succès
-    const successUrl = `${siteUrl}/integrations/mailchimp?success=true&account=${encodeURIComponent(accountData.account_name)}`
+         // Rediriger vers le dashboard avec succès
+     const successUrl = `${siteUrl}/integrations/mailchimp?success=true&account=${encodeURIComponent(accountName)}`
     
     console.log('🎉 Installation Mailchimp réussie, redirection vers:', successUrl)
     
