@@ -3,20 +3,30 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { 
+      status: 200, 
+      headers: corsHeaders 
+    })
   }
 
   try {
+    console.log('🔗 Début de la fonction authorize')
+    
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('user_id')
     const storeId = searchParams.get('store_id')
     const returnUrl = searchParams.get('return_url')
 
+    console.log('📋 Paramètres reçus:', { userId, storeId, returnUrl })
+
     if (!userId || !storeId) {
+      console.log('❌ Paramètres manquants')
       return new Response(
         JSON.stringify({ 
           error: 'user_id et store_id sont requis',
@@ -30,9 +40,10 @@ serve(async (req) => {
     }
 
     const clientId = Deno.env.get('MAILCHIMP_CLIENT_ID')
-    const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+    console.log('🔑 Client ID:', clientId ? 'PRÉSENT' : 'MANQUANT')
     
     if (!clientId) {
+      console.log('❌ MAILCHIMP_CLIENT_ID manquant')
       return new Response(
         JSON.stringify({ error: 'MAILCHIMP_CLIENT_ID non configuré' }),
         { 
@@ -42,8 +53,9 @@ serve(async (req) => {
       )
     }
 
-    // URL de callback correcte pour Supabase Edge Functions
+    // URL de callback correcte
     const redirectUri = `https://grutldacuowplosarucp.supabase.co/functions/v1/oauth/mailchimp/callback`
+    console.log('🔄 Redirect URI:', redirectUri)
 
     const authUrl = new URL('https://login.mailchimp.com/oauth2/authorize')
     authUrl.searchParams.set('response_type', 'code')
@@ -51,7 +63,7 @@ serve(async (req) => {
     authUrl.searchParams.set('redirect_uri', redirectUri)
     authUrl.searchParams.set('scope', 'read_write')
     
-    // State avec timestamp pour sécurité
+    // State avec données sécurisées
     const state = JSON.stringify({ 
       userId, 
       storeId, 
@@ -61,14 +73,18 @@ serve(async (req) => {
     authUrl.searchParams.set('state', state)
 
     console.log('🔗 URL d\'autorisation générée:', authUrl.toString())
-    console.log('📋 Paramètres:', { userId, storeId, redirectUri })
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         auth_url: authUrl.toString(),
         message: 'Redirection vers Mailchimp...',
-        debug: { redirectUri, clientId: clientId ? '***' : 'MANQUANT' }
+        debug: { 
+          redirectUri, 
+          clientId: clientId ? '***' : 'MANQUANT',
+          userId,
+          storeId
+        }
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
