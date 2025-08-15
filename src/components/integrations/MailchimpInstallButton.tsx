@@ -38,7 +38,7 @@ const MailchimpInstallButton: React.FC<MailchimpInstallButtonProps> = ({
       
       // Appeler l'Edge Function pour obtenir l'URL d'autorisation
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/oauth/mailchimp/authorize?` +
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mailchimp-authorize?` +
         `user_id=${user.id}&store_id=${store.id}&return_url=${encodeURIComponent(window.location.href)}`,
         {
           headers: {
