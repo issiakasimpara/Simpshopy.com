@@ -123,7 +123,9 @@ serve(async (req) => {
 
     // Récupérer les informations du compte Mailchimp
     console.log('🔄 Récupération des informations du compte...')
-    const accountResponse = await fetch('https://us1.api.mailchimp.com/3.0/', {
+    
+    // Utiliser l'endpoint OAuth pour récupérer les informations du compte
+    const accountResponse = await fetch('https://login.mailchimp.com/oauth2/metadata', {
       headers: {
         'Authorization': `Bearer ${tokenData.access_token}`
       }
