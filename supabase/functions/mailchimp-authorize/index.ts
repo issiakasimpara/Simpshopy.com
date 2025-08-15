@@ -53,8 +53,8 @@ serve(async (req) => {
       )
     }
 
-    // URL de callback correcte
-    const redirectUri = `https://grutldacuowplosarucp.supabase.co/functions/v1/mailchimp-callback`
+    // URL de callback sur le domaine principal
+    const redirectUri = `https://simpshopy.com/api/oauth/mailchimp/callback`
     console.log('🔄 Redirect URI:', redirectUri)
 
     const authUrl = new URL('https://login.mailchimp.com/oauth2/authorize')
