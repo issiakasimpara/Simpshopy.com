@@ -5,11 +5,19 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 serve(async (req) => {
+  console.log('🔄 mailchimp-callback appelé:', req.method, req.url)
+  
+  // Gérer les requêtes OPTIONS (preflight CORS)
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    console.log('✅ Réponse OPTIONS CORS')
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    })
   }
 
   try {
@@ -18,10 +26,13 @@ serve(async (req) => {
     const state = searchParams.get('state')
     const error = searchParams.get('error')
 
+    console.log('📋 Paramètres reçus:', { code: !!code, state: !!state, error })
+
     // Vérifier s'il y a une erreur d'autorisation
     if (error) {
       console.error('❌ Erreur autorisation Mailchimp:', error)
-      const errorUrl = '/dashboard/integrations?error=mailchimp_oauth_denied'
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+      const errorUrl = `${siteUrl}/integrations/mailchimp?error=oauth_denied`
       return new Response(null, {
         status: 302,
         headers: {
@@ -33,7 +44,8 @@ serve(async (req) => {
 
     if (!code || !state) {
       console.error('❌ Code ou state manquant:', { code: !!code, state: !!state })
-      const errorUrl = '/dashboard/integrations?error=mailchimp_oauth_invalid'
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+      const errorUrl = `${siteUrl}/integrations/mailchimp?error=oauth_invalid`
       return new Response(null, {
         status: 302,
         headers: {
@@ -48,7 +60,8 @@ serve(async (req) => {
       stateData = JSON.parse(state)
     } catch (e) {
       console.error('❌ Erreur parsing state:', e)
-      const errorUrl = '/dashboard/integrations?error=mailchimp_oauth_invalid_state'
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+      const errorUrl = `${siteUrl}/integrations/mailchimp?error=oauth_invalid_state`
       return new Response(null, {
         status: 302,
         headers: {
@@ -58,11 +71,12 @@ serve(async (req) => {
       })
     }
 
-    const { userId, storeId, returnUrl } = stateData
+    const { userId, storeId } = stateData
 
     if (!userId || !storeId) {
       console.error('❌ userId ou storeId manquant dans le state')
-      const errorUrl = '/dashboard/integrations?error=mailchimp_oauth_invalid_data'
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+      const errorUrl = `${siteUrl}/integrations/mailchimp?error=oauth_invalid_data`
       return new Response(null, {
         status: 302,
         headers: {
@@ -154,7 +168,7 @@ serve(async (req) => {
           provider_account_id: accountData.account_id,
           metadata: {
             account_name: accountData.account_name,
-            dc: accountData.dc, // Data center
+            dc: accountData.dc,
             api_endpoint: accountData.api_endpoint
           },
           updated_at: new Date()
@@ -179,7 +193,7 @@ serve(async (req) => {
           provider_account_id: accountData.account_id,
           metadata: {
             account_name: accountData.account_name,
-            dc: accountData.dc, // Data center
+            dc: accountData.dc,
             api_endpoint: accountData.api_endpoint
           }
         })
@@ -205,7 +219,6 @@ serve(async (req) => {
       })
 
     // Rediriger vers le dashboard avec succès
-    const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
     const successUrl = `${siteUrl}/integrations/mailchimp?success=true&account=${encodeURIComponent(accountData.account_name)}`
     
     console.log('🎉 Installation Mailchimp réussie, redirection vers:', successUrl)
