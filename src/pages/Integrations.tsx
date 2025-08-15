@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { INTEGRATIONS, Integration } from '../data/integrations';
 import IntegrationCard from '../components/integrations/IntegrationCard';
 import { useAuth } from '../hooks/useAuth';
+import { useStores } from '../hooks/useStores';
 import DashboardLayout from '../components/DashboardLayout';
 import {
   getInstalledIntegrations,
+  getOAuthIntegrations,
   installIntegration,
-  uninstallIntegration
+  uninstallIntegration,
+  isIntegrationInstalled
 } from '../services/installedIntegrationsService';
 
 const getCategories = (integrations: Integration[]) => [
@@ -15,6 +18,7 @@ const getCategories = (integrations: Integration[]) => [
 
 const IntegrationsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { store } = useStores();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [installed, setInstalled] = useState<string[]>([]);
@@ -27,19 +31,42 @@ const IntegrationsPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    getInstalledIntegrations(user.id)
-      .then(data => setInstalled(data.map(i => i.integration_id)))
-      .catch(e => setError('Erreur lors du chargement des intégrations installées'))
-      .finally(() => setLoading(false));
-  }, [user]);
+    
+    const loadIntegrations = async () => {
+      try {
+        // Charger les intégrations classiques
+        const classicIntegrations = await getInstalledIntegrations(user.id);
+        const classicIds = classicIntegrations.map(i => i.integration_id);
+        
+        // Charger les intégrations OAuth
+        const oauthIntegrations = await getOAuthIntegrations(user.id, store?.id);
+        const oauthIds = oauthIntegrations.map(i => i.provider);
+        
+        // Combiner les deux listes
+        const allInstalled = [...classicIds, ...oauthIds];
+        setInstalled(allInstalled);
+      } catch (e) {
+        console.error('Erreur chargement intégrations:', e);
+        setError('Erreur lors du chargement des intégrations installées');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadIntegrations();
+  }, [user, store]);
 
   const handleInstall = async (integrationId: string) => {
     if (!user) return;
     setLoading(true);
     try {
       await installIntegration(user.id, integrationId);
-      setInstalled(prev => [...prev, integrationId]);
+      // Pour Mailchimp, la redirection est gérée dans le service
+      if (integrationId !== 'mailchimp') {
+        setInstalled(prev => [...prev, integrationId]);
+      }
     } catch (e) {
+      console.error('Erreur installation:', e);
       setError('Erreur lors de l\'installation');
     } finally {
       setLoading(false);
@@ -51,8 +78,12 @@ const IntegrationsPage: React.FC = () => {
     setLoading(true);
     try {
       await uninstallIntegration(user.id, integrationId);
-      setInstalled(prev => prev.filter(id => id !== integrationId));
+      // Pour Mailchimp, la redirection est gérée dans le service
+      if (integrationId !== 'mailchimp') {
+        setInstalled(prev => prev.filter(id => id !== integrationId));
+      }
     } catch (e) {
+      console.error('Erreur désinstallation:', e);
       setError('Erreur lors de la désinstallation');
     } finally {
       setLoading(false);
