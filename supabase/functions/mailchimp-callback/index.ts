@@ -204,7 +204,8 @@ serve(async (req) => {
       })
 
     // Rediriger vers le dashboard avec succès
-    const successUrl = `${returnUrl}?success=mailchimp&account=${encodeURIComponent(accountData.account_name)}`
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+    const successUrl = `${siteUrl}/integrations/mailchimp?success=true&account=${encodeURIComponent(accountData.account_name)}`
     
     console.log('🎉 Installation Mailchimp réussie, redirection vers:', successUrl)
     
@@ -239,7 +240,8 @@ serve(async (req) => {
     }
     
     // Rediriger vers le dashboard avec erreur
-    const errorUrl = '/dashboard/integrations?error=mailchimp_oauth_failed'
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+    const errorUrl = `${siteUrl}/integrations/mailchimp?error=oauth_failed`
     
     return new Response(null, {
       status: 302,

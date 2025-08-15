@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useStores } from '@/hooks/useStores'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { useSearchParams } from 'react-router-dom'
 import DashboardLayout from '@/components/DashboardLayout'
 import MailchimpInstallButton from '@/components/integrations/MailchimpInstallButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,6 +46,7 @@ const MailchimpIntegration = () => {
   const [integration, setIntegration] = useState<OAuthIntegration | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [searchParams] = useSearchParams()
 
   // Vérifier si l'intégration est installée
   useEffect(() => {
@@ -85,6 +87,30 @@ const MailchimpIntegration = () => {
 
     checkIntegration()
   }, [user, store])
+
+  // Gérer les paramètres de succès/erreur
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const error = searchParams.get('error')
+    const account = searchParams.get('account')
+
+    if (success === 'true') {
+      toast({
+        title: "Installation réussie !",
+        description: account ? `Mailchimp connecté avec le compte ${account}` : "Mailchimp a été installé avec succès",
+      })
+      // Recharger la page pour afficher l'état installé
+      window.location.reload()
+    }
+
+    if (error) {
+      toast({
+        title: "Erreur d'installation",
+        description: "Impossible d'installer Mailchimp. Veuillez réessayer.",
+        variant: "destructive"
+      })
+    }
+  }, [searchParams, toast])
 
   const handleUninstall = async () => {
     if (!integration) return
@@ -206,6 +232,13 @@ const MailchimpIntegration = () => {
                 </div>
                 
                 <div className="flex gap-4">
+                  <Button 
+                    onClick={() => window.open('https://mailchimp.com', '_blank')}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-4 w-4 mr-2" />
+                    Ouvrir Mailchimp
+                  </Button>
                   <Button variant="outline" onClick={handleUninstall} disabled={isRefreshing}>
                     {isRefreshing ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
