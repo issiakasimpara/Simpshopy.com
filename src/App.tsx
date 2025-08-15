@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import CartWidget from "@/components/site-builder/blocks/CartWidget";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import DomainRouter from "@/components/DomainRouter";
+
 // ⚡ ÉTAPE 2: LAZY LOADING PROGRESSIF
 import { lazy, Suspense } from 'react';
 
@@ -32,6 +33,7 @@ const Testimonials = lazy(() => import("./pages/Testimonials"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const TestSave = lazy(() => import("./pages/TestSave"));
 const TestMarkets = lazy(() => import("./pages/TestMarkets"));
+
 // const MonerooTest = lazy(() => import("./pages/MonerooTest")); // Supprimé
 
 // ÉTAPE 2B: Pages de configuration (lazy loading)
@@ -109,6 +111,8 @@ const CartWidgetConditional = () => {
 
   return <CartWidget />;
 };
+
+
 
 const App = () => {
   // ⚡ ÉTAPE 3: État du moniteur de performance
@@ -435,10 +439,15 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              
+
+              
               <Route path="*" element={<NotFound />} />
               </Routes>
             </ErrorBoundary>
             <CartWidgetConditional />
+            
+
 
             {/* ⚡ ÉTAPE 3: Moniteur de performance (dev uniquement) */}
             {import.meta.env.DEV && (

@@ -97,6 +97,8 @@ serve(async (req) => {
     // Envoyer notification push
     await sendPushNotification(orderData, storeData)
 
+
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -193,6 +195,9 @@ async function sendPushNotification(orderData: OrderData, storeData: StoreData) 
   // Pour l'instant, on log juste
   console.log(`🔔 Push notification sent for order ${orderData.id} in store ${storeData.name}`)
 }
+
+// 📱 Envoyer les notifications WhatsApp pour une commande
+
 
 function generateAdminEmailTemplate(orderData: OrderData, storeData: StoreData): string {
   const orderNumber = orderData.id.slice(-6)
