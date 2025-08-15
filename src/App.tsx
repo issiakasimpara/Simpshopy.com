@@ -67,6 +67,7 @@ import SystemDiagnosticPanel from './components/SystemDiagnosticPanel';
 // Ajouter l'import pour la page Integrations
 const Integrations = lazy(() => import("./pages/Integrations"));
 const IntegrationDetailPage = lazy(() => import("./pages/IntegrationDetailPage"));
+const MailchimpIntegration = lazy(() => import("./pages/integrations/MailchimpIntegration"));
 
 const queryClient = new QueryClient();
 
@@ -435,6 +436,16 @@ const App = () => {
                   <ProtectedRoute>
                     <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
                       <IntegrationDetailPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/integrations/mailchimp"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <MailchimpIntegration />
                     </Suspense>
                   </ProtectedRoute>
                 }
