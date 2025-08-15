@@ -18,50 +18,74 @@ serve(async (req) => {
 
     if (!userId || !storeId) {
       return new Response(
-        JSON.stringify({ error: 'Paramètres manquants: user_id et store_id requis' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'user_id et store_id sont requis',
+          received: { userId, storeId }
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
-    // Générer l'URL d'autorisation Mailchimp
     const clientId = Deno.env.get('MAILCHIMP_CLIENT_ID')
     const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
-    const redirectUri = `${siteUrl}/api/oauth/mailchimp/callback`
     
     if (!clientId) {
-      throw new Error('MAILCHIMP_CLIENT_ID non configuré')
+      return new Response(
+        JSON.stringify({ error: 'MAILCHIMP_CLIENT_ID non configuré' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
+
+    // URL de callback correcte pour Supabase Edge Functions
+    const redirectUri = `https://grutldacuowplosarucp.supabase.co/functions/v1/oauth/mailchimp/callback`
 
     const authUrl = new URL('https://login.mailchimp.com/oauth2/authorize')
     authUrl.searchParams.set('response_type', 'code')
     authUrl.searchParams.set('client_id', clientId)
     authUrl.searchParams.set('redirect_uri', redirectUri)
     authUrl.searchParams.set('scope', 'read_write')
-    authUrl.searchParams.set('state', JSON.stringify({ 
+    
+    // State avec timestamp pour sécurité
+    const state = JSON.stringify({ 
       userId, 
       storeId, 
       returnUrl: returnUrl || '/dashboard/integrations',
       timestamp: Date.now()
-    }))
+    })
+    authUrl.searchParams.set('state', state)
 
-    console.log('🔐 URL d\'autorisation Mailchimp générée:', authUrl.toString())
+    console.log('🔗 URL d\'autorisation générée:', authUrl.toString())
+    console.log('📋 Paramètres:', { userId, storeId, redirectUri })
 
     return new Response(
       JSON.stringify({ 
-        success: true,
+        success: true, 
         auth_url: authUrl.toString(),
-        message: 'Redirection vers Mailchimp pour autorisation...'
+        message: 'Redirection vers Mailchimp...',
+        debug: { redirectUri, clientId: clientId ? '***' : 'MANQUANT' }
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
+
   } catch (error) {
-    console.error('❌ Erreur autorisation Mailchimp:', error)
+    console.error('❌ Erreur dans authorize:', error)
     return new Response(
       JSON.stringify({ 
-        error: 'Erreur lors de l\'autorisation',
-        details: error instanceof Error ? error.message : 'Erreur inconnue'
+        error: 'Erreur interne du serveur',
+        details: error.message 
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   }
 })
