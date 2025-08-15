@@ -144,7 +144,7 @@ const MailchimpIntegration = () => {
       <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-            <Mail className="h-6 w-6 text-orange-600" />
+            <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-3">
