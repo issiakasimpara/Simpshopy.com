@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useStores } from '@/hooks/useStores'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, Mail } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 interface MailchimpInstallButtonProps {
   onSuccess?: () => void
@@ -87,12 +87,12 @@ const MailchimpInstallButton: React.FC<MailchimpInstallButtonProps> = ({
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           Installation...
         </>
-      ) : (
-        <>
-          <Mail className="h-4 w-4 mr-2" />
-          Installer Mailchimp
-        </>
-      )}
+             ) : (
+         <>
+           <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-4 w-4 mr-2" />
+           Installer Mailchimp
+         </>
+       )}
     </Button>
   )
 }

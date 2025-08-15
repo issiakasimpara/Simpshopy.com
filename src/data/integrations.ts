@@ -77,7 +77,7 @@ export const INTEGRATIONS: Integration[] = [
     id: 'mailchimp',
     name: 'Mailchimp',
     description: "Mailchimp est une plateforme marketing tout-en-un qui vous aide à gérer et à communiquer avec vos clients et autres parties intéressées.",
-    iconUrl: '/public/mailchimp.png',
+    iconUrl: '/mailchimp-logo.svg',
     category: 'Emailing',
     website: 'https://mailchimp.com/',
   },
