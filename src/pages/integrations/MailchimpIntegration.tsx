@@ -15,8 +15,7 @@ import {
   Settings, 
   Loader2,
   Users,
-  BarChart3,
-  RefreshCw
+  BarChart3
 } from 'lucide-react'
 
 interface OAuthIntegration {
@@ -45,7 +44,6 @@ const MailchimpIntegration = () => {
   const { toast } = useToast()
   const [integration, setIntegration] = useState<OAuthIntegration | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchParams] = useSearchParams()
 
   // Vérifier si l'intégration est installée
@@ -116,8 +114,6 @@ const MailchimpIntegration = () => {
     if (!integration) return
 
     try {
-      setIsRefreshing(true)
-      
       const { error } = await supabase
         .from('oauth_integrations')
         .update({ is_active: false })
@@ -137,33 +133,10 @@ const MailchimpIntegration = () => {
         description: "Impossible de désinstaller Mailchimp",
         variant: "destructive"
       })
-    } finally {
-      setIsRefreshing(false)
     }
   }
 
-  const handleRefresh = async () => {
-    if (!integration) return
 
-    try {
-      setIsRefreshing(true)
-      
-      // Ici on pourrait implémenter le refresh du token
-      toast({
-        title: "Actualisation",
-        description: "Intégration Mailchimp actualisée"
-      })
-    } catch (error) {
-      console.error('❌ Erreur actualisation:', error)
-      toast({
-        title: "Erreur",
-        description: "Impossible d'actualiser l'intégration",
-        variant: "destructive"
-      })
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
 
   return (
     <DashboardLayout>
@@ -231,33 +204,21 @@ const MailchimpIntegration = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <Button 
                     onClick={() => window.open('https://mailchimp.com', '_blank')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    className="bg-orange-600 hover:bg-orange-700 text-white flex-1"
                   >
                     <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-4 w-4 mr-2" />
                     Ouvrir Mailchimp
                   </Button>
-                  <Button variant="outline" onClick={handleUninstall} disabled={isRefreshing}>
-                    {isRefreshing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 mr-2" />
-                    )}
+                  <Button variant="outline" onClick={handleUninstall}>
+                    <AlertCircle className="h-4 w-4 mr-2" />
                     Désinstaller
                   </Button>
-                  <Button onClick={handleRefresh} disabled={isRefreshing}>
-                    {isRefreshing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    Actualiser
-                  </Button>
-                  <Button>
+                  <Button variant="outline">
                     <Settings className="h-4 w-4 mr-2" />
-                    Configurer
+                    Paramètres
                   </Button>
                 </div>
               </CardContent>
