@@ -25,6 +25,21 @@ serve(async (req) => {
     console.log('✅ Requête GET autorisée (callback Mailchimp)')
   }
 
+  // Vérifier l'autorisation seulement pour les requêtes POST
+  if (req.method === 'POST') {
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader) {
+      console.log('❌ Header d\'autorisation manquant pour POST')
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+  }
+
   try {
     const { searchParams } = new URL(req.url)
     const code = searchParams.get('code')
