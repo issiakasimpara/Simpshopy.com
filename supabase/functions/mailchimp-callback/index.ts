@@ -20,6 +20,11 @@ serve(async (req) => {
     })
   }
 
+  // Autoriser les requêtes GET sans autorisation (callback Mailchimp)
+  if (req.method === 'GET') {
+    console.log('✅ Requête GET autorisée (callback Mailchimp)')
+  }
+
   try {
     const { searchParams } = new URL(req.url)
     const code = searchParams.get('code')
