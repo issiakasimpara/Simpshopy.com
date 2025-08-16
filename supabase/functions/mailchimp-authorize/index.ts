@@ -53,9 +53,9 @@ serve(async (req) => {
       )
     }
 
-    // URL de callback direct vers l'Edge Function
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const redirectUri = `${supabaseUrl}/functions/v1/mailchimp-callback`
+    // URL de callback vers le frontend (proxy)
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
+    const redirectUri = `${siteUrl}/api/oauth/mailchimp/callback`
     console.log('🔄 Redirect URI:', redirectUri)
 
     const authUrl = new URL('https://login.mailchimp.com/oauth2/authorize')

@@ -41,10 +41,21 @@ serve(async (req) => {
   }
 
   try {
-    const { searchParams } = new URL(req.url)
-    const code = searchParams.get('code')
-    const state = searchParams.get('state')
-    const error = searchParams.get('error')
+    let code, state, error
+    
+    if (req.method === 'GET') {
+      // Paramètres depuis l'URL (callback direct Mailchimp)
+      const { searchParams } = new URL(req.url)
+      code = searchParams.get('code')
+      state = searchParams.get('state')
+      error = searchParams.get('error')
+    } else if (req.method === 'POST') {
+      // Paramètres depuis le body (proxy frontend)
+      const body = await req.json()
+      code = body.code
+      state = body.state
+      error = body.error
+    }
 
     console.log('📋 Paramètres reçus:', { code: !!code, state: !!state, error })
 
@@ -112,7 +123,7 @@ serve(async (req) => {
     const clientId = Deno.env.get('MAILCHIMP_CLIENT_ID')
     const clientSecret = Deno.env.get('MAILCHIMP_CLIENT_SECRET')
     const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
-    const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/mailchimp-callback`
+    const redirectUri = `${siteUrl}/api/oauth/mailchimp/callback`
 
     if (!clientId || !clientSecret) {
       throw new Error('MAILCHIMP_CLIENT_ID ou MAILCHIMP_CLIENT_SECRET non configuré')
