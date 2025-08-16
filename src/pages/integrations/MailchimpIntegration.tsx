@@ -17,7 +17,8 @@ import {
   Loader2,
   Users,
   BarChart3,
-  RefreshCw
+  RefreshCw,
+  Maximize2
 } from 'lucide-react'
 
 interface OAuthIntegration {
@@ -248,6 +249,14 @@ const MailchimpIntegration = () => {
                       >
                         <BarChart3 className="h-4 w-4 mr-2" />
                         Tableau de bord
+                      </Button>
+                      <Button 
+                        onClick={() => window.open('/integrations/mailchimp/embedded', '_blank')}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Maximize2 className="h-4 w-4 mr-2" />
+                        Interface intégrée
                       </Button>
                   <Button variant="outline" onClick={handleUninstall}>
                     <AlertCircle className="h-4 w-4 mr-2" />
