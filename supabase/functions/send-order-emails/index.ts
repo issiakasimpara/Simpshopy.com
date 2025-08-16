@@ -88,13 +88,49 @@ serve(async (req) => {
       throw new Error(`Admin not found: ${adminError?.message}`)
     }
 
-    // Envoyer les emails
+    // 1. Synchroniser le client vers Mailchimp
+    try {
+      console.log('🔄 Synchronisation client vers Mailchimp...')
+      
+      const customerData = {
+        email: orderData.customer_email,
+        first_name: orderData.customer_name?.split(' ')[0] || '',
+        last_name: orderData.customer_name?.split(' ').slice(1).join(' ') || '',
+        phone: orderData.shipping_address?.phone || '',
+        store_name: storeData.name || 'Simpshopy Store'
+      }
+
+      const mailchimpResponse = await fetch(`${supabaseUrl}/functions/v1/mailchimp-sync-customers`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: storeData.merchant_id,
+          storeId: storeData.id,
+          customerData
+        })
+      })
+
+      if (mailchimpResponse.ok) {
+        const mailchimpResult = await mailchimpResponse.json()
+        console.log('✅ Client synchronisé vers Mailchimp:', mailchimpResult)
+      } else {
+        console.log('ℹ️ Synchronisation Mailchimp ignorée (pas d\'intégration active)')
+      }
+    } catch (mailchimpError) {
+      console.error('❌ Erreur synchronisation Mailchimp:', mailchimpError)
+      // Ne pas faire échouer l'envoi d'emails si la synchronisation échoue
+    }
+
+    // 2. Envoyer les emails
     const results = await Promise.allSettled([
       sendAdminEmail(orderData, storeData, adminData.email),
       sendCustomerEmail(orderData, storeData)
     ])
 
-    // Envoyer notification push
+    // 3. Envoyer notification push
     await sendPushNotification(orderData, storeData)
 
 
