@@ -54,6 +54,7 @@ serve(async (req) => {
     }
 
     // URL de callback direct vers l'Edge Function
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const redirectUri = `${supabaseUrl}/functions/v1/mailchimp-callback`
     console.log('🔄 Redirect URI:', redirectUri)
 
