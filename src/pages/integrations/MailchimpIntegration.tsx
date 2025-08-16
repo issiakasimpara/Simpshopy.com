@@ -9,13 +9,15 @@ import MailchimpInstallButton from '@/components/integrations/MailchimpInstallBu
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { mailchimpService, MailchimpAnalytics } from '@/services/mailchimpService'
 import { 
   CheckCircle, 
   AlertCircle, 
   Settings, 
   Loader2,
   Users,
-  BarChart3
+  BarChart3,
+  RefreshCw
 } from 'lucide-react'
 
 interface OAuthIntegration {
@@ -44,6 +46,13 @@ const MailchimpIntegration = () => {
   const { toast } = useToast()
   const [integration, setIntegration] = useState<OAuthIntegration | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [analytics, setAnalytics] = useState<MailchimpAnalytics>({
+    subscribers: 0,
+    open_rate: 0,
+    click_rate: 0,
+    campaigns: 0
+  })
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
   const [searchParams] = useSearchParams()
 
   // Vérifier si l'intégration est installée
@@ -73,6 +82,11 @@ const MailchimpIntegration = () => {
         if (data) {
           console.log('✅ Intégration Mailchimp trouvée:', data.metadata?.account_name)
           setIntegration(data)
+          
+          // Charger les analytics si l'intégration est active
+          if (user && store) {
+            loadAnalytics()
+          }
         } else {
           console.log('ℹ️ Aucune intégration Mailchimp trouvée')
         }
@@ -85,6 +99,21 @@ const MailchimpIntegration = () => {
 
     checkIntegration()
   }, [user, store])
+
+  // Fonction pour charger les analytics
+  const loadAnalytics = async () => {
+    if (!user || !store) return
+
+    try {
+      setIsLoadingAnalytics(true)
+      const analyticsData = await mailchimpService.getAnalytics(user.id, store.id)
+      setAnalytics(analyticsData)
+    } catch (error) {
+      console.error('❌ Erreur chargement analytics:', error)
+    } finally {
+      setIsLoadingAnalytics(false)
+    }
+  }
 
   // Gérer les paramètres de succès/erreur
   useEffect(() => {
@@ -227,27 +256,66 @@ const MailchimpIntegration = () => {
             {/* Section Analytics */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-5 w-5" />
-                  Analytics Mailchimp
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-5 w-5" />
+                    Analytics Mailchimp
+                  </CardTitle>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={loadAnalytics}
+                    disabled={isLoadingAnalytics}
+                  >
+                    {isLoadingAnalytics ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                    )}
+                    Actualiser
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">0</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {isLoadingAnalytics ? (
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                      ) : (
+                        analytics.subscribers.toLocaleString()
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">Abonnés</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">0%</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {isLoadingAnalytics ? (
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                      ) : (
+                        `${(analytics.open_rate * 100).toFixed(1)}%`
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">Taux d'ouverture</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">0%</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {isLoadingAnalytics ? (
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                      ) : (
+                        `${(analytics.click_rate * 100).toFixed(1)}%`
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">Taux de clic</p>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">0</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {isLoadingAnalytics ? (
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                      ) : (
+                        analytics.campaigns
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">Campagnes</p>
                   </div>
                 </div>
