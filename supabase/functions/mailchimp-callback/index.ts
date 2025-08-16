@@ -97,7 +97,7 @@ serve(async (req) => {
     const clientId = Deno.env.get('MAILCHIMP_CLIENT_ID')
     const clientSecret = Deno.env.get('MAILCHIMP_CLIENT_SECRET')
     const siteUrl = Deno.env.get('SITE_URL') || 'https://simpshopy.com'
-    const redirectUri = `${siteUrl}/api/oauth/mailchimp/callback`
+    const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/mailchimp-callback`
 
     if (!clientId || !clientSecret) {
       throw new Error('MAILCHIMP_CLIENT_ID ou MAILCHIMP_CLIENT_SECRET non configuré')
