@@ -69,7 +69,6 @@ const Integrations = lazy(() => import("./pages/Integrations"));
 const IntegrationDetailPage = lazy(() => import("./pages/IntegrationDetailPage"));
 const MailchimpIntegration = lazy(() => import("./pages/integrations/MailchimpIntegration"));
 const MailchimpDashboard = lazy(() => import("./pages/integrations/MailchimpDashboard"));
-const MailchimpEmbedded = lazy(() => import("./pages/integrations/MailchimpEmbedded"));
 const MailchimpCallback = lazy(() => import("./pages/api/oauth/mailchimp/callback"));
 
 const queryClient = new QueryClient();
@@ -463,16 +462,7 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/integrations/mailchimp/embedded"
-                element={
-                  <ProtectedRoute>
-                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                      <MailchimpEmbedded />
-                    </Suspense>
-                  </ProtectedRoute>
-                }
-              />
+
               <Route
                 path="/api/oauth/mailchimp/callback"
                 element={
