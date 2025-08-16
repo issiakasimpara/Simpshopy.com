@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useStores } from '@/hooks/useStores'
 import { useToast } from '@/hooks/use-toast'
 import { mailchimpService } from '@/services/mailchimpService'
+import { supabase } from '@/integrations/supabase/client'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,29 +20,97 @@ import {
   MousePointer
 } from 'lucide-react'
 
-interface MailchimpDashboardProps {
-  integration: any
+interface OAuthIntegration {
+  id: string
+  user_id: string
+  store_id: string
+  provider: string
+  access_token: string
+  refresh_token?: string
+  token_expires_at: string
+  provider_user_id?: string
+  provider_account_id?: string
+  metadata?: {
+    account_name?: string
+    dc?: string
+    api_endpoint?: string
+  }
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
-const MailchimpDashboard = ({ integration }: MailchimpDashboardProps) => {
+const MailchimpDashboard = () => {
   const { user } = useAuth()
   const { store } = useStores()
   const { toast } = useToast()
+  const [integration, setIntegration] = useState<OAuthIntegration | null>(null)
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
+  // Récupérer l'intégration Mailchimp
   useEffect(() => {
-    if (user && store) {
-      loadAnalytics()
+    const loadIntegration = async () => {
+      if (!user || !store) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        console.log('🔍 Chargement intégration Mailchimp...')
+        
+        const { data, error } = await supabase
+          .from('oauth_integrations')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('store_id', store.id)
+          .eq('provider', 'mailchimp')
+          .eq('is_active', true)
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('❌ Erreur chargement intégration:', error)
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger l'intégration Mailchimp",
+            variant: "destructive"
+          })
+          return
+        }
+
+        if (data) {
+          console.log('✅ Intégration Mailchimp trouvée:', data.metadata?.account_name)
+          setIntegration(data)
+          // Charger les analytics
+          await loadAnalytics()
+        } else {
+          console.log('ℹ️ Aucune intégration Mailchimp trouvée')
+          toast({
+            title: "Aucune intégration",
+            description: "Aucune intégration Mailchimp active trouvée",
+            variant: "destructive"
+          })
+        }
+      } catch (error) {
+        console.error('❌ Erreur chargement intégration:', error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger l'intégration Mailchimp",
+          variant: "destructive"
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [user, store])
+
+    loadIntegration()
+  }, [user, store, toast])
 
   const loadAnalytics = async () => {
-    if (!user || !store) return
+    if (!user || !store || !integration) return
 
     try {
-      setIsLoading(true)
       const data = await mailchimpService.getAnalytics(user.id, store.id)
       setAnalytics(data)
     } catch (error) {
@@ -51,8 +120,6 @@ const MailchimpDashboard = ({ integration }: MailchimpDashboardProps) => {
         description: "Impossible de charger les analytics Mailchimp",
         variant: "destructive"
       })
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -77,6 +144,27 @@ const MailchimpDashboard = ({ integration }: MailchimpDashboardProps) => {
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
             <p>Chargement des données Mailchimp...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (!integration) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-8 w-8" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Aucune intégration Mailchimp</h2>
+            <p className="text-muted-foreground mb-4">
+              Vous devez d'abord installer Mailchimp pour accéder au tableau de bord.
+            </p>
+            <Button onClick={() => window.location.href = '/integrations/mailchimp'}>
+              Installer Mailchimp
+            </Button>
           </div>
         </div>
       </DashboardLayout>
