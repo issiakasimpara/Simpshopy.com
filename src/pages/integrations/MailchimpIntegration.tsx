@@ -234,13 +234,21 @@ const MailchimpIntegration = () => {
                 </div>
                 
                 <div className="flex gap-3">
-                  <Button 
-                    onClick={() => window.open('https://mailchimp.com', '_blank')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white flex-1"
-                  >
-                    <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-4 w-4 mr-2" />
-                    Ouvrir Mailchimp
-                  </Button>
+                                        <Button 
+                        onClick={() => window.open('https://mailchimp.com', '_blank')}
+                        className="bg-orange-600 hover:bg-orange-700 text-white flex-1"
+                      >
+                        <img src="/mailchimp-logo.svg" alt="Mailchimp" className="h-4 w-4 mr-2" />
+                        Ouvrir Mailchimp
+                      </Button>
+                      <Button 
+                        onClick={() => window.open('/integrations/mailchimp/dashboard', '_blank')}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Tableau de bord
+                      </Button>
                   <Button variant="outline" onClick={handleUninstall}>
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Désinstaller

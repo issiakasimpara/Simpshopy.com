@@ -64,6 +64,13 @@ serve(async (req) => {
     if (tokenExpiresAt <= new Date()) {
       console.log('🔄 Token expiré, rafraîchissement...')
       
+      if (!integration.refresh_token) {
+        console.error('❌ Refresh token manquant')
+        throw new Error('Refresh token manquant pour rafraîchir l\'accès')
+      }
+      
+      console.log('🔄 Tentative de rafraîchissement avec refresh_token:', integration.refresh_token.substring(0, 10) + '...')
+      
       const refreshResponse = await fetch('https://login.mailchimp.com/oauth2/token', {
         method: 'POST',
         headers: {
@@ -73,15 +80,22 @@ serve(async (req) => {
           grant_type: 'refresh_token',
           client_id: Deno.env.get('MAILCHIMP_CLIENT_ID') || '',
           client_secret: Deno.env.get('MAILCHIMP_CLIENT_SECRET') || '',
-          refresh_token: integration.refresh_token || ''
+          refresh_token: integration.refresh_token
         })
       })
 
       if (!refreshResponse.ok) {
-        throw new Error('Impossible de rafraîchir le token Mailchimp')
+        const errorText = await refreshResponse.text()
+        console.error('❌ Erreur rafraîchissement token:', refreshResponse.status, errorText)
+        throw new Error(`Impossible de rafraîchir le token Mailchimp: ${refreshResponse.status} - ${errorText}`)
       }
 
       const refreshData = await refreshResponse.json()
+      console.log('🔄 Données de rafraîchissement reçues:', { 
+        has_access_token: !!refreshData.access_token,
+        has_refresh_token: !!refreshData.refresh_token,
+        expires_in: refreshData.expires_in
+      })
       
       await supabaseAdmin
         .from('oauth_integrations')
