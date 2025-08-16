@@ -20,7 +20,7 @@ serve(async (req) => {
     })
   }
 
-  // Autoriser les requêtes GET sans autorisation (callback Mailchimp)
+  // Autoriser toutes les requêtes GET sans autorisation (callback Mailchimp)
   if (req.method === 'GET') {
     console.log('✅ Requête GET autorisée (callback Mailchimp)')
   }
