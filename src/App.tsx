@@ -70,6 +70,7 @@ const IntegrationDetailPage = lazy(() => import("./pages/IntegrationDetailPage")
 const MailchimpIntegration = lazy(() => import("./pages/integrations/MailchimpIntegration"));
 const MailchimpDashboard = lazy(() => import("./pages/integrations/MailchimpDashboard"));
 const MailchimpCallback = lazy(() => import("./pages/api/oauth/mailchimp/callback"));
+const DsersIntegration = lazy(() => import("./pages/integrations/DsersIntegration"));
 
 const queryClient = new QueryClient();
 
@@ -471,8 +472,16 @@ const App = () => {
                   </Suspense>
                 }
               />
-              
-
+              <Route
+                path="/integrations/dsers"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <DsersIntegration />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
               
               <Route path="*" element={<NotFound />} />
               </Routes>

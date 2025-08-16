@@ -81,4 +81,12 @@ export const INTEGRATIONS: Integration[] = [
     category: 'Emailing',
     website: 'https://mailchimp.com/',
   },
+  {
+    id: 'dsers',
+    name: 'DSERS Dropshipping',
+    description: "DSERS vous permet d'importer facilement des produits AliExpress dans votre boutique avec synchronisation automatique des prix et stocks.",
+    iconUrl: '/dsers-logo.svg',
+    category: 'Dropshipping',
+    website: 'https://dsers.com/',
+  },
 ]; 
