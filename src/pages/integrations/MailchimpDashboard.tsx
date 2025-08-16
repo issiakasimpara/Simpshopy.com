@@ -46,6 +46,7 @@ const MailchimpDashboard = () => {
   const { toast } = useToast()
   const [integration, setIntegration] = useState<OAuthIntegration | null>(null)
   const [analytics, setAnalytics] = useState<any>(null)
+  const [recentCampaigns, setRecentCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -113,6 +114,11 @@ const MailchimpDashboard = () => {
     try {
       const data = await mailchimpService.getAnalytics(user.id, store.id)
       setAnalytics(data)
+      
+      // Si les analytics contiennent des campagnes, les utiliser
+      if (data.campaigns && Array.isArray(data.campaigns)) {
+        setRecentCampaigns(data.campaigns.slice(0, 5)) // Limiter à 5 campagnes récentes
+      }
     } catch (error) {
       console.error('Erreur chargement analytics:', error)
       toast({
@@ -135,6 +141,32 @@ const MailchimpDashboard = () => {
 
   const openMailchimp = () => {
     window.open('https://mailchimp.com', '_blank')
+  }
+
+  const openMailchimpCampaigns = () => {
+    // Utiliser le data center spécifique si disponible
+    const dataCenter = integration?.metadata?.dc || 'us1'
+    window.open(`https://${dataCenter}.admin.mailchimp.com/campaigns/`, '_blank')
+  }
+
+  const openMailchimpAudience = () => {
+    const dataCenter = integration?.metadata?.dc || 'us1'
+    window.open(`https://${dataCenter}.admin.mailchimp.com/lists/`, '_blank')
+  }
+
+  const openMailchimpReports = () => {
+    const dataCenter = integration?.metadata?.dc || 'us1'
+    window.open(`https://${dataCenter}.admin.mailchimp.com/reports/`, '_blank')
+  }
+
+  const openMailchimpAutomation = () => {
+    const dataCenter = integration?.metadata?.dc || 'us1'
+    window.open(`https://${dataCenter}.admin.mailchimp.com/automation/`, '_blank')
+  }
+
+  const openMailchimpTemplates = () => {
+    const dataCenter = integration?.metadata?.dc || 'us1'
+    window.open(`https://${dataCenter}.admin.mailchimp.com/templates/`, '_blank')
   }
 
   if (isLoading) {
@@ -294,28 +326,79 @@ const MailchimpDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions rapides</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-20 flex-col" onClick={openMailchimp}>
-                <Mail className="h-6 w-6 mb-2" />
-                <span>Créer une campagne</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={openMailchimp}>
-                <Users className="h-6 w-6 mb-2" />
-                <span>Gérer les abonnés</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={openMailchimp}>
-                <BarChart3 className="h-6 w-6 mb-2" />
-                <span>Voir les rapports</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                 {/* Quick Actions */}
+         <Card>
+           <CardHeader>
+             <CardTitle>Actions rapides</CardTitle>
+           </CardHeader>
+           <CardContent>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimpCampaigns}>
+                 <Mail className="h-6 w-6 mb-2" />
+                 <span>Créer une campagne</span>
+               </Button>
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimpAudience}>
+                 <Users className="h-6 w-6 mb-2" />
+                 <span>Gérer les abonnés</span>
+               </Button>
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimpReports}>
+                 <BarChart3 className="h-6 w-6 mb-2" />
+                 <span>Voir les rapports</span>
+               </Button>
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimpAutomation}>
+                 <TrendingUp className="h-6 w-6 mb-2" />
+                 <span>Automatisation</span>
+               </Button>
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimpTemplates}>
+                 <Mail className="h-6 w-6 mb-2" />
+                 <span>Modèles d'email</span>
+               </Button>
+               <Button variant="outline" className="h-20 flex-col" onClick={openMailchimp}>
+                 <ExternalLink className="h-6 w-6 mb-2" />
+                 <span>Dashboard Mailchimp</span>
+               </Button>
+             </div>
+           </CardContent>
+         </Card>
+
+         {/* Campagnes récentes */}
+         {recentCampaigns.length > 0 && (
+           <Card>
+             <CardHeader>
+               <div className="flex items-center justify-between">
+                 <CardTitle>Campagnes récentes</CardTitle>
+                 <Button variant="outline" size="sm" onClick={openMailchimpCampaigns}>
+                   Voir toutes
+                 </Button>
+               </div>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-3">
+                 {recentCampaigns.map((campaign, index) => (
+                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                     <div className="flex items-center gap-3">
+                       <Mail className="h-5 w-5 text-muted-foreground" />
+                       <div>
+                         <p className="font-medium">{campaign.title || `Campagne ${index + 1}`}</p>
+                         <p className="text-sm text-muted-foreground">
+                           {campaign.status || 'En cours'}
+                         </p>
+                       </div>
+                     </div>
+                     <div className="text-right">
+                       <p className="text-sm font-medium">
+                         {campaign.stats?.opens || 0} ouvertures
+                       </p>
+                       <p className="text-xs text-muted-foreground">
+                         {campaign.stats?.clicks || 0} clics
+                       </p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </CardContent>
+           </Card>
+         )}
       </div>
     </DashboardLayout>
   )
