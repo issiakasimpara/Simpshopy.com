@@ -15,7 +15,7 @@ const CtaSection = () => {
           </h2>
 
           <p className="text-xl md:text-2xl mb-8 opacity-90 leading-relaxed">
-            Rejoignez les entrepreneurs africains qui ont choisi Simpshopy
+            Rejoignez les entrepreneurs internationaux qui ont choisi Simpshopy
             pour vendre leurs produits en ligne.
           </p>
           
@@ -38,11 +38,11 @@ const CtaSection = () => {
             </div>
             <div className="flex items-center">
               <span className="text-green-300 mr-2">✓</span>
-              Paiements mobile money
+              Paiements internationaux
             </div>
             <div className="flex items-center">
               <span className="text-green-300 mr-2">✓</span>
-              Support en français
+              Support français & anglais
             </div>
           </div>
         </div>

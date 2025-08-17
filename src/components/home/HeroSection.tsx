@@ -17,21 +17,21 @@ const HeroSection = () => {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                🚀 Plateforme tout-en-un pour l'Afrique
+                🚀 Plateforme e-commerce internationale
               </div>
 
               {/* Main Heading */}
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Créez et vendez vos produits{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                  partout en Afrique
+                  partout dans le monde
                 </span>
               </h1>
 
               {/* Subtitle */}
               <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
                 De la création de votre boutique au reversement de vos gains, nous gérons tout. 
-                Interface intuitive, paiements locaux et support en français.
+                Interface intuitive, paiements internationaux et support en français et anglais.
               </p>
 
               {/* CTA Buttons */}
@@ -58,11 +58,11 @@ const HeroSection = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Paiement mobile money</span>
+                  <span>Paiements internationaux</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Support en français</span>
+                  <span>Support français & anglais</span>
                 </div>
               </div>
             </div>
@@ -99,7 +99,7 @@ const HeroSection = () => {
                     <div className="text-xs text-gray-500">Ventes réalisées</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">15+</div>
+                    <div className="text-2xl font-bold text-gray-900">50+</div>
                     <div className="text-xs text-gray-500">Pays couverts</div>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ const HeroSection = () => {
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Globe className="h-4 w-4 text-blue-600" />
                     </div>
-                    <span className="text-sm text-gray-700">Paiements locaux intégrés</span>
+                    <span className="text-sm text-gray-700">Paiements internationaux intégrés</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -135,7 +135,7 @@ const HeroSection = () => {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Paiement sécurisé</div>
-                    <div className="text-xs text-gray-500">Mobile Money</div>
+                    <div className="text-xs text-gray-500">International</div>
                   </div>
                 </div>
               </div>
@@ -147,7 +147,7 @@ const HeroSection = () => {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Support 24/7</div>
-                    <div className="text-xs text-gray-500">En français</div>
+                    <div className="text-xs text-gray-500">Français & Anglais</div>
                   </div>
                 </div>
               </div>

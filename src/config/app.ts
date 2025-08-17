@@ -6,7 +6,7 @@ export const APP_CONFIG = {
   // Informations de base
   name: 'Simpshopy',
   tagline: 'Votre boutique en ligne simple et efficace',
-  description: 'La plateforme e-commerce adaptée à l\'Afrique qui vous aide à vendre en ligne facilement.',
+  description: 'La plateforme e-commerce internationale qui vous aide à vendre en ligne facilement.',
   
   // URLs et domaines
   domain: 'simpshopy.com',
@@ -25,19 +25,19 @@ export const APP_CONFIG = {
   
   // Configuration régionale
   region: {
-    primary: 'West Africa',
-    countries: ['ML', 'SN', 'CI', 'BF', 'NE', 'TG', 'BJ', 'GW'],
-    defaultCurrency: 'XOF',
-    defaultLocale: 'fr-ML',
-    timezone: 'Africa/Bamako'
+    primary: 'International',
+    countries: ['US', 'CA', 'GB', 'FR', 'DE', 'ES', 'IT', 'AU', 'JP', 'BR', 'IN', 'MX'],
+    defaultCurrency: 'USD',
+    defaultLocale: 'en-US',
+    timezone: 'UTC'
   },
   
-  // Tarification (en francs CFA)
+  // Tarification (en dollars USD)
   pricing: {
     starter: {
       name: 'Starter',
-      price: 15000,
-      currency: 'XOF',
+      price: 29,
+      currency: 'USD',
       period: 'mois',
       description: 'Parfait pour débuter',
       features: [
@@ -46,13 +46,13 @@ export const APP_CONFIG = {
         'Support email',
         'SSL & sécurité',
         'Templates premium',
-        'Paiement mobile money'
+        'Paiements en devises locales'
       ]
     },
     business: {
       name: 'Business',
-      price: 35000,
-      currency: 'XOF',
+      price: 79,
+      currency: 'USD',
       period: 'mois',
       description: 'Pour la croissance',
       features: [
@@ -62,14 +62,14 @@ export const APP_CONFIG = {
         'API personnalisée',
         'Multi-devises',
         'Abandon cart recovery',
-        'Intégration Orange Money/MTN'
+        'Intégration paiements locaux'
       ],
       popular: true
     },
     enterprise: {
       name: 'Enterprise',
-      price: 85000,
-      currency: 'XOF',
+      price: 199,
+      currency: 'USD',
       period: 'mois',
       description: 'Performance maximale',
       features: [
@@ -86,33 +86,33 @@ export const APP_CONFIG = {
   
   // Moyens de paiement supportés
   paymentMethods: {
-    mobileMoney: [
-      {
-        name: 'Orange Money',
-        countries: ['ML', 'SN', 'CI', 'BF'],
-        icon: '🟠'
-      },
-      {
-        name: 'MTN Mobile Money',
-        countries: ['GH', 'CI', 'CM', 'UG'],
-        icon: '🟡'
-      },
-      {
-        name: 'Moov Money',
-        countries: ['BJ', 'TG', 'CI', 'ML'],
-        icon: '🔵'
-      }
-    ],
-    traditional: [
-      {
-        name: 'Virements bancaires',
-        countries: ['ALL'],
-        icon: '🏦'
-      },
+    international: [
       {
         name: 'Cartes Visa/Mastercard',
         countries: ['ALL'],
         icon: '💳'
+      },
+      {
+        name: 'PayPal',
+        countries: ['200+'],
+        icon: '🔵'
+      },
+      {
+        name: 'Stripe',
+        countries: ['ALL'],
+        icon: '🟣'
+      }
+    ],
+    local: [
+      {
+        name: 'Paiements locaux',
+        countries: ['ALL'],
+        icon: '🏦'
+      },
+      {
+        name: 'Virements bancaires',
+        countries: ['ALL'],
+        icon: '🏦'
       },
       {
         name: 'Paiement à la livraison',
@@ -127,7 +127,7 @@ export const APP_CONFIG = {
     core: [
       {
         title: 'Boutique en ligne simple',
-        description: 'Créez votre boutique en quelques clics avec des templates adaptés au marché africain',
+        description: 'Créez votre boutique en quelques clics avec des templates professionnels',
         icon: 'store'
       },
       {
@@ -141,18 +141,18 @@ export const APP_CONFIG = {
         icon: 'bar-chart'
       },
       {
-        title: 'Paiements locaux',
-        description: 'Orange Money, MTN Mobile Money, Moov Money et virements bancaires',
+        title: 'Paiements internationaux',
+        description: 'Cartes bancaires, PayPal, Stripe et paiements en devises locales',
         icon: 'credit-card'
       },
       {
-        title: 'Multi-pays Afrique',
-        description: 'Vendez dans toute l\'Afrique de l\'Ouest avec support multi-devises',
+        title: 'Multi-pays international',
+        description: 'Vendez dans le monde entier avec support multi-devises',
         icon: 'globe'
       },
       {
         title: 'Rapide et fiable',
-        description: 'Sites optimisés pour les connexions mobiles africaines',
+        description: 'Sites optimisés pour tous les types de connexions',
         icon: 'zap'
       }
     ]
@@ -161,9 +161,9 @@ export const APP_CONFIG = {
   // Statistiques (pour la page d'accueil)
   stats: {
     stores: '100+',
-    revenue: '50M+ CFA',
+    revenue: '$2M+ USD',
     customers: '5K+',
-    countries: '8'
+    countries: '50+'
   },
   
   // Configuration technique
@@ -180,10 +180,10 @@ export const APP_CONFIG = {
   
   // Support et contact
   support: {
-    phone: '+223 XX XX XX XX',
-    whatsapp: '+223 XX XX XX XX',
-    hours: 'Lun-Ven 8h-18h GMT',
-    languages: ['français', 'bambara', 'wolof'],
+    phone: '+1 XXX XXX XXXX',
+    whatsapp: '+1 XXX XXX XXXX',
+    hours: '24/7 Global Support',
+    languages: ['français', 'english', 'español'],
     responseTime: '< 2h'
   }
 };

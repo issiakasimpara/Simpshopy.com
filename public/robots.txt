@@ -4,5 +4,23 @@ Allow: /
 # Sitemap
 Sitemap: https://simpshopy.com/sitemap.xml
 
-# Crawl-delay
-Crawl-delay: 1
+# Bloquer les pages sensibles
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /supabase/
+
+# Bloquer les fichiers sensibles
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /config/
+Disallow: /logs/
+
+# Permettre les assets publics
+Allow: /public/
+Allow: /images/
+Allow: /assets/
+Allow: /css/
+Allow: /js/

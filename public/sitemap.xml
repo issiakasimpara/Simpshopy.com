@@ -2,20 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://simpshopy.com/</loc>
-    <lastmod>2024-07-31</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://simpshopy.com/auth</loc>
-    <lastmod>2024-07-31</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://simpshopy.com/pricing</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://simpshopy.com/dashboard</loc>
-    <lastmod>2024-07-31</lastmod>
+    <loc>https://simpshopy.com/blog</loc>
+    <lastmod>2024-01-20</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://simpshopy.com/support</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://simpshopy.com/features</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://simpshopy.com/integrations</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://simpshopy.com/about</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simpshopy.com/contact</loc>
+    <lastmod>2024-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset> 

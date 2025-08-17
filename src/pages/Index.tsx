@@ -68,11 +68,11 @@ const Index = () => {
   }
 
   const plans = getAllPricingPlans().map(plan => {
-    const isPopular = plan.name === "Pro" || plan.name === "Premium";
+    const isPopular = plan.name === "Business" || plan.name === "Pro";
     return {
       name: plan.name,
-      price: plan.formattedPrice.replace(' CFA', ''),
-      period: "CFA/mois",
+      price: plan.formattedPrice.replace(' USD', ''),
+      period: "USD/mois",
       description: plan.description,
       features: plan.features,
       popular: isPopular,
@@ -136,7 +136,7 @@ const Index = () => {
               Des tarifs simples et abordables
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choisissez le plan qui correspond à votre business. Tarifs en francs CFA, aucun frais caché.
+              Choisissez le plan qui correspond à votre business. Tarifs en dollars, aucun frais caché.
             </p>
           </div>
           
@@ -185,10 +185,10 @@ const Index = () => {
               <HeadphonesIcon className="h-12 w-12 text-blue-600" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Support expert français 24/7
+              Support expert international 24/7
             </h2>
             <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-              Notre équipe d'experts e-commerce français vous accompagne à chaque étape. 
+              Notre équipe d'experts e-commerce vous accompagne à chaque étape en français et anglais. 
               Chat en direct, documentation complète et communauté active de +5,000 membres.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -213,7 +213,7 @@ const Index = () => {
             <div>
               <AppLogo />
               <p className="mt-4 text-gray-400">
-                La plateforme e-commerce tout-en-un pour l'Afrique
+                La plateforme e-commerce internationale tout-en-un
               </p>
             </div>
             <div>

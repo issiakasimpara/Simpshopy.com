@@ -72,6 +72,10 @@ const MailchimpDashboard = lazy(() => import("./pages/integrations/MailchimpDash
 const MailchimpCallback = lazy(() => import("./pages/api/oauth/mailchimp/callback"));
 const DsersIntegration = lazy(() => import("./pages/integrations/DsersIntegration"));
 
+// Pages SEO optimisées
+const Blog = lazy(() => import("./pages/Blog"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+
 const queryClient = new QueryClient();
 
 const CartWidgetConditional = () => {
@@ -195,6 +199,16 @@ const App = () => {
 
               {/* Routes publiques/clients */}
               <Route path="/" element={<Index />} />
+              <Route path="/blog" element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Blog />
+                </Suspense>
+              } />
+              <Route path="/pricing" element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Pricing />
+                </Suspense>
+              } />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/payment-success" element={

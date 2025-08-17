@@ -5,7 +5,7 @@ const FeaturesSection = () => {
     {
       icon: Shield,
       title: "Paiements sécurisés",
-      description: "Intégration native avec Mobile Money, cartes bancaires et paiements locaux",
+      description: "Intégration native avec cartes bancaires, PayPal et paiements internationaux",
       color: "from-green-500 to-emerald-600"
     },
     {
@@ -17,7 +17,7 @@ const FeaturesSection = () => {
     {
       icon: Globe,
       title: "Multi-devises",
-      description: "Vendez dans plusieurs devises locales et recevez vos gains en CFA",
+      description: "Vendez dans plusieurs devises et recevez vos gains en dollars",
       color: "from-purple-500 to-purple-600"
     },
     {
@@ -35,7 +35,7 @@ const FeaturesSection = () => {
     {
       icon: Users,
       title: "Support 24/7",
-      description: "Une équipe d'experts à votre disposition en français",
+      description: "Une équipe d'experts à votre disposition en français et anglais",
       color: "from-pink-500 to-pink-600"
     },
     {

@@ -6,18 +6,18 @@ const ComparisonSection = () => {
   const reasons = [
     {
       icon: Globe,
-      title: "Spécialement conçu pour l'Afrique",
-      description: "Paiements Mobile Money, devises africaines, conformité réglementaire locale"
+      title: "Plateforme internationale",
+      description: "Paiements internationaux, devises multiples, conformité réglementaire globale"
     },
     {
       icon: DollarSign,
-      title: "Prix abordables en devises locales",
-      description: "Pas de frais cachés, tarifs transparents en devises africaines, accessible à tous"
+      title: "Prix abordables en dollars",
+      description: "Pas de frais cachés, tarifs transparents en dollars, accessible à tous"
     },
     {
       icon: Users,
       title: "Support multilingue 24/7",
-      description: "Équipe locale en français et anglais qui comprend vos besoins"
+      description: "Équipe internationale en français et anglais qui comprend vos besoins"
     },
     {
       icon: Zap,
@@ -26,18 +26,18 @@ const ComparisonSection = () => {
     },
     {
       icon: Shield,
-      title: "Conformité locale garantie",
-      description: "Respect des réglementations africaines et européennes"
+      title: "Conformité internationale garantie",
+      description: "Respect des réglementations européennes et internationales"
     },
     {
       icon: Star,
-      title: "Fonctionnalités africaines",
-      description: "Mobile Money, livraison locale, marketing adapté au marché"
+      title: "Fonctionnalités internationales",
+      description: "Paiements globaux, livraison internationale, marketing adapté au marché"
     },
     {
       icon: Heart,
-      title: "Communauté africaine",
-      description: "Réseau d'entrepreneurs africains, partage d'expériences"
+      title: "Communauté internationale",
+      description: "Réseau d'entrepreneurs internationaux, partage d'expériences"
     },
     {
       icon: Award,
@@ -61,7 +61,7 @@ const ComparisonSection = () => {
       label: "Ventes réalisées"
     },
     {
-      number: "10+",
+      number: "50+",
       label: "Pays couverts"
     },
     {
@@ -80,7 +80,7 @@ const ComparisonSection = () => {
               Pourquoi nous choisir ?
             </h2>
             <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              Découvrez ce qui rend SimpShopy unique pour les entrepreneurs africains
+              Découvrez ce qui rend SimpShopy unique pour les entrepreneurs internationaux
             </p>
           </div>
 
@@ -117,15 +117,15 @@ const ComparisonSection = () => {
               <div className="text-4xl mb-4">💬</div>
               <blockquote className="text-xl text-gray-700 italic mb-6">
                 "SimpShopy m'a permis de créer ma boutique en ligne en quelques minutes. 
-                Les paiements Mobile Money et le support en français ont fait toute la différence !"
+                Les paiements internationaux et le support en français et anglais ont fait toute la différence !"
               </blockquote>
               <div className="flex items-center justify-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">M</span>
                 </div>
                 <div className="text-left">
-                  <div className="font-semibold text-gray-900">Mariam Diallo</div>
-                  <div className="text-sm text-gray-600">Entrepreneuse, Côte d'Ivoire</div>
+                  <div className="font-semibold text-gray-900">Marie Dubois</div>
+                  <div className="text-sm text-gray-600">Entrepreneuse, France</div>
                 </div>
               </div>
             </div>

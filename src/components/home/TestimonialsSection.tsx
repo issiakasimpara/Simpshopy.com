@@ -5,24 +5,24 @@ import { Star, Quote } from "lucide-react";
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Aminata Traoré",
-      role: "Fondatrice, Tissus Bamako",
+      name: "Marie Dubois",
+      role: "Fondatrice, Mode Paris",
       avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=64&h=64&fit=crop&crop=face",
-      content: "Avec Simpshopy, j'ai pu vendre mes tissus traditionnels en ligne. Les paiements Orange Money fonctionnent parfaitement !",
+      content: "Avec Simpshopy, j'ai pu vendre mes créations en ligne. Les paiements internationaux fonctionnent parfaitement !",
       rating: 5,
-      revenue: "+2M CFA en 3 mois"
+      revenue: "+15K€ en 3 mois"
     },
     {
-      name: "Kofi Asante",
-      role: "Entrepreneur, Électronique Accra",
+      name: "John Smith",
+      role: "Entrepreneur, Tech London",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
-      content: "Simple à utiliser, même avec une connexion lente. Mes clients peuvent payer avec MTN Mobile Money sans problème.",
+      content: "Simple à utiliser, même pour un débutant. Mes clients peuvent payer avec toutes les méthodes internationales sans problème.",
       rating: 5,
-      revenue: "500K CFA/mois"
+      revenue: "8K€/mois"
     },
     {
-      name: "Fatou Diallo",
-      role: "Créatrice, Mode Dakar",
+      name: "Sophie Martin",
+      role: "Créatrice, Artisanat Lyon",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64&h=64&fit=crop&crop=face",
       content: "La boutique se charge rapidement sur mobile. Parfait pour mes clients qui achètent depuis leur téléphone !",
       rating: 5,
@@ -38,7 +38,7 @@ const TestimonialsSection = () => {
             Nos entrepreneurs témoignent
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Découvrez comment Simpshopy aide les entrepreneurs africains à réussir en ligne
+            Découvrez comment Simpshopy aide les entrepreneurs internationaux à réussir en ligne
           </p>
         </div>
         

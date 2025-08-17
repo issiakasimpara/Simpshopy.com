@@ -36,20 +36,20 @@ Rendre SimpShopy aussi professionnel que Chariow sur Google !
 ```html
 <!-- Meta tags optimisés -->
 <head>
-  <title>SimpShopy - Plateforme E-commerce Afrique de l'Ouest | Créez votre boutique en ligne</title>
-  <meta name="description" content="SimpShopy est la plateforme e-commerce leader en Afrique de l'Ouest. Créez votre boutique en ligne en 2 minutes avec paiements Mobile Money, support multilingue et tarifs en devises locales.">
-  <meta name="keywords" content="e-commerce, boutique en ligne, Afrique de l'Ouest, Mobile Money, dropshipping, SimpShopy, Mali, Sénégal, Côte d'Ivoire">
+  <title>SimpShopy - Plateforme E-commerce Internationale | Créez votre boutique en ligne</title>
+  <meta name="description" content="SimpShopy est la plateforme e-commerce internationale. Créez votre boutique en ligne en 2 minutes avec paiements globaux, support français/anglais et tarifs en devises locales.">
+  <meta name="keywords" content="e-commerce, boutique en ligne, plateforme internationale, paiements globaux, dropshipping, SimpShopy, support français, support anglais">
   
   <!-- Open Graph -->
-  <meta property="og:title" content="SimpShopy - Plateforme E-commerce Afrique de l'Ouest">
-  <meta property="og:description" content="Créez votre boutique en ligne en 2 minutes avec paiements Mobile Money et support multilingue.">
+  <meta property="og:title" content="SimpShopy - Plateforme E-commerce Internationale">
+  <meta property="og:description" content="Créez votre boutique en ligne en 2 minutes avec paiements globaux et support multilingue.">
   <meta property="og:image" content="https://simpshopy.com/og-image.jpg">
   <meta property="og:url" content="https://simpshopy.com">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="SimpShopy - E-commerce Afrique de l'Ouest">
-  <meta name="twitter:description" content="Plateforme e-commerce complète pour l'Afrique de l'Ouest">
+  <meta name="twitter:title" content="SimpShopy - E-commerce International">
+  <meta name="twitter:description" content="Plateforme e-commerce complète avec support français et anglais">
 </head>
 ```
 
@@ -64,7 +64,7 @@ Rendre SimpShopy aussi professionnel que Chariow sur Google !
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://simpshopy.com/tarifs</loc>
+    <loc>https://simpshopy.com/pricing</loc>
     <lastmod>2024-01-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -114,16 +114,16 @@ export default function BlogPage() {
       category: "Tutoriels"
     },
     {
-      title: "Les meilleures stratégies de dropshipping en Afrique de l'Ouest",
-      description: "Découvrez comment réussir le dropshipping sur le marché africain",
-      image: "/blog/dropshipping-afrique.jpg",
+      title: "Les meilleures stratégies de dropshipping international",
+      description: "Découvrez comment réussir le dropshipping sur le marché global",
+      image: "/blog/dropshipping-international.jpg",
       date: "2024-01-18",
       category: "Business"
     },
     {
-      title: "Paiements Mobile Money : Le futur du e-commerce en Afrique",
+      title: "Paiements internationaux : Le futur du e-commerce global",
       description: "Pourquoi les paiements locaux sont essentiels pour votre succès",
-      image: "/blog/mobile-money.jpg",
+      image: "/blog/paiements-internationaux.jpg",
       date: "2024-01-15",
       category: "Paiements"
     },
@@ -170,7 +170,7 @@ export default function PricingPage() {
       price: "Gratuit",
       features: [
         "1 boutique en ligne",
-        "Paiements Mobile Money",
+        "Paiements internationaux",
         "Support email",
         "Templates de base"
       ],
@@ -251,10 +251,10 @@ export default function PricingPage() {
 #### **3.1 LinkedIn Company Page**
 ```
 Nom : SimpShopy
-Description : Plateforme e-commerce leader en Afrique de l'Ouest
+Description : Plateforme e-commerce internationale
 Secteur : Technologie / E-commerce
 Taille : 1-10 employés
-Localisation : Mali, Afrique de l'Ouest
+Localisation : International
 Site web : https://simpshopy.com
 ```
 
@@ -263,7 +263,7 @@ Site web : https://simpshopy.com
 Nom : SimpShopy
 Catégorie : Plateforme e-commerce
 Description : Créez votre boutique en ligne en 2 minutes avec SimpShopy
-Adresse : Mali
+Adresse : International
 Téléphone : [Votre numéro]
 Email : contact@simpshopy.com
 ```
@@ -271,10 +271,10 @@ Email : contact@simpshopy.com
 #### **3.3 Twitter/X Account**
 ```
 @SimpShopy
-Bio : 🚀 Plateforme e-commerce Afrique de l'Ouest
-📍 Mali | 🌍 Afrique de l'Ouest
-💳 Paiements Mobile Money
-📱 Support multilingue
+Bio : 🚀 Plateforme e-commerce internationale
+🌍 Support français et anglais
+💳 Paiements globaux
+📱 Interface multilingue
 ```
 
 ---
@@ -285,11 +285,11 @@ Bio : 🚀 Plateforme e-commerce Afrique de l'Ouest
 ```
 Nom de l'entreprise : SimpShopy
 Catégorie : Plateforme e-commerce
-Adresse : [Votre adresse au Mali]
+Adresse : [Votre adresse]
 Téléphone : [Votre numéro]
 Site web : https://simpshopy.com
 Horaires : 24/7 (service en ligne)
-Services : Création de boutiques en ligne, paiements Mobile Money, support client
+Services : Création de boutiques en ligne, paiements internationaux, support client
 ```
 
 #### **4.2 Photos et contenu**
@@ -306,34 +306,34 @@ Services : Création de boutiques en ligne, paiements Mobile Money, support clie
 ```markdown
 # Sites à contacter pour des backlinks :
 
-1. **Blogs e-commerce africains**
-   - afrique-ecommerce.com
-   - tech-afrique.com
-   - startup-afrique.com
+1. **Blogs e-commerce internationaux**
+   - ecommerce-platforms.com
+   - techcrunch.com
+   - startup-news.com
 
 2. **Forums et communautés**
-   - Reddit r/Africa
-   - Facebook Groups e-commerce Afrique
-   - LinkedIn Groups tech Afrique
+   - Reddit r/ecommerce
+   - Facebook Groups e-commerce
+   - LinkedIn Groups tech
 
 3. **Sites de presse**
-   - jeuneafrique.com
-   - afrik.com
-   - digitalbusiness.africa
+   - tech.eu
+   - eu-startups.com
+   - digitalbusiness.news
 
 4. **Directoires d'entreprises**
-   - annuaire-afrique.com
-   - entreprises-mali.com
-   - startup-directory.africa
+   - startup-directory.com
+   - saas-directory.com
+   - ecommerce-platforms.com
 ```
 
 #### **5.2 Guest Posts**
 ```markdown
 # Articles invités à proposer :
 
-1. "L'avenir du e-commerce en Afrique de l'Ouest"
-2. "Comment réussir le dropshipping en Afrique"
-3. "Les paiements Mobile Money révolutionnent le e-commerce"
+1. "L'avenir du e-commerce international"
+2. "Comment réussir le dropshipping global"
+3. "Les paiements internationaux révolutionnent le e-commerce"
 4. "Intégration DSERS : Le guide complet"
 ```
 
@@ -346,7 +346,7 @@ Services : Création de boutiques en ligne, paiements Mobile Money, support clie
 - ✅ **Rich Snippets** : Informations structurées
 - ✅ **Google My Business** : Profil complet avec avis
 - ✅ **Présence sociale** : Pages actives et engagées
-- ✅ **SEO** : Meilleur classement pour "e-commerce Afrique"
+- ✅ **SEO** : Meilleur classement pour "e-commerce international"
 
 ### **Après 6 mois :**
 - ✅ **Autorité de domaine** : Augmentation significative
