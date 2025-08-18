@@ -298,4 +298,50 @@ export class OnboardingService {
       return 1;
     }
   }
+
+  /**
+   * Récupère la devise choisie lors de l'onboarding
+   */
+  static async getOnboardingCurrency(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_onboarding')
+        .select('currency_code')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la récupération de la devise d\'onboarding:', error);
+        return null;
+      }
+
+      return data?.currency_code || null;
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la devise d\'onboarding:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Récupère le pays choisi lors de l'onboarding
+   */
+  static async getOnboardingCountry(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_onboarding')
+        .select('country_code')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la récupération du pays d\'onboarding:', error);
+        return null;
+      }
+
+      return data?.country_code || null;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du pays d\'onboarding:', error);
+      return null;
+    }
+  }
 }

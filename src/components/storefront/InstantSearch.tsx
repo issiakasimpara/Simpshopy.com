@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import OptimizedImage from '@/components/ui/optimized-image';
 import { useOptimizedProducts } from '@/hooks/useOptimizedQuery';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { cn } from '@/lib/utils';
 
 interface InstantSearchProps {
@@ -29,6 +30,7 @@ const InstantSearch = ({ storeId, onProductSelect, className }: InstantSearchPro
   const [selectedIndex, setSelectedIndex] = useState(-1);
   
   const { data: products = [], isLoading } = useOptimizedProducts(storeId);
+  const { formatPrice } = useStoreCurrency(storeId);
 
   // Recherche intelligente avec scoring
   const searchResults = useMemo(() => {
@@ -94,13 +96,7 @@ const InstantSearch = ({ storeId, onProductSelect, className }: InstantSearchPro
     setSelectedIndex(-1);
   }, [onProductSelect]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
+
 
   useEffect(() => {
     setSelectedIndex(-1);

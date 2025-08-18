@@ -12,6 +12,7 @@ import {
   Globe
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface StoreData {
   domain: any;
@@ -34,6 +35,7 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
   const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { formatPrice } = useStoreCurrency(storeData?.store?.id);
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -213,7 +215,7 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
                     )}
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-lg">
-                        {product.price.toLocaleString('fr-FR')} €
+                        {formatPrice(product.price)}
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />

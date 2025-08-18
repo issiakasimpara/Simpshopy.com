@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingBag, X, Plus, Minus } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 const CartWidget = () => {
   const {
@@ -20,13 +21,7 @@ const CartWidget = () => {
   const { storeSlug } = useParams();
   const location = useLocation();
   const { stores } = useStores();
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XAF'
-    }).format(price);
-  };
+  const { formatPrice } = useStoreCurrency(stores[0]?.id);
 
   const getStoreBasedUrl = (path: string) => {
     // Si nous sommes dans une boutique spécifique

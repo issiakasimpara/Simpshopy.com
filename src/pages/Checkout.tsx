@@ -17,6 +17,7 @@ import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/util
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
 import { MonerooService, convertToMonerooAmount, formatMonerooAmount } from '@/services/monerooService';
 import { useCartSessions } from '@/hooks/useCartSessions';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
@@ -25,6 +26,17 @@ const Checkout = () => {
   const location = useLocation();
   const { storeSlug } = useParams();
   const { toast } = useToast();
+  
+  // États pour les méthodes de livraison
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<any>(null);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [detectedCountry, setDetectedCountry] = useState<string>('');
+  const [detectedCountryCode, setDetectedCountryCode] = useState<CountryCode>('ML');
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [currentStoreId, setCurrentStoreId] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  
+  const { formatPrice, currency } = useStoreCurrency(currentStoreId);
 
   // Détecter si nous sommes dans l'aperçu
   const isInPreview = window.self !== window.top;
@@ -38,15 +50,6 @@ const Checkout = () => {
     country: '',
     phone: ''
   });
-
-  // États pour les méthodes de livraison
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<any>(null);
-  const [shippingCost, setShippingCost] = useState(0);
-  const [detectedCountry, setDetectedCountry] = useState<string>('');
-  const [detectedCountryCode, setDetectedCountryCode] = useState<CountryCode>('ML');
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
-  const [currentStoreId, setCurrentStoreId] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
 
   // Hook automatique pour les méthodes de livraison
   const { methods: shippingMethods, isLoading: isLoadingShipping } = useShippingWithAutoSetup(
@@ -252,12 +255,12 @@ const Checkout = () => {
       await saveCartSession(storeInfo.id, items, customerInfoForSession);
 
       const tempOrderNumber = `TEMP-${Date.now()}`;
-      const totalAmountCFA = getTotalWithShipping();
-      const totalAmountCentimes = convertToMonerooAmount(totalAmountCFA);
+      const totalAmount = getTotalWithShipping();
+      const totalAmountCentimes = convertToMonerooAmount(totalAmount);
 
       const paymentData = {
         amount: totalAmountCentimes,
-        currency: 'XOF',
+        currency: currency || 'XOF',
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
         customer: {
@@ -278,7 +281,7 @@ const Checkout = () => {
           items: JSON.stringify(items),
           shipping_method: JSON.stringify(selectedShippingMethod),
           shipping_cost: shippingCost.toString(),
-          total_amount: totalAmountCFA.toString()
+          total_amount: totalAmount.toString()
         }
       };
 
@@ -293,7 +296,7 @@ const Checkout = () => {
           customerInfo,
           items,
           selectedShippingMethod,
-          totalAmountCFA
+          totalAmount
         }));
         
         console.log('✅ Paiement initialisé avec succès, redirection...');
@@ -521,7 +524,7 @@ const Checkout = () => {
                       }`}
                       onClick={() => {
                         setSelectedShippingMethod(method);
-                        console.log('🚚 Méthode sélectionnée:', method.name, method.price, 'CFA');
+                        console.log('🚚 Méthode sélectionnée:', method.name, method.price);
                       }}
                     >
                       <div className="flex items-center justify-between">
@@ -553,7 +556,7 @@ const Checkout = () => {
                             {method.price === 0 ? (
                               <span className="text-green-600">Gratuit</span>
                             ) : (
-                              <span>{method.price} CFA</span>
+                              <span>{formatPrice(method.price)}</span>
                             )}
                           </div>
                         </div>
@@ -588,7 +591,7 @@ const Checkout = () => {
                       )}
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-gray-600">{item.price} CFA</p>
+                        <p className="text-gray-600">{formatPrice(item.price)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -623,7 +626,7 @@ const Checkout = () => {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Sous-total:</span>
-                    <span>{getTotalPrice().toFixed(0)} CFA</span>
+                    <span>{formatPrice(getTotalPrice())}</span>
                   </div>
 
                   <div className="flex justify-between">
@@ -633,7 +636,7 @@ const Checkout = () => {
                         selectedShippingMethod.price === 0 ? (
                           <span className="text-green-600">Gratuit</span>
                         ) : (
-                          `${selectedShippingMethod.price} CFA`
+                          formatPrice(selectedShippingMethod.price)
                         )
                       ) : (
                         <span className="text-gray-500">Non sélectionnée</span>
@@ -652,7 +655,7 @@ const Checkout = () => {
 
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>{getTotalWithShipping().toFixed(0)} CFA</span>
+                    <span>{formatPrice(getTotalWithShipping())}</span>
                   </div>
                 </div>
                 

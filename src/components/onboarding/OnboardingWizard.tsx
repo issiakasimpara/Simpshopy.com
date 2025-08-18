@@ -23,6 +23,7 @@ const OnboardingWizard = () => {
     saveStep,
     goToPreviousStep,
     completeOnboarding,
+    initializeStoreCurrency,
   } = useOnboarding();
 
   const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(onboardingData.experience_level);
@@ -64,6 +65,13 @@ const OnboardingWizard = () => {
         country_code: selectedCountry, 
         currency_code: selectedCurrency 
       });
+      
+      // Initialiser la devise du store avec celle choisie lors de l'onboarding
+      if (selectedCurrency) {
+        console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
+        await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+      }
+      
       await completeOnboarding();
       navigate('/dashboard');
     }

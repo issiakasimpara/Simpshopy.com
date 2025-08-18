@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import AddToCartButton from './AddToCartButton';
 import OptimizedImage from '@/components/ui/optimized-image';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Store = Tables<'stores'>;
@@ -29,6 +30,7 @@ const ProductsBlock = ({
   onProductClick
 }: ProductsBlockProps) => {
   const { products, isLoading } = useProducts(selectedStore?.id);
+  const { formatPrice } = useStoreCurrency(selectedStore?.id);
   
   console.log('ProductsBlock - onProductClick available:', !!onProductClick);
   console.log('ProductsBlock - products count:', products.length);
@@ -148,9 +150,9 @@ const ProductsBlock = ({
                   
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-blue-600">{product.price} CFA</span>
+                      <span className="text-xl font-bold text-blue-600">{formatPrice(product.price)}</span>
                       {product.compare_price && product.compare_price > product.price && (
-                        <span className="text-sm text-gray-500 line-through">{product.compare_price} CFA</span>
+                        <span className="text-sm text-gray-500 line-through">{formatPrice(product.compare_price)}</span>
                       )}
                     </div>
                     

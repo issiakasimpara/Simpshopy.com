@@ -2,9 +2,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStoreCurrency } from "@/hooks/useStoreCurrency";
 import { useStores } from "@/hooks/useStores";
-import { KPICards } from "./KPICards";
-import { TopProductsChart } from "./TopProductsChart";
-import { SalesChart } from "./SalesChart";
+import KPICards from "./KPICards";
+import TopProductsChart from "./TopProductsChart";
+import SalesChart from "./SalesChart";
 
 const AnalyticsTabs = () => {
   const { store } = useStores();

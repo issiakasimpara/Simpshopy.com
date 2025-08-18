@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Image as ImageIcon } from 'lucide-react';
 import { useProductVariantsLoader } from '@/hooks/useProductVariantsLoader';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
+import { useStores } from '@/hooks/useStores';
 
 interface VariantCombination {
   id: string;
@@ -27,6 +29,8 @@ interface SimpleVariantSectionProps {
 const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVariants = [], productId }: SimpleVariantSectionProps & { productId?: string }) => {
   // Charger les variantes depuis la base de données si on édite un produit
   const { variants: dbVariants, isLoading } = useProductVariantsLoader(productId);
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
   
   const [colors, setColors] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
@@ -330,7 +334,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2">Variante</th>
-                    <th className="text-left p-2">Prix (CFA)</th>
+                    <th className="text-left p-2">Prix ({formatPrice(0, { showSymbol: true, showCode: true })})</th>
                     <th className="text-left p-2">Stock</th>
                     <th className="text-left p-2">SKU</th>
                   </tr>

@@ -65,7 +65,7 @@ export const useStoreCurrency = (storeId?: string) => {
   const queryClient = useQueryClient();
 
   // Vérifier si storeId est valide
-  const isValidStoreId = storeId && storeId.trim() !== '' && storeId !== 'undefined';
+  const isValidStoreId = Boolean(storeId && storeId.trim() !== '' && storeId !== 'undefined');
 
   // Récupérer la devise de la boutique
   const { data: currency, isLoading: isLoadingCurrency, refetch: refetchCurrency } = useQuery({
@@ -178,14 +178,30 @@ export const useStoreCurrency = (storeId?: string) => {
   // Fonction pour obtenir les devises supportées
   const getSupportedCurrencies = () => {
     return [
-      'XOF', 'XAF', 'GHS', 'NGN', 'EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 
-      'CHF', 'CNY', 'INR', 'BRL', 'MXN', 'ZAR', 'EGP', 'KES', 'UGX', 'TZS'
+      // Afrique (25 devises)
+      'XOF', 'XAF', 'GHS', 'NGN', 'ZAR', 'EGP', 'KES', 'UGX', 'TZS', 'MAD', 'DZD', 'TND', 'LYD', 'SDG', 'ETB', 'SOS', 'DJF', 'KMF', 'MUR', 'SCR', 'BIF', 'RWF', 'CDF', 'GMD', 'SLL',
+      
+      // Europe (30 devises)
+      'EUR', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'ISK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'RSD', 'ALL', 'MKD', 'BAM', 'MNT', 'GEL', 'AMD', 'AZN', 'BYN', 'MDL', 'UAH', 'RUB', 'TRY', 'ILS', 'JOD', 'LBP', 'SYP',
+      
+      // Amériques (35 devises)
+      'USD', 'CAD', 'BRL', 'MXN', 'ARS', 'CLP', 'COP', 'PEN', 'UYU', 'PYG', 'BOB', 'GTQ', 'HNL', 'NIO', 'CRC', 'PAB', 'BBD', 'JMD', 'TTD', 'XCD', 'AWG', 'ANG', 'SRD', 'GYD', 'VEF', 'ECU', 'BZD', 'HTG', 'DOP', 'CUP', 'KYD', 'BMD', 'FKP',
+      
+      // Asie (40 devises)
+      'JPY', 'CNY', 'INR', 'KRW', 'SGD', 'HKD', 'TWD', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'BDT', 'PKR', 'LKR', 'NPR', 'MMK', 'KHR', 'LAK', 'KZT', 'UZS', 'TJS', 'TMM', 'AFN', 'IRR', 'IQD', 'SAR', 'AED', 'QAR', 'KWD', 'BHD', 'OMR', 'YER', 'KGS', 'TMT',
+      
+      // Océanie (10 devises)
+      'AUD', 'NZD', 'FJD', 'PGK', 'SBD', 'TOP', 'VUV', 'WST', 'KID', 'TVD',
+      
+      // Devises spéciales et crypto
+      'XDR', 'XAU', 'XAG', 'BTC', 'ETH', 'USDT', 'USDC'
     ] as const;
   };
 
   // Fonction pour formater un prix
   const formatPrice = (amount: number, options?: { showSymbol?: boolean; showCode?: boolean }) => {
-    const currentCurrency = currency || 'XOF';
+    // Si pas de storeId valide ou pas de devise récupérée, utiliser XOF par défaut
+    const currentCurrency = (isValidStoreId && currency) ? currency : 'XOF';
     return formatCurrency(amount, currentCurrency, options);
   };
 
@@ -200,9 +216,9 @@ export const useStoreCurrency = (storeId?: string) => {
   };
 
   return {
-    currency: currency || 'XOF',
+    currency: (isValidStoreId && currency) ? currency : 'XOF',
     currencySettings,
-    isLoading: isLoadingCurrency || isLoadingSettings,
+    isLoading: isValidStoreId && (isLoadingCurrency || isLoadingSettings),
     isUpdating: updateCurrencyMutation.isPending || updateCurrencySettingsMutation.isPending,
     updateCurrency,
     updateCurrencySettings,

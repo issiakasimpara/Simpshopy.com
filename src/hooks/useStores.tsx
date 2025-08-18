@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { OnboardingService } from '@/services/onboardingService';
+import { StoreCurrencyService } from '@/services/storeCurrencyService';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Store = Tables<'stores'>;
@@ -134,6 +136,7 @@ export const useStores = () => {
         throw new Error('Profile not found');
       }
 
+      // Créer le store
       const { data, error } = await supabase
         .from('stores')
         .insert({ ...store, merchant_id: profile.id })
@@ -141,6 +144,33 @@ export const useStores = () => {
         .single();
 
       if (error) throw error;
+
+      // Initialiser automatiquement la devise du store avec celle de l'onboarding
+      try {
+        console.log('💰 Vérification de la devise d\'onboarding pour le store:', data.id);
+        
+        // Récupérer la devise choisie lors de l'onboarding
+        const onboardingCurrency = await OnboardingService.getOnboardingCurrency(user.id);
+        const onboardingCountry = await OnboardingService.getOnboardingCountry(user.id);
+        
+        if (onboardingCurrency) {
+          console.log('✅ Devise d\'onboarding trouvée:', onboardingCurrency);
+          
+          // Initialiser la devise du store avec celle de l'onboarding
+          const countries = onboardingCountry ? [onboardingCountry] : ['ML', 'CI', 'SN', 'BF'];
+          await StoreCurrencyService.initializeStoreCurrency(data.id, onboardingCurrency, countries);
+          
+          console.log('✅ Devise du store initialisée avec succès:', onboardingCurrency);
+        } else {
+          console.log('ℹ️ Aucune devise d\'onboarding trouvée, utilisation de la devise par défaut (XOF)');
+          // Utiliser la devise par défaut si aucune devise d'onboarding n'est trouvée
+          await StoreCurrencyService.initializeStoreCurrency(data.id, 'XOF', ['ML', 'CI', 'SN', 'BF']);
+        }
+      } catch (currencyError) {
+        console.error('⚠️ Erreur lors de l\'initialisation de la devise:', currencyError);
+        // Ne pas faire échouer la création du store si l'initialisation de la devise échoue
+      }
+
       return data;
     },
     onSuccess: async (newStore) => {

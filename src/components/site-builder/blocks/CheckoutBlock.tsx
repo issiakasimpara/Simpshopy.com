@@ -9,6 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Trash2, CreditCard, Truck, Clock, MapPin, Loader2 } from 'lucide-react';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface CheckoutBlockProps {
@@ -32,6 +33,7 @@ interface ShippingMethod {
 
 const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) => {
   const { items, updateQuantity, removeItem, getTotalPrice } = useCart();
+  const { formatPrice } = useStoreCurrency(selectedStore?.id);
   const [customerInfo, setCustomerInfo] = useState({
     email: '',
     firstName: '',
@@ -200,7 +202,7 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                       )}
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-gray-600">{item.price} CFA</p>
+                        <p className="text-gray-600">{formatPrice(item.price)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -281,7 +283,7 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                                 {method.price === 0 ? (
                                   <span className="text-green-600">Gratuit</span>
                                 ) : (
-                                  <span>{method.price} CFA</span>
+                                  <span>{formatPrice(method.price)}</span>
                                 )}
                               </div>
                             </div>
@@ -303,7 +305,7 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Sous-total:</span>
-                    <span>{getTotalPrice().toFixed(2)} CFA</span>
+                    <span>{formatPrice(getTotalPrice())}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison:</span>
@@ -311,13 +313,13 @@ const CheckoutBlock = ({ block, isEditing, selectedStore }: CheckoutBlockProps) 
                       {shippingCost === 0 ? (
                         <span className="text-green-600">Gratuit</span>
                       ) : (
-                        `${shippingCost.toFixed(2)} CFA`
+                        formatPrice(shippingCost)
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
                     <span>Total:</span>
-                    <span>{getTotalWithShipping().toFixed(2)} CFA</span>
+                    <span>{formatPrice(getTotalWithShipping())}</span>
                   </div>
                 </div>
 

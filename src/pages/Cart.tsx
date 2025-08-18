@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { useEffect } from 'react';
 
 const Cart = () => {
@@ -12,6 +13,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { stores } = useStores();
   const { storeSlug } = useParams();
+  const { formatPrice } = useStoreCurrency(storeId);
 
   // Initialiser le panier avec le premier store disponible
   useEffect(() => {
@@ -20,13 +22,6 @@ const Cart = () => {
       setStoreId(stores[0].id);
     }
   }, [stores, storeId, setStoreId]);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XAF'
-    }).format(price);
-  };
 
   const handleCheckout = () => {
     // Si nous sommes dans une boutique spécifique, naviguer vers son checkout

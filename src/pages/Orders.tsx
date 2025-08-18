@@ -9,6 +9,7 @@ import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw, ShoppingCart,
 import { useStores } from '@/hooks/useStores';
 import { useOrders } from '@/hooks/useOrders';
 import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { Order } from '@/services/orderService';
 import { getOrderStatusBadge, getPaymentStatusBadge, formatCurrency } from '@/utils/orderUtils';
@@ -17,6 +18,7 @@ import OrderDetailsModal from '@/components/OrderDetailsModal';
 
 const Orders = () => {
   const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
   const { toast } = useToast();
   const {
     orders,
@@ -260,7 +262,7 @@ const Orders = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Valeur perdue</p>
-                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{formatCurrency(abandonedStats.totalValue, 'XOF')}</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{formatPrice(abandonedStats.totalValue)}</p>
                       </div>
                       <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
                         <DollarSign className="h-5 w-5 text-orange-600" />
@@ -347,7 +349,7 @@ const Orders = () => {
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatCurrency(cart.total_value, 'XOF')}
+                            {formatPrice(cart.total_value)}
                           </p>
                           <p className="text-sm text-gray-500">
                             Valeur perdue

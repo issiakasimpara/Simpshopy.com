@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
+import { useStores } from '@/hooks/useStores';
 import { 
   Truck, 
   Edit, 
@@ -34,6 +36,8 @@ const ShippingMethodsList = ({
   onDelete,
   onAdd
 }: ShippingMethodsListProps) => {
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const filteredMethods = methods.filter(method => {
@@ -136,11 +140,11 @@ const ShippingMethodsList = ({
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-lg font-semibold">
                       <DollarSign className="h-4 w-4" />
-                      {method.price === 0 ? 'Gratuit' : `${method.price.toFixed(0)} CFA`}
+                      {method.price === 0 ? 'Gratuit' : formatPrice(method.price)}
                     </div>
                     {method.free_shipping_threshold && (
                       <p className="text-xs text-muted-foreground">
-                        Gratuit à partir de {method.free_shipping_threshold} CFA
+                        Gratuit à partir de {formatPrice(method.free_shipping_threshold)}
                       </p>
                     )}
                   </div>

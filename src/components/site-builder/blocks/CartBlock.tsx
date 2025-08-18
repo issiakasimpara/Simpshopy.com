@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface CartBlockProps {
   block: TemplateBlock;
@@ -17,16 +18,10 @@ interface CartBlockProps {
 const CartBlock = ({ block, isEditing = false, onNavigate }: CartBlockProps) => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
+  const { formatPrice } = useStoreCurrency();
 
   console.log('CartBlock - Items in cart:', items);
   console.log('CartBlock - Total items:', items.length);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XAF'
-    }).format(price);
-  };
 
   const handleCheckout = () => {
     if (onNavigate) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface StoreData {
   store: any;
@@ -16,6 +17,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
   const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [isMainDomain, setIsMainDomain] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { formatPrice } = useStoreCurrency(storeData?.store?.id);
 
   useEffect(() => {
     const handleDomainRouting = async () => {
@@ -205,7 +207,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
               <div key={product.id} className="border rounded-lg p-4">
                 <h3 className="font-semibold">{product.name}</h3>
                 <p className="text-sm text-muted-foreground">{product.description}</p>
-                <p className="text-lg font-bold mt-2">{product.price} XOF</p>
+                <p className="text-lg font-bold mt-2">{formatPrice(product.price)}</p>
               </div>
             ))}
           </div>

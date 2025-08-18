@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useMarkets } from '@/hooks/useMarkets';
 import { Market } from '@/types/markets';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ const CreateShippingMethodDialog = ({
   onSuccess
 }: CreateShippingMethodDialogProps) => {
   const { createShippingMethod, updateShippingMethod, isCreatingMethod, isUpdatingMethod } = useMarkets(storeId);
+  const { formatPrice } = useStoreCurrency(storeId);
   const [formData, setFormData] = useState({
     name: editingMethod?.name || '',
     description: editingMethod?.description || '',
@@ -285,7 +287,7 @@ const CreateShippingMethodDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Prix (CFA) *</Label>
+            <Label htmlFor="price">Prix ({formatPrice(0, { showSymbol: true, showCode: true })}) *</Label>
             <Input
               id="price"
               type="number"

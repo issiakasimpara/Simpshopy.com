@@ -5,12 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Coins, Globe, AlertTriangle, CheckCircle, Bug, RefreshCw } from "lucide-react";
+import { Coins, Globe, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
 import { useStoreCurrency } from "@/hooks/useStoreCurrency";
 import { CURRENCIES } from "@/utils/formatCurrency";
 import { useToast } from "@/hooks/use-toast";
-import { runCurrencyDebug } from "@/utils/debugCurrencySystem";
-import { runCurrencyUpdateTest } from "@/utils/testCurrencyUpdate";
+
 
 interface CurrencySectionProps {
   storeId?: string;
@@ -54,31 +53,7 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
     }
   };
 
-  const handleDebugTest = () => {
-    console.log('🔍 Test du système de devise...');
-    console.log('Store ID:', storeId);
-    console.log('Store ID valide:', isValidStoreId);
-    console.log('Devise actuelle:', currency);
-    console.log('Devise sélectionnée:', selectedCurrency);
-    console.log('Paramètres:', currencySettings);
-    
-    // Lancer le debug complet
-    runCurrencyDebug();
-    
-    toast({
-      title: "Debug lancé",
-      description: "Vérifiez la console pour les détails du test.",
-    });
-  };
 
-  const handleForceUpdate = () => {
-    toast({
-      title: "Test de mise à jour",
-      description: "Changement de devise et rafraîchissement forcé...",
-    });
-    
-    runCurrencyUpdateTest();
-  };
 
   const getCurrencyLabel = (currencyCode: string) => {
     const currency = CURRENCIES[currencyCode as keyof typeof CURRENCIES];
@@ -89,7 +64,7 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
 
   const getCurrencyFlag = (currencyCode: string) => {
     const flags: Record<string, string> = {
-      // Devises africaines
+      // Afrique (25 devises)
       'XOF': '🇧🇫', // CFA BCEAO
       'XAF': '🇨🇲', // CFA BEAC
       'GHS': '🇬🇭', // Ghana
@@ -99,19 +74,147 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
       'KES': '🇰🇪', // Kenya
       'UGX': '🇺🇬', // Ouganda
       'TZS': '🇹🇿', // Tanzanie
+      'MAD': '��🇦', // Maroc
+      'DZD': '🇩🇿', // Algérie
+      'TND': '🇹🇳', // Tunisie
+      'LYD': '🇱🇾', // Libye
+      'SDG': '🇸🇩', // Soudan
+      'ETB': '🇪🇹', // Éthiopie
+      'SOS': '🇸🇴', // Somalie
+      'DJF': '🇩🇯', // Djibouti
+      'KMF': '🇰🇲', // Comores
+      'MUR': '🇲🇺', // Maurice
+      'SCR': '🇸🇨', // Seychelles
+      'BIF': '🇧🇮', // Burundi
+      'RWF': '🇷🇼', // Rwanda
+      'CDF': '🇨🇩', // RDC
+      'GMD': '🇬🇲', // Gambie
+      'SLL': '🇸��', // Sierra Leone
       
-      // Devises occidentales
+      // Europe (30 devises)
       'EUR': '🇪🇺', // Euro
-      'USD': '🇺🇸', // Dollar US
       'GBP': '🇬🇧', // Livre sterling
-      'JPY': '🇯🇵', // Yen japonais
-      'CAD': '🇨🇦', // Dollar canadien
-      'AUD': '🇦🇺', // Dollar australien
       'CHF': '🇨🇭', // Franc suisse
-      'CNY': '🇨🇳', // Yuan chinois
-      'INR': '🇮🇳', // Roupie indienne
+      'SEK': '🇸🇪', // Couronne suédoise
+      'NOK': '🇳🇴', // Couronne norvégienne
+      'DKK': '🇩🇰', // Couronne danoise
+      'ISK': '🇮🇸', // Couronne islandaise
+      'PLN': '🇵🇱', // Złoty polonais
+      'CZK': '🇨🇿', // Couronne tchèque
+      'HUF': '🇭🇺', // Forint hongrois
+      'RON': '🇷🇴', // Leu roumain
+      'BGN': '🇧🇬', // Lev bulgare
+      'HRK': '🇭🇷', // Kuna croate
+      'RSD': '🇷🇸', // Dinar serbe
+      'ALL': '🇦🇱', // Lek albanais
+      'MKD': '🇲🇰', // Denar macédonien
+      'BAM': '🇧🇦', // Mark convertible
+      'MNT': '🇲🇳', // Tugrik mongol
+      'GEL': '🇬🇪', // Lari géorgien
+      'AMD': '🇦🇲', // Dram arménien
+      'AZN': '🇦🇿', // Manat azerbaïdjanais
+      'BYN': '🇧🇾', // Rouble biélorusse
+      'MDL': '🇲🇩', // Leu moldave
+      'UAH': '🇺🇦', // Hryvnia ukrainienne
+      'RUB': '🇷🇺', // Rouble russe
+      'TRY': '🇹🇷', // Livre turque
+      'ILS': '🇮🇱', // Shekel israélien
+      'JOD': '🇯🇴', // Dinar jordanien
+      'LBP': '🇱🇧', // Livre libanaise
+      'SYP': '🇸🇾', // Livre syrienne
+      
+      // Amériques (35 devises)
+      'USD': '🇺🇸', // Dollar américain
+      'CAD': '🇨🇦', // Dollar canadien
       'BRL': '🇧🇷', // Real brésilien
       'MXN': '🇲🇽', // Peso mexicain
+      'ARS': '🇦🇷', // Peso argentin
+      'CLP': '🇨🇱', // Peso chilien
+      'COP': '🇨🇴', // Peso colombien
+      'PEN': '🇵🇪', // Sol péruvien
+      'UYU': '🇺🇾', // Peso uruguayen
+      'PYG': '🇵🇾', // Guarani paraguayen
+      'BOB': '🇧🇴', // Boliviano
+      'GTQ': '🇬🇹', // Quetzal guatémaltèque
+      'HNL': '🇭🇳', // Lempira hondurien
+      'NIO': '🇳🇮', // Córdoba nicaraguayen
+      'CRC': '🇨🇷', // Colón costaricain
+      'PAB': '🇵🇦', // Balboa panaméen
+      'BBD': '🇧🇧', // Dollar barbadien
+      'JMD': '🇯🇲', // Dollar jamaïcain
+      'TTD': '🇹🇹', // Dollar trinidadien
+      'XCD': '🇦🇬', // Dollar est-caribéen
+      'AWG': '🇦🇼', // Florin arubais
+      'ANG': '🇨🇼', // Florin néerlandais
+      'SRD': '🇸🇷', // Dollar surinamais
+      'GYD': '🇬🇾', // Dollar guyanien
+      'VEF': '🇻🇪', // Bolivar vénézuélien
+      'ECU': '🇪🇨', // Dollar équatorien
+      'BZD': '🇧🇿', // Dollar bélizien
+      'HTG': '🇭🇹', // Gourde haïtienne
+      'DOP': '🇩🇴', // Peso dominicain
+      'CUP': '🇨🇺', // Peso cubain
+      'KYD': '🇰🇾', // Dollar des îles Caïmans
+      'BMD': '🇧🇲', // Dollar bermudien
+      'FKP': '🇫🇰', // Livre des îles Falkland
+      
+      // Asie (40 devises)
+      'JPY': '🇯🇵', // Yen japonais
+      'CNY': '🇨🇳', // Yuan chinois
+      'INR': '🇮🇳', // Roupie indienne
+      'KRW': '🇰🇷', // Won sud-coréen
+      'SGD': '🇸🇬', // Dollar singapourien
+      'HKD': '🇭🇰', // Dollar de Hong Kong
+      'TWD': '🇹🇼', // Dollar taïwanais
+      'THB': '🇹🇭', // Baht thaïlandais
+      'MYR': '🇲🇾', // Ringgit malaisien
+      'IDR': '🇮🇩', // Roupie indonésienne
+      'PHP': '🇵🇭', // Peso philippin
+      'VND': '🇻🇳', // Dong vietnamien
+      'BDT': '🇧🇩', // Taka bangladais
+      'PKR': '🇵🇰', // Roupie pakistanaise
+      'LKR': '🇱🇰', // Roupie srilankaise
+      'NPR': '🇳🇵', // Roupie népalaise
+      'MMK': '🇲🇲', // Kyat birman
+      'KHR': '🇰🇭', // Riel cambodgien
+      'LAK': '🇱🇦', // Kip laotien
+      'KZT': '🇰🇿', // Tenge kazakh
+      'UZS': '🇺🇿', // Sum ouzbek
+      'TJS': '🇹🇯', // Somoni tadjik
+      'TMM': '🇹🇲', // Manat turkmène
+      'AFN': '🇦🇫', // Afghani afghan
+      'IRR': '🇮🇷', // Rial iranien
+      'IQD': '🇮🇶', // Dinar irakien
+      'SAR': '🇸🇦', // Riyal saoudien
+      'AED': '🇦🇪', // Dirham émirati
+      'QAR': '🇶🇦', // Riyal qatari
+      'KWD': '🇰🇼', // Dinar koweïtien
+      'BHD': '🇧🇭', // Dinar bahreïni
+      'OMR': '🇴🇲', // Rial omanais
+      'YER': '🇾🇪', // Rial yéménite
+      'KGS': '🇰🇬', // Som kirghize
+      'TMT': '🇹🇲', // Manat turkmène
+      
+      // Océanie (10 devises)
+      'AUD': '🇦🇺', // Dollar australien
+      'NZD': '🇳🇿', // Dollar néo-zélandais
+      'FJD': '🇫🇯', // Dollar fidjien
+      'PGK': '🇵🇬', // Kina papouasien
+      'SBD': '🇸🇧', // Dollar des îles Salomon
+      'TOP': '🇹🇴', // Pa'anga tongien
+      'VUV': '🇻🇺', // Vatu vanuatais
+      'WST': '🇼🇸', // Tala samoane
+      'KID': '🇰🇮', // Dollar kiribatien
+      'TVD': '🇹🇻', // Dollar tuvaluan
+      
+      // Devises spéciales et crypto
+      'XDR': '🌍', // Droits de tirage spéciaux
+      'XAU': '🥇', // Or
+      'XAG': '🥈', // Argent
+      'BTC': '₿', // Bitcoin
+      'ETH': 'Ξ', // Ethereum
+      'USDT': '💱', // Tether
+      'USDC': '💱', // USD Coin
     };
     return flags[currencyCode] || '💱';
   };
@@ -243,40 +346,7 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
         </CardContent>
       </Card>
 
-      {/* Section de debug */}
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-            <Bug className="h-4 w-4" />
-            Outils de debug
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDebugTest}
-              className="flex-1"
-            >
-              <Bug className="h-3 w-3 mr-1" />
-              Debug système
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleForceUpdate}
-              className="flex-1"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
-              Test mise à jour
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Utilisez ces outils pour diagnostiquer les problèmes de devise
-          </p>
-        </CardContent>
-      </Card>
+
     </div>
   );
 };

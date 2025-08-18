@@ -8,6 +8,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { useCart } from '@/contexts/CartContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 type Product = Tables<'products'>;
 
@@ -36,6 +37,7 @@ const ProductDetailInfo = ({
   const navigate = useNavigate();
   const { storeSlug } = useParams();
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const { formatPrice } = useStoreCurrency(product.store_id);
   console.log('ProductDetailInfo - Rendering with:', {
     productName: product.name,
     productId: product.id,
@@ -120,9 +122,9 @@ const ProductDetailInfo = ({
       {/* Prix */}
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl lg:text-3xl font-bold text-blue-600">{currentPrice} CFA</span>
+          <span className="text-2xl lg:text-3xl font-bold text-blue-600">{formatPrice(currentPrice)}</span>
           {currentComparePrice && currentComparePrice > currentPrice && (
-            <span className="text-lg text-gray-500 line-through">{currentComparePrice} CFA</span>
+            <span className="text-lg text-gray-500 line-through">{formatPrice(currentComparePrice)}</span>
           )}
           {currentComparePrice && currentComparePrice > currentPrice && (
             <Badge className="bg-red-500 text-white">

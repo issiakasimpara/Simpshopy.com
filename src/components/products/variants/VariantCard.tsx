@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Image as ImageIcon, Package } from 'lucide-react';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface VariantCardProps {
   variant: any;
@@ -12,6 +13,7 @@ interface VariantCardProps {
 }
 
 const VariantCard = ({ variant, onEdit, onDelete }: VariantCardProps) => {
+  const { formatPrice } = useStoreCurrency();
   const getVariantDisplayName = () => {
     const attributeNames = variant.variant_attribute_values
       ?.map((vav: any) => vav.attribute_values?.value)
@@ -85,11 +87,11 @@ const VariantCard = ({ variant, onEdit, onDelete }: VariantCardProps) => {
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold text-green-600">
-              {variant.price ? `${variant.price} CFA` : 'Prix non défini'}
+              {variant.price ? formatPrice(variant.price) : 'Prix non défini'}
             </span>
             {variant.compare_price && variant.compare_price > variant.price && (
               <span className="text-sm text-gray-500 line-through">
-                {variant.compare_price} CFA
+                {formatPrice(variant.compare_price)}
               </span>
             )}
           </div>

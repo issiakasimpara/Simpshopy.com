@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, ShoppingCart } from 'lucide-react';
 import AddToCartButton from '../AddToCartButton';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface RelatedProductsProps {
   currentProductId: string;
@@ -13,6 +14,7 @@ interface RelatedProductsProps {
 }
 
 const RelatedProducts = ({ currentProductId, products, onProductClick, viewMode, storeId }: RelatedProductsProps) => {
+  const { formatPrice } = useStoreCurrency(storeId);
   // Filtrer les produits pour exclure le produit actuel et limiter le nombre
   const relatedProducts = products
     .filter(product => product.id !== currentProductId)
@@ -73,9 +75,9 @@ const RelatedProducts = ({ currentProductId, products, onProductClick, viewMode,
                 </h3>
                 
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="font-bold text-blue-600">{product.price} CFA</span>
+                  <span className="font-bold text-blue-600">{formatPrice(product.price)}</span>
                   {product.compare_price && product.compare_price > product.price && (
-                    <span className="text-sm text-gray-500 line-through">{product.compare_price} CFA</span>
+                    <span className="text-sm text-gray-500 line-through">{formatPrice(product.compare_price)}</span>
                   )}
                 </div>
 
