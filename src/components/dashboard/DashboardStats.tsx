@@ -11,7 +11,7 @@ const DashboardStats = () => {
   const { store } = useStores();
   const { formatPrice } = useStoreCurrency(store?.id);
   const { stats, isLoadingStats } = useOrders();
-  const { products, isLoading: isLoadingProducts } = useProducts(store?.id);
+  const { products, isLoading: isLoadingProducts } = useProducts(store?.id, 'active');
   const { analytics, isLoading: analyticsLoading } = useAnalytics();
 
   // Utiliser les analytics pour les statistiques

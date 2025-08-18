@@ -7,21 +7,21 @@ type Product = Tables<'products'>;
 type ProductInsert = TablesInsert<'products'>;
 type ProductUpdate = TablesUpdate<'products'>;
 
-export const useProducts = (storeId?: string) => {
+export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: products, isLoading, error, refetch } = useQuery({
-    queryKey: ['products', storeId],
+    queryKey: ['products', storeId, statusFilter],
     queryFn: async () => {
-      console.log('useProducts - Fetching products for store:', storeId);
+      console.log('useProducts - Fetching products for store:', storeId, 'with status filter:', statusFilter);
       
       if (!storeId) {
         console.log('useProducts - No storeId provided, returning empty array');
         return [];
       }
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
         .select(`
           *,
@@ -30,6 +30,13 @@ export const useProducts = (storeId?: string) => {
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
+      // Si on spécifie un filtre de statut, l'appliquer
+      if (statusFilter === 'active') {
+        query = query.eq('status', 'active');
+      }
+
+      const { data, error } = await query;
+
       if (error) {
         console.error('useProducts - Error fetching products:', error);
         throw error;
@@ -37,7 +44,8 @@ export const useProducts = (storeId?: string) => {
 
       console.log('useProducts - Successfully fetched products:', {
         count: data?.length || 0,
-        products: data?.map(p => ({ id: p.id, name: p.name, price: p.price })) || []
+        statusFilter,
+        products: data?.map(p => ({ id: p.id, name: p.name, price: p.price, status: p.status })) || []
       });
 
       return data || [];
@@ -62,10 +70,11 @@ export const useProducts = (storeId?: string) => {
       return data;
     },
     onSuccess: (newProduct) => {
-      // Invalider la query pour forcer un refetch propre
-      queryClient.invalidateQueries(['products', storeId]);
-      // Forcer un refetch immédiat pour s'assurer que les données sont à jour
-      queryClient.refetchQueries(['products', storeId]);
+      console.log('✅ Product creation successful, updating cache');
+      
+      // Invalider toutes les queries de produits pour ce store
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] });
+      
       toast({
         title: "Produit créé !",
         description: "Votre produit a été ajouté avec succès.",
@@ -93,8 +102,15 @@ export const useProducts = (storeId?: string) => {
       return data;
     },
     onSuccess: (updatedProduct) => {
-      // Mise à jour optimiste du cache
-      queryClient.setQueryData(['products', storeId], (old: any) => {
+      console.log('✅ Product update successful, updating cache');
+      
+      // Mise à jour optimiste du cache pour toutes les variantes de la query
+      queryClient.setQueryData(['products', storeId, 'all'], (old: any) => {
+        if (!old) return [updatedProduct];
+        return old.map((p: any) => p.id === updatedProduct.id ? updatedProduct : p);
+      });
+      
+      queryClient.setQueryData(['products', storeId, 'active'], (old: any) => {
         if (!old) return [updatedProduct];
         return old.map((p: any) => p.id === updatedProduct.id ? updatedProduct : p);
       });
@@ -115,20 +131,37 @@ export const useProducts = (storeId?: string) => {
 
   const deleteProduct = useMutation({
     mutationFn: async (id: string) => {
+      console.log('🗑️ Attempting to delete product:', id);
+      
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error deleting product:', error);
+        throw error;
+      }
+      
+      console.log('✅ Product deleted successfully:', id);
       return id;
     },
     onSuccess: (deletedId) => {
-      // Mise à jour optimiste du cache
-      queryClient.setQueryData(['products', storeId], (old: any) => {
+      console.log('✅ Product deletion mutation successful, updating cache');
+      
+      // Mise à jour optimiste du cache pour toutes les variantes de la query
+      queryClient.setQueryData(['products', storeId, 'all'], (old: any) => {
         if (!old) return [];
         return old.filter((p: any) => p.id !== deletedId);
       });
+      
+      queryClient.setQueryData(['products', storeId, 'active'], (old: any) => {
+        if (!old) return [];
+        return old.filter((p: any) => p.id !== deletedId);
+      });
+      
+      // Invalider toutes les queries de produits pour ce store
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] });
       
       toast({
         title: "Produit supprimé !",

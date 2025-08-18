@@ -34,7 +34,7 @@ const ProductDetailBlock = ({
 }: ProductDetailBlockProps) => {
   // TOUS LES HOOKS EN PREMIER - ORDRE FIXE ET STABLE
   // Utiliser les produits passés en props ou charger via hook si pas disponibles
-  const { products: hookProducts, isLoading } = useProducts(passedProducts ? undefined : selectedStore?.id);
+  const { products: hookProducts, isLoading } = useProducts(passedProducts ? undefined : selectedStore?.id, 'active');
   const products = passedProducts || hookProducts || [];
   const [currentImages, setCurrentImages] = useState<string[]>([]);
 

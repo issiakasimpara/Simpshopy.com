@@ -17,7 +17,7 @@ interface ProductsEditorProps {
 }
 
 const ProductsEditor = ({ block, selectedStore, onUpdate }: ProductsEditorProps) => {
-  const { products, isLoading } = useProducts(selectedStore?.id);
+  const { products, isLoading } = useProducts(selectedStore?.id, 'active');
 
   return (
     <div className="space-y-4">

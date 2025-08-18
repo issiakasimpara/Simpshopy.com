@@ -29,7 +29,7 @@ const ProductsBlock = ({
   selectedStore,
   onProductClick
 }: ProductsBlockProps) => {
-  const { products, isLoading } = useProducts(selectedStore?.id);
+  const { products, isLoading } = useProducts(selectedStore?.id, 'active');
   const { formatPrice } = useStoreCurrency(selectedStore?.id);
   
   console.log('ProductsBlock - onProductClick available:', !!onProductClick);

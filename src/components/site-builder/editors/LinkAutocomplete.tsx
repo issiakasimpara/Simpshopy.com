@@ -12,7 +12,7 @@ interface LinkAutocompleteProps {
 const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pages }) => {
   const { stores } = useStores();
   const storeId = stores && stores[0]?.id;
-  const { products = [] } = useProducts(storeId);
+  const { products = [] } = useProducts(storeId, 'active');
 
   // Suggestions de pages : soit via prop, soit fallback
   const pageSuggestions = useMemo(() => {

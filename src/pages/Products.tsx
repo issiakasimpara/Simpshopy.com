@@ -19,7 +19,7 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState<Tables<'products'> | null>(null);
   
   const { stores } = useStores();
-  const { products, isLoading, deleteProduct, refetch } = useProducts(selectedStoreId);
+  const { products, isLoading, deleteProduct, refetch } = useProducts(selectedStoreId, 'all');
 
   // Auto-select the first store when stores are loaded
   useEffect(() => {
@@ -38,8 +38,20 @@ const Products = () => {
   };
 
   const handleDeleteProduct = (productId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      deleteProduct(productId);
+    console.log('🗑️ Delete product requested:', productId);
+    
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
+      console.log('🗑️ User confirmed deletion, calling deleteProduct mutation');
+      deleteProduct.mutate(productId, {
+        onSuccess: () => {
+          console.log('✅ Product deletion successful');
+        },
+        onError: (error) => {
+          console.error('❌ Product deletion failed:', error);
+        }
+      });
+    } else {
+      console.log('❌ User cancelled deletion');
     }
   };
 
