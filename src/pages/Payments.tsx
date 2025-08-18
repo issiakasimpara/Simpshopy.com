@@ -17,8 +17,7 @@ import {
   CheckCircle, 
   XCircle,
   AlertCircle,
-  Download,
-  RefreshCw
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -29,23 +28,7 @@ const Payments = () => {
   const { formatPrice } = useStoreCurrency(currentStore?.id);
   const { payments, paymentStats, isLoading, verifyPayment } = usePayments(currentStore?.id);
   const { toast } = useToast();
-  const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      // Recharger les données
-      window.location.reload();
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de rafraîchir les données",
-        variant: "destructive"
-      });
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -120,17 +103,11 @@ const Payments = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* En-tête */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Paiements</h1>
-            <p className="text-muted-foreground">
-              Gérez les paiements de votre boutique {currentStore.name}
-            </p>
-          </div>
-          <Button onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualiser
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Paiements</h1>
+          <p className="text-muted-foreground">
+            Gérez les paiements de votre boutique {currentStore.name}
+          </p>
         </div>
 
         {/* Statistiques */}

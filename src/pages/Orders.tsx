@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Package, Calendar, Eye, Edit, Loader2, RefreshCw, ShoppingCart, Mail, Trash2, TrendingUp, DollarSign, Users } from 'lucide-react';
+import { Search, Package, Calendar, Eye, Edit, Loader2, ShoppingCart, Mail, Trash2, TrendingUp, DollarSign, Users } from 'lucide-react';
 import { useStores } from '@/hooks/useStores';
 import { useOrders } from '@/hooks/useOrders';
 import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
@@ -95,34 +95,19 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-  const handleRefreshAll = () => {
-    refetchOrders();
-    fetchAbandonedCarts();
-  };
+
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-              Gestion des commandes
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Visualisez et gérez les commandes et paniers abandonnés de votre boutique
-            </p>
-          </div>
-          <Button
-            onClick={handleRefreshAll}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={isLoading || isLoadingAbandoned}
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading || isLoadingAbandoned ? 'animate-spin' : ''}`} />
-            Actualiser
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Gestion des commandes
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Visualisez et gérez les commandes et paniers abandonnés de votre boutique
+          </p>
         </div>
 
         {/* Tabs */}
