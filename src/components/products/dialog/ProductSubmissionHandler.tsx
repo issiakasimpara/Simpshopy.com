@@ -58,7 +58,7 @@ export const useProductSubmission = ({ storeId, formData, onSuccess }: ProductSu
     try {
       const productData: any = {
         store_id: storeId,
-        name: formData.name,
+        name: formData.name.trim(), // Sanitiser le nom lors de la soumission
         price: price,
         status: formData.status,
         inventory_quantity: parseInt(formData.inventory_quantity) || 0,

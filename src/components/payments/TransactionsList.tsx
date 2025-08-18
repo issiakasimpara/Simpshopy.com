@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
 import { 
   Table,
   TableBody,
@@ -45,6 +47,8 @@ interface TransactionsListProps {
 }
 
 const TransactionsList = ({ transactions, onTransactionSelect }: TransactionsListProps) => {
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
   const [searchTerm, setSearchTerm] = useState("");
 
   const getStatusColor = (status: string) => {
@@ -146,12 +150,12 @@ const TransactionsList = ({ transactions, onTransactionSelect }: TransactionsLis
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-semibold">{transaction.amount.toFixed(2)} CFA</div>
+                      <div className="font-semibold">{formatPrice(transaction.amount)}</div>
                       <div className="text-xs text-muted-foreground">
-                        Frais: {transaction.fee.toFixed(2)} CFA
+                        Frais: {formatPrice(transaction.fee)}
                       </div>
                       <div className="text-xs font-semibold text-green-600 dark:text-green-400">
-                        Net: {transaction.net.toFixed(2)} CFA
+                        Net: {formatPrice(transaction.net)}
                       </div>
                     </div>
                   </TableCell>

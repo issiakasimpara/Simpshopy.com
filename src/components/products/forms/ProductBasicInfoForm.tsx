@@ -47,23 +47,23 @@ const ProductBasicInfoForm = ({ formData, onFormDataChange, onNext, isLoading = 
   const validateAndUpdate = (field: keyof FormData, value: any) => {
     setIsValidating(true);
     
-    // Sanitisation automatique
-    const sanitizedValue = typeof value === 'string' ? sanitizeField(field, value) : value;
+    // Ne pas sanitiser pendant la saisie pour permettre les espaces
+    const valueToValidate = typeof value === 'string' ? value : value;
     
     // Validation selon le type de champ
     let validationResult;
     switch (field) {
       case 'name':
-        validationResult = validateField('productName', sanitizedValue);
+        validationResult = validateField('productName', valueToValidate);
         break;
       case 'price':
-        validationResult = validateField('price', sanitizedValue);
+        validationResult = validateField('price', valueToValidate);
         break;
       case 'sku':
-        validationResult = validateField('sku', sanitizedValue);
+        validationResult = validateField('sku', valueToValidate);
         break;
       case 'description':
-        validationResult = validateField('description', sanitizedValue);
+        validationResult = validateField('description', valueToValidate);
         break;
       default:
         validationResult = { isValid: true };
@@ -75,10 +75,10 @@ const ProductBasicInfoForm = ({ formData, onFormDataChange, onNext, isLoading = 
       [field]: validationResult.error
     }));
     
-    // Mise à jour du formulaire avec la valeur sanitée
+    // Mise à jour du formulaire avec la valeur originale (non sanitée)
     onFormDataChange({
       ...formData,
-      [field]: sanitizedValue
+      [field]: value
     });
     
     setIsValidating(false);

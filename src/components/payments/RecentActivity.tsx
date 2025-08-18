@@ -2,6 +2,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
 import { TrendingUp, RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 interface Transaction {
@@ -17,6 +19,8 @@ interface RecentActivityProps {
 }
 
 const RecentActivity = ({ transactions }: RecentActivityProps) => {
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Réussi": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
@@ -64,7 +68,7 @@ const RecentActivity = ({ transactions }: RecentActivityProps) => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold text-sm">{transaction.amount.toFixed(2)} CFA</div>
+                <div className="font-semibold text-sm">{formatPrice(transaction.amount)}</div>
                 <Badge className={`${getStatusColor(transaction.status)} font-medium text-xs`} variant="secondary">
                   {transaction.status}
                 </Badge>

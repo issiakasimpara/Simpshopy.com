@@ -59,15 +59,21 @@ export const useSecurity = () => {
           };
         
         case 'productName':
+          // Validation sans sanitisation pour permettre les espaces pendant la saisie
+          const nameLength = value.length;
+          const isValidName = nameLength >= 2 && nameLength <= 200;
           return {
-            isValid: validateProductName(value),
-            error: validateProductName(value) ? undefined : 'Nom invalide (2-200 caractères)'
+            isValid: isValidName,
+            error: isValidName ? undefined : 'Nom invalide (2-200 caractères)'
           };
         
         case 'description':
+          // Validation sans sanitisation pour permettre les espaces pendant la saisie
+          const descLength = value.length;
+          const isValidDesc = descLength <= 2000;
           return {
-            isValid: validateDescription(value),
-            error: validateDescription(value) ? undefined : 'Description trop longue (max 2000 caractères)'
+            isValid: isValidDesc,
+            error: isValidDesc ? undefined : 'Description trop longue (max 2000 caractères)'
           };
         
         case 'uuid':

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { usePayments } from '@/hooks/usePayments';
 import { useStores } from '@/hooks/useStores';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { 
   CreditCard, 
@@ -25,6 +26,7 @@ import { fr } from 'date-fns/locale';
 const Payments = () => {
   const navigate = useNavigate();
   const { stores, store: currentStore } = useStores();
+  const { formatPrice } = useStoreCurrency(currentStore?.id);
   const { payments, paymentStats, isLoading, verifyPayment } = usePayments(currentStore?.id);
   const { toast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
@@ -61,10 +63,15 @@ const Payments = () => {
   };
 
   const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency || 'XOF'
-    }).format(amount);
+    // Utiliser formatPrice si la devise correspond à celle du store, sinon utiliser la devise spécifiée
+    if (currency && currency !== 'XOF') {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: currency
+      }).format(amount);
+    }
+    // Utiliser formatPrice pour la devise du store
+    return formatPrice(amount);
   };
 
   if (!currentStore) {
@@ -135,7 +142,7 @@ const Payments = () => {
                   <DollarSign className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total des ventes</p>
-                    <p className="text-2xl font-bold">{formatAmount(paymentStats.totalAmount, 'XOF')}</p>
+                    <p className="text-2xl font-bold">{formatPrice(paymentStats.totalAmount)}</p>
                   </div>
                 </div>
               </CardContent>
