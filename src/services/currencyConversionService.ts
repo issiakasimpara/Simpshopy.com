@@ -42,54 +42,29 @@ export class CurrencyConversionService {
         };
       }
 
-      // Chercher le taux de conversion direct
-      const { data: directRate, error: directError } = await supabase
-        .from('currency_rates')
-        .select('*')
-        .eq('base_currency', fromCurrency)
-        .eq('target_currency', toCurrency)
-        .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Pas plus vieux que 7 jours
-        .single();
+      // Utiliser la fonction PostgreSQL directement
+      const { data, error } = await supabase.rpc('convert_currency', {
+        amount: amount,
+        from_currency: fromCurrency,
+        to_currency: toCurrency
+      });
 
-      if (directRate) {
-        const convertedAmount = amount * directRate.rate;
-        console.log(`✅ Conversion directe: ${amount} × ${directRate.rate} = ${convertedAmount}`);
-        
+      if (error) {
+        console.error('❌ Erreur lors de la conversion:', error);
+        return null;
+      }
+
+      if (data !== null) {
         return {
           originalAmount: amount,
           originalCurrency: fromCurrency,
-          convertedAmount: convertedAmount,
+          convertedAmount: data,
           targetCurrency: toCurrency,
-          rate: directRate.rate,
-          lastUpdated: directRate.last_updated
+          rate: data / amount,
+          lastUpdated: new Date().toISOString()
         };
       }
 
-      // Chercher le taux de conversion inverse
-      const { data: inverseRate, error: inverseError } = await supabase
-        .from('currency_rates')
-        .select('*')
-        .eq('base_currency', toCurrency)
-        .eq('target_currency', fromCurrency)
-        .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .single();
-
-      if (inverseRate) {
-        const convertedAmount = amount / inverseRate.rate;
-        const rate = 1 / inverseRate.rate;
-        console.log(`✅ Conversion inverse: ${amount} ÷ ${inverseRate.rate} = ${convertedAmount}`);
-        
-        return {
-          originalAmount: amount,
-          originalCurrency: fromCurrency,
-          convertedAmount: convertedAmount,
-          targetCurrency: toCurrency,
-          rate: rate,
-          lastUpdated: inverseRate.last_updated
-        };
-      }
-
-      console.log(`❌ Aucun taux de conversion trouvé pour ${fromCurrency} → ${toCurrency}`);
       return null;
 
     } catch (error) {
@@ -111,33 +86,18 @@ export class CurrencyConversionService {
         return 1;
       }
 
-      // Chercher le taux de conversion direct
-      const { data: directRate, error: directError } = await supabase
-        .from('currency_rates')
-        .select('rate')
-        .eq('base_currency', fromCurrency)
-        .eq('target_currency', toCurrency)
-        .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .single();
+      // Utiliser la fonction PostgreSQL directement
+      const { data, error } = await supabase.rpc('get_exchange_rate', {
+        from_currency: fromCurrency,
+        to_currency: toCurrency
+      });
 
-      if (directRate) {
-        return directRate.rate;
+      if (error) {
+        console.error('❌ Erreur lors de la récupération du taux:', error);
+        return null;
       }
 
-      // Chercher le taux de conversion inverse
-      const { data: inverseRate, error: inverseError } = await supabase
-        .from('currency_rates')
-        .select('rate')
-        .eq('base_currency', toCurrency)
-        .eq('target_currency', fromCurrency)
-        .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .single();
-
-      if (inverseRate) {
-        return 1 / inverseRate.rate;
-      }
-
-      return null;
+      return data;
 
     } catch (error) {
       console.error('❌ Erreur lors de la récupération du taux de change:', error);
@@ -165,58 +125,76 @@ export class CurrencyConversionService {
 
       console.log(`📊 Taux de conversion: ${rate}`);
 
-      // Mettre à jour les prix des produits
-      const { error: productsError } = await supabase
+      // Mettre à jour les prix des produits - Version simplifiée
+      const { data: products, error: productsFetchError } = await supabase
         .from('products')
-        .update({
-          price: supabase.rpc('convert_currency', {
-            amount: supabase.raw('price'),
-            from_currency: oldCurrency,
-            to_currency: newCurrency
-          })
-        })
+        .select('id, price')
         .eq('store_id', storeId);
 
-      if (productsError) {
-        console.error('❌ Erreur lors de la mise à jour des produits:', productsError);
-      } else {
-        console.log('✅ Prix des produits mis à jour');
+      if (productsFetchError) {
+        console.error('❌ Erreur lors de la récupération des produits:', productsFetchError);
+      } else if (products && products.length > 0) {
+        // Mettre à jour chaque produit individuellement
+        for (const product of products) {
+          const newPrice = product.price * rate;
+          const { error: updateError } = await supabase
+            .from('products')
+            .update({ price: newPrice })
+            .eq('id', product.id);
+
+          if (updateError) {
+            console.error(`❌ Erreur lors de la mise à jour du produit ${product.id}:`, updateError);
+          }
+        }
+        console.log(`✅ Prix de ${products.length} produits mis à jour`);
       }
 
-      // Mettre à jour les montants des commandes
-      const { error: ordersError } = await supabase
-        .from('orders')
-        .update({
-          total_amount: supabase.rpc('convert_currency', {
-            amount: supabase.raw('total_amount'),
-            from_currency: oldCurrency,
-            to_currency: newCurrency
-          })
-        })
+      // Mettre à jour les montants des commandes - Version simplifiée
+      const { data: orders, error: ordersFetchError } = await supabase
+        .from('public_orders')
+        .select('id, total_amount')
         .eq('store_id', storeId);
 
-      if (ordersError) {
-        console.error('❌ Erreur lors de la mise à jour des commandes:', ordersError);
-      } else {
-        console.log('✅ Montants des commandes mis à jour');
+      if (ordersFetchError) {
+        console.error('❌ Erreur lors de la récupération des commandes:', ordersFetchError);
+      } else if (orders && orders.length > 0) {
+        // Mettre à jour chaque commande individuellement
+        for (const order of orders) {
+          const newAmount = order.total_amount * rate;
+          const { error: updateError } = await supabase
+            .from('public_orders')
+            .update({ total_amount: newAmount })
+            .eq('id', order.id);
+
+          if (updateError) {
+            console.error(`❌ Erreur lors de la mise à jour de la commande ${order.id}:`, updateError);
+          }
+        }
+        console.log(`✅ Montants de ${orders.length} commandes mis à jour`);
       }
 
-      // Mettre à jour les montants des paiements
-      const { error: paymentsError } = await supabase
+      // Mettre à jour les montants des paiements - Version simplifiée
+      const { data: payments, error: paymentsFetchError } = await supabase
         .from('payments')
-        .update({
-          amount: supabase.rpc('convert_currency', {
-            amount: supabase.raw('amount'),
-            from_currency: oldCurrency,
-            to_currency: newCurrency
-          })
-        })
+        .select('id, amount')
         .eq('store_id', storeId);
 
-      if (paymentsError) {
-        console.error('❌ Erreur lors de la mise à jour des paiements:', paymentsError);
-      } else {
-        console.log('✅ Montants des paiements mis à jour');
+      if (paymentsFetchError) {
+        console.error('❌ Erreur lors de la récupération des paiements:', paymentsFetchError);
+      } else if (payments && payments.length > 0) {
+        // Mettre à jour chaque paiement individuellement
+        for (const payment of payments) {
+          const newAmount = payment.amount * rate;
+          const { error: updateError } = await supabase
+            .from('payments')
+            .update({ amount: newAmount })
+            .eq('id', payment.id);
+
+          if (updateError) {
+            console.error(`❌ Erreur lors de la mise à jour du paiement ${payment.id}:`, updateError);
+          }
+        }
+        console.log(`✅ Montants de ${payments.length} paiements mis à jour`);
       }
 
       console.log('✅ Mise à jour des montants terminée');
@@ -234,7 +212,7 @@ export class CurrencyConversionService {
   static async getAllRates(): Promise<CurrencyRate[]> {
     try {
       const { data, error } = await supabase
-        .from('currency_rates')
+        .from('currency_rates' as any)
         .select('*')
         .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order('base_currency')
@@ -245,7 +223,7 @@ export class CurrencyConversionService {
         return [];
       }
 
-      return data || [];
+      return (data as CurrencyRate[]) || [];
 
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des taux:', error);
