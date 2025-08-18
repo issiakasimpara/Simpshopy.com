@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, HeadphonesIcon } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
@@ -16,9 +16,14 @@ import PaymentMethodsSection from "@/components/home/PaymentMethodsSection";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import AppLogo from "@/components/ui/AppLogo";
 import Integrations from './Integrations';
+import { useAuth } from "@/hooks/useAuth";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { shouldShowOnboarding } = useOnboarding();
   const isPreviewMode = searchParams.get('preview') === 'true';
   const previewPage = searchParams.get('page');
   const { appName, features, getAllPricingPlans } = useAppConfig();
@@ -98,10 +103,23 @@ const Index = () => {
               <Button variant="ghost" asChild className="font-medium">
                 <Link to="/auth">Connexion</Link>
               </Button>
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                <Link to="/dashboard">
-                  Commencer <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => {
+                  if (user) {
+                    // Utilisateur connecté
+                    if (shouldShowOnboarding) {
+                      navigate('/onboarding');
+                    } else {
+                      navigate('/dashboard');
+                    }
+                  } else {
+                    // Nouvel utilisateur - rediriger vers l'auth avec un paramètre pour indiquer qu'il faut faire l'onboarding après
+                    navigate('/auth?onboarding=true');
+                  }
+                }}
+              >
+                Commencer <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

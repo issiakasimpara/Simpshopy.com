@@ -1,116 +1,165 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Wand2 } from 'lucide-react';
-import AttributeSelector from './AttributeSelector';
-import type { CheckedState } from '@radix-ui/react-checkbox';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
+import { Package, Tag, DollarSign } from "lucide-react";
 
 interface VariantCreationFormProps {
-  newVariant: {
-    price: string;
-    inventory_quantity: string;
-    selectedAttributes: Record<string, string[]>;
-  };
-  onNewVariantChange: (variant: any) => void;
-  generateMode: boolean;
-  onGenerateModeChange: (checked: CheckedState) => void;
-  colorAttribute?: any;
-  sizeAttribute?: any;
-  onAttributeChange: (attributeId: string, valueId: string, checked: CheckedState) => void;
-  onCreateVariant: () => void;
-  onGenerateAllCombinations: () => void;
-  productId?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (variant: any) => void;
+  productName: string;
+  attributes: any[];
 }
 
 const VariantCreationForm = ({
-  newVariant,
-  onNewVariantChange,
-  generateMode,
-  onGenerateModeChange,
-  colorAttribute,
-  sizeAttribute,
-  onAttributeChange,
-  onCreateVariant,
-  onGenerateAllCombinations,
-  productId
+  open,
+  onOpenChange,
+  onSave,
+  productName,
+  attributes,
 }: VariantCreationFormProps) => {
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    sku: "",
+    price: 0,
+    stock_quantity: 0,
+    is_active: true,
+  });
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    onSave(formData);
+    onOpenChange(false);
+    // Reset form
+    setFormData({
+      name: "",
+      sku: "",
+      price: 0,
+      stock_quantity: 0,
+      is_active: true,
+    });
+  };
+
+  const isFormValid = formData.name && formData.price > 0;
+
   return (
-    <div className="space-y-4 border-t pt-6">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Créer des variantes</Label>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="generateMode"
-            checked={generateMode}
-            onCheckedChange={onGenerateModeChange}
-          />
-          <Label htmlFor="generateMode" className="text-sm">Mode génération automatique</Label>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="variant-price">Prix (CFA) *</Label>
-          <Input
-            id="variant-price"
-            type="number"
-            step="0.01"
-            value={newVariant.price}
-            onChange={(e) => onNewVariantChange({ ...newVariant, price: e.target.value })}
-            placeholder="Prix de la variante"
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="variant-stock">Stock</Label>
-          <Input
-            id="variant-stock"
-            type="number"
-            value={newVariant.inventory_quantity}
-            onChange={(e) => onNewVariantChange({ ...newVariant, inventory_quantity: e.target.value })}
-            placeholder="Quantité en stock"
-          />
-        </div>
-      </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Créer une nouvelle variante
+          </DialogTitle>
+        </DialogHeader>
 
-      <AttributeSelector
-        colorAttribute={colorAttribute}
-        sizeAttribute={sizeAttribute}
-        selectedAttributes={newVariant.selectedAttributes}
-        generateMode={generateMode}
-        onAttributeChange={onAttributeChange}
-      />
+        <div className="space-y-6">
+          {/* Informations de base */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Tag className="h-4 w-4" />
+                Informations de base
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="variant-name">Nom de la variante *</Label>
+                <Input
+                  id="variant-name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  placeholder={`Ex: ${productName} - Rouge, Taille L`}
+                />
+              </div>
 
-      {generateMode ? (
-        <Button 
-          onClick={onGenerateAllCombinations}
-          disabled={!newVariant.price || !productId}
-          className="w-full"
-        >
-          <Wand2 className="h-4 w-4 mr-2" />
-          Générer toutes les combinaisons (SKU automatiques)
-        </Button>
-      ) : (
-        <Button 
-          onClick={onCreateVariant}
-          disabled={!newVariant.price || !productId}
-          className="w-full"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter la variante (SKU automatique)
-        </Button>
-      )}
+              <div className="space-y-2">
+                <Label htmlFor="variant-sku">Référence (SKU)</Label>
+                <Input
+                  id="variant-sku"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange("sku", e.target.value)}
+                  placeholder="Ex: TSH-RED-L"
+                />
+              </div>
 
-      <div className="text-xs text-muted-foreground space-y-1">
-        <p>🔧 Les SKU sont générés automatiquement basés sur le nom du produit et les attributs.</p>
-        {generateMode && (
-          <p>💡 Le mode génération automatique créera une variante pour chaque combinaison possible.</p>
-        )}
-      </div>
-    </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="variant-active"
+                  checked={formData.is_active}
+                  onChange={(e) => handleInputChange("is_active", e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="variant-active">Variante active</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prix et stock */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <DollarSign className="h-4 w-4" />
+                Prix et stock
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="variant-price">Prix ({formatPrice(0, { showSymbol: true, showCode: true })}) *</Label>
+                  <Input
+                    id="variant-price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => handleInputChange("price", parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="variant-stock">Quantité en stock</Label>
+                  <Input
+                    id="variant-stock"
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={(e) => handleInputChange("stock_quantity", parseInt(e.target.value) || 0)}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSave} disabled={!isFormValid}>
+              Créer la variante
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

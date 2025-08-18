@@ -1,37 +1,24 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip as ChartTooltip } from "recharts";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { Loader2 } from "lucide-react";
-import { formatCurrency } from "@/utils/orderUtils";
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
 
 const SalesChart = () => {
   const { salesData, isLoading } = useAnalytics();
-
-  const chartConfig = {
-    sales: {
-      label: "Ventes (CFA)",
-      color: "#3b82f6",
-    },
-    orders: {
-      label: "Commandes",
-      color: "#10b981",
-    },
-  };
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
 
   if (isLoading) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Évolution des ventes</CardTitle>
-          <CardDescription>
-            Suivi mensuel du chiffre d'affaires et des commandes
-          </CardDescription>
+          <CardTitle>Évolution des ventes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
-            <Loader2 className="h-6 w-6 animate-spin" />
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="text-muted-foreground">Chargement...</div>
           </div>
         </CardContent>
       </Card>
@@ -40,19 +27,13 @@ const SalesChart = () => {
 
   if (!salesData || salesData.length === 0) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Évolution des ventes</CardTitle>
-          <CardDescription>
-            Suivi mensuel du chiffre d'affaires et des commandes
-          </CardDescription>
+          <CardTitle>Évolution des ventes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
-            <div className="text-center text-muted-foreground">
-              <p className="text-sm">Aucune donnée de vente disponible</p>
-              <p className="text-xs mt-1">Les données apparaîtront ici une fois que vous aurez des ventes</p>
-            </div>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="text-muted-foreground">Aucune donnée disponible</div>
           </div>
         </CardContent>
       </Card>
@@ -60,56 +41,63 @@ const SalesChart = () => {
   }
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Évolution des ventes</CardTitle>
-        <CardDescription>
-          Suivi mensuel du chiffre d'affaires et des commandes
-        </CardDescription>
+        <CardTitle>Évolution des ventes</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' });
-                }}
-              />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => formatCurrency(value)}
-              />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => {
-                  const date = new Date(value);
-                  return date.toLocaleDateString('fr-FR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  });
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="sales"
-                stroke={chartConfig.sales.color}
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={salesData}>
+            <XAxis
+              dataKey="date"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => formatPrice(value)}
+            />
+            <ChartTooltip
+              content={<ChartTooltipContent />}
+              formatter={(value) => [formatPrice(value as number), "Ventes"]}
+            />
+            <Line
+              type="monotone"
+              dataKey="sales"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="stroke-primary"
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );
+};
+
+const ChartTooltipContent = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col">
+            <span className="text-[0.70rem] uppercase text-muted-foreground">
+              {label}
+            </span>
+            <span className="font-bold text-muted-foreground">
+              {payload[0].value}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
 };
 
 export default SalesChart;

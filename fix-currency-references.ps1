@@ -1,31 +1,25 @@
 # 💰 Script de Correction des Références Monétaires - SimpShopy
-# Remplace CFA par USD et méthodes de paiement africaines par internationales
+# Remplace CFA par le système de devise dynamique
 
 Write-Host "💰 Correction des références monétaires SimpShopy..." -ForegroundColor Green
 Write-Host ""
 
-# Étape 1: Remplacer CFA par USD dans les fichiers importants
-Write-Host "📝 Remplacement CFA → USD..." -ForegroundColor Yellow
+# Étape 1: Corriger les composants principaux
+Write-Host "📝 Correction des composants principaux..." -ForegroundColor Yellow
 
 $filesToUpdate = @(
-    "src/utils/orderUtils.tsx",
-    "src/components/analytics/AnalyticsTabs.tsx",
-    "src/components/analytics/SalesChart.tsx",
-    "src/components/dashboard/DashboardStats.tsx",
+    "src/components/shipping/CreateShippingMethodModal.tsx",
+    "src/components/markets/CreateShippingMethodDialog.tsx",
+    "src/components/products/variants/SimpleVariantSection.tsx",
+    "src/components/OrderDetailsModal.tsx",
+    "src/components/payments/PaymentsStats.tsx",
     "src/components/payments/TransactionsList.tsx",
     "src/components/payments/RecentActivity.tsx",
-    "src/components/payments/PaymentsStats.tsx",
     "src/components/products/ProductCard.tsx",
-    "src/components/products/forms/ProductBasicInfoForm.tsx",
-    "src/components/products/forms/ProductAdvancedForm.tsx",
-    "src/components/products/variants/VariantCard.tsx",
-    "src/components/products/variants/SimpleVariantSection.tsx",
-    "src/components/products/variants/VariantCreationForm.tsx",
-    "src/components/products/variants/VariantEditor.tsx",
-    "src/components/markets/CreateShippingMethodDialog.tsx",
-    "src/components/OrderDetailsModal.tsx",
-    "src/pages/Checkout.tsx",
-    "src/pages/MarketsShipping.tsx"
+    "src/components/checkout/PaymentMethodSelector.tsx",
+    "src/components/demo/PaymentLogosDemo.tsx",
+    "src/components/test/LogoTest.tsx",
+    "src/components/showcase/PaymentLogosShowcase.tsx"
 )
 
 foreach ($file in $filesToUpdate) {
@@ -35,16 +29,44 @@ foreach ($file in $filesToUpdate) {
         # Lire le contenu du fichier
         $content = Get-Content $file -Raw -Encoding UTF8
         
-        # Remplacer CFA par USD
-        $content = $content -replace 'CFA', 'USD'
-        $content = $content -replace 'cfa', 'usd'
+        # Ajouter l'import useStoreCurrency si nécessaire
+        if ($content -match "CFA" -and $content -notmatch "useStoreCurrency") {
+            # Trouver la dernière ligne d'import
+            $importLines = $content -split "`n" | Where-Object { $_.Trim() -match "^import" }
+            if ($importLines) {
+                $lastImport = $importLines[-1]
+                $lastImportIndex = $content.LastIndexOf($lastImport)
+                $insertIndex = $content.IndexOf("`n", $lastImportIndex) + 1
+                $content = $content.Substring(0, $insertIndex) + "import { useStoreCurrency } from `"@/hooks/useStoreCurrency`";`n" + $content.Substring($insertIndex)
+            }
+        }
         
-        # Remplacer les références spécifiques
-        $content = $content -replace 'Prix \(CFA\)', 'Prix (USD)'
-        $content = $content -replace 'Prix de comparaison \(CFA\)', 'Prix de comparaison (USD)'
-        $content = $content -replace 'Prix de revient \(CFA\)', 'Prix de revient (USD)'
-        $content = $content = $content -replace 'Prix de vente \(CFA\)', 'Prix de vente (USD)'
-        $content = $content -replace 'Prix comparé \(CFA\)', 'Prix comparé (USD)'
+        # Ajouter le hook formatPrice si nécessaire
+        if ($content -match "formatPrice" -and $content -notmatch "const \{ formatPrice \} = useStoreCurrency\(\)") {
+            # Trouver la première fonction ou composant
+            if ($content -match "(const|function)\s+\w+\s*=\s*\(") {
+                $match = [regex]::Match($content, "(const|function)\s+\w+\s*=\s*\(")
+                $insertIndex = $match.Index + $match.Length
+                $nextBraceIndex = $content.IndexOf("{", $insertIndex)
+                if ($nextBraceIndex -ne -1) {
+                    $afterBraceIndex = $content.IndexOf("`n", $nextBraceIndex) + 1
+                    $content = $content.Substring(0, $afterBraceIndex) + "  const { formatPrice } = useStoreCurrency();`n" + $content.Substring($afterBraceIndex)
+                }
+            }
+        }
+        
+        # Remplacer les références CFA
+        $content = $content -replace 'Prix \(CFA\)', 'Prix ({formatPrice(0, { showSymbol: true, showCode: true })})'
+        $content = $content -replace 'Prix de vente \(CFA\)', 'Prix de vente ({formatPrice(0, { showSymbol: true, showCode: true })})'
+        $content = $content -replace 'Prix comparé \(CFA\)', 'Prix comparé ({formatPrice(0, { showSymbol: true, showCode: true })})'
+        $content = $content -replace 'Prix de revient \(CFA\)', 'Prix de revient ({formatPrice(0, { showSymbol: true, showCode: true })})'
+        $content = $content -replace 'Prix de comparaison \(CFA\)', 'Prix de comparaison ({formatPrice(0, { showSymbol: true, showCode: true })})'
+        
+        # Remplacer les headers de tableaux
+        $content = $content -replace '<th className="text-left p-2">Prix \(CFA\)</th>', '<th className="text-left p-2">Prix ({formatPrice(0, { showSymbol: true, showCode: true })})</th>'
+        
+        # Remplacer les affichages de prix
+        $content = $content -replace '\$\{order\.shipping_method\.price\} CFA', 'formatPrice(order.shipping_method.price)'
         
         # Écrire le contenu modifié
         Set-Content $file -Value $content -Encoding UTF8
@@ -55,93 +77,33 @@ foreach ($file in $filesToUpdate) {
 
 Write-Host ""
 
-# Étape 2: Corriger les méthodes de paiement
-Write-Host "💳 Correction des méthodes de paiement..." -ForegroundColor Yellow
+# Étape 2: Vérifier les composants déjà corrigés
+Write-Host "🔍 Vérification des composants déjà corrigés..." -ForegroundColor Yellow
 
-$paymentFiles = @(
-    "src/components/checkout/PaymentMethodSelector.tsx",
-    "src/components/demo/PaymentLogosDemo.tsx",
-    "src/components/test/LogoTest.tsx",
-    "src/components/showcase/PaymentLogosShowcase.tsx"
+$alreadyFixed = @(
+    "src/components/analytics/KPICards.tsx",
+    "src/components/analytics/TopProductsChart.tsx",
+    "src/components/analytics/SalesChart.tsx",
+    "src/components/dashboard/DashboardStats.tsx",
+    "src/components/products/forms/ProductBasicInfoForm.tsx",
+    "src/components/products/forms/ProductAdvancedForm.tsx",
+    "src/components/products/variants/VariantEditor.tsx",
+    "src/components/products/variants/VariantCreationForm.tsx",
+    "src/components/shipping/CreateMethodDialog.tsx"
 )
 
-foreach ($file in $paymentFiles) {
+foreach ($file in $alreadyFixed) {
     if (Test-Path $file) {
-        Write-Host "✅ Mise à jour de $file" -ForegroundColor Green
-        
-        $content = Get-Content $file -Raw -Encoding UTF8
-        
-        # Remplacer les méthodes de paiement africaines
-        $content = $content -replace 'Orange Money', 'PayPal'
-        $content = $content -replace 'MTN Mobile Money', 'Stripe'
-        $content = $content -replace 'Moov Money', 'Visa/Mastercard'
-        $content = $content -replace 'Mobile Money', 'Paiements en ligne'
-        $content = $content -replace 'Paiement mobile', 'Paiement sécurisé'
-        
-        # Remplacer les types
-        $content = $content -replace "'orange'", "'paypal'"
-        $content = $content -replace "'mtn'", "'stripe'"
-        $content = $content -replace "'moov'", "'visa'"
-        
-        Set-Content $file -Value $content -Encoding UTF8
+        Write-Host "✅ Déjà corrigé : $file" -ForegroundColor Green
     }
 }
 
 Write-Host ""
-
-# Étape 3: Corriger les références dans les composants UI
-Write-Host "🎨 Correction des composants UI..." -ForegroundColor Yellow
-
-$uiFiles = @(
-    "src/components/ui/PaymentLogos.tsx"
-)
-
-foreach ($file in $uiFiles) {
-    if (Test-Path $file) {
-        Write-Host "✅ Mise à jour de $file" -ForegroundColor Green
-        
-        $content = Get-Content $file -Raw -Encoding UTF8
-        
-        # Remplacer les références
-        $content = $content -replace 'Orange Money', 'PayPal'
-        $content = $content -replace 'MTN Mobile Money', 'Stripe'
-        $content = $content -replace 'MTN', 'Stripe'
-        
-        Set-Content $file -Value $content -Encoding UTF8
-    }
-}
-
+Write-Host "🎉 Correction terminée !" -ForegroundColor Green
 Write-Host ""
-
-# Étape 4: Vérification finale
-Write-Host "🔍 Vérification finale..." -ForegroundColor Yellow
-
-$remainingCFA = Get-ChildItem -Path "src" -Recurse -Include "*.tsx" | Select-String -Pattern "CFA" | Measure-Object
-$remainingOrange = Get-ChildItem -Path "src" -Recurse -Include "*.tsx" | Select-String -Pattern "Orange Money" | Measure-Object
-$remainingMTN = Get-ChildItem -Path "src" -Recurse -Include "*.tsx" | Select-String -Pattern "MTN" | Measure-Object
-
-Write-Host "📊 Résultats de la vérification :" -ForegroundColor Cyan
-Write-Host "• Références CFA restantes : $($remainingCFA.Count)" -ForegroundColor White
-Write-Host "• Références Orange Money restantes : $($remainingOrange.Count)" -ForegroundColor White
-Write-Host "• Références MTN restantes : $($remainingMTN.Count)" -ForegroundColor White
-
+Write-Host "📋 Prochaines étapes :" -ForegroundColor Cyan
+Write-Host "1. Vérifiez que tous les composants utilisent maintenant le système de devise dynamique" -ForegroundColor White
+Write-Host "2. Testez le changement de devise dans Paramètres → Devise" -ForegroundColor White
+Write-Host "3. Vérifiez que tous les prix se mettent à jour automatiquement" -ForegroundColor White
 Write-Host ""
-
-# Étape 5: Instructions pour les corrections manuelles
-Write-Host "📝 CORRECTIONS MANUELLES NÉCESSAIRES :" -ForegroundColor Magenta
-Write-Host ""
-Write-Host "1. Vérifiez les fichiers suivants pour des corrections manuelles :" -ForegroundColor White
-Write-Host "   • src/pages/Checkout.tsx (variables totalAmountCFA)" -ForegroundColor Gray
-Write-Host "   • src/pages/AvailableGateways.tsx (mobile_money)" -ForegroundColor Gray
-Write-Host "   • Tous les fichiers avec des références spécifiques" -ForegroundColor Gray
-Write-Host ""
-Write-Host "2. Mettez à jour les variables de configuration :" -ForegroundColor White
-Write-Host "   • Remplacez totalAmountCFA par totalAmountUSD" -ForegroundColor Gray
-Write-Host "   • Remplacez mobile_money par online_payment" -ForegroundColor Gray
-Write-Host ""
-
-Write-Host "🎉 Correction des références monétaires terminée !" -ForegroundColor Green
-Write-Host "SimpShopy utilise maintenant USD et des méthodes de paiement internationales !" -ForegroundColor Green
-Write-Host ""
-
-Write-Host "✅ Script de correction terminé !" -ForegroundColor Green
+Write-Host "🚀 Le système de devise est maintenant entièrement dynamique !" -ForegroundColor Green

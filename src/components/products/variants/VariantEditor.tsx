@@ -9,264 +9,311 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Image as ImageIcon, Package, Settings, Save } from 'lucide-react';
 import ProductImageManager from '../ProductImageManager';
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
+import { Package as PackageIcon, Tag, DollarSign, Hash, AlertTriangle } from "lucide-react";
+
+interface Variant {
+  id?: string;
+  name: string;
+  sku: string;
+  price: number;
+  compare_price?: number;
+  cost_price?: number;
+  stock_quantity: number;
+  weight?: number;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
+  is_active: boolean;
+}
 
 interface VariantEditorProps {
-  variant: any;
+  variant: Variant | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (variantData: any) => void;
-  productName?: string;
+  onSave: (variant: Variant) => void;
+  productName: string;
 }
 
 const VariantEditor = ({ variant, open, onOpenChange, onSave, productName }: VariantEditorProps) => {
-  const [formData, setFormData] = useState({
-    sku: '',
-    price: '',
-    compare_price: '',
-    cost_price: '',
-    inventory_quantity: '',
-    weight: '',
-    images: [] as string[]
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
+  
+  const [formData, setFormData] = useState<Variant>({
+    name: "",
+    sku: "",
+    price: 0,
+    compare_price: 0,
+    cost_price: 0,
+    stock_quantity: 0,
+    weight: 0,
+    dimensions: {
+      length: 0,
+      width: 0,
+      height: 0,
+    },
+    is_active: true,
   });
 
   useEffect(() => {
     if (variant) {
       setFormData({
-        sku: variant.sku || '',
-        price: variant.price?.toString() || '',
-        compare_price: variant.compare_price?.toString() || '',
-        cost_price: variant.cost_price?.toString() || '',
-        inventory_quantity: variant.inventory_quantity?.toString() || '',
-        weight: variant.weight?.toString() || '',
-        images: variant.images || []
+        ...variant,
+        compare_price: variant.compare_price || 0,
+        cost_price: variant.cost_price || 0,
+        weight: variant.weight || 0,
+        dimensions: {
+          length: variant.dimensions?.length || 0,
+          width: variant.dimensions?.width || 0,
+          height: variant.dimensions?.height || 0,
+        },
+      });
+    } else {
+      setFormData({
+        name: "",
+        sku: "",
+        price: 0,
+        compare_price: 0,
+        cost_price: 0,
+        stock_quantity: 0,
+        weight: 0,
+        dimensions: {
+          length: 0,
+          width: 0,
+          height: 0,
+        },
+        is_active: true,
       });
     }
   }, [variant]);
 
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleDimensionChange = (dimension: string, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      dimensions: {
+        ...prev.dimensions,
+        [dimension]: value,
+      },
+    }));
+  };
+
   const handleSave = () => {
-    const updatedVariant = {
-      ...variant,
-      sku: formData.sku,
-      price: formData.price ? parseFloat(formData.price) : null,
-      compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
-      cost_price: formData.cost_price ? parseFloat(formData.cost_price) : null,
-      inventory_quantity: formData.inventory_quantity ? parseInt(formData.inventory_quantity) : 0,
-      weight: formData.weight ? parseFloat(formData.weight) : null,
-      images: formData.images
-    };
-    
-    onSave(updatedVariant);
+    onSave(formData);
     onOpenChange(false);
   };
 
-  const getVariantDisplayName = () => {
-    const attributeNames = variant?.variant_attribute_values
-      ?.map((vav: any) => vav.attribute_values?.value)
-      .filter(Boolean)
-      .join(' / ') || 'Variante';
-    
-    return attributeNames;
-  };
-
-  const generateSKU = () => {
-    if (!productName) return;
-    
-    const attributes = variant?.variant_attribute_values
-      ?.map((vav: any) => vav.attribute_values?.value)
-      .filter(Boolean) || [];
-    
-    // Logique simplifiée de génération de SKU côté client
-    const baseProduct = productName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase();
-    const attributePart = attributes.join('').replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-    const randomPart = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
-    
-    const generatedSKU = `${baseProduct}-${attributePart}-${randomPart}`;
-    setFormData(prev => ({ ...prev, sku: generatedSKU }));
-  };
-
-  if (!variant) return null;
+  const isFormValid = formData.name && formData.price > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Modifier la variante : {getVariantDisplayName()}
+            <PackageIcon className="h-5 w-5" />
+            {variant ? "Modifier la variante" : "Ajouter une variante"}
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="basic" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Informations
-            </TabsTrigger>
-            <TabsTrigger value="images" className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Images
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="basic" className="space-y-6">
-            {/* Attributs de la variante */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Attributs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {variant.variant_attribute_values?.map((vav: any, index: number) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-2">
-                      {vav.attribute_values?.hex_color && (
-                        <div 
-                          className="w-3 h-3 rounded-full border"
-                          style={{ backgroundColor: vav.attribute_values.hex_color }}
-                        />
-                      )}
-                      {vav.attribute_values?.value}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* SKU */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Code produit (SKU)</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={formData.sku}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                    placeholder="SKU de la variante"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={generateSKU}
-                  >
-                    Générer
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Le SKU doit être unique pour chaque variante
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Prix */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Prix et coûts</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="price">Prix de vente (CFA) *</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="compare_price">Prix comparé (CFA)</Label>
-                    <Input
-                      id="compare_price"
-                      type="number"
-                      step="0.01"
-                      value={formData.compare_price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, compare_price: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cost_price">Prix de revient (CFA)</Label>
-                    <Input
-                      id="cost_price"
-                      type="number"
-                      step="0.01"
-                      value={formData.cost_price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cost_price: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Stock et poids */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Stock et expédition</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="inventory_quantity">Quantité en stock</Label>
-                    <Input
-                      id="inventory_quantity"
-                      type="number"
-                      value={formData.inventory_quantity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, inventory_quantity: e.target.value }))}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="weight">Poids (kg)</Label>
-                    <Input
-                      id="weight"
-                      type="number"
-                      step="0.01"
-                      value={formData.weight}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="images" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Images de la variante</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProductImageManager
-                  images={formData.images}
-                  onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+        <div className="space-y-6">
+          {/* Informations de base */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Tag className="h-4 w-4" />
+                Informations de base
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom de la variante *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  placeholder={`Ex: ${productName} - Rouge, Taille L`}
                 />
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    💡 Ces images seront affichées spécifiquement pour cette variante. 
-                    Si aucune image n'est définie, les images du produit principal seront utilisées.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Annuler
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Sauvegarder
-          </Button>
-        </DialogFooter>
+              <div className="space-y-2">
+                <Label htmlFor="sku">Référence (SKU)</Label>
+                <Input
+                  id="sku"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange("sku", e.target.value)}
+                  placeholder="Ex: TSH-RED-L"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={formData.is_active}
+                  onChange={(e) => handleInputChange("is_active", e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="is_active">Variante active</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prix et stock */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <DollarSign className="h-4 w-4" />
+                Prix et stock
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Prix de vente ({formatPrice(0, { showSymbol: true, showCode: true })}) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => handleInputChange("price", parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="compare_price">Prix comparé ({formatPrice(0, { showSymbol: true, showCode: true })})</Label>
+                  <Input
+                    id="compare_price"
+                    type="number"
+                    value={formData.compare_price}
+                    onChange={(e) => handleInputChange("compare_price", parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cost_price">Prix de revient ({formatPrice(0, { showSymbol: true, showCode: true })})</Label>
+                  <Input
+                    id="cost_price"
+                    type="number"
+                    value={formData.cost_price}
+                    onChange={(e) => handleInputChange("cost_price", parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="stock_quantity">Quantité en stock</Label>
+                <Input
+                  id="stock_quantity"
+                  type="number"
+                  value={formData.stock_quantity}
+                  onChange={(e) => handleInputChange("stock_quantity", parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dimensions et poids */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Hash className="h-4 w-4" />
+                Dimensions et poids
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Poids (kg)</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    value={formData.weight}
+                    onChange={(e) => handleInputChange("weight", parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="length">Longueur (cm)</Label>
+                  <Input
+                    id="length"
+                    type="number"
+                    value={formData.dimensions?.length}
+                    onChange={(e) => handleDimensionChange("length", parseFloat(e.target.value) || 0)}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="width">Largeur (cm)</Label>
+                  <Input
+                    id="width"
+                    type="number"
+                    value={formData.dimensions?.width}
+                    onChange={(e) => handleDimensionChange("width", parseFloat(e.target.value) || 0)}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="height">Hauteur (cm)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    value={formData.dimensions?.height}
+                    onChange={(e) => handleDimensionChange("height", parseFloat(e.target.value) || 0)}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Avertissement */}
+          {formData.compare_price > 0 && formData.compare_price <= formData.price && (
+            <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+              <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-orange-800 dark:text-orange-200">
+                <p className="font-medium">Prix comparé invalide</p>
+                <p>Le prix comparé doit être supérieur au prix de vente pour afficher une réduction.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSave} disabled={!isFormValid}>
+              {variant ? "Mettre à jour" : "Ajouter"}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

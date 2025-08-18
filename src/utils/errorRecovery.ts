@@ -145,11 +145,13 @@ class ErrorRecoveryManager {
    */
   private async defaultRecovery(error: Error, context: ErrorContext): Promise<void> {
     // Actions de récupération par défaut selon le type d'erreur
-    if (error.message.includes('Network') || error.message.includes('fetch')) {
+    const errorMessage = error.message || error.toString() || '';
+    
+    if (errorMessage.includes('Network') || errorMessage.includes('fetch')) {
       await this.handleNetworkError(context);
-    } else if (error.message.includes('auth') || error.message.includes('session')) {
+    } else if (errorMessage.includes('auth') || errorMessage.includes('session')) {
       await this.handleAuthError(context);
-    } else if (error.message.includes('database') || error.message.includes('supabase')) {
+    } else if (errorMessage.includes('database') || errorMessage.includes('supabase')) {
       await this.handleDatabaseError(context);
     } else {
       await this.handleGenericError(context);

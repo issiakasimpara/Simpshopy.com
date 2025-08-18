@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, AlertCircle, CheckCircle } from 'lucide-react';
 import { useSecurity } from '@/hooks/useSecurity';
+import { useStoreCurrency } from "@/hooks/useStoreCurrency";
+import { useStores } from "@/hooks/useStores";
+import { Button } from "@/components/ui/button";
 
 type ProductStatus = 'draft' | 'active' | 'inactive';
 
@@ -29,12 +32,16 @@ interface ValidationErrors {
 interface ProductBasicInfoFormProps {
   formData: FormData;
   onFormDataChange: (data: FormData) => void;
+  onNext: () => void;
+  isLoading?: boolean;
 }
 
-const ProductBasicInfoForm = ({ formData, onFormDataChange }: ProductBasicInfoFormProps) => {
+const ProductBasicInfoForm = ({ formData, onFormDataChange, onNext, isLoading = false }: ProductBasicInfoFormProps) => {
   const { validateField, sanitizeField } = useSecurity();
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [isValidating, setIsValidating] = useState(false);
+  const { store } = useStores();
+  const { formatPrice } = useStoreCurrency(store?.id);
 
   // Validation en temps réel
   const validateAndUpdate = (field: keyof FormData, value: any) => {
@@ -80,6 +87,8 @@ const ProductBasicInfoForm = ({ formData, onFormDataChange }: ProductBasicInfoFo
   const updateFormData = (field: keyof FormData, value: any) => {
     validateAndUpdate(field, value);
   };
+
+  const isFormValid = formData.name && parseFloat(formData.price) > 0;
 
   return (
     <Card>
@@ -183,7 +192,7 @@ const ProductBasicInfoForm = ({ formData, onFormDataChange }: ProductBasicInfoFo
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="price">Prix (CFA) *</Label>
+            <Label htmlFor="price">Prix ({formatPrice(0, { showSymbol: true, showCode: true })}) *</Label>
             <div className="relative">
               <Input
                 id="price"
@@ -240,6 +249,13 @@ const ProductBasicInfoForm = ({ formData, onFormDataChange }: ProductBasicInfoFo
             </select>
           </div>
         </div>
+        <Button
+          onClick={onNext}
+          disabled={!isFormValid || isLoading}
+          className="w-full"
+        >
+          {isLoading ? "Chargement..." : "Suivant"}
+        </Button>
       </CardContent>
     </Card>
   );

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Image as ImageIcon, Eye } from 'lucide-react';
+import { FormattedPrice } from '@/components/ui/FormattedPrice';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface ProductCardProps {
@@ -30,13 +31,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-ML', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price) + ' CFA';
-  };
+  // Supprimer cette fonction car on utilise maintenant FormattedPrice
 
   return (
     <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 bg-gradient-to-br from-background via-background to-muted/10">
@@ -91,7 +86,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
           <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border border-purple-200/30 dark:border-purple-800/30">
             <span className="text-sm font-medium text-muted-foreground">Prix:</span>
             <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {formatPrice(Number(product.price))}
+              <FormattedPrice amount={Number(product.price)} storeId={product.store_id} />
             </span>
           </div>
           

@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
+import OnboardingWizard from "./components/onboarding/OnboardingWizard";
 
 // Pages importantes (chargement immédiat)
 import Cart from "./pages/Cart";
@@ -241,6 +242,16 @@ const App = () => {
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Route d'onboarding */}
+              <Route
+                path="/onboarding"
+                element={
+                  <ProtectedRoute>
+                    <OnboardingWizard />
+                  </ProtectedRoute>
+                }
+              />
               
               {/* Routes marchands/admin (protégées) */}
               <Route

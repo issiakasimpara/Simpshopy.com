@@ -4,19 +4,23 @@ import {
   User, 
   Shield, 
   Bell, 
-  Palette
+  Palette,
+  Coins
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { useStores } from "@/hooks/useStores";
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { ProfileTab } from "@/components/settings/ProfileTab";
 import { SecurityTab } from "@/components/settings/SecurityTab";
 import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { AppearanceTab } from "@/components/settings/AppearanceTab";
+import { CurrencySection } from "@/components/settings/sections/CurrencySection";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { store } = useStores(); // Récupérer le store de l'utilisateur
 
   const {
     profileData,
@@ -63,7 +67,7 @@ const Settings = () => {
 
           <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-8">
             <Tabs defaultValue="profile" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 shadow-lg rounded-2xl p-2 h-16">
+              <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 shadow-lg rounded-2xl p-2 h-16">
                 <TabsTrigger 
                   value="profile" 
                   className="flex items-center gap-3 h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50"
@@ -100,6 +104,15 @@ const Settings = () => {
                   </div>
                   <span className="font-semibold">Apparence</span>
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="currency" 
+                  className="flex items-center gap-3 h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50"
+                >
+                  <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-lg data-[state=active]:bg-white/20">
+                    <Coins className="h-4 w-4" />
+                  </div>
+                  <span className="font-semibold">Devise</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="profile" className="mt-8">
@@ -128,6 +141,10 @@ const Settings = () => {
 
               <TabsContent value="appearance" className="mt-8">
                 <AppearanceTab />
+              </TabsContent>
+
+              <TabsContent value="currency" className="mt-8">
+                <CurrencySection storeId={store?.id} />
               </TabsContent>
             </Tabs>
           </div>
