@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency, type Currency } from '@/utils/formatCurrency';
+import { CurrencyConversionService } from './currencyConversionService';
 
 export interface StoreCurrencySettings {
   store_id: string;
@@ -44,10 +45,16 @@ export class StoreCurrencyService {
   }
 
   /**
-   * Met à jour la devise de la boutique
+   * Met à jour la devise de la boutique avec conversion automatique des montants
    */
   static async updateStoreCurrency(storeId: string, currency: Currency): Promise<boolean> {
     try {
+      // Récupérer l'ancienne devise
+      const oldCurrency = await this.getStoreCurrency(storeId);
+      
+      console.log(`🔄 Changement de devise: ${oldCurrency} → ${currency}`);
+
+      // Mettre à jour la devise dans la base de données
       const { error } = await supabase
         .from('market_settings')
         .upsert({
@@ -61,6 +68,23 @@ export class StoreCurrencyService {
       if (error) {
         console.error('Erreur lors de la mise à jour de la devise:', error);
         return false;
+      }
+
+      // Si la devise a changé, convertir automatiquement tous les montants
+      if (oldCurrency !== currency) {
+        console.log(`💰 Conversion automatique des montants: ${oldCurrency} → ${currency}`);
+        
+        const conversionSuccess = await CurrencyConversionService.updateStoreAmounts(
+          storeId,
+          oldCurrency,
+          currency
+        );
+
+        if (conversionSuccess) {
+          console.log('✅ Conversion automatique terminée avec succès');
+        } else {
+          console.warn('⚠️ La devise a été mise à jour mais la conversion automatique a échoué');
+        }
       }
 
       return true;
