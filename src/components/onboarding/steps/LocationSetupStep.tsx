@@ -85,7 +85,7 @@ const LocationSetupStep: React.FC<LocationSetupStepProps> = ({
 
       {/* Sélection du pays */}
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+        <label className="flex text-sm font-medium text-gray-700 items-center gap-2">
           <Globe className="w-4 h-4" />
           Votre emplacement
         </label>
@@ -139,7 +139,7 @@ const LocationSetupStep: React.FC<LocationSetupStepProps> = ({
 
       {/* Sélection de la devise */}
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+        <label className="flex text-sm font-medium text-gray-700 items-center gap-2">
           <CreditCard className="w-4 h-4" />
           Devise principale de la boutique
         </label>
