@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useStores } from '@/hooks/useStores';
 import { ONBOARDING_STEPS } from '@/types/onboarding';
 import ExperienceLevelStep from './steps/ExperienceLevelStep';
 import BusinessTypeStep from './steps/BusinessTypeStep';
