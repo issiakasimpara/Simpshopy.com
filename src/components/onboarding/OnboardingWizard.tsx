@@ -26,10 +26,22 @@ const OnboardingWizard = () => {
     initializeStoreCurrency,
   } = useOnboarding();
 
+  // Vérifier si l'utilisateur a un store
+  const { store, createStore } = useStores();
+
   const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(onboardingData.experience_level);
   const [selectedBusinessType, setSelectedBusinessType] = useState(onboardingData.business_type);
   const [selectedCountry, setSelectedCountry] = useState(onboardingData.country_code);
   const [selectedCurrency, setSelectedCurrency] = useState(onboardingData.currency_code);
+
+  // Synchroniser l'état local avec les données d'onboarding
+  useEffect(() => {
+    console.log('🔄 Synchronisation des données d\'onboarding:', onboardingData);
+    setSelectedExperienceLevel(onboardingData.experience_level);
+    setSelectedBusinessType(onboardingData.business_type);
+    setSelectedCountry(onboardingData.country_code);
+    setSelectedCurrency(onboardingData.currency_code);
+  }, [onboardingData]);
 
   // Rediriger si l'onboarding est déjà terminé
   useEffect(() => {
@@ -56,24 +68,57 @@ const OnboardingWizard = () => {
   }
 
   const handleNext = async () => {
+    console.log('🔄 handleNext appelé - Étape actuelle:', currentStep);
+    console.log('📊 Données sélectionnées:', {
+      selectedExperienceLevel,
+      selectedBusinessType,
+      selectedCountry,
+      selectedCurrency
+    });
+
     if (currentStep === 1 && selectedExperienceLevel) {
-      await saveStep({ experience_level: selectedExperienceLevel });
+      console.log('💾 Sauvegarde de l\'expérience:', selectedExperienceLevel);
+      const saved = await saveStep({ experience_level: selectedExperienceLevel });
+      console.log('✅ Sauvegarde réussie:', saved);
+      if (saved) {
+        console.log('➡️ Passage à l\'étape suivante');
+        await nextStep();
+      }
     } else if (currentStep === 2 && selectedBusinessType) {
-      await saveStep({ business_type: selectedBusinessType });
+      console.log('💾 Sauvegarde du type de business:', selectedBusinessType);
+      const saved = await saveStep({ business_type: selectedBusinessType });
+      console.log('✅ Sauvegarde réussie:', saved);
+      if (saved) {
+        console.log('➡️ Passage à l\'étape suivante');
+        await nextStep();
+      }
     } else if (currentStep === 3 && selectedCountry && selectedCurrency) {
-      await saveStep({ 
+      console.log('💾 Sauvegarde de la localisation:', { selectedCountry, selectedCurrency });
+      const saved = await saveStep({ 
         country_code: selectedCountry, 
         currency_code: selectedCurrency 
       });
       
-      // Initialiser la devise du store avec celle choisie lors de l'onboarding
-      if (selectedCurrency) {
-        console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
-        await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+      console.log('✅ Sauvegarde réussie:', saved);
+      if (saved) {
+        // Créer un store si l'utilisateur n'en a pas
+        if (!store) {
+          console.log('🏪 Création d\'un nouveau store pour l\'utilisateur');
+          await createStore();
+        }
+        
+        // Initialiser la devise du store avec celle choisie lors de l'onboarding
+        if (selectedCurrency) {
+          console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
+          await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+        }
+        
+        console.log('🎉 Finalisation de l\'onboarding');
+        await completeOnboarding();
+        navigate('/dashboard');
       }
-      
-      await completeOnboarding();
-      navigate('/dashboard');
+    } else {
+      console.log('❌ Conditions non remplies pour passer à l\'étape suivante');
     }
   };
 
