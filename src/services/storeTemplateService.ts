@@ -38,12 +38,16 @@ export class StoreTemplateService {
    */
   static async getTemplateForSector(sector: string): Promise<StoreTemplate | null> {
     try {
+      console.log('🔍 getTemplateForSector appelé avec secteur:', sector);
+      
       // Si le secteur est "other" ou vide, utiliser un template aléatoire
       if (!sector || sector === 'other') {
+        console.log('🔄 Secteur "other" ou vide, utilisation d\'un template aléatoire');
         return this.getRandomTemplate();
       }
 
       // Chercher un template spécifique pour le secteur
+      console.log('🔍 Recherche du template pour le secteur:', sector);
       const { data, error } = await supabase
         .from('store_templates')
         .select('*')
@@ -51,14 +55,22 @@ export class StoreTemplateService {
         .eq('is_active', true)
         .single();
 
-      if (error || !data) {
-        console.log(`Aucun template trouvé pour le secteur: ${sector}, utilisation d'un template par défaut`);
+      if (error) {
+        console.error('❌ Erreur lors de la recherche du template:', error);
+        console.log('🔄 Utilisation du template par défaut');
         return this.getDefaultTemplate();
       }
 
+      if (!data) {
+        console.log(`⚠️ Aucun template trouvé pour le secteur: ${sector}`);
+        console.log('🔄 Utilisation du template par défaut');
+        return this.getDefaultTemplate();
+      }
+
+      console.log('✅ Template trouvé:', data.name, 'pour le secteur:', data.sector);
       return data as StoreTemplate;
     } catch (error) {
-      console.error('Erreur lors de la récupération du template:', error);
+      console.error('❌ Erreur lors de la récupération du template:', error);
       return this.getDefaultTemplate();
     }
   }
@@ -142,6 +154,8 @@ export class StoreTemplateService {
         return { success: false };
       }
 
+      console.log('🎯 Template sélectionné pour la boutique:', template.name, 'secteur:', template.sector);
+
       // Créer la boutique
       const { data: store, error: storeError } = await supabase
         .from('stores')
@@ -163,6 +177,27 @@ export class StoreTemplateService {
       if (storeError) {
         console.error('Erreur lors de la création de la boutique:', storeError);
         return { success: false };
+      }
+
+      console.log('✅ Boutique créée avec succès, ID:', store.id);
+
+      // CRÉER LE TEMPLATE DE SITE WEB CORRESPONDANT
+      const siteTemplateId = this.getSiteTemplateIdForSector(sector);
+      console.log('🌐 Création du template de site web avec ID:', siteTemplateId);
+
+      const { error: siteTemplateError } = await supabase
+        .from('site_templates')
+        .insert({
+          store_id: store.id,
+          template_id: siteTemplateId,
+          template_data: this.getDefaultSiteTemplateData(sector),
+          is_published: true
+        });
+
+      if (siteTemplateError) {
+        console.error('❌ Erreur lors de la création du template de site web:', siteTemplateError);
+      } else {
+        console.log('✅ Template de site web créé avec succès');
       }
 
       // Créer les produits par défaut si le template en a
@@ -195,6 +230,117 @@ export class StoreTemplateService {
       console.error('Erreur lors de la création de la boutique avec template:', error);
       return { success: false };
     }
+  }
+
+  /**
+   * Obtenir l'ID du template de site web correspondant au secteur
+   */
+  private static getSiteTemplateIdForSector(sector: string): string {
+    const sectorToTemplateMap: { [key: string]: string } = {
+      'technology': 'tech-modern',
+      'fashion': 'fashion-modern',
+      'food': 'food-gourmet',
+      'health': 'health-wellness',
+      'education': 'learning-hub',
+      'entertainment': 'entertainment-store',
+      'other': 'general-modern',
+      'general': 'general-modern'
+    };
+
+    return sectorToTemplateMap[sector] || 'general-modern';
+  }
+
+  /**
+   * Obtenir les données par défaut du template de site web
+   */
+  private static getDefaultSiteTemplateData(sector: string): any {
+    const baseTemplate = {
+      theme: {
+        primary_color: '#3B82F6',
+        secondary_color: '#1F2937',
+        accent_color: '#10B981'
+      },
+      layout: {
+        header: { type: 'standard', show_logo: true, show_nav: true },
+        footer: { type: 'standard', show_social: true },
+        sidebar: { enabled: false }
+      }
+    };
+
+    // Personnaliser selon le secteur
+    const sectorCustomizations: { [key: string]: any } = {
+      'technology': {
+        theme: {
+          primary_color: '#3B82F6',
+          secondary_color: '#1F2937',
+          accent_color: '#10B981'
+        },
+        hero: {
+          title: 'Solutions Technologiques Innovantes',
+          subtitle: 'Découvrez nos produits tech de pointe'
+        }
+      },
+      'fashion': {
+        theme: {
+          primary_color: '#EC4899',
+          secondary_color: '#831843',
+          accent_color: '#F59E0B'
+        },
+        hero: {
+          title: 'Mode & Style',
+          subtitle: 'Découvrez nos dernières collections'
+        }
+      },
+      'food': {
+        theme: {
+          primary_color: '#F59E0B',
+          secondary_color: '#92400E',
+          accent_color: '#10B981'
+        },
+        hero: {
+          title: 'Gastronomie & Saveurs',
+          subtitle: 'Dégustez nos produits d\'exception'
+        }
+      },
+      'health': {
+        theme: {
+          primary_color: '#10B981',
+          secondary_color: '#064E3B',
+          accent_color: '#3B82F6'
+        },
+        hero: {
+          title: 'Santé & Bien-être',
+          subtitle: 'Prenez soin de vous naturellement'
+        }
+      },
+      'education': {
+        theme: {
+          primary_color: '#8B5CF6',
+          secondary_color: '#4C1D95',
+          accent_color: '#F59E0B'
+        },
+        hero: {
+          title: 'Apprentissage & Formation',
+          subtitle: 'Développez vos compétences'
+        }
+      },
+      'entertainment': {
+        theme: {
+          primary_color: '#EF4444',
+          secondary_color: '#7F1D1D',
+          accent_color: '#F59E0B'
+        },
+        hero: {
+          title: 'Divertissement & Loisirs',
+          subtitle: 'Vivez des expériences uniques'
+        }
+      }
+    };
+
+    return {
+      ...baseTemplate,
+      ...(sectorCustomizations[sector] || sectorCustomizations['general'])
+    };
   }
 
   /**
