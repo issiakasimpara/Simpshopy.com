@@ -8,7 +8,7 @@ import SalesChart from "./SalesChart";
 
 const AnalyticsTabs = () => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
 
   return (
     <Tabs defaultValue="overview" className="space-y-6">

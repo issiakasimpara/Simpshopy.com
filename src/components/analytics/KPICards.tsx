@@ -8,17 +8,17 @@ import { useStores } from "@/hooks/useStores";
 const KPICards = () => {
   const { analytics, isLoading } = useAnalytics();
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
 
   const cards = [
     {
       title: "Chiffre d'affaires total",
-      value: isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatPrice(analytics?.totalRevenue || 0),
+      value: isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatConvertedPrice(analytics?.totalRevenue || 0, 'XOF'),
       description: "Revenus générés depuis le début",
     },
     {
       title: "Panier moyen",
-      value: isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatPrice(analytics?.averageOrderValue || 0),
+      value: isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatConvertedPrice(analytics?.averageOrderValue || 0, 'XOF'),
       description: "Valeur moyenne par commande",
     },
     {

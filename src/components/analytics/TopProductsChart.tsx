@@ -8,7 +8,7 @@ import { useStores } from "@/hooks/useStores";
 const TopProductsChart = () => {
   const { topProducts, isLoading } = useAnalytics();
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
 
   if (isLoading) {
     return (
@@ -65,11 +65,11 @@ const TopProductsChart = () => {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => formatPrice(value)}
+              tickFormatter={(value) => formatConvertedPrice(value, 'XOF')}
             />
             <ChartTooltip
               content={<ChartTooltipContent />}
-              formatter={(value) => [formatPrice(value as number), "Ventes"]}
+                              formatter={(value) => [formatConvertedPrice(value as number, 'XOF'), "Ventes"]}
             />
             <Bar dataKey="sales" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
           </BarChart>
