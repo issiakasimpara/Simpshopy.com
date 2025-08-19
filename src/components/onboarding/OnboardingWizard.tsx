@@ -22,6 +22,7 @@ const OnboardingWizard = () => {
     isSaving,
     isCompleting,
     saveStep,
+    nextStep,
     previousStep,
     completeOnboarding,
     initializeStoreCurrency,
