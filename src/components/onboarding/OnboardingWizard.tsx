@@ -21,7 +21,7 @@ const OnboardingWizard = () => {
     isSaving,
     isCompleting,
     saveStep,
-    goToPreviousStep,
+    previousStep,
     completeOnboarding,
     initializeStoreCurrency,
   } = useOnboarding();
@@ -78,7 +78,7 @@ const OnboardingWizard = () => {
   };
 
   const handlePrevious = async () => {
-    await goToPreviousStep();
+    await previousStep();
   };
 
   const canProceed = () => {

@@ -164,6 +164,12 @@ export const useOnboarding = () => {
     }
   }, [storeId, initializeCurrency]);
 
+  // Déterminer si l'onboarding est terminé
+  const isOnboardingCompleted = userOnboarding?.onboarding_completed || false;
+
+  // Déterminer si l'onboarding doit être affiché
+  const shouldShowOnboarding = user?.id && !isOnboardingCompleted;
+
   return {
     // État
     currentStep,
@@ -192,5 +198,9 @@ export const useOnboarding = () => {
     saveOnboardingMutation,
     completeOnboardingMutation,
     updateStepMutation,
+    
+    // Onboarding status
+    isOnboardingCompleted,
+    shouldShowOnboarding,
   };
 };

@@ -96,9 +96,10 @@ const Auth = () => {
     } else {
       toast({
         title: "Connexion réussie !",
-        description: "Bienvenue sur votre tableau de bord.",
+        description: "Bienvenue ! Configuration de votre boutique en cours...",
       });
-      navigate('/dashboard');
+      // Rediriger vers l'onboarding au lieu du dashboard
+      navigate('/onboarding');
     }
     
     setIsLoading(false);
