@@ -205,6 +205,33 @@ export const useStoreCurrency = (storeId?: string) => {
     return formatCurrency(amount, currentCurrency, options);
   };
 
+  // Fonction pour convertir et formater un prix (pour les montants stockés en XOF)
+  const formatConvertedPrice = (amount: number, originalCurrency: Currency = 'XOF', options?: { showSymbol?: boolean; showCode?: boolean }) => {
+    // Si pas de storeId valide ou pas de devise récupérée, utiliser XOF par défaut
+    const currentCurrency = (isValidStoreId && currency) ? currency : 'XOF';
+    
+    // Si la devise actuelle est la même que la devise d'origine, pas de conversion nécessaire
+    if (currentCurrency === originalCurrency) {
+      return formatCurrency(amount, currentCurrency, options);
+    }
+
+    // Pour l'instant, on suppose que les montants sont stockés en XOF
+    // Dans une vraie application, il faudrait stocker la devise d'origine avec chaque montant
+    // Pour l'instant, on utilise un taux fixe pour la démonstration
+    let convertedAmount = amount;
+    
+    if (originalCurrency === 'XOF' && currentCurrency === 'EUR') {
+      convertedAmount = amount * 0.00152; // Taux approximatif XOF vers EUR
+    } else if (originalCurrency === 'XOF' && currentCurrency === 'USD') {
+      convertedAmount = amount * 0.00166; // Taux approximatif XOF vers USD
+    } else if (originalCurrency === 'XOF' && currentCurrency === 'GBP') {
+      convertedAmount = amount * 0.00130; // Taux approximatif XOF vers GBP
+    }
+    // Ajouter d'autres conversions selon les besoins
+    
+    return formatCurrency(convertedAmount, currentCurrency, options);
+  };
+
   // Fonction pour mettre à jour la devise
   const updateCurrency = async (newCurrency: Currency) => {
     return updateCurrencyMutation.mutateAsync(newCurrency);
@@ -225,6 +252,7 @@ export const useStoreCurrency = (storeId?: string) => {
     initializeCurrency,
     getSupportedCurrencies,
     formatPrice,
+    formatConvertedPrice,
     refetchCurrency,
     refetchSettings,
   };

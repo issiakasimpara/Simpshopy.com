@@ -9,7 +9,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 
 const DashboardStats = () => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
   const { stats, isLoadingStats } = useOrders();
   const { products, isLoading: isLoadingProducts } = useProducts(store?.id, 'active');
   const { analytics, isLoading: analyticsLoading } = useAnalytics();
@@ -25,8 +25,8 @@ const DashboardStats = () => {
   const cards = [
     {
       title: "Revenus totaux",
-      value: formatPrice(revenue),
-      change: todayRevenue > 0 ? `+${formatPrice(todayRevenue)} aujourd'hui` : "Aucune vente aujourd'hui",
+      value: formatConvertedPrice(revenue, 'XOF'),
+      change: todayRevenue > 0 ? `+${formatConvertedPrice(todayRevenue, 'XOF')} aujourd'hui` : "Aucune vente aujourd'hui",
       icon: DollarSign,
       trend: todayRevenue > 0 ? "up" : "neutral" as const,
     },

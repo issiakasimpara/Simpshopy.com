@@ -6,7 +6,7 @@ import { useStores } from "@/hooks/useStores";
 
 const PaymentsStats = () => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
 
   // Données fictives pour l'exemple
   const stats = {
@@ -19,7 +19,7 @@ const PaymentsStats = () => {
   const cards = [
     {
       title: "Revenus totaux",
-      value: formatPrice(stats.totalRevenue),
+      value: formatConvertedPrice(stats.totalRevenue, 'XOF'),
       change: "+12.5% ce mois",
       icon: DollarSign,
       trend: "up" as const,
@@ -33,7 +33,7 @@ const PaymentsStats = () => {
     },
     {
       title: "Transaction moyenne",
-      value: formatPrice(stats.averageTransaction),
+      value: formatConvertedPrice(stats.averageTransaction, 'XOF'),
       change: "+4.1% ce mois",
       icon: Package,
       trend: "up" as const,

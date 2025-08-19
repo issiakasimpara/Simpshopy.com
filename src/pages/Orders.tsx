@@ -18,7 +18,7 @@ import OrderDetailsModal from '@/components/OrderDetailsModal';
 
 const Orders = () => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
   const { toast } = useToast();
   const {
     orders,
@@ -247,7 +247,7 @@ const Orders = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Valeur perdue</p>
-                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{formatPrice(abandonedStats.totalValue)}</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{formatConvertedPrice(abandonedStats.totalValue, 'XOF')}</p>
                       </div>
                       <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
                         <DollarSign className="h-5 w-5 text-orange-600" />
@@ -334,7 +334,7 @@ const Orders = () => {
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatPrice(cart.total_value)}
+                            {formatConvertedPrice(cart.total_value, 'XOF')}
                           </p>
                           <p className="text-sm text-gray-500">
                             Valeur perdue

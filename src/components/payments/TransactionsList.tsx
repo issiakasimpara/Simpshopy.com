@@ -48,7 +48,7 @@ interface TransactionsListProps {
 
 const TransactionsList = ({ transactions, onTransactionSelect }: TransactionsListProps) => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
   const [searchTerm, setSearchTerm] = useState("");
 
   const getStatusColor = (status: string) => {
@@ -150,12 +150,12 @@ const TransactionsList = ({ transactions, onTransactionSelect }: TransactionsLis
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-semibold">{formatPrice(transaction.amount)}</div>
+                      <div className="font-semibold">{formatConvertedPrice(transaction.amount, 'XOF')}</div>
                       <div className="text-xs text-muted-foreground">
-                        Frais: {formatPrice(transaction.fee)}
+                                                  Frais: {formatConvertedPrice(transaction.fee, 'XOF')}
                       </div>
                       <div className="text-xs font-semibold text-green-600 dark:text-green-400">
-                        Net: {formatPrice(transaction.net)}
+                                                  Net: {formatConvertedPrice(transaction.net, 'XOF')}
                       </div>
                     </div>
                   </TableCell>

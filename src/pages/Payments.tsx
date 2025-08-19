@@ -25,7 +25,7 @@ import { fr } from 'date-fns/locale';
 const Payments = () => {
   const navigate = useNavigate();
   const { stores, store: currentStore } = useStores();
-  const { formatPrice } = useStoreCurrency(currentStore?.id);
+  const { formatConvertedPrice } = useStoreCurrency(currentStore?.id);
   const { payments, paymentStats, isLoading, verifyPayment } = usePayments(currentStore?.id);
   const { toast } = useToast();
 
@@ -53,8 +53,8 @@ const Payments = () => {
         currency: currency
       }).format(amount);
     }
-    // Utiliser formatPrice pour la devise du store
-    return formatPrice(amount);
+    // Utiliser formatConvertedPrice pour la devise du store
+    return formatConvertedPrice(amount, 'XOF');
   };
 
   if (!currentStore) {
@@ -119,7 +119,7 @@ const Payments = () => {
                   <DollarSign className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total des ventes</p>
-                    <p className="text-2xl font-bold">{formatPrice(paymentStats.totalAmount)}</p>
+                    <p className="text-2xl font-bold">{formatConvertedPrice(paymentStats.totalAmount, 'XOF')}</p>
                   </div>
                 </div>
               </CardContent>

@@ -20,13 +20,13 @@ export const FormattedPrice = ({
   className = "",
   children 
 }: FormattedPriceProps) => {
-  const { currency: storeCurrency, isLoading } = useStoreCurrency(storeId);
+  const { currency: storeCurrency, formatConvertedPrice, isLoading } = useStoreCurrency(storeId);
   
   // Utiliser la devise forcée ou celle de la boutique
   const currency = forcedCurrency || storeCurrency || 'XOF';
   
-  // Formater le prix
-  const formattedPrice = formatCurrency(amount, currency, { 
+  // Formater le prix avec conversion automatique
+  const formattedPrice = formatConvertedPrice(amount, 'XOF', { 
     showSymbol, 
     compact 
   });
