@@ -87,7 +87,7 @@ export class OnboardingService {
         .from('user_onboarding')
         .update({
           onboarding_completed: true,
-          onboarding_step: 3,
+          onboarding_step: 5, // Mise à jour pour les 5 étapes
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);

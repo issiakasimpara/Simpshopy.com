@@ -5,14 +5,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useStores } from '@/hooks/useStores';
+import { useAuth } from '@/hooks/useAuth';
 import { ONBOARDING_STEPS } from '@/types/onboarding';
+import { StoreTemplateService } from '@/services/storeTemplateService';
 import ExperienceLevelStep from './steps/ExperienceLevelStep';
 import BusinessTypeStep from './steps/BusinessTypeStep';
+import SectorStep from './steps/SectorStep';
 import LocationSetupStep from './steps/LocationSetupStep';
+import SummaryStep from './steps/SummaryStep';
 import AppLogo from '@/components/ui/AppLogo';
 
 const OnboardingWizard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     currentStep,
     onboardingData,
@@ -33,6 +38,7 @@ const OnboardingWizard = () => {
 
   const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(onboardingData.experience_level);
   const [selectedBusinessType, setSelectedBusinessType] = useState(onboardingData.business_type);
+  const [selectedSector, setSelectedSector] = useState(onboardingData.sector);
   const [selectedCountry, setSelectedCountry] = useState(onboardingData.country_code);
   const [selectedCurrency, setSelectedCurrency] = useState(onboardingData.currency_code);
 
@@ -41,6 +47,7 @@ const OnboardingWizard = () => {
     console.log('🔄 Synchronisation des données d\'onboarding:', onboardingData);
     setSelectedExperienceLevel(onboardingData.experience_level);
     setSelectedBusinessType(onboardingData.business_type);
+    setSelectedSector(onboardingData.sector);
     setSelectedCountry(onboardingData.country_code);
     setSelectedCurrency(onboardingData.currency_code);
   }, [onboardingData]);
@@ -74,6 +81,7 @@ const OnboardingWizard = () => {
     console.log('📊 Données sélectionnées:', {
       selectedExperienceLevel,
       selectedBusinessType,
+      selectedSector,
       selectedCountry,
       selectedCurrency
     });
@@ -97,7 +105,16 @@ const OnboardingWizard = () => {
           const nextStepResult = await nextStep();
           console.log('✅ nextStep résultat:', nextStepResult);
         }
-      } else if (currentStep === 3 && selectedCountry && selectedCurrency) {
+      } else if (currentStep === 3 && selectedSector) {
+        console.log('💾 Sauvegarde du secteur:', selectedSector);
+        const saved = await saveStep({ sector: selectedSector });
+        console.log('✅ Sauvegarde réussie:', saved);
+        if (saved) {
+          console.log('➡️ Passage à l\'étape suivante');
+          const nextStepResult = await nextStep();
+          console.log('✅ nextStep résultat:', nextStepResult);
+        }
+      } else if (currentStep === 4 && selectedCountry && selectedCurrency) {
         console.log('💾 Sauvegarde de la localisation:', { selectedCountry, selectedCurrency });
         const saved = await saveStep({ 
           country_code: selectedCountry, 
@@ -106,22 +123,78 @@ const OnboardingWizard = () => {
         
         console.log('✅ Sauvegarde réussie:', saved);
         if (saved) {
-          // Créer un store si l'utilisateur n'en a pas
-          if (!store) {
-            console.log('🏪 Création d\'un nouveau store pour l\'utilisateur');
-            await createStore();
-          }
-          
-          // Initialiser la devise du store avec celle choisie lors de l'onboarding
-          if (selectedCurrency) {
-            console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
-            await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
-          }
-          
-          console.log('🎉 Finalisation de l\'onboarding');
-          await completeOnboarding();
-          navigate('/dashboard');
+          console.log('➡️ Passage à l\'étape suivante');
+          const nextStepResult = await nextStep();
+          console.log('✅ nextStep résultat:', nextStepResult);
         }
+                                      } else if (currentStep === 5) {
+                  // Étape finale - Création de la boutique avec template
+                  console.log('🎉 Création de la boutique avec template basé sur le secteur');
+                  
+                  // Créer un store si l'utilisateur n'en a pas
+                  if (!store) {
+                    console.log('🏪 Création d\'un nouveau store avec template');
+                    
+                    // Générer un nom de store basé sur les données d'onboarding
+                    const businessTypeNames = {
+                      'digital_products': 'Boutique Digitale',
+                      'online_services': 'Services en Ligne',
+                      'physical_products': 'Boutique Physique',
+                      'mixed': 'Boutique Mixte'
+                    };
+                    
+                    const experienceNames = {
+                      'beginner': 'Débutant',
+                      'experienced': 'Expérimenté'
+                    };
+                    
+                    const storeName = `${businessTypeNames[selectedBusinessType as keyof typeof businessTypeNames] || 'Ma Boutique'} - ${experienceNames[selectedExperienceLevel as keyof typeof experienceNames] || 'Nouveau'}`;
+                    
+                    // Créer la boutique avec le template approprié
+                    const onboardingData = {
+                      experience_level: selectedExperienceLevel,
+                      business_type: selectedBusinessType,
+                      sector: selectedSector,
+                      country_code: selectedCountry,
+                      currency_code: selectedCurrency
+                    };
+                    
+                    const result = await StoreTemplateService.createStoreWithTemplate(
+                      user?.id || '',
+                      storeName,
+                      selectedSector || 'other',
+                      onboardingData
+                    );
+                    
+                    if (result.success) {
+                      console.log('✅ Boutique créée avec succès avec le template:', result.template?.name);
+                      
+                      // Initialiser la devise du store
+                      if (selectedCurrency) {
+                        console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
+                        await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+                      }
+                    } else {
+                      console.error('❌ Erreur lors de la création de la boutique avec template');
+                      // Fallback : créer la boutique sans template
+                      await createStore({
+                        name: storeName,
+                        description: `Boutique créée via l'onboarding - ${selectedBusinessType}`,
+                        status: 'active',
+                        settings: {
+                          currency: selectedCurrency,
+                          country: selectedCountry,
+                          business_type: selectedBusinessType,
+                          experience_level: selectedExperienceLevel,
+                          sector: selectedSector
+                        }
+                      });
+                    }
+                  }
+                  
+                  console.log('🎉 Finalisation de l\'onboarding');
+                  await completeOnboarding();
+                  navigate('/dashboard');
       } else {
         console.log('❌ Conditions non remplies pour passer à l\'étape suivante');
       }
@@ -134,6 +207,19 @@ const OnboardingWizard = () => {
     await previousStep();
   };
 
+  const handleStartFromZero = async () => {
+    console.log('🚀 Démarrage à partir de zéro');
+    // Sauvegarder seulement la devise et rediriger vers le dashboard
+    if (selectedCurrency && selectedCountry) {
+      await saveStep({ 
+        country_code: selectedCountry, 
+        currency_code: selectedCurrency 
+      });
+    }
+    await completeOnboarding();
+    navigate('/dashboard');
+  };
+
   const canProceed = () => {
     switch (currentStep) {
       case 1:
@@ -141,7 +227,11 @@ const OnboardingWizard = () => {
       case 2:
         return !!selectedBusinessType;
       case 3:
+        return !!selectedSector;
+      case 4:
         return !!selectedCountry && !!selectedCurrency;
+      case 5:
+        return true; // Toujours possible de procéder à l'étape finale
       default:
         return false;
     }
@@ -165,11 +255,33 @@ const OnboardingWizard = () => {
         );
       case 3:
         return (
+          <SectorStep
+            selectedSector={selectedSector}
+            onSelect={setSelectedSector}
+          />
+        );
+      case 4:
+        return (
           <LocationSetupStep
             selectedCountry={selectedCountry}
             selectedCurrency={selectedCurrency}
             onCountrySelect={setSelectedCountry}
             onCurrencySelect={setSelectedCurrency}
+          />
+        );
+      case 5:
+        return (
+          <SummaryStep
+            onboardingData={{
+              experience_level: selectedExperienceLevel,
+              business_type: selectedBusinessType,
+              sector: selectedSector,
+              country_code: selectedCountry,
+              currency_code: selectedCurrency
+            }}
+            onValidate={handleNext}
+            onStartFromZero={handleStartFromZero}
+            isLoading={isCompleting}
           />
         );
       default:
@@ -239,24 +351,10 @@ const OnboardingWizard = () => {
               </Button>
 
               <div className="flex items-center gap-2">
-                {currentStep === 3 ? (
-                  <Button
-                    onClick={handleNext}
-                    disabled={!canProceed() || isSaving || isCompleting}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isCompleting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Finalisation...
-                      </>
-                    ) : (
-                      <>
-                        Ouvrir votre boutique
-                        <Check className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
+                {currentStep === 5 ? (
+                  <div className="hidden">
+                    {/* Les boutons sont gérés par le composant SummaryStep */}
+                  </div>
                 ) : (
                   <Button
                     onClick={handleNext}

@@ -3,10 +3,11 @@
 export interface UserOnboarding {
   id: string;
   user_id: string;
-  experience_level: 'beginner' | 'experienced';
-  business_type: 'digital_products' | 'online_services' | 'free_choice';
-  country_code: string;
-  currency_code: string;
+  experience_level?: 'beginner' | 'experienced';
+  business_type?: 'digital_products' | 'online_services' | 'physical_products' | 'mixed';
+  sector?: 'technology' | 'fashion' | 'food' | 'health' | 'education' | 'entertainment' | 'other';
+  country_code?: string;
+  currency_code?: string;
   onboarding_completed: boolean;
   onboarding_step: number;
   created_at: string;
@@ -49,10 +50,13 @@ export interface OnboardingStep {
 }
 
 export interface OnboardingData {
-  experience_level: 'beginner' | 'experienced';
-  business_type: 'digital_products' | 'online_services' | 'free_choice';
-  country_code: string;
-  currency_code: string;
+  experience_level?: 'beginner' | 'experienced';
+  business_type?: 'digital_products' | 'online_services' | 'physical_products' | 'mixed';
+  sector?: 'technology' | 'fashion' | 'food' | 'health' | 'education' | 'entertainment' | 'other';
+  country_code?: string;
+  currency_code?: string;
+  theme_preference?: 'modern' | 'classic' | 'minimal' | 'colorful';
+  features_needed?: string[];
 }
 
 // Types pour les composants d'onboarding
@@ -65,7 +69,7 @@ export interface ExperienceLevelOption {
 }
 
 export interface BusinessTypeOption {
-  id: 'digital_products' | 'online_services' | 'free_choice';
+  id: 'digital_products' | 'online_services' | 'physical_products' | 'mixed';
   title: string;
   description: string;
   icon: string;
@@ -85,28 +89,39 @@ export interface CurrencyOption {
   is_primary: boolean;
 }
 
+export interface SectorOption {
+  id: string;
+  title: string;
+  emoji: string;
+  description: string;
+}
+
 // Configuration des étapes d'onboarding
-export const ONBOARDING_STEPS: OnboardingStep[] = [
+export const ONBOARDING_STEPS = [
   {
     id: 1,
     title: "Expérience en ligne",
-    description: "Parlez-nous de votre niveau d'expérience",
-    component: "ExperienceLevel",
-    isCompleted: false
+    description: "Parlez-nous de votre niveau d'expérience"
   },
   {
     id: 2,
     title: "Type de business",
-    description: "Que proposerez-vous ?",
-    component: "BusinessType",
-    isCompleted: false
+    description: "Que proposerez-vous ?"
   },
   {
     id: 3,
-    title: "Localisation",
-    description: "Où êtes-vous basé ?",
-    component: "LocationSetup",
-    isCompleted: false
+    title: "Secteur d'activité",
+    description: "Dans quel secteur travaillez-vous ?"
+  },
+  {
+    id: 4,
+    title: "Configuration géographique",
+    description: "Configurons l'emplacement et la devise par défaut de votre boutique"
+  },
+  {
+    id: 5,
+    title: "Résumé et création",
+    description: "Vérifiez vos choix et créez votre boutique"
   }
 ];
 
@@ -143,9 +158,87 @@ export const BUSINESS_TYPE_OPTIONS: BusinessTypeOption[] = [
     icon: '📅'
   },
   {
-    id: 'free_choice',
-    title: 'Libre choix',
-    description: 'Prenez le temps de choisir et ajoutez différents types de produits au moment qui vous convient. Pas de stress !',
-    icon: '⏳'
+    id: 'physical_products',
+    title: 'Produits physiques',
+    description: 'Vendez des produits tangibles avec gestion des stocks et livraison.',
+    icon: '📦'
+  },
+  {
+    id: 'mixed',
+    title: 'Mixte',
+    description: 'Combinez produits physiques et digitaux dans votre boutique.',
+    icon: '🔄'
+  }
+];
+
+export const SECTOR_OPTIONS: SectorOption[] = [
+  {
+    id: 'technology',
+    title: 'Technologie',
+    emoji: '💻',
+    description: 'Logiciels, applications, services tech'
+  },
+  {
+    id: 'fashion',
+    title: 'Mode & Beauté',
+    emoji: '👗',
+    description: 'Vêtements, accessoires, cosmétiques'
+  },
+  {
+    id: 'food',
+    title: 'Alimentation',
+    emoji: '🍕',
+    description: 'Restaurants, livraison, produits alimentaires'
+  },
+  {
+    id: 'health',
+    title: 'Santé & Bien-être',
+    emoji: '🏥',
+    description: 'Services médicaux, fitness, bien-être'
+  },
+  {
+    id: 'education',
+    title: 'Éducation',
+    emoji: '📚',
+    description: 'Cours, formations, livres'
+  },
+  {
+    id: 'entertainment',
+    title: 'Divertissement',
+    emoji: '🎮',
+    description: 'Jeux, événements, loisirs'
+  },
+  {
+    id: 'other',
+    title: 'Autre',
+    emoji: '🔧',
+    description: 'Autres secteurs d\'activité'
+  }
+];
+
+export const THEME_OPTIONS = [
+  {
+    id: 'modern',
+    title: 'Moderne',
+    emoji: '✨',
+    description: 'Design épuré et contemporain'
+  },
+  {
+    id: 'classic',
+    title: 'Classique',
+    emoji: '🏛️',
+    description: 'Style traditionnel et élégant'
+  },
+  {
+    id: 'minimal',
+    title: 'Minimaliste',
+    emoji: '⚪',
+    description: 'Simple et épuré'
+  },
+  {
+    id: 'colorful',
+    title: 'Coloré',
+    emoji: '🌈',
+    description: 'Vif et dynamique'
   }
 ];

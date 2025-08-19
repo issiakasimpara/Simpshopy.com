@@ -84,6 +84,7 @@ export const useOnboarding = () => {
       setOnboardingData({
         experience_level: userOnboarding.experience_level,
         business_type: userOnboarding.business_type,
+        sector: userOnboarding.sector,
         country_code: userOnboarding.country_code,
         currency_code: userOnboarding.currency_code,
       });
@@ -183,6 +184,16 @@ export const useOnboarding = () => {
   // Déterminer si l'onboarding doit être affiché
   const shouldShowOnboarding = user?.id && !isOnboardingCompleted;
 
+  // Fonction pour récupérer les devises d'un pays
+  const getCurrenciesForCountry = useCallback(async (countryCode: string) => {
+    try {
+      return await OnboardingService.getCurrenciesForCountry(countryCode);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des devises du pays:', error);
+      return [];
+    }
+  }, []);
+
   return {
     // État
     currentStep,
@@ -206,6 +217,7 @@ export const useOnboarding = () => {
     previousStep,
     completeOnboarding,
     initializeStoreCurrency,
+    getCurrenciesForCountry,
     
     // Mutations
     saveOnboardingMutation,
