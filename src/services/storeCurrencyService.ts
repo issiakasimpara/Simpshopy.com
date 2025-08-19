@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency, type Currency } from '@/utils/formatCurrency';
-import { CurrencyConversionService } from './currencyConversionService';
+import { SecureCurrencyService } from './secureCurrencyService'; // Utilise le service sécurisé
 
 export interface StoreCurrencySettings {
   store_id: string;
@@ -74,7 +74,7 @@ export class StoreCurrencyService {
       if (oldCurrency !== currency) {
         console.log(`💰 Conversion automatique des montants: ${oldCurrency} → ${currency}`);
         
-        const conversionSuccess = await CurrencyConversionService.updateStoreAmounts(
+        const conversionSuccess = await SecureCurrencyService.updateStoreAmounts(
           storeId,
           oldCurrency,
           currency

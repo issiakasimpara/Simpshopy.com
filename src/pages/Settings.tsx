@@ -18,6 +18,7 @@ import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { AppearanceTab } from "@/components/settings/AppearanceTab";
 import { CurrencySection } from "@/components/settings/sections/CurrencySection";
 
+
 const Settings = () => {
   const { toast } = useToast();
   const { store } = useStores(); // Récupérer le store de l'utilisateur
