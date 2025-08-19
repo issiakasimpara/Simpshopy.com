@@ -78,49 +78,55 @@ const OnboardingWizard = () => {
       selectedCurrency
     });
 
-    if (currentStep === 1 && selectedExperienceLevel) {
-      console.log('💾 Sauvegarde de l\'expérience:', selectedExperienceLevel);
-      const saved = await saveStep({ experience_level: selectedExperienceLevel });
-      console.log('✅ Sauvegarde réussie:', saved);
-      if (saved) {
-        console.log('➡️ Passage à l\'étape suivante');
-        await nextStep();
-      }
-    } else if (currentStep === 2 && selectedBusinessType) {
-      console.log('💾 Sauvegarde du type de business:', selectedBusinessType);
-      const saved = await saveStep({ business_type: selectedBusinessType });
-      console.log('✅ Sauvegarde réussie:', saved);
-      if (saved) {
-        console.log('➡️ Passage à l\'étape suivante');
-        await nextStep();
-      }
-    } else if (currentStep === 3 && selectedCountry && selectedCurrency) {
-      console.log('💾 Sauvegarde de la localisation:', { selectedCountry, selectedCurrency });
-      const saved = await saveStep({ 
-        country_code: selectedCountry, 
-        currency_code: selectedCurrency 
-      });
-      
-      console.log('✅ Sauvegarde réussie:', saved);
-      if (saved) {
-        // Créer un store si l'utilisateur n'en a pas
-        if (!store) {
-          console.log('🏪 Création d\'un nouveau store pour l\'utilisateur');
-          await createStore();
+    try {
+      if (currentStep === 1 && selectedExperienceLevel) {
+        console.log('💾 Sauvegarde de l\'expérience:', selectedExperienceLevel);
+        const saved = await saveStep({ experience_level: selectedExperienceLevel });
+        console.log('✅ Sauvegarde réussie:', saved);
+        if (saved) {
+          console.log('➡️ Passage à l\'étape suivante');
+          const nextStepResult = await nextStep();
+          console.log('✅ nextStep résultat:', nextStepResult);
         }
-        
-        // Initialiser la devise du store avec celle choisie lors de l'onboarding
-        if (selectedCurrency) {
-          console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
-          await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+      } else if (currentStep === 2 && selectedBusinessType) {
+        console.log('💾 Sauvegarde du type de business:', selectedBusinessType);
+        const saved = await saveStep({ business_type: selectedBusinessType });
+        console.log('✅ Sauvegarde réussie:', saved);
+        if (saved) {
+          console.log('➡️ Passage à l\'étape suivante');
+          const nextStepResult = await nextStep();
+          console.log('✅ nextStep résultat:', nextStepResult);
         }
+      } else if (currentStep === 3 && selectedCountry && selectedCurrency) {
+        console.log('💾 Sauvegarde de la localisation:', { selectedCountry, selectedCurrency });
+        const saved = await saveStep({ 
+          country_code: selectedCountry, 
+          currency_code: selectedCurrency 
+        });
         
-        console.log('🎉 Finalisation de l\'onboarding');
-        await completeOnboarding();
-        navigate('/dashboard');
+        console.log('✅ Sauvegarde réussie:', saved);
+        if (saved) {
+          // Créer un store si l'utilisateur n'en a pas
+          if (!store) {
+            console.log('🏪 Création d\'un nouveau store pour l\'utilisateur');
+            await createStore();
+          }
+          
+          // Initialiser la devise du store avec celle choisie lors de l'onboarding
+          if (selectedCurrency) {
+            console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
+            await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
+          }
+          
+          console.log('🎉 Finalisation de l\'onboarding');
+          await completeOnboarding();
+          navigate('/dashboard');
+        }
+      } else {
+        console.log('❌ Conditions non remplies pour passer à l\'étape suivante');
       }
-    } else {
-      console.log('❌ Conditions non remplies pour passer à l\'étape suivante');
+    } catch (error) {
+      console.error('❌ Erreur dans handleNext:', error);
     }
   };
 

@@ -107,16 +107,29 @@ export const useOnboarding = () => {
 
   // Passer à l'étape suivante
   const nextStep = useCallback(async () => {
-    if (!user?.id) return false;
+    console.log('🔄 nextStep appelé - user?.id:', user?.id, 'currentStep:', currentStep);
+    
+    if (!user?.id) {
+      console.log('❌ Pas d\'utilisateur connecté');
+      return false;
+    }
 
     const nextStepNumber = currentStep + 1;
+    console.log('📈 Passage de l\'étape', currentStep, 'à l\'étape', nextStepNumber);
+    
     setCurrentStep(nextStepNumber);
 
-    const success = await updateStepMutation.mutateAsync(nextStepNumber);
-    if (success) {
-      return true;
+    try {
+      const success = await updateStepMutation.mutateAsync(nextStepNumber);
+      console.log('✅ updateStepMutation résultat:', success);
+      if (success) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('❌ Erreur dans updateStepMutation:', error);
+      return false;
     }
-    return false;
   }, [user?.id, currentStep, updateStepMutation]);
 
   // Passer à l'étape précédente
