@@ -596,28 +596,26 @@ const Storefront = () => {
       {renderNavigation()}
       {renderBreadcrumb()}
 
-      {/* Contenu principal avec animations */}
-      <Suspense fallback={<StorefrontLoader />}>
-        <div className="min-h-screen animate-fade-in-up">
-          {currentPageBlocks.map((block, index) => (
-            <div
-              key={`${block.id}-${block.order}`}
-              className="animate-scale-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <BlockRenderer
-                block={block}
-                isEditing={false}
-                viewMode="desktop"
-                selectedStore={store}
-                productId={selectedProductId}
-                onProductClick={handleProductClick}
-                products={products}
-              />
-            </div>
-          ))}
-        </div>
-      </Suspense>
+      {/* Contenu principal - RENDU SYNCHRONE (rapide comme Shopify) */}
+      <div className="min-h-screen">
+        {currentPageBlocks.map((block, index) => (
+          <div
+            key={`${block.id}-${block.order}`}
+            className="animate-fade-in"
+            style={{ animationDelay: `${index * 20}ms` }} // Réduit de 100ms à 20ms
+          >
+            <BlockRenderer
+              block={block}
+              isEditing={false}
+              viewMode="desktop"
+              selectedStore={store}
+              productId={selectedProductId}
+              onProductClick={handleProductClick}
+              products={products}
+            />
+          </div>
+        ))}
+      </div>
 
       <CartWidget />
     </div>

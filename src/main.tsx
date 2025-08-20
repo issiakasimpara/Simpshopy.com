@@ -15,6 +15,8 @@ import { errorRecoveryManager } from './utils/errorRecovery'
 // import { monitoring } from './utils/monitoring'
 // 🔍 Système de diagnostic pour identifier les problèmes
 import { systemDiagnostic } from './utils/systemDiagnostic'
+// 🗄️ Migration de la base de données
+import { checkMarketSettingsTable, applyMarketSettingsMigration } from './scripts/applyMarketSettingsMigration'
 
 // 🔍 Exécuter la validation de sécurité en développement uniquement
 if (import.meta.env.DEV) {
@@ -67,6 +69,19 @@ errorRecoveryManager.registerRecoveryAction('Auth_signIn_Error', {
 });
 
 console.log('✅ Système de récupération d\'erreurs initialisé');
+
+// 🗄️ Vérifier et appliquer les migrations de base de données
+// NOTE: Migration désactivée - exécutez manuellement CREATE_MARKET_SETTINGS_MANUAL.sql
+(async () => {
+  try {
+    const tableExists = await checkMarketSettingsTable();
+    if (!tableExists) {
+      console.log('⚠️ Table market_settings manquante - exécutez CREATE_MARKET_SETTINGS_MANUAL.sql manuellement');
+    }
+  } catch (error) {
+    console.warn('⚠️ Erreur lors de la vérification des migrations:', error);
+  }
+})();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
