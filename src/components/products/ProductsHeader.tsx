@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Plus, Package, Store } from 'lucide-react';
+import { Plus, Package, Store, Upload } from 'lucide-react';
 import StoreSelector from '@/components/StoreSelector';
 
 interface ProductsHeaderProps {
@@ -8,6 +8,7 @@ interface ProductsHeaderProps {
   onStoreSelect: (storeId: string) => void;
   onCreateStore: () => void;
   onAddProduct: () => void;
+  onImportCSV: () => void;
   productCount: number;
 }
 
@@ -16,6 +17,7 @@ const ProductsHeader = ({
   onStoreSelect, 
   onCreateStore, 
   onAddProduct, 
+  onImportCSV,
   productCount 
 }: ProductsHeaderProps) => {
   return (
@@ -56,13 +58,23 @@ const ProductsHeader = ({
               </span>
             </div>
           </div>
-          <Button 
-            onClick={onAddProduct} 
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 group"
-          >
-            <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-            Ajouter un produit
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={onImportCSV}
+              variant="outline"
+              className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950/20"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Importer CSV
+            </Button>
+            <Button 
+              onClick={onAddProduct} 
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+              Ajouter un produit
+            </Button>
+          </div>
         </div>
       )}
     </div>

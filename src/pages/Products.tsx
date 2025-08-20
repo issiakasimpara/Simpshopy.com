@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import CreateStoreDialog from '@/components/CreateStoreDialog';
 import AddProductDialog from '@/components/AddProductDialog';
 import EditProductDialog from '@/components/EditProductDialog';
+import ImportProductsDialog from '@/components/products/ImportProductsDialog';
 import ProductsHeader from '@/components/products/ProductsHeader';
 import ProductList from '@/components/products/ProductList';
 import NoStoreSelected from '@/components/products/NoStoreSelected';
@@ -16,6 +17,7 @@ const Products = () => {
   const [showCreateStore, setShowCreateStore] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showEditProduct, setShowEditProduct] = useState(false);
+  const [showImportCSV, setShowImportCSV] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Tables<'products'> | null>(null);
   
   const { stores } = useStores();
@@ -64,6 +66,12 @@ const Products = () => {
     setShowAddProduct(false);
   };
 
+  // Callback pour forcer le refetch après import CSV
+  const handleImportComplete = () => {
+    console.log('Products - Import completed, forcing refetch');
+    refetch();
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -76,6 +84,7 @@ const Products = () => {
               onStoreSelect={setSelectedStoreId}
               onCreateStore={() => setShowCreateStore(true)}
               onAddProduct={() => setShowAddProduct(true)}
+              onImportCSV={() => setShowImportCSV(true)}
               productCount={products.length}
             />
           </div>
@@ -120,6 +129,13 @@ const Products = () => {
             open={showEditProduct} 
             onOpenChange={setShowEditProduct}
             product={selectedProduct}
+            storeId={selectedStoreId}
+          />
+
+          <ImportProductsDialog
+            open={showImportCSV}
+            onOpenChange={setShowImportCSV}
+            onImportComplete={handleImportComplete}
             storeId={selectedStoreId}
           />
         </>
