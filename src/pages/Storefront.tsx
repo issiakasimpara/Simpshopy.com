@@ -9,7 +9,7 @@ import { Template } from '@/types/template';
 import { supabase } from '@/integrations/supabase/client';
 import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 import type { Tables } from '@/integrations/supabase/types';
-import { debugStorefront } from '@/utils/debugStorefront';
+
 import { useBranding } from '@/hooks/useBranding';
 
 // Composant de chargement sophistiqué
@@ -236,10 +236,9 @@ const Storefront = () => {
   useEffect(() => {
     fetchStoreData();
 
-    // Ajouter la fonction de debug à la console
+    // Debug info
     if (storeSlug) {
-      (window as any).debugStorefront = () => debugStorefront(storeSlug);
-      console.log('🔧 Pour diagnostiquer, tapez: debugStorefront() dans la console');
+      console.log('🔧 Debug: Storefront chargé pour le slug:', storeSlug);
     }
   }, [storeSlug]);
 

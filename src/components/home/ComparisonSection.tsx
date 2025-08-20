@@ -79,7 +79,7 @@ const ComparisonSection = () => {
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               Pourquoi nous choisir ?
             </h2>
-            <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto">
               Découvrez ce qui rend SimpShopy unique pour les entrepreneurs internationaux
             </p>
           </div>
@@ -91,7 +91,7 @@ const ComparisonSection = () => {
                 <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 text-sm md:text-base">
+                <div className="text-gray-700 text-sm md:text-base">
                   {stat.label}
                 </div>
               </div>
@@ -106,7 +106,7 @@ const ComparisonSection = () => {
                   <reason.icon className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3">{reason.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{reason.description}</p>
+                <p className="text-gray-700 leading-relaxed">{reason.description}</p>
               </div>
             ))}
           </div>
@@ -125,7 +125,7 @@ const ComparisonSection = () => {
                 </div>
                 <div className="text-left">
                   <div className="font-semibold text-gray-900">Marie Dubois</div>
-                  <div className="text-sm text-gray-600">Entrepreneuse, France</div>
+                  <div className="text-sm text-gray-700">Entrepreneuse, France</div>
                 </div>
               </div>
             </div>
@@ -138,7 +138,7 @@ const ComparisonSection = () => {
                 Commencer gratuitement avec SimpShopy
               </Link>
             </Button>
-            <p className="text-gray-600 mt-4 text-sm">
+            <p className="text-gray-700 mt-4 text-sm">
               Aucune carte de crédit requise • Essai gratuit 30 jours
             </p>
           </div>

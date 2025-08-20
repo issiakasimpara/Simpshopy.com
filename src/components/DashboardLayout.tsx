@@ -186,13 +186,20 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <Link
                 key={item.name}
                 to={item.href}
+                tabIndex={0}
                 className={cn(
-                  "group flex items-center px-4 py-4 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden",
+                  "group flex items-center px-4 py-4 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
                   isActive
                     ? "bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 text-blue-700 dark:text-blue-300 shadow-lg border border-blue-200/30 dark:border-blue-800/30"
                     : "text-muted-foreground hover:bg-gradient-to-r hover:from-accent/80 hover:to-accent/60 hover:text-accent-foreground hover:shadow-md hover:scale-[1.02]"
                 )}
                 onClick={() => setSidebarOpen(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSidebarOpen(false);
+                  }
+                }}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Effet de brillance pour l'élément actif */}

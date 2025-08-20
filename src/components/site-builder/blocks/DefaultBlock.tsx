@@ -31,7 +31,7 @@ const DefaultBlock = ({ block, isEditing, viewMode, onUpdate }: DefaultBlockProp
     >
       <div className="container mx-auto text-center">
         <h3 className="text-xl font-semibold mb-4">Bloc {block.type}</h3>
-        <p className="text-gray-600">Contenu du bloc à personnaliser</p>
+        <p className="text-gray-700">Contenu du bloc à personnaliser</p>
       </div>
     </div>
   );

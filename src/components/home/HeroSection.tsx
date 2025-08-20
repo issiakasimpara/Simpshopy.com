@@ -16,7 +16,7 @@ const HeroSection = () => {
             <div className="space-y-8">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                 🚀 Plateforme e-commerce internationale
               </div>
 

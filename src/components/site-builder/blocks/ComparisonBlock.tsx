@@ -54,7 +54,7 @@ const ComparisonBlock = ({ block, isEditing = false, viewMode = 'desktop' }: Com
             <div className="p-4 text-center font-semibold text-blue-600">
               {ourColumn || 'Nous'}
             </div>
-            <div className="p-4 text-center font-semibold text-gray-600">
+            <div className="p-4 text-center font-semibold text-gray-700">
               {theirColumn || 'Autres'}
             </div>
           </div>

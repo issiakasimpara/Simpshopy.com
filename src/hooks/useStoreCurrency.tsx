@@ -92,7 +92,7 @@ export const useStoreCurrency = (storeId?: string) => {
       refetchCurrency();
       refetchSettings();
     }
-  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings]);
+  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings, user?.id]);
 
   // Rafraîchissement périodique pour s'assurer que les données sont à jour
   useEffect(() => {
@@ -105,7 +105,7 @@ export const useStoreCurrency = (storeId?: string) => {
     }, 30000); // Rafraîchir toutes les 30 secondes
 
     return () => clearInterval(interval);
-  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings]);
+  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings, user?.id]);
 
   // Configuration du temps réel pour les changements de devise
   useEffect(() => {
@@ -153,7 +153,7 @@ export const useStoreCurrency = (storeId?: string) => {
         cleanupGlobalChannel();
       }
     };
-  }, [storeId, isValidStoreId, refetchCurrency, refetchSettings, toast]);
+  }, [storeId, isValidStoreId, refetchCurrency, refetchSettings, toast, user?.id]);
 
   // Mutation pour mettre à jour la devise
   const updateCurrencyMutation = useMutation({

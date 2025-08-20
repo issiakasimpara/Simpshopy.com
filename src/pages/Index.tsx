@@ -18,6 +18,7 @@ import AppLogo from "@/components/ui/AppLogo";
 import Integrations from './Integrations';
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -87,6 +88,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead 
+        title="SimpShopy - Plateforme E-commerce Internationale | Créez votre boutique en ligne"
+        description="SimpShopy est la plateforme e-commerce internationale. Créez votre boutique en ligne en 2 minutes avec paiements globaux, support français/anglais et tarifs en devises locales."
+        keywords="e-commerce, boutique en ligne, plateforme internationale, paiements globaux, dropshipping, SimpShopy, support français, support anglais"
+        type="website"
+      />
       {/* Header */}
       <header className="border-b bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
