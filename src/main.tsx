@@ -16,28 +16,24 @@ import { errorRecoveryManager } from './utils/errorRecovery'
 // 🔍 Système de diagnostic pour identifier les problèmes
 import { systemDiagnostic } from './utils/systemDiagnostic'
 
-// 🔍 Exécuter la validation de sécurité en développement
+// 🔍 Exécuter la validation de sécurité en développement uniquement
 if (import.meta.env.DEV) {
   logSecurityReport();
 
-  // ⚡ ÉTAPE 1: Réactiver le monitoring de performance
-  console.log('🚀 ÉTAPE 1: Activation du Performance Manager...');
-
+  // ⚡ Monitoring de performance (développement uniquement)
   try {
-    const stopPerformanceReporting = performanceManager.startPeriodicReporting(120000); // 2 minutes pour commencer
-    console.log('✅ Performance Manager activé avec succès');
-
+    const stopPerformanceReporting = performanceManager.startPeriodicReporting(120000);
+    
     // Nettoyer au démontage
     window.addEventListener('beforeunload', () => {
       stopPerformanceReporting();
     });
   } catch (error) {
-    console.warn('⚠️ Erreur Performance Manager:', error);
+    // Log silencieux en production
   }
 }
 
-// 🛡️ Initialiser le système de récupération d'erreurs
-console.log('🛡️ Initialisation du système de récupération d\'erreurs...');
+// 🛡️ Initialiser le système de récupération d'erreurs (silencieux)
 
 // Enregistrer des actions de récupération spécifiques
 errorRecoveryManager.registerRecoveryAction('Products_fetch_products_Error', {

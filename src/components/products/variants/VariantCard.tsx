@@ -14,6 +14,7 @@ interface VariantCardProps {
 
 const VariantCard = ({ variant, onEdit, onDelete }: VariantCardProps) => {
   const { formatPrice } = useStoreCurrency();
+  const productName = variant.product?.name || 'Produit';
   const getVariantDisplayName = () => {
     const attributeNames = variant.variant_attribute_values
       ?.map((vav: any) => vav.attribute_values?.value)
@@ -38,7 +39,7 @@ const VariantCard = ({ variant, onEdit, onDelete }: VariantCardProps) => {
         <div className="aspect-square w-full bg-gray-100">
           <img
             src={getMainImage()}
-            alt={getVariantDisplayName()}
+            alt={`Image du produit ${getVariantDisplayName()} - ${productName || 'Produit'}`}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.currentTarget.src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop';

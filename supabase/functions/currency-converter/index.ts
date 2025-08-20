@@ -5,9 +5,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Clé API Fixer.io stockée de manière sécurisée côté serveur
-const FIXER_API_KEY = '247aaec3c4d358e9ee8633d18919c334'
+// Clé API Fixer.io récupérée depuis les variables d'environnement
+const FIXER_API_KEY = Deno.env.get('FIXER_API_KEY')
 const FIXER_BASE_URL = 'http://data.fixer.io/api'
+
+// Validation de la clé API
+if (!FIXER_API_KEY) {
+  throw new Error('FIXER_API_KEY manquante dans les variables d\'environnement')
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests

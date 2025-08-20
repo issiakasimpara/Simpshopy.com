@@ -10,6 +10,7 @@ import { useCartSessionsCleanup } from './hooks/useOptimizedCartSessions';
 import { useSessionOptimizer } from './hooks/useSessionOptimizer';
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
+import CookieConsent from './components/CookieConsent';
 
 // Lazy loading des composants
 const Index = lazy(() => import('./pages/Index'));
@@ -131,6 +132,7 @@ function App() {
                 </Routes>
                     </Suspense>
               <Toaster />
+              <CookieConsent />
             </Router>
       </CartProvider>
     </AuthProvider>

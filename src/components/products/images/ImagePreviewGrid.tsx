@@ -33,7 +33,7 @@ const ImagePreviewGrid = ({ images, onRemoveImage, onSetAsMainImage }: ImagePrev
               <div className="aspect-square relative">
                 <img
                   src={image}
-                  alt={`Produit ${index + 1}`}
+                  alt={`Image ${index + 1} du produit - ${images.length} image${images.length > 1 ? 's' : ''} disponible${images.length > 1 ? 's' : ''}`}
                   className="w-full h-full object-cover rounded"
                   onError={(e) => {
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop';
