@@ -20,7 +20,7 @@ import { useCartSessions } from '@/hooks/useCartSessions';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 const Checkout = () => {
-  const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
+  const { items, updateQuantity, removeItem, getTotalPrice, clearCart, storeId: cartStoreId } = useCart();
   const { saveCartSession } = useCartSessions();
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,7 +36,9 @@ const Checkout = () => {
   const [currentStoreId, setCurrentStoreId] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   
-  const { formatPrice, currency } = useStoreCurrency(currentStoreId);
+  // Utiliser le storeId du panier en priorité, sinon celui récupéré par getStoreInfo
+  const effectiveStoreId = cartStoreId || currentStoreId;
+  const { formatPrice, currency } = useStoreCurrency(effectiveStoreId);
 
   // Détecter si nous sommes dans l'aperçu
   const isInPreview = window.self !== window.top;
@@ -53,7 +55,7 @@ const Checkout = () => {
 
   // Hook automatique pour les méthodes de livraison
   const { methods: shippingMethods, isLoading: isLoadingShipping } = useShippingWithAutoSetup(
-    currentStoreId,
+    effectiveStoreId,
     detectedCountryCode
   );
 
@@ -69,12 +71,15 @@ const Checkout = () => {
   useEffect(() => {
     console.log('🔍 DEBUG CHECKOUT:');
     console.log('- Store Slug:', storeSlug);
+    console.log('- Cart Store ID:', cartStoreId);
     console.log('- Current Store ID:', currentStoreId);
+    console.log('- Effective Store ID:', effectiveStoreId);
+    console.log('- Currency from hook:', currency);
     console.log('- Detected Country:', detectedCountry, detectedCountryCode);
     console.log('- Shipping Methods:', shippingMethods);
     console.log('- Is Loading Shipping:', isLoadingShipping);
     console.log('- Selected Method:', selectedShippingMethod);
-  }, [storeSlug, currentStoreId, detectedCountry, detectedCountryCode, shippingMethods, isLoadingShipping, selectedShippingMethod]);
+  }, [storeSlug, cartStoreId, currentStoreId, effectiveStoreId, currency, detectedCountry, detectedCountryCode, shippingMethods, isLoadingShipping, selectedShippingMethod]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCustomerInfoChange = (field: string, value: string) => {
@@ -125,11 +130,16 @@ const Checkout = () => {
         const userCountryCode = await detectUserCountryForCheckout();
 
         // 2. Récupérer les infos de la boutique
-        const storeInfo = await getStoreInfo();
-        if (storeInfo) {
-          setCurrentStoreId(storeInfo.id);
-          console.log('🏪 Store configuré:', storeInfo.id);
-        }
+              const storeInfo = await getStoreInfo();
+      if (storeInfo) {
+        setCurrentStoreId(storeInfo.id);
+        console.log('🏪 Store configuré:', storeInfo.id);
+      }
+      
+      // Si on n'a pas de storeId dans le panier, utiliser celui récupéré
+      if (!cartStoreId && storeInfo) {
+        console.log('🔄 Utilisation du storeId récupéré car pas de storeId dans le panier');
+      }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation:', error);
       }
@@ -240,6 +250,9 @@ const Checkout = () => {
         throw new Error('Impossible de récupérer les informations de la boutique');
       }
 
+      // Utiliser le storeId du panier en priorité
+      const finalStoreId = cartStoreId || storeInfo.id;
+
       // Sauvegarder les informations du client dans la session de panier
       const customerInfoForSession = {
         email: customerInfo.email,
@@ -252,7 +265,7 @@ const Checkout = () => {
       };
 
       console.log('💾 Sauvegarde session avec infos client...');
-      await saveCartSession(storeInfo.id, items, customerInfoForSession);
+      await saveCartSession(finalStoreId, items, customerInfoForSession);
 
       const tempOrderNumber = `TEMP-${Date.now()}`;
       const totalAmount = getTotalWithShipping();
@@ -275,7 +288,7 @@ const Checkout = () => {
         },
         metadata: {
           temp_order_number: tempOrderNumber,
-          store_id: storeInfo.id,
+          store_id: finalStoreId,
           store_name: storeInfo.name,
           customer_info: JSON.stringify(customerInfo),
           items: JSON.stringify(items),

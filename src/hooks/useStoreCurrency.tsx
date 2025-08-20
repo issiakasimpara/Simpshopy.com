@@ -85,6 +85,28 @@ export const useStoreCurrency = (storeId?: string) => {
     retry: false, // Ne pas retenter si la requête échoue
   });
 
+  // Forcer le refetch quand le storeId devient valide
+  useEffect(() => {
+    if (isValidStoreId && storeId) {
+      console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
+      refetchCurrency();
+      refetchSettings();
+    }
+  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings]);
+
+  // Rafraîchissement périodique pour s'assurer que les données sont à jour
+  useEffect(() => {
+    if (!isValidStoreId || !storeId) return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 Rafraîchissement périodique des données de devise');
+      refetchCurrency();
+      refetchSettings();
+    }, 30000); // Rafraîchir toutes les 30 secondes
+
+    return () => clearInterval(interval);
+  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings]);
+
   // Configuration du temps réel pour les changements de devise
   useEffect(() => {
     if (!isValidStoreId) {
@@ -98,8 +120,19 @@ export const useStoreCurrency = (storeId?: string) => {
     // Fonction de callback pour ce composant
     const handleCurrencyChange = () => {
       console.log('🔄 Rafraîchissement des données de devise pour le composant');
+      // Forcer le refetch immédiat
       refetchCurrency();
       refetchSettings();
+      
+      // Invalider aussi les requêtes dans le cache
+      queryClient.invalidateQueries({ 
+        queryKey: ['store-currency', storeId],
+        exact: true 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['store-currency-settings', storeId],
+        exact: true 
+      });
       
       // Notification optionnelle
       toast({
@@ -129,8 +162,20 @@ export const useStoreCurrency = (storeId?: string) => {
       return StoreCurrencyService.updateStoreCurrency(storeId!, newCurrency);
     },
     onSuccess: () => {
+      console.log('🔄 Mutation réussie, invalidation des requêtes de devise');
+      // Invalider toutes les requêtes liées à la devise pour ce store
+      queryClient.invalidateQueries({ 
+        queryKey: ['store-currency', storeId],
+        exact: true 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['store-currency-settings', storeId],
+        exact: true 
+      });
+      // Invalider aussi les requêtes générales
       queryClient.invalidateQueries({ queryKey: ['store-currency'] });
       queryClient.invalidateQueries({ queryKey: ['store-currency-settings'] });
+      
       toast({
         title: "Devise mise à jour",
         description: `La devise de votre boutique a été changée avec succès.`,
@@ -202,7 +247,10 @@ export const useStoreCurrency = (storeId?: string) => {
   const formatPrice = (amount: number, options?: { showSymbol?: boolean; showCode?: boolean }) => {
     // Si pas de storeId valide ou pas de devise récupérée, utiliser XOF par défaut
     const currentCurrency = (isValidStoreId && currency) ? currency : 'XOF';
-    return formatCurrency(amount, currentCurrency, options);
+    
+    // Utiliser formatConvertedPrice pour faire la conversion automatique
+    // On suppose que les montants sont stockés en XOF par défaut
+    return formatConvertedPrice(amount, 'XOF', options);
   };
 
   // Fonction pour convertir et formater un prix (pour les montants stockés en XOF)
@@ -215,19 +263,52 @@ export const useStoreCurrency = (storeId?: string) => {
       return formatCurrency(amount, currentCurrency, options);
     }
 
-    // Pour l'instant, on suppose que les montants sont stockés en XOF
-    // Dans une vraie application, il faudrait stocker la devise d'origine avec chaque montant
-    // Pour l'instant, on utilise un taux fixe pour la démonstration
+    // Taux de change approximatifs (en production, utiliser une API de change)
+    const rates: Record<Currency, number> = {
+      XOF: 1,        // Base: Franc CFA BCEAO
+      XAF: 1,        // Parité avec XOF
+      EUR: 0.00152,  // 1 EUR ≈ 655 XOF
+      USD: 0.00166,  // 1 USD ≈ 620 XOF
+      GBP: 0.00130,  // 1 GBP ≈ 500 XOF
+      GHS: 0.0095,   // 1 GHS ≈ 105 XOF
+      NGN: 0.0013,   // 1 NGN ≈ 770 XOF
+      ZAR: 0.0085,   // 1 ZAR ≈ 118 XOF
+      EGP: 0.052,    // 1 EGP ≈ 19 XOF
+      KES: 0.0095,   // 1 KES ≈ 105 XOF
+      UGX: 0.00042,  // 1 UGX ≈ 2380 XOF
+      TZS: 0.00068,  // 1 TZS ≈ 1470 XOF
+      MAD: 0.0095,   // 1 MAD ≈ 105 XOF
+      DZD: 0.0095,   // 1 DZD ≈ 105 XOF
+      TND: 0.0095,   // 1 TND ≈ 105 XOF
+      LYD: 0.0095,   // 1 LYD ≈ 105 XOF
+      SDG: 0.0095,   // 1 SDG ≈ 105 XOF
+      ETB: 0.0095,   // 1 ETB ≈ 105 XOF
+      SOS: 0.0095,   // 1 SOS ≈ 105 XOF
+      DJF: 0.0095,   // 1 DJF ≈ 105 XOF
+      KMF: 0.0095,   // 1 KMF ≈ 105 XOF
+      MUR: 0.0095,   // 1 MUR ≈ 105 XOF
+      SCR: 0.0095,   // 1 SCR ≈ 105 XOF
+      BIF: 0.0095,   // 1 BIF ≈ 105 XOF
+      RWF: 0.0095,   // 1 RWF ≈ 105 XOF
+      CDF: 0.0095,   // 1 CDF ≈ 105 XOF
+      GMD: 0.0095,   // 1 GMD ≈ 105 XOF
+      SLL: 0.0095,   // 1 SLL ≈ 105 XOF
+    };
+
+    // Convertir vers XOF puis vers la devise cible
     let convertedAmount = amount;
     
-    if (originalCurrency === 'XOF' && currentCurrency === 'EUR') {
-      convertedAmount = amount * 0.00152; // Taux approximatif XOF vers EUR
-    } else if (originalCurrency === 'XOF' && currentCurrency === 'USD') {
-      convertedAmount = amount * 0.00166; // Taux approximatif XOF vers USD
-    } else if (originalCurrency === 'XOF' && currentCurrency === 'GBP') {
-      convertedAmount = amount * 0.00130; // Taux approximatif XOF vers GBP
+    if (originalCurrency !== 'XOF') {
+      // Convertir d'abord vers XOF
+      const rateToXOF = rates[originalCurrency] || 1;
+      convertedAmount = amount / rateToXOF;
     }
-    // Ajouter d'autres conversions selon les besoins
+    
+    // Puis convertir vers la devise cible
+    if (currentCurrency !== 'XOF') {
+      const rateFromXOF = rates[currentCurrency] || 1;
+      convertedAmount = convertedAmount * rateFromXOF;
+    }
     
     return formatCurrency(convertedAmount, currentCurrency, options);
   };

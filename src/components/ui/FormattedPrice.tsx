@@ -26,7 +26,7 @@ export const FormattedPrice = ({
   const currency = forcedCurrency || storeCurrency || 'XOF';
   
   // Formater le prix avec conversion automatique
-  const formattedPrice = formatConvertedPrice(amount, 'XOF', { 
+  const formattedPrice = formatConvertedPrice(amount, currency, { 
     showSymbol, 
     compact 
   });

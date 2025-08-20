@@ -21,6 +21,8 @@ export class StoreCurrencyService {
    */
   static async getStoreCurrency(storeId: string): Promise<Currency> {
     try {
+      console.log('🔍 StoreCurrencyService - Récupération devise pour storeId:', storeId);
+      
       const { data, error } = await supabase
         .from('market_settings')
         .select('default_currency')
@@ -30,16 +32,19 @@ export class StoreCurrencyService {
       if (error) {
         // Si la table n'existe pas, retourner la devise par défaut
         if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
-          console.log('Table market_settings n\'existe pas, utilisation de la devise par défaut');
+          console.log('❌ Table market_settings n\'existe pas, utilisation de la devise par défaut');
           return 'XOF';
         }
-        console.error('Erreur lors de la récupération de la devise:', error);
+        console.error('❌ Erreur lors de la récupération de la devise:', error);
         return 'XOF'; // Devise par défaut
       }
 
-      return (data?.default_currency as Currency) || 'XOF';
+      const currency = (data?.default_currency as Currency) || 'XOF';
+      console.log('✅ StoreCurrencyService - Devise récupérée:', currency, 'pour storeId:', storeId);
+      
+      return currency;
     } catch (error) {
-      console.error('Erreur lors de la récupération de la devise:', error);
+      console.error('❌ Erreur lors de la récupération de la devise:', error);
       return 'XOF';
     }
   }
