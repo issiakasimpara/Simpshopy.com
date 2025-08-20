@@ -8,14 +8,24 @@ import { useCookieConsent, type CookiePreferences } from '@/hooks/useCookieConse
 const CookieConsent: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [localPreferences, setLocalPreferences] = useState<CookiePreferences>({
+    essential: true,
+    analytics: false,
+    marketing: false,
+    preferences: false
+  });
   const { preferences, hasConsented, acceptAll, acceptEssential, savePreferences } = useCookieConsent();
 
   useEffect(() => {
     // Afficher la bannière si pas de consentement
     if (!hasConsented) {
       setShowBanner(true);
+    } else {
+      setShowBanner(false);
     }
-  }, [hasConsented]);
+    // Synchroniser les préférences locales avec celles du hook
+    setLocalPreferences(preferences);
+  }, [hasConsented, preferences]);
 
   const handleAcceptAll = () => {
     acceptAll();
@@ -28,7 +38,7 @@ const CookieConsent: React.FC = () => {
   };
 
   const handleSavePreferences = () => {
-    savePreferences(preferences);
+    savePreferences(localPreferences);
     setShowSettings(false);
     setShowBanner(false);
   };
@@ -36,8 +46,7 @@ const CookieConsent: React.FC = () => {
   const handlePreferenceChange = (key: keyof CookiePreferences, value: boolean) => {
     if (key === 'essential') return; // Ne peut pas être désactivé
     // Mettre à jour les préférences localement pour l'interface
-    const newPreferences = { ...preferences, [key]: value };
-    // Note: Les préférences ne sont appliquées qu'après sauvegarde
+    setLocalPreferences(prev => ({ ...prev, [key]: value }));
   };
 
   if (!showBanner) return null;
@@ -123,12 +132,12 @@ const CookieConsent: React.FC = () => {
                    </p>
                 </div>
                 <div className="flex items-center">
-                                     <input
-                     type="checkbox"
-                     checked={preferences.essential}
-                     disabled
-                     className="rounded border-border"
-                   />
+                                                       <input
+                    type="checkbox"
+                    checked={localPreferences.essential}
+                    disabled
+                    className="rounded border-border"
+                  />
                 </div>
               </div>
 
@@ -141,12 +150,12 @@ const CookieConsent: React.FC = () => {
                    </p>
                 </div>
                 <div className="flex items-center">
-                                     <input
-                     type="checkbox"
-                     checked={preferences.analytics}
-                     onChange={(e) => handlePreferenceChange('analytics', e.target.checked)}
-                     className="rounded border-border"
-                   />
+                                                       <input
+                    type="checkbox"
+                    checked={localPreferences.analytics}
+                    onChange={(e) => handlePreferenceChange('analytics', e.target.checked)}
+                    className="rounded border-border"
+                  />
                 </div>
               </div>
 
@@ -159,12 +168,12 @@ const CookieConsent: React.FC = () => {
                    </p>
                 </div>
                 <div className="flex items-center">
-                                     <input
-                     type="checkbox"
-                     checked={preferences.marketing}
-                     onChange={(e) => handlePreferenceChange('marketing', e.target.checked)}
-                     className="rounded border-border"
-                   />
+                                                       <input
+                    type="checkbox"
+                    checked={localPreferences.marketing}
+                    onChange={(e) => handlePreferenceChange('marketing', e.target.checked)}
+                    className="rounded border-border"
+                  />
                 </div>
               </div>
 
@@ -177,29 +186,45 @@ const CookieConsent: React.FC = () => {
                    </p>
                 </div>
                 <div className="flex items-center">
-                                     <input
-                     type="checkbox"
-                     checked={preferences.preferences}
-                     onChange={(e) => handlePreferenceChange('preferences', e.target.checked)}
-                     className="rounded border-border"
-                   />
+                                                       <input
+                    type="checkbox"
+                    checked={localPreferences.preferences}
+                    onChange={(e) => handlePreferenceChange('preferences', e.target.checked)}
+                    className="rounded border-border"
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+                        <div className="flex justify-between items-center pt-4 border-t">
               <Button 
-                onClick={() => setShowSettings(false)}
+                onClick={() => {
+                  // Reset pour les tests
+                  localStorage.removeItem('cookie_consent');
+                  localStorage.removeItem('cookie_consent_date');
+                  window.location.reload();
+                }}
                 variant="outline"
+                size="sm"
+                className="text-xs"
               >
-                Annuler
+                Reset (Test)
               </Button>
-                             <Button 
-                 onClick={handleSavePreferences}
-                 className="bg-primary hover:bg-primary/90"
-               >
-                 Sauvegarder
-               </Button>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setShowSettings(false)}
+                  variant="outline"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  onClick={handleSavePreferences}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Sauvegarder
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

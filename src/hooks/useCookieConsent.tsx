@@ -20,11 +20,60 @@ export const useCookieConsent = () => {
   // Charger les préférences au démarrage
   useEffect(() => {
     const savedConsent = localStorage.getItem('cookie_consent');
-    if (savedConsent) {
-      const savedPreferences = JSON.parse(savedConsent);
-      setPreferences(savedPreferences);
-      setHasConsented(true);
-      applyCookiePreferences(savedPreferences);
+    const consentDate = localStorage.getItem('cookie_consent_date');
+    
+    if (savedConsent && consentDate) {
+      // Vérifier si le consentement a moins de 12 mois
+      const consentTime = new Date(consentDate).getTime();
+      const now = new Date().getTime();
+      const twelveMonths = 12 * 30 * 24 * 60 * 60 * 1000; // 12 mois en millisecondes
+      
+      if (now - consentTime < twelveMonths) {
+        // Le consentement est encore valide
+        const savedPreferences = JSON.parse(savedConsent);
+        setPreferences(savedPreferences);
+        setHasConsented(true);
+        
+        // Appliquer les préférences directement ici
+        // Cookies essentiels (toujours activés)
+        if (savedPreferences.essential) {
+          document.cookie = 'essential=true; path=/; max-age=31536000; SameSite=Strict';
+        }
+
+        // Cookies analytics
+        if (savedPreferences.analytics) {
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('consent', 'update', {
+              analytics_storage: 'granted'
+            });
+          }
+        } else {
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('consent', 'update', {
+              analytics_storage: 'denied'
+            });
+          }
+        }
+
+        // Cookies marketing
+        if (savedPreferences.marketing) {
+          document.cookie = 'marketing=true; path=/; max-age=31536000; SameSite=Lax';
+        } else {
+          document.cookie = 'marketing=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+
+        // Cookies de préférences
+        if (savedPreferences.preferences) {
+          document.cookie = 'preferences=true; path=/; max-age=31536000; SameSite=Lax';
+        } else {
+          document.cookie = 'preferences=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+      } else {
+        // Le consentement a expiré, le supprimer
+        localStorage.removeItem('cookie_consent');
+        localStorage.removeItem('cookie_consent_date');
+        setHasConsented(false);
+      }
     }
   }, []);
 
