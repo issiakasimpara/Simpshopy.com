@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Moneroo</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test API Moneroo</h1>
+    <button onclick="testMonerooAPI()">Tester l'API Moneroo</button>
+    <div id="result"></div>
+
+    <script>
+        const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
+        const MONEROO_API_URL = 'https://api.moneroo.io/v1';
+
+        async function testMonerooAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test en cours...';
+
+            try {
+                // Test simple avec les données correctes selon la documentation
+                const paymentData = {
+                    amount: 1500, // 1500 CFA (pas de conversion nécessaire)
+                    currency: 'XOF', // Franc CFA - devrait être activé
+                    description: 'Test API Moneroo',
+                    return_url: 'https://simpshopy.com/payment-success',
+                    customer: {
+                        email: 'test@example.com',
+                        first_name: 'Test',
+                        last_name: 'User'
+                    }
+                    // Pas de methods pour laisser Moneroo choisir automatiquement
+                };
+
+                console.log('🔑 Test avec clé API:', MONEROO_API_KEY);
+                console.log('📊 Données de test:', paymentData);
+
+                const response = await axios.post(`${MONEROO_API_URL}/payments/initialize`, paymentData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${MONEROO_API_KEY}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                console.log('✅ Réponse API:', response.data);
+                resultDiv.innerHTML = `
+                    <h3>✅ Test réussi !</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>ID Paiement:</strong> ${response.data.data.id}</p>
+                    <p><strong>URL Checkout:</strong> <a href="${response.data.data.checkout_url}" target="_blank">${response.data.data.checkout_url}</a></p>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                console.error('❌ Erreur API:', error);
+                resultDiv.innerHTML = `
+                    <h3>❌ Test échoué</h3>
+                    <p><strong>Erreur:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> ${error.response?.status}</p>
+                    <p><strong>Détails:</strong></p>
+                    <pre>${JSON.stringify(error.response?.data || error, null, 2)}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 
