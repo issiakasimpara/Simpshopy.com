@@ -33,6 +33,9 @@ L'erreur venait de la structure imbriquée incorrecte des `<Routes>` dans `App.t
   <Route path="/cart" element={<Cart />} />
   <Route path="/checkout" element={<Checkout />} />
   
+  {/* Pages critiques - CHARGEMENT SYNCHRONE */}
+  <Route path="/" element={<Index />} />
+  
   {/* Pages admin - LAZY LOADING individuel */}
   <Route path="/dashboard" element={
     <Suspense fallback={<LoadingFallback />}>
@@ -62,8 +65,9 @@ const LoadingFallback: React.FC = () => (
 
 ### **1. `src/App.tsx`**
 - ✅ Suppression des `<Routes>` imbriquées
+- ✅ **Page d'accueil (`/`) en chargement synchrone** ⚡
 - ✅ Suspense individuel pour chaque route admin
-- ✅ Import synchrone pour les routes e-commerce
+- ✅ Import synchrone pour les routes e-commerce et critiques
 - ✅ Composant LoadingFallback réutilisable
 
 ### **2. `src/components/LoadingFallback.tsx` (nouveau)**
@@ -76,6 +80,7 @@ const LoadingFallback: React.FC = () => (
 | Aspect | Avant | Après |
 |--------|-------|-------|
 | **Erreur de routing** | ❌ Routes imbriquées | ✅ Structure correcte |
+| **Page d'accueil** | ❌ Lazy loading | ✅ **Chargement synchrone** |
 | **Performance** | Lazy loading global | Lazy loading individuel |
 | **Maintenance** | Code répétitif | Composant réutilisable |
 | **UX** | Erreur bloquante | Navigation fluide |
@@ -84,25 +89,26 @@ const LoadingFallback: React.FC = () => (
 
 ### **1. Test de navigation :**
 ```bash
+# Naviguer vers / (page d'accueil)
+# Résultat attendu : Chargement immédiat, pas de lazy loading
+```
+
+### **2. Test de la boutique :**
+```bash
 # Naviguer vers /store/best-store
 # Résultat attendu : Chargement rapide, pas d'erreur
 ```
 
-### **2. Test des pages admin :**
+### **3. Test des pages admin :**
 ```bash
 # Naviguer vers /dashboard
 # Résultat attendu : Lazy loading avec fallback
 ```
 
-### **3. Test des routes e-commerce :**
-```bash
-# Naviguer vers /cart, /checkout
-# Résultat attendu : Chargement synchrone
-```
-
 ## 🚀 **Optimisations conservées :**
 
-### **⚡ Chargement synchrone e-commerce :**
+### **⚡ Chargement synchrone critique :**
+- `Index` (page d'accueil) - **Import direct** ⚡
 - `Storefront` - Import direct
 - `Cart` - Import direct  
 - `Checkout` - Import direct
@@ -122,10 +128,11 @@ const LoadingFallback: React.FC = () => (
 
 ## 🎉 **Résultat :**
 
-**Application fonctionnelle avec routing correct !** ✅
+**Application fonctionnelle avec routing correct et page d'accueil optimisée !** ✅
 
 ### **Avantages :**
 - ✅ **Erreur de routing corrigée**
+- ⚡ **Page d'accueil ultra-rapide** (chargement synchrone)
 - ⚡ **Performance Shopify-like conservée**
 - 🎯 **Lazy loading optimisé**
 - 📱 **UX fluide et réactive**

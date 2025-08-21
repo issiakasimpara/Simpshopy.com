@@ -19,9 +19,9 @@ import Storefront from './pages/Storefront';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Index from './pages/Index';
 
 // Lazy loading UNIQUEMENT pour les pages admin (pas critiques)
-const Index = lazy(() => import('./pages/Index'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Auth = lazy(() => import('./pages/Auth'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -97,248 +97,142 @@ function App() {
                 <Route path="/store/:storeSlug/checkout" element={<Checkout />} />
                 <Route path="/product/:productId" element={<Storefront />} />
                 
+                {/* Pages critiques - CHARGEMENT SYNCHRONE */}
+                <Route path="/" element={<Index />} />
+                
                 {/* Pages admin - LAZY LOADING (pas critiques) */}
-                <Route path="/" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Index />
-                  </Suspense>
-                } />
                 <Route path="/dashboard" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Dashboard />
                   </Suspense>
                 } />
                 <Route path="/auth" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Auth />
                   </Suspense>
                 } />
                 <Route path="/analytics" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Analytics />
                   </Suspense>
                 } />
                 <Route path="/products" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Products />
                   </Suspense>
                 } />
                 <Route path="/categories" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Categories />
                   </Suspense>
                 } />
                 <Route path="/orders" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Orders />
                   </Suspense>
                 } />
                 <Route path="/customers" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Customers />
                   </Suspense>
                 } />
                 <Route path="/shipping" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Shipping />
                   </Suspense>
                 } />
                 <Route path="/payments" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Payments />
                   </Suspense>
                 } />
                 <Route path="/themes" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Themes />
                   </Suspense>
                 } />
                 <Route path="/domains" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Domains />
                   </Suspense>
                 } />
                 <Route path="/settings" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Settings />
                   </Suspense>
                 } />
                 <Route path="/store-config" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <StoreConfig />
                   </Suspense>
                 } />
                 <Route path="/integrations/dsers" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <DsersIntegration />
                   </Suspense>
                 } />
                 <Route path="/integrations/mailchimp" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <MailchimpIntegration />
                   </Suspense>
                 } />
                 <Route path="/integrations/:id" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <IntegrationDetailPage />
                   </Suspense>
                 } />
                 <Route path="/site-builder" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <SiteBuilder />
                   </Suspense>
                 } />
                 <Route path="/storefront" element={<Storefront />} />
                 <Route path="/integrations" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Integrations />
                   </Suspense>
                 } />
                 <Route path="/testimonials" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Testimonials />
                   </Suspense>
                 } />
                 <Route path="/admin/testimonials" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Testimonials />
                   </Suspense>
                 } />
                 <Route path="/onboarding" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <OnboardingWizard />
                   </Suspense>
                 } />
                 
                 {/* Routes de démonstration */}
                 <Route path="/demo" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Demo />
                   </Suspense>
                 } />
                 <Route path="/test-logo" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <TestLogo />
                   </Suspense>
                 } />
                 <Route path="/preloading-demo" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <PreloadingDemo />
                   </Suspense>
                 } />
                 
                 {/* Routes d'éditeur de template */}
                 <Route path="/store-config/site-builder/editor/:templateId" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <OptimizedTemplateEditor />
                   </Suspense>
                 } />
                 <Route path="/store-config/site-builder/preview/:templateId" element={
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-                    </div>
-                  }>
+                  <Suspense fallback={<LoadingFallback />}>
                     <TemplatePreview />
                   </Suspense>
                 } />
