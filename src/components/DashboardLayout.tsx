@@ -193,7 +193,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {/* Top bar améliorée */}
-        <div className="bg-card/80 backdrop-blur-xl border-b border-border/50 px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
+        <div className="bg-card/80 backdrop-blur-xl border-b border-border/50 px-4 py-3 flex items-center justify-between flex-shrink-0 shadow-sm">
           <Button
             variant="ghost"
             size="sm"
@@ -213,7 +213,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
