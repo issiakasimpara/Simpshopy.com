@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://simpshopy.com/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Allow important pages
+Allow: /
+Allow: /privacy-policy.html
+Allow: /terms-of-service.html
+Allow: /data-deletion.html
+
+# Crawl delay (optional)
+Crawl-delay: 1
