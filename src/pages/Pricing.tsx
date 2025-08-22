@@ -168,8 +168,13 @@ const Pricing = () => {
       <SEOHead 
         title="Tarifs SimpShopy - Plans et Prix | Plateforme E-commerce"
         description="Découvrez nos tarifs transparents et nos plans adaptés à tous les besoins. Commencez gratuitement ou choisissez le plan qui correspond à votre ambition."
-        keywords="tarifs SimpShopy, prix e-commerce, plans abonnement, plateforme e-commerce Afrique, prix boutique en ligne"
+        keywords="tarifs SimpShopy, prix e-commerce, plans abonnement, plateforme e-commerce Afrique, prix boutique en ligne, tarifs transparents"
         type="website"
+        canonical="https://simpshopy.com/pricing"
+        ogTitle="Tarifs SimpShopy - Plans et Prix Transparents"
+        ogDescription="Découvrez nos tarifs transparents et nos plans adaptés à tous les besoins. Commencez gratuitement ou choisissez le plan qui correspond à votre ambition."
+        ogImage="https://simpshopy.com/og-pricing.jpg"
+        twitterCard="summary_large_image"
       />
 
       {/* Header */}

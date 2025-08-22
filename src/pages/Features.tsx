@@ -87,8 +87,13 @@ const Features = () => {
       <SEOHead 
         title="Fonctionnalités SimpShopy - Plateforme E-commerce Complète | Créez votre boutique en ligne"
         description="Découvrez toutes les fonctionnalités de SimpShopy : boutique en ligne, gestion produits, paiements internationaux, analytics, support 24/7 et plus encore."
-        keywords="fonctionnalités e-commerce, boutique en ligne, gestion produits, paiements internationaux, analytics, support client, SimpShopy"
+        keywords="fonctionnalités e-commerce, boutique en ligne, gestion produits, paiements internationaux, analytics, support client, SimpShopy, plateforme e-commerce, création boutique en ligne"
         type="website"
+        canonical="https://simpshopy.com/features"
+        ogTitle="Fonctionnalités SimpShopy - Plateforme E-commerce Complète"
+        ogDescription="Découvrez toutes les fonctionnalités de SimpShopy : boutique en ligne, gestion produits, paiements internationaux, analytics, support 24/7 et plus encore."
+        ogImage="https://simpshopy.com/og-features.jpg"
+        twitterCard="summary_large_image"
       />
 
       {/* Header */}

@@ -1,22 +1,38 @@
 User-agent: *
 Allow: /
 
+# Pages publiques à indexer
+Allow: /features
+Allow: /pricing
+Allow: /testimonials
+Allow: /why-choose-us
+Allow: /support
+Allow: /about
+Allow: /legal
+Allow: /privacy
+Allow: /terms
+Allow: /storefront
+Allow: /cart
+Allow: /checkout
+
+# Pages admin à ne pas indexer
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /admin
+Disallow: /api
+Disallow: /settings
+Disallow: /products
+Disallow: /orders
+Disallow: /customers
+Disallow: /shipping
+Disallow: /payments
+Disallow: /themes
+Disallow: /domains
+Disallow: /integrations
+Disallow: /site-builder
+
 # Sitemap
 Sitemap: https://simpshopy.com/sitemap.xml
 
-# Disallow admin and private areas
-Disallow: /dashboard/
-Disallow: /auth/
-Disallow: /admin/
-Disallow: /api/
-Disallow: /_next/
-Disallow: /static/
-
-# Allow important pages
-Allow: /
-Allow: /privacy-policy.html
-Allow: /terms-of-service.html
-Allow: /data-deletion.html
-
-# Crawl delay (optional)
+# Crawl-delay pour éviter de surcharger le serveur
 Crawl-delay: 1
