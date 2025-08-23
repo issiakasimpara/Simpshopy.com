@@ -149,30 +149,30 @@ const MarketsShipping = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
           <div>
-            <h1 className="text-3xl font-bold">Marchés et Livraisons</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">Marchés et Livraisons</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               Gérez vos zones de vente et méthodes de livraison comme sur Shopify
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Store className="h-5 w-5 text-gray-500" />
-            <span className="text-sm text-gray-600">{currentStore.name}</span>
+            <Store className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+            <span className="text-xs sm:text-sm text-gray-600">{currentStore.name}</span>
           </div>
         </div>
 
         {/* Stats rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Globe className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Marchés actifs</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Marchés actifs</p>
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900">
                     {markets.filter(m => m.is_active).length}
                   </p>
                 </div>
@@ -181,12 +181,12 @@ const MarketsShipping = () => {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Truck className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Méthodes de livraison</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                <Truck className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Méthodes de livraison</p>
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900">
                     {allShippingMethods.filter(m => m.is_active).length}
                   </p>
                 </div>
@@ -195,9 +195,9 @@ const MarketsShipping = () => {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Store className="h-8 w-8 text-purple-600" />
+                <Store className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pays couverts</p>
                   <p className="text-2xl font-bold text-gray-900">

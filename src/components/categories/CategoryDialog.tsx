@@ -167,12 +167,12 @@ const CategoryDialog = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-lg sm:text-xl font-semibold">
             {category ? 'Modifier la catégorie' : 'Ajouter une catégorie'}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 sm:space-y-6 py-4">
           <CategoryBasicInfoForm
             formData={{
               name: formData.name,
@@ -206,14 +206,14 @@ const CategoryDialog = ({
           />
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+          <Button variant="outline" onClick={handleClose} disabled={isLoading} className="text-sm">
             Annuler
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={!formData.name.trim() || isLoading}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-sm"
           >
             {isLoading ? 'Enregistrement...' : (category ? 'Modifier' : 'Ajouter')}
           </Button>

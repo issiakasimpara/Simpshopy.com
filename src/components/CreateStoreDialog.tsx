@@ -167,18 +167,18 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
     }}>
       <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
             {step === 1 ? 'Choisir un template' : 'Créer votre boutique'}
           </DialogTitle>
         </DialogHeader>
 
         {step === 1 && (
-          <div className="space-y-6">
-            <p className="text-muted-foreground">
+          <div className="space-y-4 sm:space-y-6">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Sélectionnez un template pour votre boutique. Vous pourrez le personnaliser après.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {preBuiltTemplates.map((template) => (
                 <Card 
                   key={template.id} 
@@ -191,21 +191,21 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
                     <img
                       src={template.thumbnail}
                       alt={template.name}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-24 sm:h-32 object-cover"
                     />
                   </div>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">{template.name}</CardTitle>
-                      <Badge variant="secondary">
+                      <CardTitle className="text-sm sm:text-base">{template.name}</CardTitle>
+                      <Badge variant="secondary" className="text-xs">
                         {templateCategories.find(cat => cat.id === template.category)?.icon}
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <CardDescription className="text-xs">
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                       {template.description}
-                    </CardDescription>
+                    </p>
                   </CardContent>
                 </Card>
               ))}

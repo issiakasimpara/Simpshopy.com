@@ -144,11 +144,11 @@ const CreateMarketDialog = ({ open, onOpenChange, storeId, editingMarket, onSucc
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
             {editingMarket ? 'Modifier le marché' : 'Créer un nouveau marché'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm sm:text-base">
             {editingMarket
               ? 'Modifiez les détails de ce marché et les pays couverts.'
               : 'Définissez une zone de vente pour vos produits en sélectionnant les pays où vous souhaitez vendre.'
@@ -156,7 +156,7 @@ const CreateMarketDialog = ({ open, onOpenChange, storeId, editingMarket, onSucc
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Nom du marché *</Label>
             <Input
