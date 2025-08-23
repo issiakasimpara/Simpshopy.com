@@ -40,11 +40,12 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
   }
 });
 
-// 🔍 Log de débogage (uniquement en développement)
-if (import.meta.env.DEV) {
+// 🔍 Log de débogage (uniquement en développement - première initialisation)
+if (import.meta.env.DEV && !window.__SUPABASE_INITIALIZED__) {
   console.log('🔐 Supabase client initialisé:', {
     url: SUPABASE_URL,
     keyPrefix: SUPABASE_ANON_KEY.substring(0, 20) + '...',
     env: import.meta.env.VITE_APP_ENV
   });
+  window.__SUPABASE_INITIALIZED__ = true;
 }
