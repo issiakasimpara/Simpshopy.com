@@ -37,27 +37,12 @@ const SitePreviewContent = ({
   const { getTotalItems, setStoreId, storeId, items } = useCart();
   const selectedStore = Array.isArray(stores) && stores.length > 0 ? stores[0] : null;
 
-  // Debug logs
-  console.log('SitePreview: Current state', {
-    selectedStore: selectedStore?.id,
-    storeId,
-    itemsCount: items.length,
-    totalItems: getTotalItems()
-  });
-  
   // Récupérer les domaines pour afficher la bonne URL
   const { domains } = useStoreDomains(selectedStore?.id);
 
   // Initialiser le panier avec le storeId de la boutique sélectionnée
   useEffect(() => {
-    console.log('SitePreview: useEffect triggered', {
-      selectedStoreId: selectedStore?.id,
-      open,
-      currentStoreId: storeId
-    });
-
     if (selectedStore?.id && open) {
-      console.log('SitePreview: Initializing cart with storeId:', selectedStore.id);
       setStoreId(selectedStore.id);
     }
   }, [selectedStore?.id, open, setStoreId, storeId]);
@@ -72,33 +57,22 @@ const SitePreviewContent = ({
   // Écouter les messages de la page de succès de paiement
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('🔔 SitePreview received message:', event.data);
-      console.log('🔔 Event origin:', event.origin);
-      console.log('🔔 Current activePreviewPage:', activePreviewPage);
-
       if (event.data.type === 'CLOSE_PREVIEW') {
-        console.log('✅ Handling CLOSE_PREVIEW - returning to home');
-        console.log('🏠 Setting activePreviewPage to "home"');
         // Retourner à la page d'accueil de la boutique dans l'aperçu
         setActivePreviewPage('home');
         setSelectedProductId(null);
         setNavigationHistory([]);
-        console.log('✅ CLOSE_PREVIEW handled successfully');
       } else if (event.data.type === 'PREVIEW_HOME_LOADED') {
-        console.log('✅ Handling PREVIEW_HOME_LOADED - confirming home page');
         // Confirmer que nous sommes bien revenus à l'accueil
         setActivePreviewPage('home');
         setSelectedProductId(null);
         setNavigationHistory([]);
-        console.log('✅ PREVIEW_HOME_LOADED handled successfully');
       } else if (event.data.type === 'NAVIGATE_TO_CUSTOMER_ORDERS') {
-        console.log('✅ Handling NAVIGATE_TO_CUSTOMER_ORDERS - showing customer orders preview');
         // Dans l'aperçu, on peut simuler la page de suivi des commandes
         // ou simplement afficher un message informatif
         setActivePreviewPage('customer-orders-preview');
         setSelectedProductId(null);
         setNavigationHistory([]);
-        console.log('✅ NAVIGATE_TO_CUSTOMER_ORDERS handled successfully');
       }
     };
 
@@ -107,14 +81,12 @@ const SitePreviewContent = ({
   }, [activePreviewPage]);
 
   const handleProductClick = (productId: string) => {
-    console.log('🛍️ Product clicked in preview:', productId);
     setSelectedProductId(productId);
     setActivePreviewPage('product-detail');
     setNavigationHistory(prev => [...prev, activePreviewPage]);
   };
 
   const handlePageNavigation = (pageName: string) => {
-    console.log('🧭 Navigating to page in preview:', pageName);
     setNavigationHistory(prev => [...prev, activePreviewPage]);
     setActivePreviewPage(pageName);
     setSelectedProductId(null);
@@ -123,7 +95,6 @@ const SitePreviewContent = ({
   const handleBackNavigation = () => {
     if (navigationHistory.length > 0) {
       const previousPage = navigationHistory[navigationHistory.length - 1];
-      console.log('⬅️ Going back to:', previousPage);
       setActivePreviewPage(previousPage);
       setNavigationHistory(prev => prev.slice(0, -1));
       setSelectedProductId(null);
@@ -131,14 +102,148 @@ const SitePreviewContent = ({
   };
 
   const getPageBlocks = (pageName: string): TemplateBlock[] => {
-    return template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
+    // Utiliser directement le template au lieu des blocs passés en props
+    const pageBlocks = template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
+    
+    // Si pas de blocs, créer des blocs par défaut selon le type de page
+    if (pageBlocks.length === 0) {
+      const defaultBlocks: TemplateBlock[] = [];
+      
+      switch (pageName) {
+        case 'product':
+          defaultBlocks.push({
+            id: 'default-product-hero',
+            type: 'hero',
+            content: {
+              title: 'Nos Produits',
+              subtitle: 'Découvrez notre collection complète',
+              showBreadcrumb: true,
+              showSearch: true
+            },
+            styles: {
+              backgroundColor: '#f8f9fa',
+              textColor: '#000000',
+              padding: '60px 0',
+            },
+            order: 1
+          });
+          defaultBlocks.push({
+            id: 'default-product-listing',
+            type: 'products',
+            content: {
+              title: 'Collection Complète',
+              layout: 'grid',
+              productsToShow: 12,
+              showPrice: true,
+              showAddToCart: true,
+              showFilters: true,
+              showSorting: true
+            },
+            styles: {
+              backgroundColor: '#ffffff',
+              textColor: '#000000',
+              padding: '80px 0',
+            },
+            order: 2
+          });
+          break;
+          
+        case 'category':
+          defaultBlocks.push({
+            id: 'default-category-hero',
+            type: 'hero',
+            content: {
+              title: 'Catégories',
+              subtitle: 'Explorez nos différentes collections',
+              showBreadcrumb: true
+            },
+            styles: {
+              backgroundColor: '#f8f9fa',
+              textColor: '#000000',
+              padding: '60px 0',
+            },
+            order: 1
+          });
+          defaultBlocks.push({
+            id: 'default-category-gallery',
+            type: 'gallery',
+            content: {
+              title: 'Nos Collections',
+              layout: 'grid',
+              showOverlay: true,
+              images: [
+                {
+                  url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f',
+                  title: 'Collection 1',
+                  link: '/category/1'
+                },
+                {
+                  url: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1',
+                  title: 'Collection 2',
+                  link: '/category/2'
+                },
+                {
+                  url: 'https://images.unsplash.com/photo-1506629905496-f43d8e5d8b6d',
+                  title: 'Collection 3',
+                  link: '/category/3'
+                }
+              ]
+            },
+            styles: {
+              backgroundColor: '#ffffff',
+              textColor: '#000000',
+              padding: '80px 0',
+            },
+            order: 2
+          });
+          break;
+          
+        case 'contact':
+          defaultBlocks.push({
+            id: 'default-contact-hero',
+            type: 'hero',
+            content: {
+              title: 'Contactez-nous',
+              subtitle: 'Nous sommes là pour vous aider',
+              showBreadcrumb: true
+            },
+            styles: {
+              backgroundColor: '#f8f9fa',
+              textColor: '#000000',
+              padding: '60px 0',
+            },
+            order: 1
+          });
+          defaultBlocks.push({
+            id: 'default-contact-form',
+            type: 'contact',
+            content: {
+              title: 'Envoyez-nous un message',
+              showMap: true,
+              showPhone: true,
+              showEmail: true
+            },
+            styles: {
+              backgroundColor: '#ffffff',
+              textColor: '#000000',
+              padding: '80px 0',
+            },
+            order: 2
+          });
+          break;
+      }
+      
+      return defaultBlocks;
+    }
+    
+    return pageBlocks;
   };
 
   const getPageDisplayName = (pageName: string): string => {
     const names: { [key: string]: string } = {
       'home': 'Accueil',
-      'products': 'Produits',
-      'categories': 'Catégories',
+      'product': 'Produits',
+      'category': 'Catégories',
       'contact': 'Contact',
       'cart': 'Panier',
       'product-detail': 'Détail Produit',
@@ -162,8 +267,8 @@ const SitePreviewContent = ({
   const renderProfessionalNavigation = () => {
     const navigationItems = [
       { name: 'Accueil', page: 'home', icon: Home },
-      { name: 'Produits', page: 'products', icon: Package },
-      { name: 'Catégories', page: 'categories', icon: Grid },
+      { name: 'Produits', page: 'product', icon: Package },
+      { name: 'Catégories', page: 'category', icon: Grid },
       { name: 'Contact', page: 'contact', icon: Phone }
     ];
 
