@@ -279,7 +279,7 @@ const Home = () => {
               <div className={`${index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} order-1 lg:order-2 mb-8 lg:mb-0`}>
                 {/* Sophisticated SVG Illustrations */}
                 <div className="relative">
-                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-4 sm:p-6 lg:p-8 h-[300px] sm:h-[400px] lg:h-[500px] flex items-center justify-center shadow-2xl border border-blue-100">
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-4 sm:p-6 lg:p-8 h-[400px] sm:h-[450px] lg:h-[500px] flex items-center justify-center shadow-2xl border border-blue-100">
                     {feature.illustration === 'boutique' && <BoutiqueIllustration />}
                     {feature.illustration === 'paiements' && <PaiementsIllustration />}
                     {feature.illustration === 'integrations' && <IntegrationsIllustration />}
@@ -494,7 +494,7 @@ const PlusIcon = ({ className }: { className?: string }) => (
 // Illustrations SVG sophistiquées
 const BoutiqueIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80">
+    <div className="relative w-full h-full max-w-sm max-h-sm">
       {/* Dashboard principal */}
       <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 sm:p-4 lg:p-6">
         {/* Header */}
@@ -548,7 +548,7 @@ const BoutiqueIllustration = () => (
 
 const PaiementsIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80">
+    <div className="relative w-full h-full max-w-sm max-h-sm">
       {/* Payment interface */}
       <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 sm:p-4 lg:p-6">
         {/* Header */}
@@ -596,7 +596,7 @@ const PaiementsIllustration = () => (
 
 const IntegrationsIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80">
+    <div className="relative w-full h-full max-w-sm max-h-sm">
       {/* Integration dashboard */}
       <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 sm:p-4 lg:p-6">
         {/* Header */}
@@ -651,7 +651,7 @@ const IntegrationsIllustration = () => (
 
 const AnalyticsIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80">
+    <div className="relative w-full h-full max-w-sm max-h-sm">
       {/* Analytics dashboard */}
       <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 sm:p-4 lg:p-6">
         {/* Header */}
@@ -704,7 +704,7 @@ const AnalyticsIllustration = () => (
 
 const SupportIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80">
+    <div className="relative w-full h-full max-w-sm max-h-sm">
       {/* Support interface */}
       <div className="absolute inset-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 sm:p-4 lg:p-6">
         {/* Header */}
