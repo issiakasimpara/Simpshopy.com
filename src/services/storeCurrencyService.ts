@@ -21,7 +21,11 @@ export class StoreCurrencyService {
    */
   static async getStoreCurrency(storeId: string): Promise<Currency> {
     try {
-      console.log('🔍 StoreCurrencyService - Récupération devise pour storeId:', storeId);
+      // Log seulement en développement et seulement la première fois
+      if (import.meta.env.DEV && !window.__CURRENCY_LOGGED__) {
+        console.log('🔍 StoreCurrencyService - Récupération devise pour storeId:', storeId);
+        window.__CURRENCY_LOGGED__ = true;
+      }
       
       const { data, error } = await supabase
         .from('market_settings')
@@ -40,7 +44,11 @@ export class StoreCurrencyService {
       }
 
       const currency = (data?.default_currency as Currency) || 'XOF';
-      console.log('✅ StoreCurrencyService - Devise récupérée:', currency, 'pour storeId:', storeId);
+      // Log seulement en cas de succès et seulement la première fois
+      if (import.meta.env.DEV && !window.__CURRENCY_SUCCESS_LOGGED__) {
+        console.log('✅ StoreCurrencyService - Devise récupérée:', currency, 'pour storeId:', storeId);
+        window.__CURRENCY_SUCCESS_LOGGED__ = true;
+      }
       
       return currency;
     } catch (error) {

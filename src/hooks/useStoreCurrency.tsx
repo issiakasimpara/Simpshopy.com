@@ -88,24 +88,31 @@ export const useStoreCurrency = (storeId?: string) => {
   // Forcer le refetch quand le storeId devient valide
   useEffect(() => {
     if (isValidStoreId && storeId) {
-      console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
+      // Log seulement la première fois
+      if (import.meta.env.DEV && !window.__STOREID_VALID_LOGGED__) {
+        console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
+        window.__STOREID_VALID_LOGGED__ = true;
+      }
       refetchCurrency();
       refetchSettings();
     }
-  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings, user?.id]);
+  }, [isValidStoreId, storeId, user?.id]); // Supprimé refetchCurrency et refetchSettings des dépendances
 
   // Rafraîchissement périodique pour s'assurer que les données sont à jour
   useEffect(() => {
     if (!isValidStoreId || !storeId) return;
 
     const interval = setInterval(() => {
-      console.log('🔄 Rafraîchissement périodique des données de devise');
+      // Log seulement en développement et moins fréquemment
+      if (import.meta.env.DEV && Math.random() < 0.1) { // 10% de chance de log
+        console.log('🔄 Rafraîchissement périodique des données de devise');
+      }
       refetchCurrency();
       refetchSettings();
     }, 30000); // Rafraîchir toutes les 30 secondes
 
     return () => clearInterval(interval);
-  }, [isValidStoreId, storeId, refetchCurrency, refetchSettings, user?.id]);
+  }, [isValidStoreId, storeId, user?.id]); // Supprimé refetchCurrency et refetchSettings des dépendances
 
   // Configuration du temps réel pour les changements de devise
   useEffect(() => {
@@ -153,7 +160,7 @@ export const useStoreCurrency = (storeId?: string) => {
         cleanupGlobalChannel();
       }
     };
-  }, [storeId, isValidStoreId, refetchCurrency, refetchSettings, toast, user?.id]);
+  }, [storeId, isValidStoreId, user?.id]); // Supprimé refetchCurrency, refetchSettings et toast des dépendances
 
   // Mutation pour mettre à jour la devise
   const updateCurrencyMutation = useMutation({

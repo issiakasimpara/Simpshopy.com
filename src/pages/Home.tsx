@@ -3,11 +3,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Globe, CreditCard, Package, Palette, Shield, BarChart3, ArrowRight, Users, Quote, Play, Zap, Target, TrendingUp, ShoppingBag, DollarSign, Smartphone, Monitor, Zap as Lightning, Plus, FileText, Settings, Headphones } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import AppLogo from "@/components/ui/AppLogo";
+import { useAuth } from "@/hooks/useAuth";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { shouldShowOnboarding } = useOnboarding();
+
+  // Fonction pour gérer la redirection intelligente
+  const handleSmartRedirect = () => {
+    if (user) {
+      // Utilisateur connecté
+      if (shouldShowOnboarding) {
+        navigate('/onboarding');
+      } else {
+        navigate('/dashboard');
+      }
+    } else {
+      // Nouvel utilisateur - rediriger vers l'auth
+      navigate('/auth');
+    }
+  };
+
   const testimonials = [
     {
       quote: "J'ai adoré la simplicité du service et ses fonctionnalités pratiques. Elles vont m'aider à vendre mes produits et services en ligne sans effort !",
@@ -160,11 +181,20 @@ const Home = () => {
               <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
             </nav>
             <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-              <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
-                <Link to="/auth">Connexion</Link>
-              </Button>
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
-                <Link to="/auth">Vendre</Link>
+              {user ? (
+                <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
+                  <Link to="/auth">Connexion</Link>
+                </Button>
+              )}
+              <Button 
+                onClick={handleSmartRedirect}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {user ? 'Mon Dashboard' : 'Vendre'}
               </Button>
             </div>
           </div>
@@ -198,8 +228,12 @@ const Home = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-8 sm:mb-12 px-4">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium">
-                Créez ma boutique
+              <Button 
+                size="lg" 
+                onClick={handleSmartRedirect}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
+              >
+                {user ? 'Mon Dashboard' : 'Créez ma boutique'}
                 <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
               <Button size="lg" variant="outline" className="text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl border-2 border-gray-300 hover:bg-gray-50 hover:border-blue-300 transition-all duration-300 font-medium">
@@ -264,11 +298,15 @@ const Home = () => {
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-10 leading-relaxed font-light px-4 lg:px-0">
                   {feature.description}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 px-4 lg:px-0">
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium">
-                    Créez une boutique gratuite
-                    <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-                  </Button>
+                                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 px-4 lg:px-0">
+                   <Button 
+                     size="lg" 
+                     onClick={handleSmartRedirect}
+                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
+                   >
+                     {user ? 'Mon Dashboard' : 'Créez une boutique gratuite'}
+                     <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
+                   </Button>
                   {index === 1 || index === 2 ? (
                     <Button size="lg" variant="ghost" className="text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 text-blue-600 font-medium hover:bg-blue-50 rounded-2xl">
                       En savoir plus
@@ -368,12 +406,16 @@ const Home = () => {
               ))}
             </div>
           </div>
-          <div className="text-center mt-8 sm:mt-12">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium">
-              Choisir Simpshopy
-              <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-            </Button>
-          </div>
+                     <div className="text-center mt-8 sm:mt-12">
+             <Button 
+               size="lg" 
+               onClick={handleSmartRedirect}
+               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
+             >
+               {user ? 'Mon Dashboard' : 'Choisir Simpshopy'}
+               <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
+             </Button>
+           </div>
         </div>
       </section>
 
@@ -416,10 +458,14 @@ const Home = () => {
           <p className="text-lg sm:text-xl text-white/90 mb-8 sm:mb-12 leading-relaxed px-4">
             Rejoignez des milliers d'entrepreneurs qui font confiance à Simpshopy
           </p>
-          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg sm:text-xl px-8 sm:px-12 py-6 sm:py-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 font-bold">
-            Créez votre boutique
-            <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-          </Button>
+                     <Button 
+             size="lg" 
+             onClick={handleSmartRedirect}
+             className="bg-white text-blue-600 hover:bg-gray-100 text-lg sm:text-xl px-8 sm:px-12 py-6 sm:py-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 font-bold"
+           >
+             {user ? 'Mon Dashboard' : 'Créez votre boutique'}
+             <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
+           </Button>
         </div>
       </section>
 
