@@ -21,8 +21,8 @@ const BlockLibraryItem = ({ blockType, onAddBlock }: BlockLibraryItemProps) => {
     >
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{blockType.icon}</span>
-          <CardTitle className="text-sm">{blockType.name}</CardTitle>
+          <span className="text-base sm:text-lg">{blockType.icon}</span>
+          <CardTitle className="text-xs sm:text-sm">{blockType.name}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="pt-0">

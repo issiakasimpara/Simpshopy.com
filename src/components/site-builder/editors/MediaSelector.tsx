@@ -28,7 +28,7 @@ const MediaSelector = ({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label className="text-xs sm:text-sm">{label}</Label>
       <div className="space-y-2">
         {currentValue && (
           <div className="p-2 border rounded bg-gray-50">
@@ -40,7 +40,7 @@ const MediaSelector = ({
           variant="outline"
           size="sm"
           onClick={() => setShowMediaManager(true)}
-          className="w-full"
+          className="w-full text-xs sm:text-sm h-8 sm:h-9"
         >
           {currentValue ? 'Changer le média' : 'Sélectionner un média'}
         </Button>

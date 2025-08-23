@@ -33,9 +33,9 @@ const BlockLibrary = ({ onBlockAdd }: BlockLibraryProps) => {
   );
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-sm">Bibliothèque de blocs</h3>
-      <div className="grid gap-2">
+    <div className="space-y-3 sm:space-y-4">
+      <h3 className="font-semibold text-xs sm:text-sm">Bibliothèque de blocs</h3>
+      <div className="grid gap-2 sm:gap-3">
         {filteredBlockTemplates.map((blockTemplate) => (
           <BlockLibraryItem
             key={blockTemplate.type}

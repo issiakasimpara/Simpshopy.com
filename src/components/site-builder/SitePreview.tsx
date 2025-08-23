@@ -35,7 +35,7 @@ const SitePreviewContent = ({
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
   const { stores } = useStores();
   const { getTotalItems, setStoreId, storeId, items } = useCart();
-  const selectedStore = stores.length > 0 ? stores[0] : null;
+  const selectedStore = Array.isArray(stores) && stores.length > 0 ? stores[0] : null;
 
   // Debug logs
   console.log('SitePreview: Current state', {
@@ -98,101 +98,179 @@ const SitePreviewContent = ({
         setActivePreviewPage('customer-orders-preview');
         setSelectedProductId(null);
         setNavigationHistory([]);
+        console.log('✅ NAVIGATE_TO_CUSTOMER_ORDERS handled successfully');
       }
     };
 
-    console.log('🎧 SitePreview: Adding message listener');
     window.addEventListener('message', handleMessage);
-    return () => {
-      console.log('🎧 SitePreview: Removing message listener');
-      window.removeEventListener('message', handleMessage);
-    };
+    return () => window.removeEventListener('message', handleMessage);
   }, [activePreviewPage]);
 
-  const getDisplayUrl = () => {
-    // Vérifier s'il y a un domaine personnalisé actif
-    const activeDomain = domains?.find(domain => domain.status === 'active' && domain.is_verified);
-    
-    if (activeDomain) {
-      return `https://${activeDomain.domain_name}`;
-    }
-    
-    // Sinon utiliser notre sous-domaine par défaut
-    return generateSimpshopyUrl(selectedStore?.name || 'Ma Boutique');
-  };
-
-  const getPageBlocks = (pageName: string) => {
-    const pageBlocks = template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
-    return pageBlocks;
-  };
-
-  // Pages principales à afficher dans la navigation (comme un vrai site e-commerce)
-  const mainNavigationPages = ['home', 'product', 'category', 'contact'];
-  
-  const getPageDisplayName = (pageName: string) => {
-    const names = {
-      'home': 'Accueil',
-      'product': 'Boutique',
-      'category': 'Catégories',
-      'contact': 'Contact',
-      'product-detail': 'Détail Produit',
-      'cart': 'Panier',
-      'checkout': 'Commande',
-      'customer-orders-preview': 'Suivi des commandes'
-    };
-    return names[pageName] || pageName;
-  };
-
   const handleProductClick = (productId: string) => {
-    if (activePreviewPage !== 'product-detail') {
-      setNavigationHistory(prev => [...prev, activePreviewPage]);
-    }
-    
+    console.log('🛍️ Product clicked in preview:', productId);
     setSelectedProductId(productId);
     setActivePreviewPage('product-detail');
+    setNavigationHistory(prev => [...prev, activePreviewPage]);
+  };
+
+  const handlePageNavigation = (pageName: string) => {
+    console.log('🧭 Navigating to page in preview:', pageName);
+    setNavigationHistory(prev => [...prev, activePreviewPage]);
+    setActivePreviewPage(pageName);
+    setSelectedProductId(null);
   };
 
   const handleBackNavigation = () => {
     if (navigationHistory.length > 0) {
       const previousPage = navigationHistory[navigationHistory.length - 1];
-      setNavigationHistory(prev => prev.slice(0, -1));
+      console.log('⬅️ Going back to:', previousPage);
       setActivePreviewPage(previousPage);
-      setSelectedProductId(null);
-    } else {
-      setActivePreviewPage('home');
+      setNavigationHistory(prev => prev.slice(0, -1));
       setSelectedProductId(null);
     }
   };
 
-  const handlePageNavigation = (pageName: string) => {
-    setNavigationHistory([]);
-    setActivePreviewPage(pageName);
-    if (pageName !== 'product-detail') {
-      setSelectedProductId(null);
-    }
+  const getPageBlocks = (pageName: string): TemplateBlock[] => {
+    return template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
   };
 
-  const handleCartNavigation = () => {
-    setNavigationHistory(prev => [...prev, activePreviewPage]);
-    setActivePreviewPage('cart');
-    setSelectedProductId(null);
+  const getPageDisplayName = (pageName: string): string => {
+    const names: { [key: string]: string } = {
+      'home': 'Accueil',
+      'products': 'Produits',
+      'categories': 'Catégories',
+      'contact': 'Contact',
+      'cart': 'Panier',
+      'product-detail': 'Détail Produit',
+      'customer-orders-preview': 'Suivi Commandes'
+    };
+    return names[pageName] || pageName;
+  };
+
+  const getDisplayUrl = (): string => {
+    if (selectedStore && domains && Array.isArray(domains) && domains.length > 0) {
+      const primaryDomain = domains.find(d => d.is_primary);
+      if (primaryDomain) {
+        return `https://${primaryDomain.domain_name}${activePreviewPage === 'home' ? '' : `/${activePreviewPage}`}`;
+      }
+    }
+    
+    const storeSlug = selectedStore?.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
+    return generateSimpshopyUrl(storeSlug);
+  };
+
+  const renderProfessionalNavigation = () => {
+    const navigationItems = [
+      { name: 'Accueil', page: 'home', icon: Home },
+      { name: 'Produits', page: 'products', icon: Package },
+      { name: 'Catégories', page: 'categories', icon: Grid },
+      { name: 'Contact', page: 'contact', icon: Phone }
+    ];
+
+    return (
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-12 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">
+                {selectedStore?.name || template.name}
+              </div>
+            </div>
+            
+            <div className="hidden sm:flex items-center gap-4 sm:gap-6">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.page}
+                    onClick={() => handlePageNavigation(item.page)}
+                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-md transition-colors ${
+                      activePreviewPage === item.page
+                        ? 'bg-gray-100 text-gray-900'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{item.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button className="p-1 sm:p-2 text-gray-600 hover:text-gray-900">
+                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+              <button className="p-1 sm:p-2 text-gray-600 hover:text-gray-900">
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+              <button 
+                onClick={() => handlePageNavigation('cart')}
+                className="relative p-1 sm:p-2 text-gray-600 hover:text-gray-900"
+              >
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+                {getTotalItems() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {getTotalItems()}
+                  </span>
+                )}
+              </button>
+              <button className="p-1 sm:p-2 text-gray-600 hover:text-gray-900">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  };
+
+  const renderBreadcrumb = () => {
+    if (activePreviewPage === 'home') return null;
+
+    return (
+      <div className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => handlePageNavigation('home')}
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            >
+              <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Accueil</span>
+            </button>
+            <span className="text-gray-400">/</span>
+            <span className="text-xs sm:text-sm text-gray-900 font-medium">
+              {getPageDisplayName(activePreviewPage)}
+            </span>
+            {navigationHistory.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackNavigation}
+                className="ml-2 h-6 sm:h-8 px-2 text-xs sm:text-sm"
+              >
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden sm:inline">Retour</span>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderProductDetail = () => {
+    if (!selectedProductId) return null;
+
     const productDetailBlock: TemplateBlock = {
-      id: 'product-detail-temp',
+      id: 'product-detail-preview-temp',
       type: 'product-detail',
       content: {
-        title: 'Détail du produit',
-        showRelatedProducts: true,
-        showReviews: true,
-        showDescription: true,
-        showSpecifications: true,
-        showVariantSelector: true,
-        showImageGallery: true,
-        showInfoTabs: true,
-        showSizeGuide: true,
-        showComposition: true
+        productId: selectedProductId,
+        showAddToCart: true,
+        showQuantity: true,
+        showRelatedProducts: true
       },
       styles: {
         backgroundColor: '#ffffff',
@@ -254,24 +332,25 @@ const SitePreviewContent = ({
   const renderCustomerOrdersPreview = () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-bold mb-2">Suivi des commandes</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="text-center max-w-md p-4 sm:p-6">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📦</div>
+          <h3 className="text-lg sm:text-xl font-bold mb-2">Suivi des commandes</h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
             Cette page permettra à vos clients de suivre leurs commandes en utilisant leur email ou numéro de commande.
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p className="text-sm text-blue-800">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm text-blue-800">
               <strong>Mode Aperçu :</strong> Cette fonctionnalité sera disponible sur votre vraie boutique une fois publiée.
             </p>
           </div>
           <Button
             variant="outline"
             onClick={() => handlePageNavigation('home')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
           >
-            <Home className="h-4 w-4" />
-            Retour à l'accueil
+            <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Retour à l'accueil</span>
+            <span className="sm:hidden">Accueil</span>
           </Button>
         </div>
       </div>
@@ -283,137 +362,22 @@ const SitePreviewContent = ({
     
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">📄</div>
-          <h3 className="text-xl font-bold mb-2">Page "{pageDisplayName}" en construction</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="text-center max-w-md p-4 sm:p-6">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📄</div>
+          <h3 className="text-lg sm:text-xl font-bold mb-2">Page "{pageDisplayName}" en construction</h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
             Cette page est en cours de préparation. Revenez bientôt !
           </p>
           <Button 
             variant="outline" 
             onClick={() => handlePageNavigation('home')}
             disabled={activePreviewPage === 'home'}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
           >
-            <Home className="h-4 w-4" />
-            Retour à l'accueil
+            <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Retour à l'accueil</span>
+            <span className="sm:hidden">Accueil</span>
           </Button>
-        </div>
-      </div>
-    );
-  };
-
-  // Navigation professionnelle comme un vrai site e-commerce
-  const renderProfessionalNavigation = () => {
-    return (
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        {/* Navigation principale */}
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo et nom de la boutique */}
-            <div className="flex items-center gap-3">
-              <div 
-                className="text-2xl font-bold cursor-pointer"
-                style={{ color: template.styles.primaryColor }}
-                onClick={() => handlePageNavigation('home')}
-              >
-                {selectedStore?.name || template.name}
-              </div>
-            </div>
-
-            {/* Navigation centrale */}
-            <nav className="hidden md:flex items-center gap-8">
-              {mainNavigationPages.map((pageName) => (
-                <button
-                  key={pageName}
-                  onClick={() => handlePageNavigation(pageName)}
-                  className={`text-gray-700 hover:text-gray-900 transition-colors font-medium ${
-                    activePreviewPage === pageName ? 'border-b-2 pb-1' : ''
-                  }`}
-                  style={{ 
-                    borderColor: activePreviewPage === pageName ? template.styles.primaryColor : 'transparent'
-                  }}
-                >
-                  {getPageDisplayName(pageName)}
-                </button>
-              ))}
-            </nav>
-
-            {/* Actions utilisateur */}
-            <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Search className="h-5 w-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Heart className="h-5 w-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <User className="h-5 w-5 text-gray-600" />
-              </button>
-              <button 
-                onClick={handleCartNavigation}
-                className="p-2 hover:bg-gray-100 rounded-full relative"
-              >
-                <ShoppingBag className="h-5 w-5 text-gray-600" />
-                {getTotalItems() > 0 && (
-                  <span 
-                    className="absolute -top-1 -right-1 text-xs text-white rounded-full w-5 h-5 flex items-center justify-center"
-                    style={{ backgroundColor: template.styles.primaryColor }}
-                  >
-                    {getTotalItems()}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
-  };
-
-  const renderBreadcrumb = () => {
-    if (activePreviewPage === 'home') return null;
-    
-    return (
-      <div className="bg-gray-50 border-b">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <button 
-              onClick={() => handlePageNavigation('home')}
-              className="hover:text-gray-900 flex items-center gap-1"
-            >
-              <Home className="h-3 w-3" />
-              Accueil
-            </button>
-            <span>/</span>
-            {activePreviewPage === 'product-detail' && selectedProductId ? (
-              <>
-                <button 
-                  onClick={handleBackNavigation}
-                  className="hover:text-gray-900"
-                >
-                  Boutique
-                </button>
-                <span>/</span>
-                <span className="text-gray-900 font-medium">Détail du produit</span>
-                {navigationHistory.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBackNavigation}
-                    className="ml-2 h-6 px-2 text-xs"
-                  >
-                    <ArrowLeft className="h-3 w-3 mr-1" />
-                    Retour
-                  </Button>
-                )}
-              </>
-            ) : (
-              <span className="text-gray-900 font-medium">
-                {getPageDisplayName(activePreviewPage)}
-              </span>
-            )}
-          </div>
         </div>
       </div>
     );
@@ -423,22 +387,25 @@ const SitePreviewContent = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-0 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+      <DialogContent className="max-w-4xl sm:max-w-5xl lg:max-w-6xl h-[85vh] sm:h-[90vh] p-0">
+        <DialogHeader className="p-3 sm:p-4 lg:p-6 pb-0 border-b">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Retour à l'éditeur
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Retour à l'éditeur</span>
+                <span className="sm:hidden">Retour</span>
               </Button>
-              <DialogTitle>Aperçu Professionnel - {selectedStore?.name || template.name}</DialogTitle>
+              <DialogTitle className="text-sm sm:text-base lg:text-lg">
+                Aperçu Professionnel - {selectedStore?.name || template.name}
+              </DialogTitle>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 lg:gap-3">
               <Badge variant="outline" className="text-xs">
                 Page: {getPageDisplayName(activePreviewPage)}
               </Badge>
@@ -461,9 +428,10 @@ const SitePreviewContent = ({
                   const storeSlug = selectedStore?.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
                   window.open(`/store/${storeSlug}`, '_blank');
                 }}
-                className="text-xs h-6"
+                className="text-xs h-6 sm:h-8 px-2 sm:px-3"
               >
-                Ouvrir la vraie boutique
+                <span className="hidden sm:inline">Ouvrir la vraie boutique</span>
+                <span className="sm:hidden">Vraie boutique</span>
               </Button>
             </div>
           </div>
@@ -471,14 +439,14 @@ const SitePreviewContent = ({
         
         <div className="flex-1 overflow-y-auto bg-white relative">
           {/* Barre d'adresse simulée du navigateur */}
-          <div className="bg-gray-100 border-b px-6 py-2">
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+          <div className="bg-gray-100 border-b px-3 sm:px-4 lg:px-6 py-2">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex gap-1 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-400"></div>
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-400"></div>
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-400"></div>
               </div>
-              <div className="flex-1 bg-white rounded-lg px-4 py-2 text-sm text-gray-700 border">
+              <div className="flex-1 bg-white rounded-lg px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm text-gray-700 border">
                 {getDisplayUrl()}
               </div>
             </div>

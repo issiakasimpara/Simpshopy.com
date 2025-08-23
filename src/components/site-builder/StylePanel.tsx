@@ -24,47 +24,51 @@ const StylePanel = ({ block, onUpdate }: StylePanelProps) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Styles du bloc</CardTitle>
+      <CardHeader className="p-3 sm:p-4">
+        <CardTitle className="text-xs sm:text-sm">Styles du bloc</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
         <div>
-          <Label htmlFor="backgroundColor">Couleur de fond</Label>
+          <Label htmlFor="backgroundColor" className="text-xs sm:text-sm">Couleur de fond</Label>
           <Input
             id="backgroundColor"
             type="color"
             value={localBlock.styles.backgroundColor || '#ffffff'}
             onChange={(e) => updateStyles({ backgroundColor: e.target.value })}
+            className="text-xs sm:text-sm"
           />
         </div>
         
         <div>
-          <Label htmlFor="textColor">Couleur du texte</Label>
+          <Label htmlFor="textColor" className="text-xs sm:text-sm">Couleur du texte</Label>
           <Input
             id="textColor"
             type="color"
             value={localBlock.styles.textColor || '#000000'}
             onChange={(e) => updateStyles({ textColor: e.target.value })}
+            className="text-xs sm:text-sm"
           />
         </div>
         
         <div>
-          <Label htmlFor="padding">Espacement interne</Label>
+          <Label htmlFor="padding" className="text-xs sm:text-sm">Espacement interne</Label>
           <Input
             id="padding"
             placeholder="ex: 20px 0"
             value={localBlock.styles.padding || ''}
             onChange={(e) => updateStyles({ padding: e.target.value })}
+            className="text-xs sm:text-sm"
           />
         </div>
         
         <div>
-          <Label htmlFor="margin">Espacement externe</Label>
+          <Label htmlFor="margin" className="text-xs sm:text-sm">Espacement externe</Label>
           <Input
             id="margin"
             placeholder="ex: 10px 0"
             value={localBlock.styles.margin || ''}
             onChange={(e) => updateStyles({ margin: e.target.value })}
+            className="text-xs sm:text-sm"
           />
         </div>
       </CardContent>

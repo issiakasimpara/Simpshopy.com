@@ -31,68 +31,72 @@ const SiteSettings = ({ template, onUpdate }: SiteSettingsProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Informations générales</CardTitle>
+        <CardHeader className="p-3 sm:p-4">
+          <CardTitle className="text-sm sm:text-base">Informations générales</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
           <div>
-            <Label htmlFor="siteName">Nom du site</Label>
+            <Label htmlFor="siteName" className="text-xs sm:text-sm">Nom du site</Label>
             <Input
               id="siteName"
               value={localTemplate.name}
               onChange={(e) => updateTemplate({ name: e.target.value })}
+              className="text-xs sm:text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="siteDescription">Description</Label>
+            <Label htmlFor="siteDescription" className="text-xs sm:text-sm">Description</Label>
             <Textarea
               id="siteDescription"
               value={localTemplate.description}
               onChange={(e) => updateTemplate({ description: e.target.value })}
               rows={3}
+              className="text-xs sm:text-sm"
             />
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Couleurs du thème</CardTitle>
+        <CardHeader className="p-3 sm:p-4">
+          <CardTitle className="text-sm sm:text-base">Couleurs du thème</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
           <div>
-            <Label htmlFor="primaryColor">Couleur principale</Label>
+            <Label htmlFor="primaryColor" className="text-xs sm:text-sm">Couleur principale</Label>
             <Input
               id="primaryColor"
               type="color"
               value={localTemplate.styles.primaryColor}
               onChange={(e) => updateStyles({ primaryColor: e.target.value })}
+              className="text-xs sm:text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="secondaryColor">Couleur secondaire</Label>
+            <Label htmlFor="secondaryColor" className="text-xs sm:text-sm">Couleur secondaire</Label>
             <Input
               id="secondaryColor"
               type="color"
               value={localTemplate.styles.secondaryColor}
               onChange={(e) => updateStyles({ secondaryColor: e.target.value })}
+              className="text-xs sm:text-sm"
             />
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Typographie</CardTitle>
+        <CardHeader className="p-3 sm:p-4">
+          <CardTitle className="text-sm sm:text-base">Typographie</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4">
           <div>
-            <Label htmlFor="fontFamily">Police de caractères</Label>
+            <Label htmlFor="fontFamily" className="text-xs sm:text-sm">Police de caractères</Label>
             <select
               id="fontFamily"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md text-xs sm:text-sm"
               value={localTemplate.styles.fontFamily}
               onChange={(e) => updateStyles({ fontFamily: e.target.value })}
             >
@@ -100,7 +104,7 @@ const SiteSettings = ({ template, onUpdate }: SiteSettingsProps) => {
               <option value="Roboto">Roboto</option>
               <option value="Open Sans">Open Sans</option>
               <option value="Lato">Lato</option>
-              <option value="Montserrat">Montserrat</option>
+              <option value="Poppins">Poppins</option>
             </select>
           </div>
         </CardContent>

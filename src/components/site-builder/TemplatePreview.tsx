@@ -71,42 +71,45 @@ const TemplatePreview = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Retour aux thèmes
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Retour aux thèmes</span>
+                <span className="sm:hidden">Retour</span>
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
+              <div className="h-4 sm:h-6 w-px bg-gray-300" />
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">{template.name}</h1>
-                <p className="text-sm text-gray-500">Aperçu du thème</p>
+                <h1 className="text-sm sm:text-lg font-semibold text-gray-900 truncate max-w-32 sm:max-w-none">{template.name}</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Aperçu du thème</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleBack}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <Eye className="h-4 w-4" />
-                Voir d'autres thèmes
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Voir d'autres thèmes</span>
+                <span className="sm:hidden">Thèmes</span>
               </Button>
               <Button
                 size="sm"
                 onClick={handleUseTemplate}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex items-center gap-2"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <Palette className="h-4 w-4" />
-                {hasStore ? 'Utiliser ce thème' : 'Créer ma boutique'}
+                <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">{hasStore ? 'Utiliser ce thème' : 'Créer ma boutique'}</span>
+                <span className="sm:hidden">{hasStore ? 'Utiliser' : 'Créer'}</span>
               </Button>
             </div>
           </div>
@@ -114,81 +117,81 @@ const TemplatePreview = () => {
       </header>
 
       {/* Contenu principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Info du template */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{template.name}</h2>
-                <p className="text-gray-600 mb-4">{template.description}</p>
-                <div className="flex items-center gap-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+              <div className="flex-1">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2">{template.name}</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{template.description}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800">
                     {template.category}
                   </span>
-                  <span className="text-sm text-gray-500">Gratuit</span>
+                  <span className="text-xs sm:text-sm text-gray-500">Gratuit</span>
                   <div className="flex items-center gap-1">
-                    <span className="text-yellow-400">⭐</span>
-                    <span className="text-sm font-medium">4.8</span>
+                    <span className="text-yellow-400 text-sm sm:text-base">⭐</span>
+                    <span className="text-xs sm:text-sm font-medium">4.8</span>
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-3xl mb-2">{template.icon}</div>
+              <div className="text-center sm:text-right">
+                <div className="text-2xl sm:text-3xl mb-2">{template.icon}</div>
               </div>
             </div>
           </div>
 
           {/* Contrôles de prévisualisation */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Aperçu en temps réel</h3>
-                <p className="text-sm text-gray-600">Voyez comment votre boutique apparaîtra à vos clients</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">Aperçu en temps réel</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Voyez comment votre boutique apparaîtra à vos clients</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant={viewMode === 'desktop' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('desktop')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
-                  <Monitor className="h-4 w-4" />
-                  Desktop
+                  <Monitor className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Desktop</span>
                 </Button>
                 <Button
                   variant={viewMode === 'tablet' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('tablet')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
-                  <Tablet className="h-4 w-4" />
-                  Tablet
+                  <Tablet className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Tablet</span>
                 </Button>
                 <Button
                   variant={viewMode === 'mobile' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('mobile')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
-                  <Smartphone className="h-4 w-4" />
-                  Mobile
+                  <Smartphone className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Mobile</span>
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Aperçu du template */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Barre d'adresse simulée */}
-            <div className="bg-gray-100 border-b px-6 py-2 mb-4">
-              <div className="flex items-center gap-4">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <div className="bg-gray-100 border-b px-3 sm:px-6 py-2 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="flex gap-1 sm:gap-2">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-400"></div>
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-400"></div>
                 </div>
-                <div className="flex-1 bg-white rounded-lg px-4 py-2 text-sm text-gray-700 border">
+                <div className="flex-1 bg-white rounded-lg px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm text-gray-700 border">
                   {hasStore 
                     ? `${store.name.toLowerCase().replace(/\s+/g, '-')}.commerce-flow.fr`
                     : 'ma-boutique.commerce-flow.fr'
@@ -217,14 +220,14 @@ const TemplatePreview = () => {
                   ))
                 ) : (
                   <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                      <div className="text-6xl mb-4">🎨</div>
-                      <h3 className="text-xl font-bold mb-2">Aperçu du thème</h3>
-                      <p className="text-gray-600 mb-4">
+                    <div className="text-center p-4 sm:p-6">
+                      <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎨</div>
+                      <h3 className="text-lg sm:text-xl font-bold mb-2">Aperçu du thème</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                         Ce thème sera personnalisable dans l'éditeur après création de votre boutique.
                       </p>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm text-blue-800">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                        <p className="text-xs sm:text-sm text-blue-800">
                           <strong>Mode Aperçu :</strong> Les blocs et contenus seront chargés dynamiquement.
                         </p>
                       </div>
@@ -235,35 +238,36 @@ const TemplatePreview = () => {
             </div>
 
             {/* Fonctionnalités */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl mb-2">📱</div>
-                <h3 className="font-semibold mb-1">Responsive</h3>
-                <p className="text-sm text-gray-600">Optimisé pour tous les appareils</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+              <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="text-xl sm:text-2xl mb-2">📱</div>
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">Responsive</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Optimisé pour tous les appareils</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl mb-2">🎨</div>
-                <h3 className="font-semibold mb-1">Personnalisable</h3>
-                <p className="text-sm text-gray-600">Couleurs et styles modifiables</p>
+              <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="text-xl sm:text-2xl mb-2">🎨</div>
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">Personnalisable</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Couleurs et styles modifiables</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl mb-2">⚡</div>
-                <h3 className="font-semibold mb-1">Rapide</h3>
-                <p className="text-sm text-gray-600">Chargement ultra-rapide</p>
+              <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg sm:col-span-2 lg:col-span-1">
+                <div className="text-xl sm:text-2xl mb-2">⚡</div>
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">Rapide</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Chargement ultra-rapide</p>
               </div>
             </div>
 
             {/* Call to action */}
-            <div className="text-center mt-8">
+            <div className="text-center mt-6 sm:mt-8">
               <Button
                 size="lg"
                 onClick={handleUseTemplate}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 text-lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg h-10 sm:h-12"
               >
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                {hasStore ? 'Appliquer ce thème à ma boutique' : 'Créer ma boutique avec ce thème'}
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{hasStore ? 'Appliquer ce thème à ma boutique' : 'Créer ma boutique avec ce thème'}</span>
+                <span className="sm:hidden">{hasStore ? 'Appliquer' : 'Créer'}</span>
               </Button>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">
                 {hasStore 
                   ? 'Votre thème actuel sera remplacé par celui-ci'
                   : 'Vous pourrez personnaliser ce thème après la création'

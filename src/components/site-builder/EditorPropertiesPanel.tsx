@@ -103,31 +103,32 @@ const EditorPropertiesPanel = ({
         return <GuaranteesEditor block={selectedBlock} onUpdate={handleUpdate} />;
 
       default:
-        return <div className="p-4 text-gray-500">Aucun éditeur disponible pour ce type de bloc</div>;
+        return <div className="p-3 sm:p-4 text-gray-500 text-xs sm:text-sm">Aucun éditeur disponible pour ce type de bloc</div>;
     }
   };
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 mt-20 flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-semibold">Propriétés du bloc</h3>
-        <div className="flex gap-2">
+    <div className="w-64 sm:w-72 lg:w-80 bg-white border-l border-gray-200 mt-16 sm:mt-20 flex flex-col">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b">
+        <h3 className="font-semibold text-sm sm:text-lg">Propriétés du bloc</h3>
+        <div className="flex gap-1 sm:gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={onToggleStylePanel}
-            className={showStylePanel ? 'bg-blue-50' : ''}
+            className={`${showStylePanel ? 'bg-blue-50' : ''} h-8 w-8 sm:h-9 sm:w-auto p-0 sm:px-2`}
           >
-            <Palette className="h-4 w-4" />
+            <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden lg:inline text-xs sm:text-sm ml-1 sm:ml-2">Style</span>
           </Button>
           {onClose && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="hover:bg-gray-100"
+              className="hover:bg-gray-100 h-8 w-8 sm:h-9 sm:w-auto p-0 sm:px-2"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           )}
         </div>
@@ -140,7 +141,9 @@ const EditorPropertiesPanel = ({
             onUpdate={onBlockUpdate}
           />
         ) : (
-          renderEditor()
+          <div className="p-3 sm:p-4">
+            {renderEditor()}
+          </div>
         )}
       </div>
     </div>

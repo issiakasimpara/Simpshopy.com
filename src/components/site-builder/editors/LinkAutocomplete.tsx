@@ -44,7 +44,7 @@ const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pa
   };
 
   return (
-    <Command>
+    <Command className="text-xs sm:text-sm">
       <CommandInput
         placeholder="/page-ou-url"
         value={input}
@@ -52,23 +52,24 @@ const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pa
           setInput(val);
           onChange(val);
         }}
+        className="text-xs sm:text-sm"
       />
       <CommandList>
-        <CommandGroup heading="Pages">
+        <CommandGroup heading="Pages" className="text-xs sm:text-sm">
           {pageSuggestions.map((page) => (
-            <CommandItem key={page.value} value={page.value} onSelect={() => handleSelect(page.value)}>
+            <CommandItem key={page.value} value={page.value} onSelect={() => handleSelect(page.value)} className="text-xs sm:text-sm">
               {page.label}
             </CommandItem>
           ))}
         </CommandGroup>
-        <CommandGroup heading="Produits">
+        <CommandGroup heading="Produits" className="text-xs sm:text-sm">
           {productLinks.map((prod) => (
-            <CommandItem key={prod.value} value={prod.value} onSelect={() => handleSelect(prod.value)}>
+            <CommandItem key={prod.value} value={prod.value} onSelect={() => handleSelect(prod.value)} className="text-xs sm:text-sm">
               {prod.label}
             </CommandItem>
           ))}
         </CommandGroup>
-        <CommandEmpty>Aucun résultat</CommandEmpty>
+        <CommandEmpty className="text-xs sm:text-sm">Aucun résultat</CommandEmpty>
       </CommandList>
     </Command>
   );

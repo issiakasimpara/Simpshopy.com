@@ -146,32 +146,32 @@ const SiteBuilder = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header moderne */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-pink-600/5 to-blue-600/5 rounded-3xl" />
-          <div className="relative p-8 bg-gradient-to-br from-background via-background to-muted/20 rounded-3xl border border-border/50 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="relative p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-2xl shadow-inner">
-                  <Palette className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+          <div className="relative p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/20 rounded-3xl border border-border/50 shadow-lg">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0">
+              <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+                <div className="relative p-3 sm:p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-2xl shadow-inner">
+                  <Palette className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 dark:text-purple-400" />
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
                   <div className="absolute -top-1 -right-1 p-1 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full animate-pulse">
                     <Sparkles className="h-3 w-3 text-white" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent">
                     {isThemeGallery ? 'Galerie de Thèmes' : 'Créateur de Site'}
                   </h1>
-                  <p className="text-lg text-muted-foreground font-medium mt-2 flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    {isThemeGallery
+                  <p className="text-sm sm:text-base lg:text-lg text-muted-foreground font-medium mt-2 flex items-center gap-2">
+                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                    <span className="text-xs sm:text-sm lg:text-base">{isThemeGallery
                       ? hasStore 
                         ? 'Choisissez un nouveau thème pour votre boutique'
                         : 'Choisissez un thème pour créer votre boutique'
                       : 'Choisissez un template et personnalisez votre boutique'
-                    }
+                    }</span>
                   </p>
                 </div>
               </div>
@@ -188,22 +188,22 @@ const SiteBuilder = () => {
         {/* Templates Grid avec design amélioré */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl" />
-          <div className="relative p-6 bg-gradient-to-br from-background via-background to-muted/20 rounded-2xl border border-border/50 shadow-lg">
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-xl">
-                    <Grid className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="relative p-4 sm:p-6 bg-gradient-to-br from-background via-background to-muted/20 rounded-2xl border border-border/50 shadow-lg">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-xl">
+                    <Grid className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                     Templates Disponibles
                   </h2>
                 </div>
-                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg">
+                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg text-xs sm:text-sm">
                   {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                 {selectedCategory === 'all' 
                   ? "Tous les templates disponibles" 
                   : `Templates pour ${getCategoryName(selectedCategory)}`
@@ -211,31 +211,31 @@ const SiteBuilder = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredTemplates.map((template) => (
                 <Card key={template.id} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 bg-gradient-to-br from-background via-background to-muted/10 cursor-pointer">
                   {/* Gradient border effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg" />
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60" />
                   
-                  <CardHeader className="relative pb-4">
+                  <CardHeader className="relative pb-3 sm:pb-4">
                     <div className="flex items-center justify-between">
-                      <div className="relative w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                        <span className="text-2xl">{getTemplateIcon(template.category)}</span>
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                        <span className="text-lg sm:text-2xl">{getTemplateIcon(template.category)}</span>
                         <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
                       </div>
                       <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-amber-400 fill-current" />
-                        <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                        <Star className="h-3 w-3 sm:h-4 sm:w-4 text-amber-400 fill-current" />
+                        <span className="text-xs sm:text-sm font-medium text-amber-600 dark:text-amber-400">
                           4.8
                         </span>
                       </div>
                     </div>
                     <div>
-                      <CardTitle className="text-xl font-bold text-foreground group-hover:text-purple-600 transition-colors duration-300">
+                      <CardTitle className="text-lg sm:text-xl font-bold text-foreground group-hover:text-purple-600 transition-colors duration-300">
                         {template.name}
                       </CardTitle>
-                      <CardDescription className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-2 line-clamp-2">
                         {template.description}
                       </CardDescription>
                     </div>
@@ -243,7 +243,7 @@ const SiteBuilder = () => {
                   
                   <CardContent className="relative pt-0">
                     {/* Preview Image */}
-                    <div className="relative w-full h-32 rounded-xl mb-4 overflow-hidden shadow-inner group-hover:shadow-lg transition-shadow duration-300">
+                    <div className="relative w-full h-24 sm:h-32 rounded-xl mb-3 sm:mb-4 overflow-hidden shadow-inner group-hover:shadow-lg transition-shadow duration-300">
                       <img 
                         src={getPreviewImage(template.category)} 
                         alt={`Aperçu ${template.name}`}
@@ -251,15 +251,15 @@ const SiteBuilder = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 group-hover:opacity-80 transition-opacity duration-300" />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="bg-white/90 dark:bg-gray-900/90 rounded-full p-2">
-                          <Eye className="h-6 w-6 text-purple-500" />
+                        <div className="bg-white/90 dark:bg-gray-900/90 rounded-full p-1.5 sm:p-2">
+                          <Eye className="h-4 w-4 sm:h-6 sm:w-6 text-purple-500" />
                         </div>
                       </div>
                     </div>
                     
                     {/* Template Info */}
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <Badge className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50 text-xs sm:text-sm">
                         {getCategoryName(template.category)}
                       </Badge>
                       <span className="text-xs text-muted-foreground font-medium">
@@ -268,11 +268,11 @@ const SiteBuilder = () => {
                     </div>
                     
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 group/btn bg-gradient-to-r from-white to-blue-50/30 dark:from-gray-950 dark:to-blue-950/20 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950/30 dark:hover:to-purple-950/30 border-border/60 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300"
+                        className="flex-1 group/btn bg-gradient-to-r from-white to-blue-50/30 dark:from-gray-950 dark:to-blue-950/20 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950/30 dark:hover:to-purple-950/30 border-border/60 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 text-xs sm:text-sm"
                         onClick={() => {
                           if (isThemeGallery) {
                             // Si on est dans la galerie de thèmes, aller à l'aperçu
@@ -283,12 +283,12 @@ const SiteBuilder = () => {
                           }
                         }}
                       >
-                        <Eye className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
-                        Aperçu
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                        <span className="text-xs sm:text-sm">Aperçu</span>
                       </Button>
                       <Button
                         size="sm"
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 group/btn text-xs sm:text-sm"
                         onClick={() => {
                           if (isThemeGallery) {
                             if (hasStore) {
@@ -307,20 +307,20 @@ const SiteBuilder = () => {
                       >
                         {isChangingTheme === template.id ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                            Changement...
+                            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Changement...</span>
                           </>
                         ) : (
                           <>
                             {isThemeGallery && hasStore ? (
                               <>
-                                <Check className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
-                                Utiliser ce thème
+                                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                                <span className="text-xs sm:text-sm">Utiliser ce thème</span>
                               </>
                             ) : (
                               <>
-                                <Palette className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
-                                {isThemeGallery ? 'Utiliser ce thème' : 'Utiliser'}
+                                <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                                <span className="text-xs sm:text-sm">{isThemeGallery ? 'Utiliser ce thème' : 'Utiliser'}</span>
                               </>
                             )}
                           </>
@@ -333,19 +333,19 @@ const SiteBuilder = () => {
             </div>
 
             {filteredTemplates.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12">
-                <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg mb-6">
-                  <Palette className="h-12 w-12 text-muted-foreground" />
+              <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg mb-4 sm:mb-6">
+                  <Palette className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
                   Aucun template disponible
                 </h3>
-                <p className="text-muted-foreground text-center mb-6 max-w-md">
+                <p className="text-xs sm:text-sm text-muted-foreground text-center mb-4 sm:mb-6 max-w-md">
                   Aucun template n'est disponible pour la catégorie "{getCategoryName(selectedCategory)}" pour le moment.
                 </p>
                 <Button 
                   onClick={() => setSelectedCategory('all')} 
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
                 >
                   Voir tous les templates
                 </Button>

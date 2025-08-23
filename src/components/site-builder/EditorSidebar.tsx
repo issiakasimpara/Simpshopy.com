@@ -41,11 +41,11 @@ const EditorSidebar = ({
 
   const getPageIcon = (pageName: string) => {
     switch (pageName) {
-      case 'home': return <Home className="h-4 w-4" />;
-      case 'product': return <Package className="h-4 w-4" />;
-      case 'category': return <Grid className="h-4 w-4" />;
-      case 'contact': return <Phone className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case 'home': return <Home className="h-3 w-3 sm:h-4 sm:w-4" />;
+      case 'product': return <Package className="h-3 w-3 sm:h-4 sm:w-4" />;
+      case 'category': return <Grid className="h-3 w-3 sm:h-4 sm:w-4" />;
+      case 'contact': return <Phone className="h-3 w-3 sm:h-4 sm:w-4" />;
+      default: return <FileText className="h-3 w-3 sm:h-4 sm:w-4" />;
     }
   };
 
@@ -74,31 +74,31 @@ const EditorSidebar = ({
   };
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 h-full mt-20 flex flex-col">
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-lg">Éditeur</h2>
+    <div className="w-64 sm:w-72 lg:w-80 bg-white border-r border-gray-200 h-full mt-16 sm:mt-20 flex flex-col">
+      <div className="p-3 sm:p-4 border-b">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="font-semibold text-sm sm:text-lg">Éditeur</h2>
           <Button
             variant={showSettings ? 'default' : 'outline'}
             size="sm"
             onClick={onToggleSettings}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
           >
-            <Settings className="h-4 w-4" />
-            {showSettings ? 'Éditeur' : 'Réglages'}
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">{showSettings ? 'Éditeur' : 'Réglages'}</span>
           </Button>
         </div>
         
         {!showSettings && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="pages" className="flex items-center gap-2">
-                <Layout className="h-4 w-4" />
-                Pages
+            <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9">
+              <TabsTrigger value="pages" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Layout className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Pages</span>
               </TabsTrigger>
-              <TabsTrigger value="blocks" className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Blocs
+              <TabsTrigger value="blocks" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Blocs</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -107,7 +107,7 @@ const EditorSidebar = ({
 
       <div className="flex-1 overflow-y-auto">
         {showSettings ? (
-          <div className="p-4">
+          <div className="p-3 sm:p-4">
             <SiteSettings
               template={template}
               onUpdate={() => {}}
@@ -115,9 +115,9 @@ const EditorSidebar = ({
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-            <TabsContent value="pages" className="p-4 space-y-4 mt-0">
+            <TabsContent value="pages" className="p-3 sm:p-4 space-y-3 sm:space-y-4 mt-0">
               <div>
-                <h3 className="font-medium mb-3 text-sm text-gray-600 uppercase tracking-wide">
+                <h3 className="font-medium mb-2 sm:mb-3 text-xs sm:text-sm text-gray-600 uppercase tracking-wide">
                   Pages du site
                 </h3>
                 <div className="space-y-2">
@@ -133,16 +133,16 @@ const EditorSidebar = ({
                         }`}
                         onClick={() => onPageChange(pageName)}
                       >
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 sm:p-4">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className={`p-1.5 sm:p-2 rounded-lg ${
                                 isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
                               }`}>
                                 {getPageIcon(pageName)}
                               </div>
                               <div>
-                                <h4 className="font-medium text-sm">
+                                <h4 className="font-medium text-xs sm:text-sm">
                                   {getPageDisplayName(pageName)}
                                 </h4>
                                 <p className="text-xs text-gray-500">
@@ -174,36 +174,38 @@ const EditorSidebar = ({
               <Separator />
 
               <div>
-                <h3 className="font-medium mb-3 text-sm text-gray-600 uppercase tracking-wide">
+                <h3 className="font-medium mb-2 sm:mb-3 text-xs sm:text-sm text-gray-600 uppercase tracking-wide">
                   Actions rapides
                 </h3>
                 <div className="space-y-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start"
+                    className="w-full justify-start text-xs sm:text-sm h-8 sm:h-9"
                     onClick={() => setActiveTab('blocks')}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un bloc
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Ajouter un bloc</span>
+                    <span className="sm:hidden">Ajouter</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start"
+                    className="w-full justify-start text-xs sm:text-sm h-8 sm:h-9"
                     onClick={onToggleSettings}
                   >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Réglages du site
+                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Réglages du site</span>
+                    <span className="sm:hidden">Réglages</span>
                   </Button>
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="blocks" className="mt-0 h-full">
-              <div className="p-4">
-                <div className="mb-4">
-                  <h3 className="font-medium mb-2">Ajouter à la page</h3>
+              <div className="p-3 sm:p-4">
+                <div className="mb-3 sm:mb-4">
+                  <h3 className="font-medium mb-2 text-xs sm:text-sm">Ajouter à la page</h3>
                   <Badge variant="outline" className="text-xs">
                     {getPageDisplayName(currentPage)}
                   </Badge>

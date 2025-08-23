@@ -14,33 +14,36 @@ interface HeroEditorProps {
 
 const HeroEditor = ({ block, onUpdate, onMediaSelect }: HeroEditorProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <Label htmlFor="title">Titre</Label>
+        <Label htmlFor="title" className="text-xs sm:text-sm">Titre</Label>
         <Input
           id="title"
           value={block.content.title || ''}
           onChange={(e) => onUpdate('title', e.target.value)}
+          className="text-xs sm:text-sm"
         />
       </div>
       <div>
-        <Label htmlFor="subtitle">Sous-titre</Label>
+        <Label htmlFor="subtitle" className="text-xs sm:text-sm">Sous-titre</Label>
         <Input
           id="subtitle"
           value={block.content.subtitle || ''}
           onChange={(e) => onUpdate('subtitle', e.target.value)}
+          className="text-xs sm:text-sm"
         />
       </div>
       <div>
-        <Label htmlFor="buttonText">Texte du bouton</Label>
+        <Label htmlFor="buttonText" className="text-xs sm:text-sm">Texte du bouton</Label>
         <Input
           id="buttonText"
           value={block.content.buttonText || ''}
           onChange={(e) => onUpdate('buttonText', e.target.value)}
+          className="text-xs sm:text-sm"
         />
       </div>
       <div>
-        <Label htmlFor="buttonLink">Lien du bouton</Label>
+        <Label htmlFor="buttonLink" className="text-xs sm:text-sm">Lien du bouton</Label>
         <LinkAutocomplete
           value={block.content.buttonLink || ''}
           onChange={(val) => onUpdate('buttonLink', val)}
@@ -54,12 +57,12 @@ const HeroEditor = ({ block, onUpdate, onMediaSelect }: HeroEditorProps) => {
         onMediaSelect={onMediaSelect}
       />
       <div>
-        <Label>Type de média</Label>
+        <Label className="text-xs sm:text-sm">Type de média</Label>
         <Select 
           value={block.content.mediaType || 'image'} 
           onValueChange={(value) => onUpdate('mediaType', value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

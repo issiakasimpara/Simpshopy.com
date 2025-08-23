@@ -31,70 +31,75 @@ const FeaturesEditor = ({ block, onUpdate }: FeaturesEditorProps) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div>
-        <Label htmlFor="featuresTitle">Titre de la section</Label>
+        <Label htmlFor="featuresTitle" className="text-xs sm:text-sm">Titre de la section</Label>
         <Input
           id="featuresTitle"
           value={block.content.title || ''}
           onChange={(e) => onUpdate('title', e.target.value)}
+          className="text-xs sm:text-sm"
         />
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <Label>Fonctionnalités</Label>
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <Label className="text-xs sm:text-sm">Fonctionnalités</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={addFeature}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
           >
-            <Plus className="h-4 w-4" />
-            Ajouter
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Ajouter</span>
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {features.map((feature: any, index: number) => (
-            <div key={index} className="p-4 border rounded-lg space-y-3">
+            <div key={index} className="p-3 sm:p-4 border rounded-lg space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Fonctionnalité {index + 1}</span>
+                <span className="text-xs sm:text-sm font-medium">Fonctionnalité {index + 1}</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => removeFeature(index)}
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
               
               <div>
-                <Label>Icône (emoji)</Label>
+                <Label className="text-xs sm:text-sm">Icône (emoji)</Label>
                 <Input
                   value={feature.icon || ''}
                   onChange={(e) => updateFeature(index, 'icon', e.target.value)}
                   placeholder="⭐"
+                  className="text-xs sm:text-sm"
                 />
               </div>
               
               <div>
-                <Label>Titre</Label>
+                <Label className="text-xs sm:text-sm">Titre</Label>
                 <Input
                   value={feature.title || ''}
                   onChange={(e) => updateFeature(index, 'title', e.target.value)}
                   placeholder="Titre de la fonctionnalité"
+                  className="text-xs sm:text-sm"
                 />
               </div>
               
               <div>
-                <Label>Description</Label>
+                <Label className="text-xs sm:text-sm">Description</Label>
                 <Input
                   value={feature.description || ''}
                   onChange={(e) => updateFeature(index, 'description', e.target.value)}
                   placeholder="Description de la fonctionnalité"
+                  className="text-xs sm:text-sm"
                 />
               </div>
             </div>
