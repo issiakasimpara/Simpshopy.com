@@ -99,13 +99,13 @@ const Orders = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+        <div className="p-2 sm:p-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">
             Gestion des commandes
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Visualisez et gérez les commandes et paniers abandonnés de votre boutique
           </p>
         </div>
@@ -113,22 +113,26 @@ const Orders = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Commandes ({orders.length})
+            <TabsTrigger value="orders" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Commandes</span>
+              <span className="sm:hidden">Cmd</span>
+              ({orders.length})
             </TabsTrigger>
-            <TabsTrigger value="abandoned" className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Paniers abandonnés ({abandonedCarts.length})
+            <TabsTrigger value="abandoned" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Paniers abandonnés</span>
+              <span className="sm:hidden">Paniers</span>
+              ({abandonedCarts.length})
             </TabsTrigger>
           </TabsList>
 
           {/* Onglet Commandes */}
-          <TabsContent value="orders" className="space-y-6">
+          <TabsContent value="orders" className="space-y-4 sm:space-y-6">
             {/* Filters */}
             <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Input
                       type="text"
@@ -179,11 +183,11 @@ const Orders = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {filteredOrders.map(order => (
                   <Card key={order.id} className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <CardContent className="p-3 sm:p-4 lg:p-6">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
                         <div className="flex-1 space-y-2">
                           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                             Commande #{order.order_number}

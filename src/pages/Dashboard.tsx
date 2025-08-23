@@ -9,7 +9,7 @@ import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions"
 const Dashboard = () => {
   return (
     <DashboardLayout>
-      <div className="h-full p-4">
+      <div className="h-full p-2 sm:p-4">
         {/* Header avec gradient moderne */}
         <DashboardHeader />
 
@@ -17,14 +17,14 @@ const Dashboard = () => {
         <DashboardStats />
 
         {/* Main Content Grid avec design modernisé */}
-        <div className="grid xl:grid-cols-3 gap-6">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {/* Recent Orders */}
-          <div className="xl:col-span-2">
+          <div className="lg:col-span-2">
             <RecentOrders />
           </div>
 
           {/* Right Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Store Status */}
             <StoreStatus />
 

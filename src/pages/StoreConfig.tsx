@@ -160,7 +160,7 @@ const StoreConfig = () => {
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-pink-950/20 pointer-events-none rounded-3xl" />
         
-        <div className="relative space-y-8 p-1">
+        <div className="relative space-y-4 sm:space-y-6 lg:space-y-8 p-1">
           <StoreHeader 
             isInSiteBuilder={isInSiteBuilder}
             store={store}
@@ -170,7 +170,7 @@ const StoreConfig = () => {
 
           {/* Template Preview or Configuration */}
           {store ? (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               {/* Template Actions */}
               <StoreActions 
                 selectedStore={store}
@@ -180,51 +180,51 @@ const StoreConfig = () => {
               />
 
               {viewMode === 'template' && storeTemplate ? (
-                <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-8">
+                <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
                   <StorePreview 
                     selectedStore={store}
                     onViewModeChange={setViewMode}
                   />
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-8">
-                  <Tabs value={currentTab} className="space-y-8">
+                <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
+                  <Tabs value={currentTab} className="space-y-4 sm:space-y-6 lg:space-y-8">
                     {!isInSiteBuilder && (
-                      <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 shadow-lg rounded-2xl p-2 h-16">
-                        <TabsTrigger value="config" asChild className="flex items-center gap-3 h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50">
+                      <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 shadow-lg rounded-2xl p-2 h-12 sm:h-14 lg:h-16">
+                        <TabsTrigger value="config" asChild className="flex items-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50">
                           <Link to="/store-config">
-                            <div className="p-1.5 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-lg data-[state=active]:bg-white/20">
-                              <Settings className="h-4 w-4" />
+                            <div className="p-1 sm:p-1.5 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-lg data-[state=active]:bg-white/20">
+                              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
-                            <span className="font-semibold">Configuration</span>
+                            <span className="font-semibold text-xs sm:text-sm lg:text-base">Configuration</span>
                           </Link>
                         </TabsTrigger>
-                        <TabsTrigger value="site-builder" asChild className="flex items-center gap-3 h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50">
+                        <TabsTrigger value="site-builder" asChild className="flex items-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50">
                           <Link to={`/store-config/site-builder/editor/${storeTemplate?.id || 'fashion-modern'}`}>
-                            <div className="p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg data-[state=active]:bg-white/20">
-                              <Palette className="h-4 w-4" />
+                            <div className="p-1 sm:p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg data-[state=active]:bg-white/20">
+                              <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
-                            <span className="font-semibold">Créateur de Site</span>
+                            <span className="font-semibold text-xs sm:text-sm lg:text-base">Créateur de Site</span>
                           </Link>
                         </TabsTrigger>
                       </TabsList>
                     )}
 
-                    <TabsContent value="config" className="mt-8">
-                      <div className="grid gap-8">
+                    <TabsContent value="config" className="mt-4 sm:mt-6 lg:mt-8">
+                      <div className="grid gap-4 sm:gap-6 lg:gap-8">
                         <StoreStatusCard 
                           selectedStore={store}
                           onViewModeChange={setViewMode}
                         />
 
                         <Tabs defaultValue="config" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="config">Configuration</TabsTrigger>
-                            <TabsTrigger value="domains">Domaines</TabsTrigger>
-                            <TabsTrigger value="preview">Aperçu</TabsTrigger>
+                          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                            <TabsTrigger value="config" className="text-xs sm:text-sm">Configuration</TabsTrigger>
+                            <TabsTrigger value="domains" className="text-xs sm:text-sm">Domaines</TabsTrigger>
+                            <TabsTrigger value="preview" className="text-xs sm:text-sm">Aperçu</TabsTrigger>
                           </TabsList>
 
-                          <TabsContent value="config" className="space-y-6">
+                          <TabsContent value="config" className="space-y-4 sm:space-y-6">
                             <StoreConfigForm
                               formData={formData}
                               setFormData={setFormData}
@@ -233,14 +233,14 @@ const StoreConfig = () => {
                             />
                           </TabsContent>
 
-                          <TabsContent value="domains" className="space-y-6">
+                          <TabsContent value="domains" className="space-y-4 sm:space-y-6">
                             <DomainManager 
                               selectedStore={store}
                               onSubmit={handleDomainSubmit}
                             />
                           </TabsContent>
 
-                          <TabsContent value="preview" className="space-y-6">
+                          <TabsContent value="preview" className="space-y-4 sm:space-y-6">
                             <StorePreview 
                               selectedStore={store}
                               onViewModeChange={setViewMode}
