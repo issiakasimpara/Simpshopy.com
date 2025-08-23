@@ -77,15 +77,15 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ className }) 
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
       {/* En-tête avec actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Activity className="h-6 w-6" />
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
             Tableau de Bord Monitoring
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Surveillance en temps réel de la performance et sécurité
           </p>
         </div>
@@ -95,98 +95,79 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ className }) 
             size="sm"
             onClick={refreshMetrics}
             disabled={isRefreshing}
+            className="text-xs sm:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Actualiser
           </Button>
           <Button 
             variant="outline" 
             size="sm"
             onClick={downloadReport}
+            className="text-xs sm:text-sm"
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Rapport
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={clearEvents}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Effacer
           </Button>
         </div>
       </div>
 
-      {/* Cartes de statut global */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Métriques principales */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Performance</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              {getPerformanceStatus() === 'critical' && (
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-              )}
-              {getPerformanceStatus() === 'warning' && (
-                <AlertTriangle className="h-4 w-4 text-yellow-500" />
-              )}
-              {getPerformanceStatus() === 'good' && (
-                <CheckCircle className="h-4 w-4 text-green-500" />
-              )}
-              <span className="text-2xl font-bold">
-                {getPerformanceStatus() === 'critical' ? 'Critique' :
-                 getPerformanceStatus() === 'warning' ? 'Attention' : 'Bon'}
-              </span>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="p-2 sm:p-3 bg-blue-100 rounded-lg">
+                <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Performance</p>
+                <p className="text-lg sm:text-2xl font-bold">{metrics.performance.pageLoadTime}ms</p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.performance.errorCount} erreurs, {metrics.performance.pageLoadTime.toFixed(0)}ms
-            </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sécurité</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              {getSecurityStatus() === 'critical' && (
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-              )}
-              {getSecurityStatus() === 'warning' && (
-                <AlertTriangle className="h-4 w-4 text-yellow-500" />
-              )}
-              {getSecurityStatus() === 'good' && (
-                <CheckCircle className="h-4 w-4 text-green-500" />
-              )}
-              <span className="text-2xl font-bold">
-                {getSecurityStatus() === 'critical' ? 'Critique' :
-                 getSecurityStatus() === 'warning' ? 'Attention' : 'Sécurisé'}
-              </span>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="p-2 sm:p-3 bg-green-100 rounded-lg">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Sécurité</p>
+                <p className="text-lg sm:text-2xl font-bold">{metrics.security.suspiciousRequests}</p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.security.suspiciousRequests} requêtes suspectes
-            </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mémoire</CardTitle>
-                            <HardDrive className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardHeader>
-            <div className="text-2xl font-bold">
-              {(metrics.performance.memoryUsage / 1024 / 1024).toFixed(1)} MB
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="p-2 sm:p-3 bg-orange-100 rounded-lg">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Erreurs</p>
+                <p className="text-lg sm:text-2xl font-bold">{metrics.performance.errorCount}</p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Utilisation actuelle
-            </p>
-          </CardHeader>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="p-2 sm:p-3 bg-purple-100 rounded-lg">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Uptime</p>
+                <p className="text-lg sm:text-2xl font-bold">99.9%</p>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
 

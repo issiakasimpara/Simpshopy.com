@@ -30,11 +30,11 @@ const Monitoring: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <Tabs defaultValue="monitoring" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger value="tests">Tests Automatisés</TabsTrigger>
+      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 lg:px-6">
+        <Tabs defaultValue="monitoring" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-2 h-10 sm:h-12">
+            <TabsTrigger value="monitoring" className="text-xs sm:text-sm">Monitoring</TabsTrigger>
+            <TabsTrigger value="tests" className="text-xs sm:text-sm">Tests Automatisés</TabsTrigger>
           </TabsList>
           
           <TabsContent value="monitoring">

@@ -79,15 +79,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className }) => {
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
       {/* En-tête avec actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Play className="h-6 w-6" />
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Play className="h-5 w-5 sm:h-6 sm:w-6" />
             Tests Automatisés
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Validation de la sécurité, performance et robustesse
           </p>
         </div>
@@ -95,34 +95,25 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className }) => {
           <Button 
             onClick={runTests}
             disabled={isRunning}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs sm:text-sm"
           >
             {isRunning ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
             ) : (
-              <Play className="h-4 w-4" />
+              <Play className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
-            {isRunning ? 'Exécution...' : 'Lancer les Tests'}
+            {isRunning ? 'En cours...' : 'Lancer les tests'}
           </Button>
           {results && (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={downloadResults}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Télécharger
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={clearTestResults}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Effacer
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={downloadResults}
+              className="text-xs sm:text-sm"
+            >
+              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Résultats
+            </Button>
           )}
         </div>
       </div>
@@ -130,13 +121,13 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className }) => {
       {/* Barre de progression */}
       {isRunning && (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Progression des tests...</span>
+              <div className="flex justify-between text-sm">
+                <span>Progression des tests</span>
                 <span>{progress}%</span>
               </div>
-              <Progress value={progress} className="w-full" />
+              <Progress value={progress} className="h-2" />
             </div>
           </CardContent>
         </Card>
@@ -144,95 +135,70 @@ const TestRunner: React.FC<TestRunnerProps> = ({ className }) => {
 
       {/* Résultats des tests */}
       {results && (
-        <div className="space-y-4">
-          {/* Résumé global */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                Résumé des Tests
-              </CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm sm:text-base">Tests de Sécurité</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {results.suites.map((suite: any) => (
-                  <div key={suite.name} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(suite.passed, suite.total)}
-                      <span className="font-medium">{suite.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className={`font-bold ${getStatusColor(suite.passed, suite.total)}`}>
-                        {suite.passed}/{suite.total}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {((suite.passed / suite.total) * 100).toFixed(0)}%
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Authentification</span>
+                  {getStatusIcon(results.security.auth.passed, results.security.auth.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Autorisation</span>
+                  {getStatusIcon(results.security.authorization.passed, results.security.authorization.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Validation</span>
+                  {getStatusIcon(results.security.validation.passed, results.security.validation.total)}
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Détails par suite */}
-          {results.suites.map((suite: any) => (
-            <Card key={suite.name}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  {getStatusIcon(suite.passed, suite.total)}
-                  {suite.name}
-                  <Badge variant="outline">
-                    {suite.passed}/{suite.total} tests réussis
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {suite.tests.map((test: any) => (
-                    <div 
-                      key={test.name} 
-                      className={`flex items-center justify-between p-2 rounded ${
-                        test.passed ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {test.passed ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        )}
-                        <span className="font-medium">{test.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        {test.duration && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {test.duration.toFixed(2)}ms
-                          </div>
-                        )}
-                        {!test.passed && test.error && (
-                          <Badge variant="destructive" className="text-xs">
-                            {test.error}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Rapport complet */}
           <Card>
-            <CardHeader>
-              <CardTitle>Rapport Complet</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm sm:text-base">Tests de Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
-                {results.summary}
-              </pre>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Temps de réponse</span>
+                  {getStatusIcon(results.performance.responseTime.passed, results.performance.responseTime.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Mémoire</span>
+                  {getStatusIcon(results.performance.memory.passed, results.performance.memory.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">CPU</span>
+                  {getStatusIcon(results.performance.cpu.passed, results.performance.cpu.total)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm sm:text-base">Tests d'Intégration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">API</span>
+                  {getStatusIcon(results.integration.api.passed, results.integration.api.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Base de données</span>
+                  {getStatusIcon(results.integration.database.passed, results.integration.database.total)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm">Services externes</span>
+                  {getStatusIcon(results.integration.external.passed, results.integration.external.total)}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -102,37 +102,39 @@ const IntegrationsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold mb-2">App Store / Intégrations</h1>
-        <p className="mb-8 text-muted-foreground">Découvrez et ajoutez des applications pour enrichir votre boutique en ligne.</p>
-        <div className="flex gap-4 mb-6">
+      <div className="max-w-5xl mx-auto py-4 sm:py-6 lg:py-10 px-3 sm:px-4 lg:px-6">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3">App Store / Intégrations</h1>
+        <p className="mb-4 sm:mb-6 lg:mb-8 text-muted-foreground text-sm sm:text-base">Découvrez et ajoutez des applications pour enrichir votre boutique en ligne.</p>
+        
+        <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6">
           <button
-            className={`px-4 py-2 rounded font-medium text-sm transition ${tab === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 rounded font-medium text-xs sm:text-sm transition ${tab === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
             onClick={() => setTab('all')}
           >
             Toutes
           </button>
           <button
-            className={`px-4 py-2 rounded font-medium text-sm transition ${tab === 'installed' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 rounded font-medium text-xs sm:text-sm transition ${tab === 'installed' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
             onClick={() => setTab('installed')}
           >
             Installées
           </button>
         </div>
+        
         {tab === 'all' && (
           <>
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-4 sm:mb-6">
               <input
                 type="text"
                 placeholder="Rechercher une intégration..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="border rounded px-3 py-2 w-64"
+                className="border rounded px-3 py-2 w-full sm:w-64 text-sm sm:text-base"
               />
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-muted-foreground">Catégorie :</span>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-xs sm:text-sm text-muted-foreground">Catégorie :</span>
                 <button
-                  className={`px-2 py-1 rounded text-sm ${!category ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                  className={`px-2 py-1 rounded text-xs sm:text-sm ${!category ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
                   onClick={() => setCategory(null)}
                 >
                   Toutes
@@ -140,7 +142,7 @@ const IntegrationsPage: React.FC = () => {
                 {categories.map(cat => (
                   <button
                     key={cat}
-                    className={`px-2 py-1 rounded text-sm ${category === cat ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                    className={`px-2 py-1 rounded text-xs sm:text-sm ${category === cat ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
                     onClick={() => setCategory(cat)}
                   >
                     {cat}
@@ -148,8 +150,8 @@ const IntegrationsPage: React.FC = () => {
                 ))}
               </div>
             </div>
-            {error && <div className="text-red-600 mb-4">{error}</div>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {error && <div className="text-red-600 mb-4 text-sm sm:text-base">{error}</div>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filtered.map(integration => (
                 <IntegrationCard
                   key={integration.id}
@@ -161,7 +163,7 @@ const IntegrationsPage: React.FC = () => {
                 />
               ))}
               {filtered.length === 0 && (
-                <div className="col-span-full text-center text-muted-foreground py-10">Aucune intégration trouvée.</div>
+                <div className="col-span-full text-center text-muted-foreground py-8 sm:py-10 text-sm sm:text-base">Aucune intégration trouvée.</div>
               )}
             </div>
           </>
@@ -169,9 +171,9 @@ const IntegrationsPage: React.FC = () => {
         {tab === 'installed' && (
           <>
             {installedIntegrations.length === 0 && (
-              <div className="text-muted-foreground py-10 text-center">Aucune application installée pour le moment.</div>
+              <div className="text-muted-foreground py-8 sm:py-10 text-center text-sm sm:text-base">Aucune application installée pour le moment.</div>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {installedIntegrations.map(integration => (
                 <IntegrationCard
                   key={integration.id}

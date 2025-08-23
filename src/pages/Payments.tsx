@@ -101,61 +101,61 @@ const Payments = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* En-tête */}
         <div>
-          <h1 className="text-3xl font-bold">Paiements</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Paiements</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gérez les paiements de votre boutique {currentStore.name}
           </p>
         </div>
 
         {/* Statistiques */}
         {paymentStats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total des ventes</p>
-                    <p className="text-2xl font-bold">{formatConvertedPrice(paymentStats.totalAmount, 'XOF')}</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total des ventes</p>
+                    <p className="text-lg sm:text-2xl font-bold">{formatConvertedPrice(paymentStats.totalAmount, 'XOF')}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Paiements réussis</p>
-                    <p className="text-2xl font-bold">{paymentStats.completed}</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Paiements réussis</p>
+                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.completed}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-yellow-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">En attente</p>
-                    <p className="text-2xl font-bold">{paymentStats.pending}</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">En attente</p>
+                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.pending}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-2">
-                  <XCircle className="h-5 w-5 text-red-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Échoués</p>
-                    <p className="text-2xl font-bold">{paymentStats.failed}</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Échoués</p>
+                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.failed}</p>
                   </div>
                 </div>
               </CardContent>
@@ -166,7 +166,7 @@ const Payments = () => {
         {/* Liste des paiements */}
         <Card>
           <CardHeader>
-            <CardTitle>Historique des paiements</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Historique des paiements</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -174,24 +174,24 @@ const Payments = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : payments && payments.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {payments.map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <p className="font-medium">{payment.customer_name}</p>
-                          <p className="text-sm text-muted-foreground">{payment.customer_email}</p>
+                  <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm sm:text-base truncate">{payment.customer_name}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">{payment.customer_email}</p>
                         </div>
-                        <div>
-                          <p className="font-bold text-lg">{formatAmount(payment.amount, payment.currency)}</p>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="text-right sm:text-left">
+                          <p className="font-bold text-base sm:text-lg">{formatAmount(payment.amount, payment.currency)}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {format(new Date(payment.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                           </p>
                         </div>
                       </div>
                       {payment.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{payment.description}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-2">{payment.description}</p>
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
@@ -199,8 +199,8 @@ const Payments = () => {
                       {payment.status === 'pending' && (
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={() => verifyPayment.mutate(payment.moneroo_payment_id)}
+                          onClick={() => verifyPayment(payment.id)}
+                          className="text-xs sm:text-sm"
                         >
                           Vérifier
                         </Button>
@@ -212,9 +212,9 @@ const Payments = () => {
             ) : (
               <div className="text-center py-8">
                 <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun paiement</h3>
+                <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
                 <p className="text-muted-foreground">
-                  Aucun paiement n'a encore été effectué pour cette boutique.
+                  Les paiements de votre boutique apparaîtront ici.
                 </p>
               </div>
             )}
