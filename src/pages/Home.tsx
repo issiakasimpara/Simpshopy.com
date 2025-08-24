@@ -157,19 +157,16 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             <AppLogo />
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10">
-              <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Fonctionnalités</Link>
-              <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Tarifs</Link>
-              <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Témoignages</Link>
-              <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Pourquoi nous choisir</Link>
-              <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
-            </nav>
+                         <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10">
+               <Link to="/" className="text-blue-600 font-medium text-sm xl:text-lg">Accueil</Link>
+               <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Fonctionnalités</Link>
+               <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Tarifs</Link>
+               <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Témoignages</Link>
+               <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Pourquoi nous choisir</Link>
+               <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
+             </nav>
             <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-              {user ? (
-                <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
-                  <Link to="/dashboard">Dashboard</Link>
-                </Button>
-              ) : (
+              {!user && (
                 <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
                   <Link to="/auth">Connexion</Link>
                 </Button>
