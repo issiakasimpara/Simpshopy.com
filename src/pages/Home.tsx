@@ -225,13 +225,105 @@ const Home = () => {
             
             <p className="text-sm sm:text-lg text-gray-500 mb-8 sm:mb-12 px-4">✨ Aucune carte bancaire requise • Configuration en 2 minutes</p>
             
-            {/* Social proof */}
-            <div className="border-t border-gray-200/50 pt-8 sm:pt-12 px-4">
-              <p className="text-sm sm:text-lg text-gray-600 mb-4 sm:mb-6">Faites confiance à la plateforme utilisée par des entrepreneurs dans +20 pays</p>
-              <div className="flex justify-center items-center space-x-2 sm:space-x-8 opacity-60 overflow-x-auto">
-                <div className="text-lg sm:text-2xl lg:text-3xl whitespace-nowrap">🇫🇷 🇺🇸 🇨🇦 🇬🇧 🇩🇪 🇪🇸 🇮🇹 🇳🇱 🇧🇪 🇨🇭 🇦🇹 🇸🇪 🇳🇴 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇭🇺 🇷🇴 🇧🇬</div>
-              </div>
-            </div>
+                         {/* Social proof avec graphiques animés */}
+             <div className="border-t border-gray-200/50 pt-8 sm:pt-12 px-4">
+               <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8">Faites confiance à la plateforme qui fait grandir les entrepreneurs</p>
+               
+               {/* Graphiques de croissance animés */}
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                 {/* Graphique 1: Boutiques créées */}
+                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg">
+                   <div className="text-center">
+                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                       <ShoppingBag className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                     </div>
+                                           <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">+52,847</div>
+                      <div className="text-xs sm:text-sm text-gray-600">Boutiques créées</div>
+                     
+                     {/* Graphique animé */}
+                     <div className="mt-3 sm:mt-4 flex items-end justify-center space-x-1 h-8 sm:h-12">
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '60%', animationDelay: '0s'}}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '80%', animationDelay: '0.2s'}}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '45%', animationDelay: '0.4s'}}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '90%', animationDelay: '0.6s'}}></div>
+                       <div className="w-2 sm:w-3 bg-purple-500 rounded-t animate-pulse" style={{height: '100%', animationDelay: '0.8s'}}></div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Graphique 2: Pays couverts */}
+                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg">
+                   <div className="text-center">
+                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                       <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                     </div>
+                                           <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">+157</div>
+                      <div className="text-xs sm:text-sm text-gray-600">Pays couverts</div>
+                     
+                     {/* Indicateur de croissance */}
+                     <div className="mt-3 sm:mt-4 flex items-center justify-center">
+                       <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-1" />
+                       <span className="text-xs sm:text-sm text-green-600 font-medium">+15% ce mois</span>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Graphique 3: Chiffre d'affaires */}
+                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg">
+                   <div className="text-center">
+                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                       <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                     </div>
+                                           <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">€24.7M</div>
+                      <div className="text-xs sm:text-sm text-gray-600">CA généré</div>
+                     
+                     {/* Graphique circulaire animé */}
+                     <div className="mt-3 sm:mt-4 relative w-8 h-8 sm:w-12 sm:h-12 mx-auto">
+                       <div className="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+                       <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" style={{animationDuration: '2s'}}></div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Graphique 4: Satisfaction client */}
+                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg">
+                   <div className="text-center">
+                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                       <Star className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-current" />
+                     </div>
+                     <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">4.9/5</div>
+                     <div className="text-xs sm:text-sm text-gray-600">Satisfaction</div>
+                     
+                     {/* Étoiles animées */}
+                     <div className="mt-3 sm:mt-4 flex justify-center space-x-1">
+                       {[1, 2, 3, 4, 5].map((star) => (
+                         <Star 
+                           key={star} 
+                           className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current animate-pulse" 
+                           style={{animationDelay: `${star * 0.1}s`}}
+                         />
+                       ))}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
+               {/* Indicateurs de succès animés */}
+               <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm sm:text-base">
+                 <div className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}>
+                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                   <span className="font-medium">+300% croissance moyenne</span>
+                 </div>
+                 <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '1s'}}>
+                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                   <span className="font-medium">Support 24/7 disponible</span>
+                 </div>
+                 <div className="flex items-center bg-purple-100 text-purple-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}>
+                   <div className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
+                   <span className="font-medium">Configuration en 2 minutes</span>
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
       </section>
