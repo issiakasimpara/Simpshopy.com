@@ -29,23 +29,7 @@ const Home = () => {
     }
   };
 
-  const testimonials = [
-    {
-      quote: "J'ai adoré la simplicité du service et ses fonctionnalités pratiques. Elles vont m'aider à vendre mes produits et services en ligne sans effort !",
-      author: "Maurice NONTONDJI",
-      role: "Linkedin Community Manager"
-    },
-    {
-      quote: "Simpshopy offre une interface intuitive et des outils puissants, comme l'intégration du Pixel Meta Ads. Le système de création de produits est simple et efficace.",
-      author: "Godwin SOOLA",
-      role: "Digital Marketer"
-    },
-    {
-      quote: "Simpshopy est l'outil idéal pour lancer des produits rapidement sans souci de création de site ou d'intégration de paiements. Interface conviviale et simple.",
-      author: "Hermas AYI",
-      role: "CoFounder Ibudo"
-    }
-  ];
+
 
   const features = [
     {
@@ -255,33 +239,147 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 sm:py-24 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-gray-900 mb-4 sm:mb-6 px-4">Ils réussissent avec Simpshopy</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">Découvrez les témoignages de nos clients satisfaits</p>
+      {/* Section Témoignages */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Ils ont transformé leur business avec SimpShopy
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
+              Découvrez comment nos entrepreneurs ont multiplié leurs ventes et simplifié leur gestion
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-0 shadow-2xl bg-white hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 rounded-3xl overflow-hidden">
-                <CardContent className="p-6 sm:p-8 lg:p-10">
-                  <Quote className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500 mb-6 sm:mb-8" />
-                  <p className="text-gray-700 mb-6 sm:mb-8 italic text-base sm:text-lg lg:text-xl leading-relaxed font-light">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg sm:text-xl mr-4 sm:mr-6">
-                      {testimonial.author.split(' ').map(n => n[0]).join('')}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Témoignage 1 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <div className="flex items-start mb-6">
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1589156191108-c762ff4b96ab?w=150&h=150&fit=crop&crop=face" 
+                        alt="Aminata Koné"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>AK</span>
                     </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm sm:text-lg">{testimonial.author}</div>
-                      <div className="text-gray-500 text-sm">{testimonial.role}</div>
-                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                <div className="ml-4 flex-1">
+                  <h4 className="font-semibold text-gray-900">Aminata Koné</h4>
+                  <p className="text-sm text-gray-600">Fondatrice, Mode Africaine Plus</p>
+                </div>
+              </div>
+              <blockquote className="text-gray-700 italic mb-6">
+                "SimpShopy a révolutionné ma boutique de vêtements. En 3 mois, mes ventes ont augmenté de 300% grâce aux outils de marketing intégrés et à la facilité de gestion des stocks."
+              </blockquote>
+              <div className="flex items-center text-sm text-gray-500">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="ml-2">5.0</span>
+              </div>
+            </div>
+
+            {/* Témoignage 2 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <div className="flex items-start mb-6">
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" 
+                        alt="Boubacar Diallo"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>BD</span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-blue-500 rounded-full border-2 border-white"></div>
+                  </div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <h4 className="font-semibold text-gray-900">Boubacar Diallo</h4>
+                  <p className="text-sm text-gray-600">Directeur, Tech Solutions Pro</p>
+                </div>
+              </div>
+              <blockquote className="text-gray-700 italic mb-6">
+                "L'interface intuitive et les fonctionnalités avancées m'ont permis de gérer 5 boutiques simultanément. Les rapports d'analytics m'aident à prendre les bonnes décisions commerciales."
+              </blockquote>
+              <div className="flex items-center text-sm text-gray-500">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="ml-2">5.0</span>
+              </div>
+            </div>
+
+            {/* Témoignage 3 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <div className="flex items-start mb-6">
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face" 
+                        alt="Fatou Traoré"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>FT</span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500 rounded-full border-2 border-white"></div>
+                  </div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <h4 className="font-semibold text-gray-900">Fatou Traoré</h4>
+                  <p className="text-sm text-gray-600">Propriétaire, Beauté Naturelle</p>
+                </div>
+              </div>
+              <blockquote className="text-gray-700 italic mb-6">
+                "Grâce à SimpShopy, j'ai pu lancer ma boutique de cosmétiques naturels en une journée. Le système de paiement multi-devises m'a ouvert de nouveaux marchés internationaux."
+              </blockquote>
+              <div className="flex items-center text-sm text-gray-500">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="ml-2">5.0</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12 sm:mt-16">
+            <Button 
+              onClick={handleSmartRedirect}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Rejoignez nos entrepreneurs réussis
+            </Button>
           </div>
         </div>
       </section>
