@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Canal global partagé pour éviter les souscriptions multiples
 let globalChannel: any = null;
 let globalStoreId: string | null = null;
-let subscribers = new Set<() => void>();
+const subscribers = new Set<() => void>();
 
 const setupGlobalChannel = (storeId: string) => {
   // Si le canal existe déjà pour ce store, ne rien faire
@@ -89,22 +89,22 @@ export const useStoreCurrency = (storeId?: string) => {
   useEffect(() => {
     if (isValidStoreId && storeId) {
       // Log seulement la première fois
-      if (import.meta.env.DEV && !window.__STOREID_VALID_LOGGED__) {
+      if (import.meta.env.DEV && !(window as any).__STOREID_VALID_LOGGED__) {
         console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
-        window.__STOREID_VALID_LOGGED__ = true;
+        (window as any).__STOREID_VALID_LOGGED__ = true;
       }
       refetchCurrency();
       refetchSettings();
     }
-  }, [isValidStoreId, storeId, user?.id]); // Supprimé refetchCurrency et refetchSettings des dépendances
+  }, [isValidStoreId, storeId, user?.id, refetchCurrency, refetchSettings]);
 
   // Rafraîchissement périodique pour s'assurer que les données sont à jour
   useEffect(() => {
     if (!isValidStoreId || !storeId) return;
 
     const interval = setInterval(() => {
-      // Log seulement en développement et moins fréquemment
-      if (import.meta.env.DEV && Math.random() < 0.1) { // 10% de chance de log
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) { // 1% de chance de log
         console.log('🔄 Rafraîchissement périodique des données de devise');
       }
       refetchCurrency();
@@ -112,12 +112,14 @@ export const useStoreCurrency = (storeId?: string) => {
     }, 30000); // Rafraîchir toutes les 30 secondes
 
     return () => clearInterval(interval);
-  }, [isValidStoreId, storeId, user?.id]); // Supprimé refetchCurrency et refetchSettings des dépendances
+  }, [isValidStoreId, storeId, user?.id, refetchCurrency, refetchSettings]);
 
   // Configuration du temps réel pour les changements de devise
   useEffect(() => {
     if (!isValidStoreId) {
-      console.log('🔕 Pas de storeId valide, pas de configuration temps réel');
+      if (import.meta.env.DEV) {
+        console.log('🔕 Pas de storeId valide, pas de configuration temps réel');
+      }
       return;
     }
 
@@ -126,7 +128,9 @@ export const useStoreCurrency = (storeId?: string) => {
 
     // Fonction de callback pour ce composant
     const handleCurrencyChange = () => {
-      console.log('🔄 Rafraîchissement des données de devise pour le composant');
+      if (import.meta.env.DEV) {
+        console.log('🔄 Rafraîchissement des données de devise pour le composant');
+      }
       // Forcer le refetch immédiat
       refetchCurrency();
       refetchSettings();
@@ -160,7 +164,7 @@ export const useStoreCurrency = (storeId?: string) => {
         cleanupGlobalChannel();
       }
     };
-  }, [storeId, isValidStoreId, user?.id]); // Supprimé refetchCurrency, refetchSettings et toast des dépendances
+  }, [storeId, isValidStoreId, user?.id, refetchCurrency, refetchSettings, queryClient, toast]);
 
   // Mutation pour mettre à jour la devise
   const updateCurrencyMutation = useMutation({
@@ -169,7 +173,9 @@ export const useStoreCurrency = (storeId?: string) => {
       return StoreCurrencyService.updateStoreCurrency(storeId!, newCurrency);
     },
     onSuccess: () => {
-      console.log('🔄 Mutation réussie, invalidation des requêtes de devise');
+      if (import.meta.env.DEV) {
+        console.log('🔄 Mutation réussie, invalidation des requêtes de devise');
+      }
       // Invalider toutes les requêtes liées à la devise pour ce store
       queryClient.invalidateQueries({ 
         queryKey: ['store-currency', storeId],
@@ -252,12 +258,17 @@ export const useStoreCurrency = (storeId?: string) => {
 
   // Fonction pour formater un prix
   const formatPrice = (amount: number, options?: { showSymbol?: boolean; showCode?: boolean }) => {
+    // Gérer les cas où amount est undefined, null ou 0
+    if (amount === undefined || amount === null || amount === 0) {
+      return '0,00';
+    }
+    
     // Si pas de storeId valide ou pas de devise récupérée, utiliser XOF par défaut
     const currentCurrency = (isValidStoreId && currency) ? currency : 'XOF';
     
-    // Utiliser formatConvertedPrice pour faire la conversion automatique
-    // On suppose que les montants sont stockés en XOF par défaut
-    return formatConvertedPrice(amount, 'XOF', options);
+    // Formater directement le montant sans conversion
+    // Les montants sont déjà dans la bonne devise
+    return formatCurrency(amount, currentCurrency, options);
   };
 
   // Fonction pour convertir et formater un prix (pour les montants stockés en XOF)
@@ -271,7 +282,7 @@ export const useStoreCurrency = (storeId?: string) => {
     }
 
     // Taux de change approximatifs (en production, utiliser une API de change)
-    const rates: Record<Currency, number> = {
+    const rates: Record<string, number> = {
       XOF: 1,        // Base: Franc CFA BCEAO
       XAF: 1,        // Parité avec XOF
       EUR: 0.00152,  // 1 EUR ≈ 655 XOF

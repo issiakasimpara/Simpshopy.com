@@ -207,7 +207,8 @@ const checkSecurityHeaders = (): SecurityCheck => {
  * 🔍 Afficher le rapport de sécurité dans la console
  */
 export const logSecurityReport = (): void => {
-  if (import.meta.env.DEV) {
+  // Log seulement en développement et très rarement pour éviter la pollution
+  if (import.meta.env.DEV && Math.random() < 0.01) { // 1% de chance de log
     const report = validateSecurity();
     
     console.group('🔐 RAPPORT DE SÉCURITÉ');

@@ -76,7 +76,10 @@ const StoreConfig = () => {
   // Rafraîchir les données quand l'utilisateur change ou quand on arrive sur la page
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('User changed or page loaded, refreshing stores...');
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('User changed or page loaded, refreshing stores...');
+      }
       refetchStores();
     }
   }, [user, authLoading, refetchStores]);

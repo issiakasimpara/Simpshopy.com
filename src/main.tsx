@@ -18,13 +18,13 @@ import { systemDiagnostic } from './utils/systemDiagnostic'
 // 🗄️ Migration de la base de données
 import { checkMarketSettingsTable, applyMarketSettingsMigration } from './scripts/applyMarketSettingsMigration'
 
-// 🔍 Exécuter la validation de sécurité en développement uniquement
-if (import.meta.env.DEV) {
+// 🔍 Exécuter la validation de sécurité en développement uniquement (réduit)
+if (import.meta.env.DEV && Math.random() < 0.1) {
   logSecurityReport();
 
-  // ⚡ Monitoring de performance (développement uniquement)
+  // ⚡ Monitoring de performance (développement uniquement - réduit)
   try {
-    const stopPerformanceReporting = performanceManager.startPeriodicReporting(120000);
+    const stopPerformanceReporting = performanceManager.startPeriodicReporting(300000); // 5 minutes au lieu de 2
     
     // Nettoyer au démontage
     window.addEventListener('beforeunload', () => {

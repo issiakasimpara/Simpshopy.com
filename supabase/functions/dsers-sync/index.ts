@@ -78,9 +78,9 @@ serve(async (req) => {
       console.error('❌ Erreur création log sync:', syncLogError)
     }
 
-    let itemsProcessed = 0
-    let itemsSucceeded = 0
-    let itemsFailed = 0
+    const itemsProcessed = 0
+    const itemsSucceeded = 0
+    const itemsFailed = 0
     const errors = []
 
     try {

@@ -129,36 +129,13 @@ const StorefrontOptimized = () => {
   // Optimisation 5: Récupération des données de branding mémorisée
   const brandingData = useBranding(template);
 
-
-
-  // Optimisation 7: Calcul des blocs mémorisé
+  // Optimisation 6: Calcul des blocs mémorisé
   const currentPageBlocks = useMemo(() => {
     if (!template?.pages?.[currentPage]) return [];
     return template.pages[currentPage].sort((a, b) => a.order - b.order);
   }, [template, currentPage]);
 
-  // Gestion des erreurs
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold mb-2">Boutique introuvable</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
-          <Button onClick={() => navigate('/')} variant="outline">
-            Retour à l'accueil
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // État de chargement
-  if (isLoading || !store) {
-    return <StorefrontLoader />;
-  }
-
-  // Optimisation 8: Navigation mémorisée
+  // Optimisation 7: Navigation mémorisée
   const renderNavigation = useMemo(() => (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -167,7 +144,7 @@ const StorefrontOptimized = () => {
           <div className="flex items-center">
             <Store className="h-8 w-8 text-blue-600 mr-2" />
             <span className="text-xl font-bold text-gray-900">
-              {store.name || 'Ma Boutique'}
+              {store?.name || 'Ma Boutique'}
             </span>
           </div>
 
@@ -209,7 +186,7 @@ const StorefrontOptimized = () => {
             >
               <ShoppingBag className="h-4 w-4 mr-2" />
               Panier
-              {products.length > 0 && (
+              {products?.length > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   {products.length}
                 </span>
@@ -264,7 +241,28 @@ const StorefrontOptimized = () => {
         )}
       </div>
     </nav>
-  ), [store.name, currentPage, products.length, mobileMenuOpen, handlePageNavigation, handleCartNavigation]);
+  ), [store?.name, currentPage, products?.length, mobileMenuOpen, handlePageNavigation, handleCartNavigation, setMobileMenuOpen]);
+
+  // Gestion des erreurs
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">❌</div>
+          <h2 className="text-2xl font-bold mb-2">Boutique introuvable</h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <Button onClick={() => navigate('/')} variant="outline">
+            Retour à l'accueil
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // État de chargement
+  if (isLoading || !store) {
+    return <StorefrontLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

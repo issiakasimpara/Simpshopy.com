@@ -136,7 +136,7 @@ Write-Host "`n🔑 Étape 4: Vérification des variables d'environnement" -Foreg
 Write-Host "Dans Supabase Dashboard > Settings > Environment Variables:" -ForegroundColor Gray
 Write-Host "Vérifiez que ces variables sont présentes:" -ForegroundColor Gray
 Write-Host "- MAILCHIMP_CLIENT_ID=477462211553" -ForegroundColor Gray
-Write-Host "- MAILCHIMP_CLIENT_SECRET=83224e7dde454761bd0a29b9bf34b52a63d46b58f00f23cb64" -ForegroundColor Gray
+Write-Host "- MAILCHIMP_CLIENT_SECRET=***HIDDEN***" -ForegroundColor Gray
 Write-Host "- MAILCHIMP_OAUTH_URL=https://login.mailchimp.com/oauth2/authorize" -ForegroundColor Gray
 Write-Host "- MAILCHIMP_TOKEN_URL=https://login.mailchimp.com/oauth2/token" -ForegroundColor Gray
 Write-Host "- MAILCHIMP_API_URL=https://us1.api.mailchimp.com/3.0" -ForegroundColor Gray

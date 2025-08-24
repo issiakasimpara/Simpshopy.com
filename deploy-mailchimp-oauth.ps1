@@ -19,7 +19,7 @@ Write-Host "   IMPORTANT: Va sur https://supabase.com/dashboard/project/$PROJECT
 Write-Host "   Ajoute ces variables:" -ForegroundColor White
 Write-Host ""
 Write-Host "   MAILCHIMP_CLIENT_ID=477462211553" -ForegroundColor Green
-Write-Host "   MAILCHIMP_CLIENT_SECRET=83224e7dde454761bd0a29b9bf34b52a63d46b58f00f23cb64" -ForegroundColor Green
+Write-Host "   MAILCHIMP_CLIENT_SECRET=***HIDDEN***" -ForegroundColor Green
 Write-Host "   MAILCHIMP_OAUTH_URL=https://login.mailchimp.com/oauth2/authorize" -ForegroundColor Green
 Write-Host "   MAILCHIMP_TOKEN_URL=https://login.mailchimp.com/oauth2/token" -ForegroundColor Green
 Write-Host "   MAILCHIMP_API_URL=https://us1.api.mailchimp.com/3.0" -ForegroundColor Green

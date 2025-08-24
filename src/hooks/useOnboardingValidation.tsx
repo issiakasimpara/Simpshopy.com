@@ -18,25 +18,28 @@ export const useOnboardingValidation = (
 
     // Validation par étape
     switch (currentStep) {
-      case 1: // Expérience
+      case 1: { // Expérience
         if (!onboardingData.experience_level) {
           errors.push('Veuillez sélectionner votre niveau d\'expérience');
         }
         break;
+      }
 
-      case 2: // Type de business
+      case 2: { // Type de business
         if (!onboardingData.business_type) {
           errors.push('Veuillez sélectionner le type de votre business');
         }
         break;
+      }
 
-      case 3: // Secteur
+      case 3: { // Secteur
         if (!onboardingData.sector) {
           errors.push('Veuillez sélectionner votre secteur d\'activité');
         }
         break;
+      }
 
-      case 4: // Configuration géographique
+      case 4: { // Configuration géographique
         if (!onboardingData.country_code) {
           errors.push('Veuillez sélectionner votre pays');
         }
@@ -44,8 +47,9 @@ export const useOnboardingValidation = (
           errors.push('Veuillez sélectionner votre devise');
         }
         break;
+      }
 
-      case 5: // Résumé
+      case 5: { // Résumé
         // Vérifier que toutes les données sont présentes
         const requiredFields = [
           'experience_level',
@@ -61,6 +65,7 @@ export const useOnboardingValidation = (
           errors.push('Certaines informations sont manquantes. Veuillez revenir aux étapes précédentes.');
         }
         break;
+      }
     }
 
     // Validations croisées

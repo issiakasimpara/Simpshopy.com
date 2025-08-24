@@ -41,7 +41,7 @@ serve(async (req) => {
     }
 
     // Valider l'URL AliExpress
-    const aliExpressPattern = /^https?:\/\/(www\.)?aliexpress\.com\/item\/[^\/]+\.html/
+    const aliExpressPattern = /^https?:\/\/(www\.)?aliexpress\.com\/item\/[^/]+\.html/
     if (!aliExpressPattern.test(ali_express_url)) {
       return new Response(
         JSON.stringify({ 
@@ -56,7 +56,7 @@ serve(async (req) => {
     }
 
     // Extraire l'ID produit de l'URL
-    const productIdMatch = ali_express_url.match(/\/item\/([^\/]+)\.html/)
+    const productIdMatch = ali_express_url.match(/\/item\/([^/]+)\.html/)
     if (!productIdMatch) {
       return new Response(
         JSON.stringify({ 

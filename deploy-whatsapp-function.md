@@ -30,7 +30,7 @@ L'erreur CORS indique que la fonction Edge `whatsapp-send` n'est pas accessible 
 1. **Dans Supabase Dashboard** → **Settings** → **Edge Functions**
 2. **Ajoutez ces variables :**
    ```
-   GUPSHUP_API_KEY=sk_5cb3dbfcab134d4cade6b41b4306c71f
+   GUPSHUP_API_KEY=your_gupshup_api_key_here
    GUPSHUP_APP_NAME=MALIBASHOPY
    GUPSHUP_CHANNEL_ID=whatsapp
    GUPSHUP_API_URL=https://api.gupshup.io/wa/api/v1

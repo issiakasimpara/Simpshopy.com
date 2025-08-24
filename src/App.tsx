@@ -4,9 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
-import { useGlobalRealtimeCleanup } from './hooks/useOptimizedRealtime';
-import { useGlobalSessionCleanup } from './hooks/useSessionOptimizer';
-import { useCartSessionsCleanup } from './hooks/useOptimizedCartSessions';
+// Imports optimisés - hooks de nettoyage supprimés pour réduire la taille du bundle
 import { useSessionOptimizer } from './hooks/useSessionOptimizer';
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
@@ -42,14 +40,11 @@ const DsersIntegration = lazy(() => import('./pages/integrations/DsersIntegratio
 const MailchimpIntegration = lazy(() => import('./pages/integrations/MailchimpIntegration'));
 const IntegrationDetailPage = lazy(() => import('./pages/IntegrationDetailPage'));
 const OnboardingWizard = lazy(() => import('./components/onboarding/OnboardingWizard'));
-const Demo = lazy(() => import('./pages/Demo'));
-const TestLogo = lazy(() => import('./pages/TestLogoPlacement'));
 const OptimizedTemplateEditor = lazy(() => import('./components/site-builder/OptimizedTemplateEditor'));
 const TemplatePreview = lazy(() => import('./components/site-builder/TemplatePreview'));
-const PreloadingDemo = lazy(() => import('./components/PreloadingDemo'));
 
 // Pages publiques SEO optimisées (chargement synchrone)
-const Home = lazy(() => import('./pages/Home')); // Main homepage
+import Home from './pages/Home'; // Main homepage - IMPORT SYNCHRONE pour performance
 const Features = lazy(() => import('./pages/Features'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const TestimonialsPublic = lazy(() => import('./pages/Testimonials'));
@@ -273,22 +268,7 @@ function App() {
                   </Suspense>
                 } />
                 
-                {/* Routes de démonstration */}
-                <Route path="/demo" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Demo />
-                  </Suspense>
-                } />
-                <Route path="/test-logo" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <TestLogo />
-                  </Suspense>
-                } />
-                <Route path="/preloading-demo" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <PreloadingDemo />
-                  </Suspense>
-                } />
+                                 {/* Routes de démonstration - SUPPRIMÉES pour production */}
                 
                 {/* Routes d'éditeur de template */}
                 <Route path="/store-config/site-builder/editor/:templateId" element={

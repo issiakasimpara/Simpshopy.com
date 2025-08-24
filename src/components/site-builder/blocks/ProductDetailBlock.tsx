@@ -45,6 +45,20 @@ const ProductDetailBlock = ({
   // TOUJOURS appeler useProductVariants avec une valeur stable
   const { variants } = useProductVariants(stableProductId);
 
+  // TOUJOURS appeler useProductVariantSelection AVANT tout early return
+  const {
+    selectedVariant,
+    selectedAttributes,
+    selectAttribute,
+    getCurrentPrice,
+    getCurrentComparePrice,
+    getCurrentStock,
+    isInStock
+  } = useProductVariantSelection({
+    product: products.find(p => p.id === (productId || firstProductId)) || null,
+    variants: variants || []
+  });
+
   try {
   
   console.log('ProductDetailBlock - Debug info:');
@@ -106,20 +120,6 @@ const ProductDetailBlock = ({
     console.log('ProductDetailBlock - No product found');
     return <ProductDetailEmptyState productId={productId} />;
   }
-  
-  // Gérer la sélection des variantes
-  const {
-    selectedVariant,
-    selectedAttributes,
-    selectAttribute,
-    getCurrentPrice,
-    getCurrentComparePrice,
-    getCurrentStock,
-    isInStock
-  } = useProductVariantSelection({
-    product: selectedProduct,
-    variants: variants || []
-  });
 
   // Gérer le changement d'image basé sur la variante
   const handleVariantImageChange = (images: string[]) => {

@@ -1,6 +1,6 @@
 // Types communs pour améliorer la cohérence du projet
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   success: boolean;
@@ -66,7 +66,7 @@ export interface Store {
   merchant_id: string;
   slug?: string;
   status: 'draft' | 'active' | 'suspended';
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -75,8 +75,8 @@ export interface Store {
 export interface TemplateBlock {
   id: string;
   type: string;
-  data: Record<string, any>;
-  style?: Record<string, any>;
+  data: Record<string, unknown>;
+  style?: Record<string, unknown>;
 }
 
 export interface TemplatePage {

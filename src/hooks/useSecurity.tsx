@@ -58,7 +58,7 @@ export const useSecurity = () => {
             error: validateSku(value) ? undefined : 'SKU invalide (3-50 caractères)'
           };
         
-        case 'productName':
+        case 'productName': {
           // Validation sans sanitisation pour permettre les espaces pendant la saisie
           const nameLength = value.length;
           const isValidName = nameLength >= 2 && nameLength <= 200;
@@ -66,8 +66,9 @@ export const useSecurity = () => {
             isValid: isValidName,
             error: isValidName ? undefined : 'Nom invalide (2-200 caractères)'
           };
+        }
         
-        case 'description':
+        case 'description': {
           // Validation sans sanitisation pour permettre les espaces pendant la saisie
           const descLength = value.length;
           const isValidDesc = descLength <= 2000;
@@ -75,19 +76,22 @@ export const useSecurity = () => {
             isValid: isValidDesc,
             error: isValidDesc ? undefined : 'Description trop longue (max 2000 caractères)'
           };
+        }
         
-        case 'uuid':
+        case 'uuid': {
           return {
             isValid: validateUUID(value),
             error: validateUUID(value) ? undefined : 'ID invalide'
           };
+        }
         
-        case 'password':
+        case 'password': {
           const passwordValidation = validatePassword(value);
           return {
             isValid: passwordValidation.isValid,
             error: passwordValidation.isValid ? undefined : passwordValidation.errors[0]
           };
+        }
         
         default:
           return { isValid: true };

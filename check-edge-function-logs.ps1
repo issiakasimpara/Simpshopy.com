@@ -22,7 +22,7 @@ Write-Host "1. Allez sur : https://supabase.com/dashboard/project/grutldacuowplo
 Write-Host "2. Cliquez sur 'Environment Variables'" -ForegroundColor White
 Write-Host "3. Vérifiez que ces variables existent :" -ForegroundColor White
 Write-Host "   - MAILCHIMP_CLIENT_ID=477462211553" -ForegroundColor Gray
-Write-Host "   - MAILCHIMP_CLIENT_SECRET=83224e7dde454761bd0a29b9bf34b52a63d46b58f00f23cb64" -ForegroundColor Gray
+Write-Host "   - MAILCHIMP_CLIENT_SECRET=***HIDDEN***" -ForegroundColor Gray
 Write-Host "   - SITE_URL=https://simpshopy.com" -ForegroundColor Gray
 
 Write-Host "`n🚀 Une fois les variables vérifiées, redéployez l'Edge Function :" -ForegroundColor Green

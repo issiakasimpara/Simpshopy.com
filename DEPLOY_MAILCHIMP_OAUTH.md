@@ -9,7 +9,7 @@ Va sur : https://supabase.com/dashboard/project/grutldacuowplosarucp/settings/en
 Ajoute ces variables :
 ```bash
 MAILCHIMP_CLIENT_ID=477462211553
-MAILCHIMP_CLIENT_SECRET=83224e7dde454761bd0a29b9bf34b52a63d46b58f00f23cb64
+MAILCHIMP_CLIENT_SECRET=your_client_secret_here
 MAILCHIMP_OAUTH_URL=https://login.mailchimp.com/oauth2/authorize
 MAILCHIMP_TOKEN_URL=https://login.mailchimp.com/oauth2/token
 MAILCHIMP_API_URL=https://us1.api.mailchimp.com/3.0

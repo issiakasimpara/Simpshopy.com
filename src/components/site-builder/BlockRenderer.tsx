@@ -56,7 +56,10 @@ const BlockRenderer = memo(({
   onNavigate,
   products
 }: BlockRendererProps) => {
-  console.log('BlockRenderer - Rendering block:', block.type, 'with productId:', productId);
+  // Log seulement en développement et très rarement
+  if (import.meta.env.DEV && Math.random() < 0.01) {
+    console.log('BlockRenderer - Rendering block:', block.type, 'with productId:', productId);
+  }
 
   const blockProps = {
     block,
@@ -81,7 +84,10 @@ const BlockRenderer = memo(({
     case 'products':
       return <ProductsBlock {...blockProps} />;
     case 'product-detail':
-      console.log('BlockRenderer - Rendering ProductDetailBlock with productId:', productId);
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('BlockRenderer - Rendering ProductDetailBlock with productId:', productId);
+      }
       return <ProductDetailBlock {...blockProps} products={products} />;
     case 'text-image':
       return <TextImageBlock {...blockProps} />;

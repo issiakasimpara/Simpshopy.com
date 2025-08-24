@@ -181,7 +181,7 @@ const Checkout = () => {
       // 3. Filtrer les méthodes par pays de l'utilisateur
       console.log('🎯 Filtrage intelligent pour le pays:', userCountryCode);
 
-      let availableMethods: any[] = [];
+      const availableMethods: any[] = [];
 
       if (methods && methods.length > 0) {
         for (const method of methods as any[]) {

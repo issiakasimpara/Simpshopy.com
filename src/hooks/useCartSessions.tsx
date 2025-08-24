@@ -36,9 +36,15 @@ export const useCartSessions = () => {
     if (!currentSessionId) {
       currentSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('cart_session_id', currentSessionId);
-      console.log('🆔 Nouvelle session créée:', currentSessionId);
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('🆔 Nouvelle session créée:', currentSessionId);
+      }
     } else {
-      console.log('🆔 Session existante récupérée:', currentSessionId);
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('🆔 Session existante récupérée:', currentSessionId);
+      }
     }
     return currentSessionId;
   };

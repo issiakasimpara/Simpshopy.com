@@ -241,9 +241,12 @@ ${this.getRecommendations().join('\n')}
     if (!this.config.enableLogging) return () => {};
     
     const interval = setInterval(() => {
-      console.group('⚡ PERFORMANCE REPORT');
-      console.log(this.getReport());
-      console.groupEnd();
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) { // 5% de chance de log
+        console.group('⚡ PERFORMANCE REPORT');
+        console.log(this.getReport());
+        console.groupEnd();
+      }
       this.cleanup();
     }, intervalMs);
 

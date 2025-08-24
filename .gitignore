@@ -23,8 +23,15 @@ dist-ssr
 # 🔐 SÉCURITÉ - Clés et secrets
 *.key
 *.pem
+*.p12
+*.pfx
+*.crt
+*.cert
 secrets/
 config/secrets.json
+api-keys.txt
+secrets.json
+credentials.json
 
 # Editor directories and files
 .vscode/*

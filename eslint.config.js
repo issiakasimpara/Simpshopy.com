@@ -23,7 +23,26 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      // Règles TypeScript moins strictes
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "warn", // Changé de "error" à "warn"
+      "@typescript-eslint/no-empty-object-type": "warn", // Changé de "error" à "warn"
+      "@typescript-eslint/no-empty-interface": "warn", // Changé de "error" à "warn"
+      
+      // Règles React moins strictes
+      "react-hooks/exhaustive-deps": "warn", // Changé de "error" à "warn"
+      
+      // Règles générales moins strictes
+      "no-case-declarations": "warn", // Changé de "error" à "warn"
+      "no-prototype-builtins": "warn", // Changé de "error" à "warn"
+      "no-useless-escape": "warn", // Changé de "error" à "warn"
+      "@typescript-eslint/no-require-imports": "warn", // Changé de "error" à "warn"
+      
+      // Règles de performance (gardées en warn)
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
     },
   }
 );

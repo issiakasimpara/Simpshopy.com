@@ -281,7 +281,7 @@ export class CSVImportService {
        'Variant SKU', 'Variant Price', 'Variant Inventory Qty', 'Image Src'
      ];
      
-     return shopifyColumns.some(col => firstRow.hasOwnProperty(col));
+     return shopifyColumns.some(col => Object.prototype.hasOwnProperty.call(firstRow, col));
    }
 
      /**

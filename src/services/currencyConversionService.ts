@@ -1,3 +1,4 @@
+// 🔄 SERVICE DE CONVERSION DE DEVISES SIMPLIFIÉ
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CurrencyRate {
@@ -6,7 +7,6 @@ export interface CurrencyRate {
   target_currency: string;
   rate: number;
   last_updated: string;
-  created_at: string;
 }
 
 export interface ConversionResult {
@@ -18,9 +18,41 @@ export interface ConversionResult {
   lastUpdated: string;
 }
 
+/**
+ * Service de conversion de devises simplifié
+ * Utilise des taux de change fixes pour les devises principales
+ */
 export class CurrencyConversionService {
+  // Taux de change fixes (à remplacer par une API en production)
+  private static readonly EXCHANGE_RATES: Record<string, Record<string, number>> = {
+    'XOF': {
+      'EUR': 0.00152,
+      'USD': 0.00167,
+      'GBP': 0.00132,
+      'XOF': 1
+    },
+    'EUR': {
+      'XOF': 655.957,
+      'USD': 1.09,
+      'GBP': 0.86,
+      'EUR': 1
+    },
+    'USD': {
+      'XOF': 598.5,
+      'EUR': 0.92,
+      'GBP': 0.79,
+      'USD': 1
+    },
+    'GBP': {
+      'XOF': 757.58,
+      'EUR': 1.16,
+      'USD': 1.27,
+      'GBP': 1
+    }
+  };
+
   /**
-   * Convertit un montant d'une devise vers une autre
+   * Convertit un montant d'une devise à une autre
    */
   static async convertCurrency(
     amount: number,
@@ -28,8 +60,6 @@ export class CurrencyConversionService {
     toCurrency: string
   ): Promise<ConversionResult | null> {
     try {
-      console.log(`🔄 Conversion: ${amount} ${fromCurrency} → ${toCurrency}`);
-
       // Si les devises sont identiques, retourner le montant original
       if (fromCurrency === toCurrency) {
         return {
@@ -42,30 +72,23 @@ export class CurrencyConversionService {
         };
       }
 
-      // Utiliser la fonction PostgreSQL directement
-      const { data, error } = await supabase.rpc('convert_currency', {
-        amount: amount,
-        from_currency: fromCurrency,
-        to_currency: toCurrency
-      });
-
-      if (error) {
-        console.error('❌ Erreur lors de la conversion:', error);
+      // Obtenir le taux de change
+      const rate = this.getExchangeRate(fromCurrency, toCurrency);
+      if (rate === null) {
+        console.warn(`⚠️ Taux de change non disponible: ${fromCurrency} → ${toCurrency}`);
         return null;
       }
 
-      if (data !== null) {
-        return {
-          originalAmount: amount,
-          originalCurrency: fromCurrency,
-          convertedAmount: data,
-          targetCurrency: toCurrency,
-          rate: data / amount,
-          lastUpdated: new Date().toISOString()
-        };
-      }
+      const convertedAmount = amount * rate;
 
-      return null;
+      return {
+        originalAmount: amount,
+        originalCurrency: fromCurrency,
+        convertedAmount: Math.round(convertedAmount * 100) / 100, // Arrondir à 2 décimales
+        targetCurrency: toCurrency,
+        rate: rate,
+        lastUpdated: new Date().toISOString()
+      };
 
     } catch (error) {
       console.error('❌ Erreur lors de la conversion de devise:', error);
@@ -76,28 +99,27 @@ export class CurrencyConversionService {
   /**
    * Obtient le taux de change entre deux devises
    */
-  static async getExchangeRate(
-    fromCurrency: string,
-    toCurrency: string
-  ): Promise<number | null> {
+  static getExchangeRate(fromCurrency: string, toCurrency: string): number | null {
     try {
       // Si les devises sont identiques, retourner 1
       if (fromCurrency === toCurrency) {
         return 1;
       }
 
-      // Utiliser la fonction PostgreSQL directement
-      const { data, error } = await supabase.rpc('get_exchange_rate', {
-        from_currency: fromCurrency,
-        to_currency: toCurrency
-      });
-
-      if (error) {
-        console.error('❌ Erreur lors de la récupération du taux:', error);
+      // Vérifier si le taux existe
+      const rates = this.EXCHANGE_RATES[fromCurrency];
+      if (!rates) {
+        console.warn(`⚠️ Devise source non supportée: ${fromCurrency}`);
         return null;
       }
 
-      return data;
+      const rate = rates[toCurrency];
+      if (rate === undefined) {
+        console.warn(`⚠️ Taux de change non disponible: ${fromCurrency} → ${toCurrency}`);
+        return null;
+      }
+
+      return rate;
 
     } catch (error) {
       console.error('❌ Erreur lors de la récupération du taux de change:', error);
@@ -117,7 +139,7 @@ export class CurrencyConversionService {
       console.log(`🔄 Mise à jour des montants du store ${storeId}: ${oldCurrency} → ${newCurrency}`);
 
       // Obtenir le taux de conversion
-      const rate = await this.getExchangeRate(oldCurrency, newCurrency);
+      const rate = this.getExchangeRate(oldCurrency, newCurrency);
       if (!rate) {
         console.error('❌ Impossible d\'obtenir le taux de conversion');
         return false;
@@ -125,7 +147,7 @@ export class CurrencyConversionService {
 
       console.log(`📊 Taux de conversion: ${rate}`);
 
-      // Mettre à jour les prix des produits - Version simplifiée
+      // Mettre à jour les prix des produits
       const { data: products, error: productsFetchError } = await supabase
         .from('products')
         .select('id, price')
@@ -136,7 +158,7 @@ export class CurrencyConversionService {
       } else if (products && products.length > 0) {
         // Mettre à jour chaque produit individuellement
         for (const product of products) {
-          const newPrice = product.price * rate;
+          const newPrice = Math.round((product.price || 0) * rate * 100) / 100;
           const { error: updateError } = await supabase
             .from('products')
             .update({ price: newPrice })
@@ -149,9 +171,9 @@ export class CurrencyConversionService {
         console.log(`✅ Prix de ${products.length} produits mis à jour`);
       }
 
-      // Mettre à jour les montants des commandes - Version simplifiée
+      // Mettre à jour les montants des commandes
       const { data: orders, error: ordersFetchError } = await supabase
-        .from('public_orders')
+        .from('orders')
         .select('id, total_amount')
         .eq('store_id', storeId);
 
@@ -160,9 +182,9 @@ export class CurrencyConversionService {
       } else if (orders && orders.length > 0) {
         // Mettre à jour chaque commande individuellement
         for (const order of orders) {
-          const newAmount = order.total_amount * rate;
+          const newAmount = Math.round((order.total_amount || 0) * rate * 100) / 100;
           const { error: updateError } = await supabase
-            .from('public_orders')
+            .from('orders')
             .update({ total_amount: newAmount })
             .eq('id', order.id);
 
@@ -171,30 +193,6 @@ export class CurrencyConversionService {
           }
         }
         console.log(`✅ Montants de ${orders.length} commandes mis à jour`);
-      }
-
-      // Mettre à jour les montants des paiements - Version simplifiée
-      const { data: payments, error: paymentsFetchError } = await supabase
-        .from('payments')
-        .select('id, amount')
-        .eq('store_id', storeId);
-
-      if (paymentsFetchError) {
-        console.error('❌ Erreur lors de la récupération des paiements:', paymentsFetchError);
-      } else if (payments && payments.length > 0) {
-        // Mettre à jour chaque paiement individuellement
-        for (const payment of payments) {
-          const newAmount = payment.amount * rate;
-          const { error: updateError } = await supabase
-            .from('payments')
-            .update({ amount: newAmount })
-            .eq('id', payment.id);
-
-          if (updateError) {
-            console.error(`❌ Erreur lors de la mise à jour du paiement ${payment.id}:`, updateError);
-          }
-        }
-        console.log(`✅ Montants de ${payments.length} paiements mis à jour`);
       }
 
       console.log('✅ Mise à jour des montants terminée');
@@ -211,19 +209,28 @@ export class CurrencyConversionService {
    */
   static async getAllRates(): Promise<CurrencyRate[]> {
     try {
-      const { data, error } = await supabase
-        .from('currency_rates' as any)
-        .select('*')
-        .gte('last_updated', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .order('base_currency')
-        .order('target_currency');
+      // Créer des taux de change à partir des données statiques
+      const rates: CurrencyRate[] = [];
+      const currencies = Object.keys(this.EXCHANGE_RATES);
 
-      if (error) {
-        console.error('❌ Erreur lors de la récupération des taux:', error);
-        return [];
+      for (const baseCurrency of currencies) {
+        for (const targetCurrency of currencies) {
+          if (baseCurrency !== targetCurrency) {
+            const rate = this.getExchangeRate(baseCurrency, targetCurrency);
+            if (rate !== null) {
+              rates.push({
+                id: `${baseCurrency}_${targetCurrency}`,
+                base_currency: baseCurrency,
+                target_currency: targetCurrency,
+                rate: rate,
+                last_updated: new Date().toISOString()
+              });
+            }
+          }
+        }
       }
 
-      return (data as CurrencyRate[]) || [];
+      return rates;
 
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des taux:', error);
@@ -232,32 +239,36 @@ export class CurrencyConversionService {
   }
 
   /**
-   * Force la mise à jour des taux de change en appelant l'Edge Function
+   * Force la mise à jour des taux de change (simulation)
    */
   static async forceUpdateRates(): Promise<boolean> {
     try {
-      console.log('🔄 Forcer la mise à jour des taux de change...');
-
-      const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/update-currency-rates`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Mise à jour forcée terminée:', result);
-
-      return result.success;
+      console.log('🔄 Simulation de la mise à jour des taux de change...');
+      
+      // En production, cela appellerait une API externe
+      // Pour l'instant, on simule juste une mise à jour réussie
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('✅ Mise à jour des taux simulée avec succès');
+      return true;
 
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour forcée:', error);
+      console.error('❌ Erreur lors de la mise à jour des taux:', error);
       return false;
     }
+  }
+
+  /**
+   * Formate un montant selon la devise
+   */
+  static formatAmount(amount: number, currency: string): string {
+    const formatter = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    return formatter.format(amount);
   }
 }

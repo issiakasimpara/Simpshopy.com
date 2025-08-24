@@ -3,7 +3,7 @@ import { supabase } from '../integrations/supabase/client';
 
 // Cache global pour éviter les configurations répétées
 const sessionConfigCache = new Map<string, boolean>();
-let isInitialized = false;
+  const isInitialized = false;
 
 interface SessionConfig {
   searchPath?: string;

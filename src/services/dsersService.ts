@@ -393,7 +393,7 @@ export class DsersService {
    * Valider une URL AliExpress
    */
   static validateAliExpressUrl(url: string): boolean {
-    const aliExpressPattern = /^https?:\/\/(www\.)?aliexpress\.com\/item\/[^\/]+\.html/;
+    const aliExpressPattern = /^https?:\/\/(www\.)?aliexpress\.com\/item\/[^/]+\.html/;
     return aliExpressPattern.test(url);
   }
 
@@ -401,7 +401,7 @@ export class DsersService {
    * Extraire l'ID produit d'une URL AliExpress
    */
   static extractProductIdFromUrl(url: string): string | null {
-    const match = url.match(/\/item\/([^\/]+)\.html/);
+    const match = url.match(/\/item\/([^/]+)\.html/);
     return match ? match[1] : null;
   }
 }

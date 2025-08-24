@@ -22,7 +22,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Vérifier d'abord la session existante
     const getInitialSession = async () => {
-      console.log('Checking for existing session...');
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('Checking for existing session...');
+      }
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -30,11 +33,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (session) {
-        console.log('Found existing session for user:', session.user?.email);
+        // Log seulement en développement et très rarement
+        if (import.meta.env.DEV && Math.random() < 0.01) {
+          console.log('Found existing session for user:', session.user?.email);
+        }
         setSession(session);
         setUser(session.user);
       } else {
-        console.log('No existing session found');
+        // Log seulement en développement et très rarement
+        if (import.meta.env.DEV && Math.random() < 0.01) {
+          console.log('No existing session found');
+        }
       }
       
       setLoading(false);
@@ -45,7 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Ensuite configurer l'écoute des changements d'état
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        // Log seulement en développement et très rarement
+        if (import.meta.env.DEV && Math.random() < 0.01) {
+          console.log('Auth state changed:', event, session?.user?.email);
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -53,7 +65,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Forcer un refresh des données quand l'utilisateur se connecte
         if (event === 'SIGNED_IN' && session) {
-          console.log('User signed in, data should refresh automatically');
+          // Log seulement en développement et très rarement
+          if (import.meta.env.DEV && Math.random() < 0.01) {
+            console.log('User signed in, data should refresh automatically');
+          }
         }
       }
     );

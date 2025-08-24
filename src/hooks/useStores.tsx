@@ -24,7 +24,10 @@ export const useStores = () => {
         return [];
       }
 
-      console.log('Fetching stores for user:', user.email);
+      // Log seulement en développement et très rarement
+      if (import.meta.env.DEV && Math.random() < 0.01) {
+        console.log('Fetching stores for user:', user.email);
+      }
 
       try {
         // D'abord récupérer le profil de l'utilisateur
@@ -96,7 +99,10 @@ export const useStores = () => {
           throw error;
         }
 
-        console.log('Stores fetched for profile:', profile.id, 'stores:', data);
+        // Log seulement en développement et très rarement
+        if (import.meta.env.DEV && Math.random() < 0.01) {
+          console.log('Stores fetched for profile:', profile.id, 'stores:', data);
+        }
         return data as Store[];
       } catch (error) {
         console.error('Error in stores query:', error);
