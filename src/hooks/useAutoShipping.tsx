@@ -78,7 +78,7 @@ export const useAutoShipping = (storeId?: string) => {
     if (storeId && !isInitialized && !isLoading) {
       createDefaultShippingMethods(storeId);
     }
-  }, [storeId, isInitialized, isLoading]);
+  }, [storeId, isInitialized, isLoading, createDefaultShippingMethods]);
 
   return {
     isInitialized,
@@ -169,7 +169,7 @@ export const useShippingWithAutoSetup = (storeId?: string, countryCode?: string)
 
   useEffect(() => {
     loadShippingMethods();
-  }, [storeId, countryCode]);
+  }, [storeId, countryCode, loadShippingMethods]);
 
   return {
     methods,

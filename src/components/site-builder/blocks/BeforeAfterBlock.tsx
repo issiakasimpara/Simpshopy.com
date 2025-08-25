@@ -90,7 +90,7 @@ const BeforeAfterBlock = ({ block, isEditing = false, viewMode = 'desktop' }: Be
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   return (
     <section

@@ -169,7 +169,7 @@ export class CSVImportService {
 
        // Validation de toutes les lignes (maintenant toujours en format Simpshopy)
        const validationErrors: string[] = [];
-       const validRows: any[] = [];
+       const validRows: Record<string, unknown>[] = [];
 
        processedData.forEach((row, index) => {
          const validation = this.validateProductRow(row, index);

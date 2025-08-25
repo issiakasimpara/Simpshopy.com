@@ -266,7 +266,7 @@ export const useAbandonedCarts = (storeId?: string) => {
     if (storeId) {
       fetchAbandonedCartsStats();
     }
-  }, [storeId]);
+  }, [storeId, fetchAbandonedCartsStats]);
 
   return {
     abandonedCarts,

@@ -7,7 +7,7 @@ import { useToast } from './use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Canal global partagé pour éviter les souscriptions multiples
-let globalChannel: any = null;
+let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 let globalStoreId: string | null = null;
 const subscribers = new Set<() => void>();
 
@@ -89,9 +89,9 @@ export const useStoreCurrency = (storeId?: string) => {
   useEffect(() => {
     if (isValidStoreId && storeId) {
       // Log seulement la première fois
-      if (import.meta.env.DEV && !(window as any).__STOREID_VALID_LOGGED__) {
+      if (import.meta.env.DEV && !(window as unknown as Record<string, unknown>).__STOREID_VALID_LOGGED__) {
         console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
-        (window as any).__STOREID_VALID_LOGGED__ = true;
+        (window as unknown as Record<string, unknown>).__STOREID_VALID_LOGGED__ = true;
       }
       refetchCurrency();
       refetchSettings();
