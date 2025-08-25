@@ -66,14 +66,35 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  // Définir la boutique active
+  // Définir la boutique active avec persistance
   const setStoreId = (newStoreId: string) => {
     console.log('CartContext: setStoreId called with:', newStoreId);
     if (newStoreId !== storeId) {
       setStoreIdState(newStoreId);
+      // Persister le storeId dans localStorage
+      localStorage.setItem('cart_store_id', newStoreId);
       loadCart(newStoreId);
     }
   };
+
+  // Charger automatiquement le panier au démarrage
+  useEffect(() => {
+    const initializeCart = async () => {
+      try {
+        // Récupérer le storeId persistant
+        const savedStoreId = localStorage.getItem('cart_store_id');
+        if (savedStoreId) {
+          console.log('CartContext: Restauration du storeId depuis localStorage:', savedStoreId);
+          setStoreIdState(savedStoreId);
+          await loadCart(savedStoreId);
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation du panier:', error);
+      }
+    };
+
+    initializeCart();
+  }, []);
 
   // Ajouter un article
   const addItem = async (item: CartItem, itemStoreId: string) => {

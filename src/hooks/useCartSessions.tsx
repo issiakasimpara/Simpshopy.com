@@ -29,6 +29,8 @@ export const useCartSessions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const { toast } = useToast();
+  const [lastCallTime, setLastCallTime] = useState<number>(0);
+  const [lastStoreId, setLastStoreId] = useState<string>('');
 
   // Fonction pour générer ou récupérer l'ID de session de manière synchrone
   const getOrCreateSessionId = (): string => {
@@ -69,7 +71,7 @@ export const useCartSessions = () => {
     );
   };
 
-  // Récupérer la session de panier
+  // Récupérer la session de panier avec protection contre les appels répétés
   const getCartSession = async (storeId?: string): Promise<CartSession | null> => {
     // Assurer qu'on a un sessionId, même si l'état n'est pas encore mis à jour
     const currentSessionId = sessionId || getOrCreateSessionId();
@@ -83,10 +85,27 @@ export const useCartSessions = () => {
       console.warn('getCartSession: storeId manquant');
       return null;
     }
+
+    // Protection contre les appels répétés (debounce de 1000ms)
+    const now = Date.now();
+    if (lastStoreId === storeId && now - lastCallTime < 1000) {
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.1) {
+        console.log('getCartSession: Appel ignoré (trop récent)');
+      }
+      return null;
+    }
+
+    setLastCallTime(now);
+    setLastStoreId(storeId);
     
     try {
       setIsLoading(true);
-      console.log('getCartSession: Recherche session', { sessionId: currentSessionId, storeId });
+      
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.1) {
+        console.log('getCartSession: Recherche session', { sessionId: currentSessionId, storeId });
+      }
 
       const { data, error } = await supabase
         .from('cart_sessions')
@@ -106,14 +125,25 @@ export const useCartSessions = () => {
       }
       
       if (data) {
-        console.log('getCartSession: Session trouvée:', data);
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.1) {
+          console.log('getCartSession: Session trouvée avec', data.items?.length || 0, 'articles');
+        }
+        const cartItems = safeConvertToCartItems(data.items);
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.1) {
+          console.log('getCartSession: Articles convertis:', cartItems.length);
+        }
         return {
           ...data,
-          items: safeConvertToCartItems(data.items)
+          items: cartItems
         };
       }
       
-      console.log('getCartSession: Aucune session trouvée');
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.1) {
+        console.log('getCartSession: Aucune session trouvée');
+      }
       return null;
     } catch (error) {
       console.error('Erreur lors de la récupération de la session:', error);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,7 +12,7 @@ export const useAutoShipping = (storeId?: string) => {
   const { toast } = useToast();
 
   // Créer les zones et méthodes complètes pour toute l'Afrique
-  const createDefaultShippingMethods = async (storeId: string) => {
+  const createDefaultShippingMethods = useCallback(async (storeId: string) => {
     console.log('🚀 Création automatique COMPLÈTE pour toute l\'Afrique - Store:', storeId);
 
     try {
@@ -56,8 +56,6 @@ export const useAutoShipping = (storeId?: string) => {
 
       return true;
 
-
-
     } catch (error) {
       console.error('💥 Erreur configuration automatique:', error);
       
@@ -71,7 +69,7 @@ export const useAutoShipping = (storeId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   // Auto-initialisation quand un storeId est fourni
   useEffect(() => {
@@ -95,12 +93,15 @@ export const useShippingWithAutoSetup = (storeId?: string, countryCode?: string)
   const [methods, setMethods] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadShippingMethods = async () => {
+  const loadShippingMethods = useCallback(async () => {
     if (!storeId) return;
 
     try {
       setIsLoading(true);
-      console.log('🚚 Chargement méthodes pour boutique:', storeId);
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) {
+        console.log('🚚 Chargement méthodes pour boutique:', storeId);
+      }
 
       // Récupérer les méthodes de cette boutique
       const { data: shippingMethods, error } = await supabase
@@ -121,7 +122,10 @@ export const useShippingWithAutoSetup = (storeId?: string, countryCode?: string)
         return;
       }
 
-      console.log('✅ Méthodes trouvées:', shippingMethods?.length || 0);
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) {
+        console.log('✅ Méthodes trouvées:', shippingMethods?.length || 0);
+      }
 
       // Normaliser les méthodes pour s'assurer que estimated_days existe
       const normalizedMethods = shippingMethods?.map(method => {
@@ -165,11 +169,11 @@ export const useShippingWithAutoSetup = (storeId?: string, countryCode?: string)
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [storeId]);
 
   useEffect(() => {
     loadShippingMethods();
-  }, [storeId, countryCode, loadShippingMethods]);
+  }, [loadShippingMethods]);
 
   return {
     methods,

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
 import { Trash2, CreditCard, Loader2, Truck, Clock, DollarSign } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,8 +20,8 @@ import { useCartSessions } from '@/hooks/useCartSessions';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 const Checkout = () => {
-  const { items, updateQuantity, removeItem, getTotalPrice, clearCart, storeId: cartStoreId } = useCart();
-  const { saveCartSession } = useCartSessions();
+  const { items, updateQuantity, removeItem, getTotalPrice, clearCart, storeId: cartStoreId, isLoading: cartLoading } = useCart();
+  const { saveCartSession, getCartSession } = useCartSessions();
   const navigate = useNavigate();
   const location = useLocation();
   const { storeSlug } = useParams();
@@ -35,6 +35,7 @@ const Checkout = () => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [currentStoreId, setCurrentStoreId] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [isCheckingCart, setIsCheckingCart] = useState(true);
   
   // Utiliser le storeId du panier en priorité, sinon celui récupéré par getStoreInfo
   const effectiveStoreId = cartStoreId || currentStoreId;
@@ -59,38 +60,8 @@ const Checkout = () => {
     detectedCountryCode
   );
 
-  // Sélectionner automatiquement la première méthode disponible
-  useEffect(() => {
-    if (shippingMethods.length > 0 && !selectedShippingMethod) {
-      setSelectedShippingMethod(shippingMethods[0]);
-      console.log('✅ Première méthode sélectionnée automatiquement:', shippingMethods[0].name);
-    }
-  }, [shippingMethods, selectedShippingMethod]);
-
-  // DEBUG: Afficher les informations de debug
-  useEffect(() => {
-    console.log('🔍 DEBUG CHECKOUT:');
-    console.log('- Store Slug:', storeSlug);
-    console.log('- Cart Store ID:', cartStoreId);
-    console.log('- Current Store ID:', currentStoreId);
-    console.log('- Effective Store ID:', effectiveStoreId);
-    console.log('- Currency from hook:', currency);
-    console.log('- Detected Country:', detectedCountry, detectedCountryCode);
-    console.log('- Shipping Methods:', shippingMethods);
-    console.log('- Is Loading Shipping:', isLoadingShipping);
-    console.log('- Selected Method:', selectedShippingMethod);
-  }, [storeSlug, cartStoreId, currentStoreId, effectiveStoreId, currency, detectedCountry, detectedCountryCode, shippingMethods, isLoadingShipping, selectedShippingMethod]);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleCustomerInfoChange = (field: string, value: string) => {
-    setCustomerInfo(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Détecter automatiquement le pays de l'utilisateur
-  const detectUserCountryForCheckout = async () => {
+  // Fonction pour détecter le pays de l'utilisateur
+  const detectUserCountryForCheckout = useCallback(async () => {
     setIsLoadingLocation(true);
     try {
       const countryCode = await detectUserCountry();
@@ -120,33 +91,237 @@ const Checkout = () => {
     } finally {
       setIsLoadingLocation(false);
     }
-  };
+  }, []);
 
-  // Charger les méthodes de livraison au chargement de la page
-  useEffect(() => {
-    const initializeShipping = async () => {
-      try {
-        // 1. Détecter le pays de l'utilisateur
-        const userCountryCode = await detectUserCountryForCheckout();
+  // Fonction pour récupérer les infos de la boutique
+  const getStoreInfo = useCallback(async () => {
+    if (!storeSlug) {
+      console.log('❌ Pas de storeSlug fourni');
+      return null;
+    }
 
-        // 2. Récupérer les infos de la boutique
-              const storeInfo = await getStoreInfo();
-      if (storeInfo) {
-        setCurrentStoreId(storeInfo.id);
-        console.log('🏪 Store configuré:', storeInfo.id);
+    try {
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) {
+        console.log('🔍 Récupération infos boutique pour slug:', storeSlug);
       }
       
-      // Si on n'a pas de storeId dans le panier, utiliser celui récupéré
-      if (!cartStoreId && storeInfo) {
-        console.log('🔄 Utilisation du storeId récupéré car pas de storeId dans le panier');
+      // Essayer d'abord avec le slug exact
+      const { data: store, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('slug', storeSlug)
+        .single();
+
+      if (error) {
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.05) {
+          console.error('❌ Erreur récupération boutique par slug:', error);
+        }
+        
+        // Si erreur 406, essayer avec une recherche par nom
+        if (error.code === '406') {
+          // Log seulement en développement et rarement
+          if (import.meta.env.DEV && Math.random() < 0.05) {
+            console.log('🔄 Tentative avec recherche par nom...');
+          }
+          const cleanSlug = storeSlug.replace(/-/g, ' ').replace(/---/g, ' ');
+          
+          const { data: storesByName, error: nameError } = await supabase
+            .from('stores')
+            .select('*')
+            .ilike('name', `%${cleanSlug}%`)
+            .limit(1);
+
+          if (nameError) {
+            // Log seulement en développement et rarement
+            if (import.meta.env.DEV && Math.random() < 0.05) {
+              console.error('❌ Erreur recherche par nom:', nameError);
+            }
+          } else if (storesByName && storesByName.length > 0) {
+            // Log seulement en développement et rarement
+            if (import.meta.env.DEV && Math.random() < 0.05) {
+              console.log('✅ Boutique trouvée par nom:', storesByName[0]);
+            }
+            return storesByName[0];
+          }
+        }
+        
+        // Fallback: rechercher la première boutique disponible
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.05) {
+          console.log('🔄 Fallback: recherche première boutique');
+        }
+        const { data: fallbackStore, error: fallbackError } = await supabase
+          .from('stores')
+          .select('*')
+          .limit(1)
+          .single();
+
+        if (fallbackError) {
+          console.error('❌ Erreur fallback boutique:', fallbackError);
+          throw new Error('Aucune boutique disponible');
+        }
+
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.05) {
+          console.log('✅ Boutique fallback:', fallbackStore);
+        }
+        return fallbackStore;
       }
+
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) {
+        console.log('✅ Boutique trouvée:', store);
+      }
+      return store;
+    } catch (error) {
+      console.error('❌ Erreur récupération boutique:', error);
+      throw error;
+    }
+  }, [storeSlug]);
+
+  // Vérifier s'il y a une session de panier valide (avec protection contre les boucles)
+  const checkCartSession = useCallback(async () => {
+    if (!effectiveStoreId) {
+      setIsCheckingCart(false);
+      return;
+    }
+
+    try {
+      setIsCheckingCart(true);
+      const session = await getCartSession(effectiveStoreId);
+      
+      if (session && session.items && session.items.length > 0) {
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.05) {
+          console.log('✅ Session de panier trouvée avec', session.items.length, 'articles');
+        }
+      } else {
+        // Log seulement en développement et rarement
+        if (import.meta.env.DEV && Math.random() < 0.05) {
+          console.log('❌ Aucune session de panier valide trouvée');
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification de la session:', error);
+    } finally {
+      setIsCheckingCart(false);
+    }
+  }, [effectiveStoreId, getCartSession]);
+
+  // Initialisation unique au chargement de la page
+  useEffect(() => {
+    const initializeCheckout = async () => {
+      try {
+        // 1. Détecter le pays de l'utilisateur
+        await detectUserCountryForCheckout();
+
+        // 2. Récupérer les infos de la boutique
+        const storeInfo = await getStoreInfo();
+        if (storeInfo) {
+          setCurrentStoreId(storeInfo.id);
+          // Log seulement en développement et rarement
+          if (import.meta.env.DEV && Math.random() < 0.05) {
+            console.log('🏪 Store configuré:', storeInfo.id);
+          }
+        }
+        
+        // Si on n'a pas de storeId dans le panier, utiliser celui récupéré
+        if (!cartStoreId && storeInfo) {
+          // Log seulement en développement et rarement
+          if (import.meta.env.DEV && Math.random() < 0.05) {
+            console.log('🔄 Utilisation du storeId récupéré car pas de storeId dans le panier');
+          }
+        }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation:', error);
       }
     };
 
-    initializeShipping();
-  }, [storeSlug]);
+    initializeCheckout();
+  }, [detectUserCountryForCheckout, getStoreInfo, cartStoreId]);
+
+  // Vérifier la session de panier une seule fois après l'initialisation
+  useEffect(() => {
+    if (effectiveStoreId && !isCheckingCart) {
+      const timer = setTimeout(() => {
+        checkCartSession();
+      }, 1000); // Attendre 1 seconde après l'initialisation
+
+      return () => clearTimeout(timer);
+    }
+  }, [effectiveStoreId, isCheckingCart, checkCartSession]);
+
+  // Timeout de sécurité pour éviter le blocage infini
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      if (isCheckingCart) {
+        console.warn('⚠️ Timeout de sécurité: Arrêt du chargement du panier');
+        setIsCheckingCart(false);
+      }
+    }, 10000); // 10 secondes maximum
+
+    return () => clearTimeout(safetyTimer);
+  }, [isCheckingCart]);
+
+  // Timeout de sécurité pour cartLoading
+  useEffect(() => {
+    const cartLoadingTimer = setTimeout(() => {
+      if (cartLoading) {
+        console.warn('⚠️ Timeout de sécurité: Arrêt du cartLoading');
+        // On ne peut pas modifier cartLoading directement, mais on peut forcer le rendu
+        // en modifiant isCheckingCart
+        setIsCheckingCart(false);
+      }
+    }, 15000); // 15 secondes maximum
+
+    return () => clearTimeout(cartLoadingTimer);
+  }, [cartLoading]);
+
+  // Debug: Afficher les états de chargement
+  useEffect(() => {
+    if (import.meta.env.DEV && (isCheckingCart || cartLoading)) {
+      console.log('🔍 États de chargement:', { isCheckingCart, cartLoading, effectiveStoreId });
+    }
+  }, [isCheckingCart, cartLoading, effectiveStoreId]);
+
+  // Sélectionner automatiquement la première méthode disponible
+  useEffect(() => {
+    if (shippingMethods.length > 0 && !selectedShippingMethod) {
+      setSelectedShippingMethod(shippingMethods[0]);
+      // Log seulement en développement et rarement
+      if (import.meta.env.DEV && Math.random() < 0.05) {
+        console.log('✅ Première méthode sélectionnée automatiquement:', shippingMethods[0].name);
+      }
+    }
+  }, [shippingMethods, selectedShippingMethod]);
+
+  // DEBUG: Afficher les informations de debug (seulement en développement et rarement)
+  useEffect(() => {
+    if (import.meta.env.DEV && Math.random() < 0.1) {
+      console.log('🔍 DEBUG CHECKOUT:', {
+        storeSlug,
+        cartStoreId,
+        currentStoreId,
+        effectiveStoreId,
+        currency,
+        detectedCountry,
+        detectedCountryCode,
+        shippingMethodsCount: shippingMethods.length,
+        isLoadingShipping,
+        selectedMethod: selectedShippingMethod?.name
+      });
+    }
+  }, [storeSlug, cartStoreId, currentStoreId, effectiveStoreId, currency, detectedCountry, detectedCountryCode, shippingMethods.length, isLoadingShipping, selectedShippingMethod]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleCustomerInfoChange = (field: string, value: string) => {
+    setCustomerInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   // Charger les méthodes de livraison pour un pays spécifique
   const loadShippingMethods = async (storeId: string, userCountryCode: CountryCode) => {
@@ -340,59 +515,36 @@ const Checkout = () => {
     }
   };
 
-  // Fonction pour récupérer les infos de la boutique
-  const getStoreInfo = async () => {
-    try {
-      // Si nous avons le slug dans l'URL, récupérer la vraie boutique
-      if (storeSlug) {
-        console.log('🔍 Recherche boutique par slug:', storeSlug);
-
-        // Appel API pour récupérer la boutique par son slug/nom
-        const { data: stores, error } = await supabase
-          .from('stores')
-          .select('id, name')
-          .ilike('name', `%${storeSlug.replace('-', ' ')}%`)
-          .limit(1);
-
-        if (error) {
-          console.error('❌ Erreur recherche boutique:', error);
-        } else if (stores && stores.length > 0) {
-          console.log('✅ Boutique trouvée:', stores[0]);
-          return stores[0];
-        }
-      }
-
-      // Sinon, essayer de récupérer depuis le localStorage ou le contexte
-      const storeData = localStorage.getItem('currentStore');
-      if (storeData) {
-        const parsed = JSON.parse(storeData);
-        console.log('📦 Boutique depuis localStorage:', parsed);
-        return parsed;
-      }
-
-      // Fallback: récupérer la première boutique disponible
-      console.log('🔄 Fallback: recherche première boutique');
-      const { data: stores, error } = await supabase
-        .from('stores')
-        .select('id, name')
-        .limit(1);
-
-      if (error) {
-        console.error('❌ Erreur fallback boutique:', error);
-        throw new Error('Aucune boutique trouvée');
-      }
-
-      if (stores && stores.length > 0) {
-        console.log('✅ Boutique fallback:', stores[0]);
-        return stores[0];
-      }
-
-      throw new Error('Aucune boutique disponible');
-    } catch (error) {
-      console.error('❌ Erreur récupération boutique:', error);
-      throw error;
-    }
-  };
+  // Afficher un état de chargement pendant la vérification du panier
+  // Ajouter une condition pour éviter le blocage infini
+  const shouldShowLoading = (isCheckingCart || cartLoading) && items.length === 0;
+  
+  if (shouldShowLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <Card>
+            <CardContent className="text-center py-12">
+              <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin" />
+              <h3 className="text-xl font-medium mb-2">Chargement de votre panier...</h3>
+              <p className="text-gray-600">Vérification de vos articles en cours</p>
+              {/* Ajouter un bouton de retry en cas de problème */}
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => {
+                  setIsCheckingCart(false);
+                  setTimeout(() => checkCartSession(), 500);
+                }}
+              >
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
