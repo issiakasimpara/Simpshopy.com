@@ -31,17 +31,8 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Rediriger automatiquement si l'utilisateur est déjà connecté
-  useEffect(() => {
-    if (user && !loading) {
-      const currentHostname = window.location.hostname;
-      if (currentHostname === 'admin.simpshopy.com') {
-        navigate('/onboarding');
-      } else {
-        window.location.href = 'https://admin.simpshopy.com/onboarding';
-      }
-    }
-  }, [user, loading, navigate]);
+  // Supprimer la redirection automatique pour éviter la boucle
+  // Laisser DomainBasedRouter gérer les redirections
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,21 +97,18 @@ const Auth = () => {
         variant: "destructive"
       });
     } else {
-              toast({
-          title: "Connexion réussie !",
-          description: "Bienvenue ! Redirection vers votre tableau de bord...",
-        });
-        
-        // Attendre un peu pour que le toast s'affiche
-        setTimeout(() => {
-          // Rediriger vers admin.simpshopy.com après connexion
-          const currentHostname = window.location.hostname;
-          if (currentHostname === 'admin.simpshopy.com') {
-            navigate('/onboarding');
-          } else {
-            window.location.href = 'https://admin.simpshopy.com/onboarding';
-          }
-        }, 1500);
+      toast({
+        title: "Connexion réussie !",
+        description: "Bienvenue ! Redirection vers votre tableau de bord...",
+      });
+      
+      // Redirection directe sans délai
+      const currentHostname = window.location.hostname;
+      if (currentHostname === 'admin.simpshopy.com') {
+        navigate('/onboarding');
+      } else {
+        window.location.href = 'https://admin.simpshopy.com/onboarding';
+      }
     }
     
     setIsLoading(false);

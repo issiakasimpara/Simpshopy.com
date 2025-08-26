@@ -8,12 +8,11 @@ interface DomainBasedRouterProps {
 
 const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [hasRedirected, setHasRedirected] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { shouldShowOnboarding, isLoading: onboardingLoading } = useOnboarding();
 
   useEffect(() => {
-    // Initialisation rapide - pas de logique complexe
+    // Initialisation simple
     const hostname = window.location.hostname;
     
     // Développement local - pas de redirection
@@ -22,41 +21,40 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
       return;
     }
 
-    // Logique simplifiée pour la production
-    if (!authLoading && !onboardingLoading) {
+    // Production - initialiser quand l'auth est prêt
+    if (!authLoading) {
       setIsInitialized(true);
     }
-  }, [authLoading, onboardingLoading]);
+  }, [authLoading]);
 
-  // Redirections critiques uniquement
+  // Redirections critiques uniquement - plus conservatrices
   useEffect(() => {
-    if (!isInitialized || authLoading || onboardingLoading || hasRedirected) return;
+    if (!isInitialized || authLoading) return;
 
     const hostname = window.location.hostname;
     const pathname = window.location.pathname;
 
-    // 🔒 SÉCURITÉ CRITIQUE : admin.simpshopy.com sans authentification
-    if (hostname === 'admin.simpshopy.com' && !user) {
-      setHasRedirected(true);
+    // 🔒 SÉCURITÉ : admin.simpshopy.com sans authentification
+    // Seulement si on n'est pas déjà sur /auth
+    if (hostname === 'admin.simpshopy.com' && !user && pathname !== '/auth') {
       window.location.href = 'https://simpshopy.com/auth';
       return;
     }
 
-    // 🔄 ONBOARDING CRITIQUE : utilisateur connecté mais pas d'onboarding
-    // Éviter la redirection si on est déjà sur /onboarding ou /auth
+    // 🔄 ONBOARDING : utilisateur connecté mais pas d'onboarding
+    // Seulement si on n'est pas déjà sur /onboarding ou /auth
     if (hostname === 'admin.simpshopy.com' && 
         user && 
         shouldShowOnboarding && 
         pathname !== '/onboarding' && 
         pathname !== '/auth') {
-      setHasRedirected(true);
       window.location.href = 'https://admin.simpshopy.com/onboarding';
       return;
     }
-  }, [isInitialized, user, authLoading, onboardingLoading, shouldShowOnboarding, hasRedirected]);
+  }, [isInitialized, user, authLoading, shouldShowOnboarding]);
 
   // Chargement minimal
-  if (!isInitialized || authLoading || onboardingLoading) {
+  if (!isInitialized || authLoading) {
     return <div className="min-h-screen bg-white" />;
   }
 
