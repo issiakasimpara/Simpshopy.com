@@ -28,7 +28,8 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
         setError(null);
 
         const hostname = window.location.hostname;
-        console.log('🔍 Subdomain Router - Checking hostname:', hostname);
+        const pathname = window.location.pathname;
+        console.log('🔍 Subdomain Router - Checking hostname:', hostname, 'pathname:', pathname);
 
         // Skip routing for localhost during development
         if (hostname === 'localhost' || hostname.includes('localhost')) {
@@ -128,8 +129,15 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   }
 
   if (isMainDomain) {
-    // Main domain - render the real homepage (Home.tsx)
-    return <Home />;
+    // Main domain - render the real homepage (Home.tsx) only for the root path
+    // For all other paths, let the normal routing handle it
+    const pathname = window.location.pathname;
+    if (pathname === '/' || pathname === '') {
+      return <Home />;
+    } else {
+      // For all other paths on main domain, use normal routing
+      return <>{children}</>;
+    }
   }
 
   // Admin domain - render admin interface
