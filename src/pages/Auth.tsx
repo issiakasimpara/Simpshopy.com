@@ -78,40 +78,42 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    const { error } = await signIn(signInData.email, signInData.password);
-    
-    if (error) {
-      let errorMessage = error.message;
-      
-      // Gérer les erreurs spécifiques de confirmation d'email
-      if (error.message.includes('Email not confirmed')) {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte de réception.";
-      } else if (error.message === 'Invalid login credentials') {
-        errorMessage = "Email ou mot de passe incorrect";
-      }
-      
-      toast({
-        title: "Erreur de connexion",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Connexion réussie !",
-        description: "Bienvenue ! Redirection vers votre tableau de bord...",
-      });
-      
-      // Redirection directe sans délai
-      const currentHostname = window.location.hostname;
-      if (currentHostname === 'admin.simpshopy.com') {
-        navigate('/onboarding');
+
+    console.log('🔍 Auth - Début de la connexion pour:', email);
+
+    try {
+      const { data, error } = await signIn(email, password);
+
+      if (error) {
+        console.log('🔍 Auth - Erreur de connexion:', error);
+        toast({
+          title: "Erreur de connexion",
+          description: error.message,
+          variant: "destructive"
+        });
       } else {
-        window.location.href = 'https://admin.simpshopy.com/onboarding';
+        console.log('🔍 Auth - Connexion réussie, redirection en cours...');
+        toast({
+          title: "Connexion réussie !",
+          description: "Bienvenue ! Redirection vers votre tableau de bord...",
+        });
+        // Redirection directe sans délai
+        const currentHostname = window.location.hostname;
+        console.log('🔍 Auth - Hostname actuel:', currentHostname);
+        if (currentHostname === 'admin.simpshopy.com') {
+          console.log('🔍 Auth - Redirection vers /onboarding (même domaine)');
+          navigate('/onboarding');
+        } else {
+          console.log('🔍 Auth - Redirection vers admin.simpshopy.com/onboarding');
+          window.location.href = 'https://admin.simpshopy.com/onboarding';
+        }
       }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.log('🔍 Auth - Erreur inattendue:', error);
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleResendConfirmation = async () => {

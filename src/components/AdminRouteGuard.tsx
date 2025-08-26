@@ -9,16 +9,27 @@ interface AdminRouteGuardProps {
 const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
   const { user, session, loading } = useAuth();
 
+  // 🔍 LOGS DE DIAGNOSTIC
+  console.log('🔍 AdminRouteGuard - État actuel:', {
+    user: user ? `✅ Connecté: ${user.email}` : '❌ Non connecté',
+    session: session ? '✅ Session active' : '❌ Pas de session',
+    loading: loading ? '⏳ Chargement...' : '✅ Chargé',
+    pathname: window.location.pathname,
+    hostname: window.location.hostname
+  });
+
   // Supprimer la logique de redirection pour éviter la boucle
   // Laisser DomainBasedRouter gérer les redirections
 
   // Afficher un loader pendant la vérification de l'authentification
   if (loading) {
+    console.log('🔍 AdminRouteGuard - Affichage du loader (loading=true)');
     return <LoadingFallback />;
   }
 
   // Si l'utilisateur n'est pas connecté, afficher un message d'erreur
   if (!user || !session) {
+    console.log('🔍 AdminRouteGuard - Utilisateur non connecté, affichage du message de vérification');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -30,6 +41,7 @@ const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
   }
 
   // Si l'utilisateur est connecté, afficher le contenu admin
+  console.log('🔍 AdminRouteGuard - Utilisateur connecté, affichage du contenu admin');
   return <>{children}</>;
 };
 
