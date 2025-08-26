@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fonction pour rediriger vers l'interface admin
+  // Fonction pour rediriger vers l'interface admin (appelée explicitement)
   const redirectToAdmin = () => {
     const currentHostname = window.location.hostname;
     
@@ -29,11 +29,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     
-    // Si on est sur simpshopy.com et qu'on a une session, rediriger vers admin
-    if ((currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') && session) {
-      const adminUrl = `https://admin.simpshopy.com${window.location.pathname === '/' ? '/dashboard' : window.location.pathname}`;
-      window.location.href = adminUrl;
-    }
+    // Rediriger vers admin.simpshopy.com
+    const adminUrl = `https://admin.simpshopy.com${window.location.pathname === '/' ? '/dashboard' : window.location.pathname}`;
+    window.location.href = adminUrl;
   };
 
   useEffect(() => {
@@ -56,15 +54,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         setSession(session);
         setUser(session.user);
-        
-        // Rediriger vers admin si on est sur le domaine principal
-        const currentHostname = window.location.hostname;
-        if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
-          // Attendre un peu pour éviter les redirections trop rapides
-          setTimeout(() => {
-            redirectToAdmin();
-          }, 100);
-        }
       } else {
         // Log seulement en développement et très rarement
         if (import.meta.env.DEV && Math.random() < 0.01) {
@@ -89,19 +78,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Rediriger vers admin après connexion réussie
+        // Ne plus rediriger automatiquement après connexion
+        // L'utilisateur reste sur simpshopy.com et peut accéder à l'admin via le bouton
         if (event === 'SIGNED_IN' && session) {
           // Log seulement en développement et très rarement
           if (import.meta.env.DEV && Math.random() < 0.01) {
-            console.log('User signed in, redirecting to admin...');
-          }
-          
-          // Rediriger vers admin si on est sur le domaine principal
-          const currentHostname = window.location.hostname;
-          if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
-            setTimeout(() => {
-              redirectToAdmin();
-            }, 500); // Attendre un peu pour que l'interface se mette à jour
+            console.log('User signed in, staying on current domain');
           }
         }
       }

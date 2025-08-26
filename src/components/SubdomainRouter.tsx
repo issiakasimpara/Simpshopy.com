@@ -22,7 +22,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   const [isMainDomain, setIsMainDomain] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { formatPrice } = useStoreCurrency(storeData?.store?.id);
-  const { user, session, redirectToAdmin } = useAuth();
+  const { user, session } = useAuth();
 
   useEffect(() => {
     const handleSubdomainRouting = async () => {
@@ -49,9 +49,9 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
           return;
         }
 
-        // Check if this is the main domain (simpshopy.com) - main site with auth
+        // Check if this is the main domain (simpshopy.com) - main site with full functionality
         if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-          console.log('🔍 Main domain detected - serving main site with authentication');
+          console.log('🔍 Main domain detected - serving main site with full functionality');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
@@ -96,14 +96,6 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
     handleSubdomainRouting();
   }, []);
 
-  // Gérer la redirection automatique vers admin si l'utilisateur est connecté sur le domaine principal
-  useEffect(() => {
-    if (isMainDomain && user && session) {
-      console.log('🔍 User authenticated on main domain - redirecting to admin');
-      redirectToAdmin();
-    }
-  }, [isMainDomain, user, session, redirectToAdmin]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -139,7 +131,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   }
 
   if (isMainDomain) {
-    // Main domain - render main site with authentication
+    // Main domain - render main site with full functionality
     return <MainSite />;
   }
 
@@ -147,7 +139,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Main site component (simpshopy.com) - landing page with authentication
+// Main site component (simpshopy.com) - full functionality with authentication
 const MainSite = () => {
   const { user, signOut } = useAuth();
 

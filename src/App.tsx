@@ -101,7 +101,7 @@ function App() {
               <SubdomainRouter>
                 {/* 🏢 INTERFACE ADMIN - simpshopy.com */}
                 <Routes>
-                  {/* ⚡ ROUTES E-COMMERCE SYNCHRONES (rapides comme Shopify) */}
+                  {/* ⚡ ROUTES E-COMMERCE PUBLIQUES - Accessibles sur simpshopy.com et sous-domaines */}
                   <Route path="/store/:storeSlug" element={<Storefront />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />

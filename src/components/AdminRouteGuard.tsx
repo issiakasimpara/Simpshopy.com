@@ -18,6 +18,38 @@ const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
         window.location.href = 'https://simpshopy.com/auth';
       }
     }
+
+    // Rediriger si quelqu'un essaie d'accéder aux routes publiques sur admin.simpshopy.com
+    const currentHostname = window.location.hostname;
+    const currentPath = window.location.pathname;
+    
+    if (currentHostname === 'admin.simpshopy.com') {
+      // Routes publiques qui ne doivent pas être accessibles sur admin.simpshopy.com
+      const publicRoutes = [
+        '/store/',
+        '/cart',
+        '/checkout',
+        '/payment-success',
+        '/product/',
+        '/features',
+        '/pricing',
+        '/testimonials',
+        '/why-choose-us',
+        '/support',
+        '/about',
+        '/legal',
+        '/privacy',
+        '/terms'
+      ];
+
+      const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+      
+      if (isPublicRoute) {
+        console.log('🔒 Public route accessed on admin domain - redirecting to main site');
+        window.location.href = `https://simpshopy.com${currentPath}`;
+        return;
+      }
+    }
   }, [user, session, loading]);
 
   // Afficher un loader pendant la vérification de l'authentification
