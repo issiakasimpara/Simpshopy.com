@@ -39,13 +39,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "supabase/functions/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "env": {
-    "VITE_APP_ENV": "production"
-  }
+  ]
 } 
