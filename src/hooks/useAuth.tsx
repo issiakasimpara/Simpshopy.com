@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
+  redirectToAdmin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Fonction pour rediriger vers l'interface admin
+  const redirectToAdmin = () => {
+    const currentHostname = window.location.hostname;
+    
+    // Si on est déjà sur admin.simpshopy.com, ne rien faire
+    if (currentHostname === 'admin.simpshopy.com') {
+      return;
+    }
+    
+    // Si on est sur simpshopy.com et qu'on a une session, rediriger vers admin
+    if ((currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') && session) {
+      const adminUrl = `https://admin.simpshopy.com${window.location.pathname === '/' ? '/dashboard' : window.location.pathname}`;
+      window.location.href = adminUrl;
+    }
+  };
 
   useEffect(() => {
     // Vérifier d'abord la session existante
@@ -39,6 +56,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         setSession(session);
         setUser(session.user);
+        
+        // Rediriger vers admin si on est sur le domaine principal
+        const currentHostname = window.location.hostname;
+        if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
+          // Attendre un peu pour éviter les redirections trop rapides
+          setTimeout(() => {
+            redirectToAdmin();
+          }, 100);
+        }
       } else {
         // Log seulement en développement et très rarement
         if (import.meta.env.DEV && Math.random() < 0.01) {
@@ -63,11 +89,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Forcer un refresh des données quand l'utilisateur se connecte
+        // Rediriger vers admin après connexion réussie
         if (event === 'SIGNED_IN' && session) {
           // Log seulement en développement et très rarement
           if (import.meta.env.DEV && Math.random() < 0.01) {
-            console.log('User signed in, data should refresh automatically');
+            console.log('User signed in, redirecting to admin...');
+          }
+          
+          // Rediriger vers admin si on est sur le domaine principal
+          const currentHostname = window.location.hostname;
+          if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
+            setTimeout(() => {
+              redirectToAdmin();
+            }, 500); // Attendre un peu pour que l'interface se mette à jour
           }
         }
       }
@@ -77,7 +111,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Pour l'inscription, rediriger vers admin.simpshopy.com
+    const redirectUrl = `https://admin.simpshopy.com/dashboard`;
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -105,6 +140,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    
+    // Après déconnexion, rediriger vers le domaine principal
+    const currentHostname = window.location.hostname;
+    if (currentHostname === 'admin.simpshopy.com') {
+      window.location.href = 'https://simpshopy.com';
+    }
   };
 
   const value = {
@@ -113,7 +154,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signIn,
     signOut,
-    loading
+    loading,
+    redirectToAdmin
   };
 
   return (

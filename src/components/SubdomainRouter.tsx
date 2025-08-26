@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
+import { useAuth } from '@/hooks/useAuth';
 import StorefrontRenderer from './storefront/StorefrontRenderer';
 
 interface StoreData {
@@ -21,6 +22,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   const [isMainDomain, setIsMainDomain] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { formatPrice } = useStoreCurrency(storeData?.store?.id);
+  const { user, session, redirectToAdmin } = useAuth();
 
   useEffect(() => {
     const handleSubdomainRouting = async () => {
@@ -33,7 +35,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
 
         // Skip routing for localhost during development
         if (hostname === 'localhost' || hostname.includes('localhost')) {
-          console.log('🔍 Development mode - skipping routing');
+          console.log('🔍 Development mode - serving admin interface');
           setIsAdminDomain(true);
           setIsLoading(false);
           return;
@@ -47,9 +49,9 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
           return;
         }
 
-        // Check if this is the main domain (simpshopy.com) - landing page
+        // Check if this is the main domain (simpshopy.com) - main site with auth
         if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-          console.log('🔍 Main domain detected - serving landing page');
+          console.log('🔍 Main domain detected - serving main site with authentication');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
@@ -94,6 +96,14 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
     handleSubdomainRouting();
   }, []);
 
+  // Gérer la redirection automatique vers admin si l'utilisateur est connecté sur le domaine principal
+  useEffect(() => {
+    if (isMainDomain && user && session) {
+      console.log('🔍 User authenticated on main domain - redirecting to admin');
+      redirectToAdmin();
+    }
+  }, [isMainDomain, user, session, redirectToAdmin]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -129,16 +139,18 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
   }
 
   if (isMainDomain) {
-    // Main domain - render landing page
-    return <LandingPage />;
+    // Main domain - render main site with authentication
+    return <MainSite />;
   }
 
   // Admin domain - render admin interface
   return <>{children}</>;
 };
 
-// Landing page component
-const LandingPage = () => {
+// Main site component (simpshopy.com) - landing page with authentication
+const MainSite = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       <header className="bg-background border-b sticky top-0 z-50">
@@ -149,12 +161,40 @@ const LandingPage = () => {
               <p className="text-sm text-muted-foreground">Plateforme E-commerce Internationale</p>
             </div>
             <div className="flex items-center space-x-4">
-              <a 
-                href="https://admin.simpshopy.com" 
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Accéder à l'admin
-              </a>
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-muted-foreground">
+                    Connecté en tant que {user.email}
+                  </span>
+                  <a 
+                    href="https://admin.simpshopy.com/dashboard" 
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Accéder à l'admin
+                  </a>
+                  <button 
+                    onClick={signOut}
+                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors"
+                  >
+                    Se déconnecter
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <a 
+                    href="/auth" 
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Se connecter
+                  </a>
+                  <a 
+                    href="/auth?mode=signup" 
+                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors"
+                  >
+                    Créer un compte
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -170,12 +210,21 @@ const LandingPage = () => {
             support français/anglais et tarifs en devises locales.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="https://admin.simpshopy.com" 
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-lg text-lg font-semibold hover:bg-primary/90 transition-colors"
-            >
-              Commencer maintenant
-            </a>
+            {user ? (
+              <a 
+                href="https://admin.simpshopy.com/dashboard" 
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-lg text-lg font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Accéder à mon dashboard
+              </a>
+            ) : (
+              <a 
+                href="/auth?mode=signup" 
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-lg text-lg font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Commencer maintenant
+              </a>
+            )}
             <a 
               href="/features" 
               className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg text-lg font-semibold hover:bg-secondary/90 transition-colors"

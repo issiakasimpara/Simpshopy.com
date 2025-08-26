@@ -12,6 +12,7 @@ import CookieConsent from './components/CookieConsent';
 import ConditionalPreloading from './components/ConditionalPreloading';
 import LoadingFallback from './components/LoadingFallback';
 import SubdomainRouter from './components/SubdomainRouter';
+import AdminRouteGuard from './components/AdminRouteGuard';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -163,130 +164,176 @@ function App() {
                     </Suspense>
                   } />
                   
-                  {/* 🛠️ PAGES ADMIN - Lazy loading pour performance */}
-                  <Route path="/dashboard" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Dashboard />
-                    </Suspense>
-                  } />
+                  {/* 🔒 ROUTES ADMIN PROTÉGÉES - Uniquement pour admin.simpshopy.com */}
                   <Route path="/auth" element={
                     <Suspense fallback={<LoadingFallback />}>
                       <Auth />
                     </Suspense>
                   } />
+                  <Route path="/dashboard" element={
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Dashboard />
+                      </Suspense>
+                    </AdminRouteGuard>
+                  } />
                   <Route path="/analytics" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Analytics />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Analytics />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/products" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Products />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Products />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/orders" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Orders />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Orders />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/customers" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Customers />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Customers />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/settings" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Settings />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Settings />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/site-builder" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <SiteBuilder />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <SiteBuilder />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/integrations" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Integrations />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Integrations />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/categories" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Categories />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Categories />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/store-config" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <StoreConfig />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <StoreConfig />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/store-config/site-builder" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <SiteBuilder />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <SiteBuilder />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/store-config/site-builder/editor/:templateId" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <OptimizedTemplateEditor />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <OptimizedTemplateEditor />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/shipping" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Shipping />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Shipping />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/payments" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Payments />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Payments />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/themes" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Themes />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Themes />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/domains" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Domains />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Domains />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/testimonials-admin" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Testimonials />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Testimonials />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   
                   {/* Intégrations spécifiques */}
                   <Route path="/integrations/dsers" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <DsersIntegration />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <DsersIntegration />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/integrations/mailchimp" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <MailchimpIntegration />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <MailchimpIntegration />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/integrations/:integrationId" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <IntegrationDetailPage />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <IntegrationDetailPage />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   
                   {/* Onboarding et éditeurs */}
                   <Route path="/onboarding" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <OnboardingWizard />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <OnboardingWizard />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/template-editor" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <OptimizedTemplateEditor />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <OptimizedTemplateEditor />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                   <Route path="/template-preview" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <TemplatePreview />
-                    </Suspense>
+                    <AdminRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <TemplatePreview />
+                      </Suspense>
+                    </AdminRouteGuard>
                   } />
                 </Routes>
               </SubdomainRouter>
