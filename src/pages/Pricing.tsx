@@ -178,24 +178,26 @@ const Pricing = () => {
       />
 
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 sm:h-20">
             <AppLogo />
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Accueil</Link>
-              <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Fonctionnalités</Link>
-              <Link to="/pricing" className="text-blue-600 font-medium">Tarifs</Link>
-              <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Témoignages</Link>
-              <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Pourquoi nous choisir</Link>
-              <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Support</Link>
+            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10">
+              <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Accueil</Link>
+              <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Fonctionnalités</Link>
+              <Link to="/pricing" className="text-blue-600 font-medium text-sm xl:text-lg">Tarifs</Link>
+              <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Témoignages</Link>
+              <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Pourquoi nous choisir</Link>
+              <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
             </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link to="/auth">Se connecter</Link>
+            <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
+              <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
+                <Link to="/auth">Connexion</Link>
               </Button>
-              <Button asChild>
-                <Link to="/auth">S'inscrire</Link>
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Vendre
               </Button>
             </div>
           </div>
