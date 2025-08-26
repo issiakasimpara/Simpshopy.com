@@ -1,149 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import LoadingFallback from './LoadingFallback';
 
 interface DomainBasedRouterProps {
   children: React.ReactNode;
 }
 
 const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentDomain, setCurrentDomain] = useState<'main' | 'admin' | 'development'>('main');
+  const [isInitialized, setIsInitialized] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { shouldShowOnboarding, isLoading: onboardingLoading } = useOnboarding();
 
   useEffect(() => {
-    const determineDomain = () => {
-      const hostname = window.location.hostname;
-      const pathname = window.location.pathname;
+    // Initialisation rapide - pas de logique complexe
+    const hostname = window.location.hostname;
+    
+    // Développement local - pas de redirection
+    if (hostname === 'localhost' || hostname.includes('localhost')) {
+      setIsInitialized(true);
+      return;
+    }
 
-      console.log('🔍 DomainBasedRouter - Checking:', { hostname, pathname });
+    // Logique simplifiée pour la production
+    if (!authLoading && !onboardingLoading) {
+      setIsInitialized(true);
+    }
+  }, [authLoading, onboardingLoading]);
 
-      // Développement local
-      if (hostname === 'localhost' || hostname.includes('localhost')) {
-        console.log('🔍 Development mode detected');
-        setCurrentDomain('development');
-        setIsLoading(false);
-        return;
-      }
-
-      // Domaine admin
-      if (hostname === 'admin.simpshopy.com') {
-        console.log('🔍 Admin domain detected');
-        setCurrentDomain('admin');
-        setIsLoading(false);
-        return;
-      }
-
-      // Domaine principal
-      if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-        console.log('🔍 Main domain detected');
-        setCurrentDomain('main');
-        setIsLoading(false);
-        return;
-      }
-
-      // Autres domaines (sous-domaines, domaines personnalisés) - traiter comme admin
-      console.log('🔍 Other domain detected - treating as admin');
-      setCurrentDomain('admin');
-      setIsLoading(false);
-    };
-
-    determineDomain();
-  }, []);
-
+  // Redirections critiques uniquement
   useEffect(() => {
-    if (isLoading || authLoading || onboardingLoading) return;
+    if (!isInitialized || authLoading || onboardingLoading) return;
 
-    const handleDomainRouting = () => {
-      const hostname = window.location.hostname;
-      const pathname = window.location.pathname;
+    const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
 
-      // 🔒 LOGIQUE DE SÉCURITÉ POUR admin.simpshopy.com
-      if (currentDomain === 'admin') {
-        // Si on est sur admin.simpshopy.com sans être connecté
-        if (!user) {
-          console.log('🔒 Unauthorized access to admin domain - redirecting to main site');
-          window.location.href = 'https://simpshopy.com/auth';
-          return;
-        }
+    // 🔒 SÉCURITÉ CRITIQUE : admin.simpshopy.com sans authentification
+    if (hostname === 'admin.simpshopy.com' && !user) {
+      window.location.href = 'https://simpshopy.com/auth';
+      return;
+    }
 
-        // Si l'utilisateur doit faire l'onboarding, rediriger vers l'onboarding sur admin
-        if (shouldShowOnboarding && pathname !== '/onboarding') {
-          console.log('🔒 User needs onboarding - redirecting to onboarding');
-          window.location.href = 'https://admin.simpshopy.com/onboarding';
-          return;
-        }
+    // 🔄 ONBOARDING CRITIQUE : utilisateur connecté mais pas d'onboarding
+    if (hostname === 'admin.simpshopy.com' && user && shouldShowOnboarding && pathname !== '/onboarding') {
+      window.location.href = 'https://admin.simpshopy.com/onboarding';
+      return;
+    }
+  }, [isInitialized, user, authLoading, onboardingLoading, shouldShowOnboarding]);
 
-        // Si l'utilisateur est sur une route publique sur admin.simpshopy.com, rediriger
-        const publicRoutes = [
-          '/store/',
-          '/cart',
-          '/checkout',
-          '/payment-success',
-          '/product/',
-          '/features',
-          '/pricing',
-          '/testimonials',
-          '/why-choose-us',
-          '/support',
-          '/about',
-          '/legal',
-          '/privacy',
-          '/terms'
-        ];
-
-        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-        if (isPublicRoute) {
-          console.log('🔒 Public route accessed on admin domain - redirecting to main site');
-          window.location.href = `https://simpshopy.com${pathname}`;
-          return;
-        }
-      }
-
-      // 🔄 LOGIQUE DE REDIRECTION POUR simpshopy.com
-      if (currentDomain === 'main') {
-        // Si l'utilisateur est connecté et a terminé l'onboarding, rediriger vers admin
-        if (user && !shouldShowOnboarding) {
-          // Vérifier si on est sur une route admin
-          const adminRoutes = [
-            '/dashboard',
-            '/analytics',
-            '/products',
-            '/orders',
-            '/customers',
-            '/settings',
-            '/site-builder',
-            '/integrations',
-            '/testimonials',
-            '/categories',
-            '/store-config',
-            '/shipping',
-            '/payments',
-            '/marketing',
-            '/monitoring'
-          ];
-
-          const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
-          if (isAdminRoute) {
-            console.log('🔄 Admin route accessed on main domain - redirecting to admin domain');
-            window.location.href = `https://admin.simpshopy.com${pathname}`;
-            return;
-          }
-        }
-      }
-    };
-
-    handleDomainRouting();
-  }, [currentDomain, user, authLoading, onboardingLoading, shouldShowOnboarding]);
-
-  // Affichage du loader pendant la détermination du domaine
-  if (isLoading || authLoading || onboardingLoading) {
-    return <LoadingFallback />;
+  // Chargement minimal
+  if (!isInitialized || authLoading || onboardingLoading) {
+    return <div className="min-h-screen bg-white" />;
   }
 
-  // Rendu du contenu selon le domaine
   return <>{children}</>;
 };
 

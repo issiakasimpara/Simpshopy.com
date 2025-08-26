@@ -52,10 +52,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Vérifier d'abord la session existante
     const getInitialSession = async () => {
-      // Log seulement en développement et très rarement
-      if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('Checking for existing session...');
-      }
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -63,17 +59,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (session) {
-        // Log seulement en développement et très rarement
-        if (import.meta.env.DEV && Math.random() < 0.01) {
-          console.log('Found existing session for user:', session.user?.email);
-        }
         setSession(session);
         setUser(session.user);
-      } else {
-        // Log seulement en développement et très rarement
-        if (import.meta.env.DEV && Math.random() < 0.01) {
-          console.log('No existing session found');
-        }
       }
       
       setLoading(false);
@@ -84,23 +71,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Ensuite configurer l'écoute des changements d'état
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // Log seulement en développement et très rarement
-        if (import.meta.env.DEV && Math.random() < 0.01) {
-          console.log('Auth state changed:', event, session?.user?.email);
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Ne plus rediriger automatiquement après connexion
-        // L'utilisateur reste sur simpshopy.com et peut accéder à l'admin via le bouton
-        if (event === 'SIGNED_IN' && session) {
-          // Log seulement en développement et très rarement
-          if (import.meta.env.DEV && Math.random() < 0.01) {
-            console.log('User signed in, staying on current domain');
-          }
-        }
       }
     );
 

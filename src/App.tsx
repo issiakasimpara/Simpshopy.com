@@ -99,7 +99,6 @@ function App() {
             <StorageInitializer>
               <Router>
                 <GlobalOptimizations />
-                <ConditionalPreloading />
                 
                 {/* 🌐 DOMAIN BASED ROUTER - Gère le routage basé sur les domaines */}
                 <DomainBasedRouter>
