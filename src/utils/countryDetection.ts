@@ -2,6 +2,8 @@
  * Système de détection de pays intelligent et robuste
  */
 
+import { isolatedStorage, isUserStorefront } from './isolatedStorage';
+
 // Liste des pays africains francophones supportés
 export const SUPPORTED_COUNTRIES = {
   'ML': { name: 'Mali', currency: 'XOF', flag: '🇲🇱' },
@@ -32,8 +34,8 @@ export type CountryCode = keyof typeof SUPPORTED_COUNTRIES;
 export const detectUserCountry = async (): Promise<CountryCode> => {
   console.log('🌍 Détection du pays utilisateur...');
 
-  // Méthode 1: Vérifier le localStorage (cache)
-  const cachedCountry = localStorage.getItem('user_country') as CountryCode;
+  // Méthode 1: Vérifier le stockage isolé (cache)
+  const cachedCountry = isolatedStorage.getItem('user_country') as CountryCode;
   if (cachedCountry && SUPPORTED_COUNTRIES[cachedCountry]) {
     console.log('✅ Pays trouvé en cache:', SUPPORTED_COUNTRIES[cachedCountry].name);
     return cachedCountry;
@@ -43,7 +45,7 @@ export const detectUserCountry = async (): Promise<CountryCode> => {
   const browserCountry = detectCountryFromBrowser();
   if (browserCountry) {
     console.log('✅ Pays détecté via navigateur:', SUPPORTED_COUNTRIES[browserCountry].name);
-    localStorage.setItem('user_country', browserCountry);
+    isolatedStorage.setItem('user_country', browserCountry);
     return browserCountry;
   }
 
@@ -51,7 +53,7 @@ export const detectUserCountry = async (): Promise<CountryCode> => {
   const timezoneCountry = detectCountryFromTimezone();
   if (timezoneCountry) {
     console.log('✅ Pays détecté via timezone:', SUPPORTED_COUNTRIES[timezoneCountry].name);
-    localStorage.setItem('user_country', timezoneCountry);
+    isolatedStorage.setItem('user_country', timezoneCountry);
     return timezoneCountry;
   }
 
@@ -60,7 +62,7 @@ export const detectUserCountry = async (): Promise<CountryCode> => {
     const apiCountry = await detectCountryFromAPI();
     if (apiCountry) {
       console.log('✅ Pays détecté via API:', SUPPORTED_COUNTRIES[apiCountry].name);
-      localStorage.setItem('user_country', apiCountry);
+      isolatedStorage.setItem('user_country', apiCountry);
       return apiCountry;
     }
   } catch (error) {
@@ -69,7 +71,7 @@ export const detectUserCountry = async (): Promise<CountryCode> => {
 
   // Fallback: Mali par défaut
   console.log('🇲🇱 Fallback: Mali par défaut');
-  localStorage.setItem('user_country', 'ML');
+  isolatedStorage.setItem('user_country', 'ML');
   return 'ML';
 };
 
@@ -189,7 +191,7 @@ const detectCountryFromAPI = async (): Promise<CountryCode | null> => {
  */
 export const setUserCountry = (countryCode: CountryCode): void => {
   if (SUPPORTED_COUNTRIES[countryCode]) {
-    localStorage.setItem('user_country', countryCode);
+    isolatedStorage.setItem('user_country', countryCode);
     console.log('✅ Pays défini manuellement:', SUPPORTED_COUNTRIES[countryCode].name);
   }
 };
@@ -197,8 +199,8 @@ export const setUserCountry = (countryCode: CountryCode): void => {
 /**
  * Obtenir les informations du pays actuel
  */
-export const getCurrentCountryInfo = (): { code: CountryCode; info: typeof SUPPORTED_COUNTRIES[CountryCode] } => {
-  const countryCode = (localStorage.getItem('user_country') as CountryCode) || 'ML';
+export const getCurrentCountryInfo = () => {
+  const countryCode = (isolatedStorage.getItem('user_country') as CountryCode) || 'ML';
   return {
     code: countryCode,
     info: SUPPORTED_COUNTRIES[countryCode]

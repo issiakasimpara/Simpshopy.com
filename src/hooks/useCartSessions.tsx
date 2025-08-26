@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { isolatedStorage, isUserStorefront } from '@/utils/isolatedStorage';
 
 export interface CartSession {
   id: string;
@@ -34,10 +35,11 @@ export const useCartSessions = () => {
 
   // Fonction pour générer ou récupérer l'ID de session de manière synchrone
   const getOrCreateSessionId = (): string => {
-    let currentSessionId = localStorage.getItem('cart_session_id');
+    // Utiliser le stockage isolé pour éviter les conflits entre boutiques
+    let currentSessionId = isolatedStorage.getItem('cart_session_id');
     if (!currentSessionId) {
       currentSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('cart_session_id', currentSessionId);
+      isolatedStorage.setItem('cart_session_id', currentSessionId);
       // Log seulement en développement et très rarement
       if (import.meta.env.DEV && Math.random() < 0.01) {
         console.log('🆔 Nouvelle session créée:', currentSessionId);

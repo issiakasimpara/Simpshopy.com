@@ -14,6 +14,8 @@ import LoadingFallback from './components/LoadingFallback';
 import DomainBasedRouter from './components/DomainBasedRouter';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import PublicRouteGuard from './components/PublicRouteGuard';
+import ConditionalCookieConsent from './components/ConditionalCookieConsent';
+import StorageInitializer from './components/StorageInitializer';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -94,302 +96,304 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <Router>
-              <GlobalOptimizations />
-              <ConditionalPreloading />
-              
-              {/* 🌐 DOMAIN BASED ROUTER - Gère le routage basé sur les domaines */}
-              <DomainBasedRouter>
-                {/* 🏢 INTERFACE ADMIN - simpshopy.com */}
-                <Routes>
-                  {/* ⚡ ROUTES E-COMMERCE PUBLIQUES - Accessibles sur simpshopy.com uniquement */}
-                  <Route path="/store/:storeSlug" element={
-                    <PublicRouteGuard>
-                      <Storefront />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/cart" element={
-                    <PublicRouteGuard>
-                      <Cart />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/checkout" element={
-                    <PublicRouteGuard>
-                      <Checkout />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/payment-success" element={
-                    <PublicRouteGuard>
-                      <PaymentSuccess />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/store/:storeSlug/cart" element={
-                    <PublicRouteGuard>
-                      <Cart />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/store/:storeSlug/checkout" element={
-                    <PublicRouteGuard>
-                      <Checkout />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/product/:productId" element={
-                    <PublicRouteGuard>
-                      <Storefront />
-                    </PublicRouteGuard>
-                  } />
-                  
-                  {/* Pages critiques - CHARGEMENT SYNCHRONE */}
-                  {/* Page d'accueil principale */}
-                  <Route path="/" element={
-                    <PublicRouteGuard>
-                      <Home />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/index" element={
-                    <PublicRouteGuard>
-                      <Index />
-                    </PublicRouteGuard>
-                  } />
-                  
-                  {/* Pages publiques SEO optimisées */}
-                  <Route path="/features" element={
-                    <PublicRouteGuard>
-                      <Features />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/pricing" element={
-                    <PublicRouteGuard>
-                      <Pricing />
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/testimonials" element={
-                    <PublicRouteGuard>
+            <StorageInitializer>
+              <Router>
+                <GlobalOptimizations />
+                <ConditionalPreloading />
+                
+                {/* 🌐 DOMAIN BASED ROUTER - Gère le routage basé sur les domaines */}
+                <DomainBasedRouter>
+                  {/* 🏢 INTERFACE ADMIN - simpshopy.com */}
+                  <Routes>
+                    {/* ⚡ ROUTES E-COMMERCE PUBLIQUES - Accessibles sur simpshopy.com uniquement */}
+                    <Route path="/store/:storeSlug" element={
+                      <PublicRouteGuard>
+                        <Storefront />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/cart" element={
+                      <PublicRouteGuard>
+                        <Cart />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/checkout" element={
+                      <PublicRouteGuard>
+                        <Checkout />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/payment-success" element={
+                      <PublicRouteGuard>
+                        <PaymentSuccess />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/store/:storeSlug/cart" element={
+                      <PublicRouteGuard>
+                        <Cart />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/store/:storeSlug/checkout" element={
+                      <PublicRouteGuard>
+                        <Checkout />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/product/:productId" element={
+                      <PublicRouteGuard>
+                        <Storefront />
+                      </PublicRouteGuard>
+                    } />
+                    
+                    {/* Pages critiques - CHARGEMENT SYNCHRONE */}
+                    {/* Page d'accueil principale */}
+                    <Route path="/" element={
+                      <PublicRouteGuard>
+                        <Home />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/index" element={
+                      <PublicRouteGuard>
+                        <Index />
+                      </PublicRouteGuard>
+                    } />
+                    
+                    {/* Pages publiques SEO optimisées */}
+                    <Route path="/features" element={
+                      <PublicRouteGuard>
+                        <Features />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/pricing" element={
+                      <PublicRouteGuard>
+                        <Pricing />
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/testimonials" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <TestimonialsPublic />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/why-choose-us" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <WhyChooseUs />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/support" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Support />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/about" element={
+                      <PublicRouteGuard>
+                        <About />
+                      </PublicRouteGuard>
+                    } />
+                    
+                    {/* Pages légales */}
+                    <Route path="/legal" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Legal />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/privacy" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Privacy />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    <Route path="/terms" element={
+                      <PublicRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Terms />
+                        </Suspense>
+                      </PublicRouteGuard>
+                    } />
+                    
+                    {/* �� AUTHENTIFICATION - Accessible sur les deux domaines */}
+                    <Route path="/auth" element={
                       <Suspense fallback={<LoadingFallback />}>
-                        <TestimonialsPublic />
+                        <Auth />
                       </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/why-choose-us" element={
-                    <PublicRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <WhyChooseUs />
-                      </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/support" element={
-                    <PublicRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Support />
-                      </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/about" element={
-                    <PublicRouteGuard>
-                      <About />
-                    </PublicRouteGuard>
-                  } />
-                  
-                  {/* Pages légales */}
-                  <Route path="/legal" element={
-                    <PublicRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Legal />
-                      </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/privacy" element={
-                    <PublicRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Privacy />
-                      </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  <Route path="/terms" element={
-                    <PublicRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Terms />
-                      </Suspense>
-                    </PublicRouteGuard>
-                  } />
-                  
-                  {/* 🔐 AUTHENTIFICATION - Accessible sur les deux domaines */}
-                  <Route path="/auth" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Auth />
-                    </Suspense>
-                  } />
-                  <Route path="/dashboard" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Dashboard />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/analytics" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Analytics />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/products" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Products />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/orders" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Orders />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/customers" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Customers />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/settings" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Settings />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/site-builder" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <SiteBuilder />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/integrations" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Integrations />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/categories" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Categories />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/store-config" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <StoreConfig />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/store-config/site-builder" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <SiteBuilder />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/store-config/site-builder/editor/:templateId" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <OptimizedTemplateEditor />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/shipping" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Shipping />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/payments" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Payments />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/themes" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Themes />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/domains" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Domains />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/testimonials-admin" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Testimonials />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  
-                  {/* Intégrations spécifiques */}
-                  <Route path="/integrations/dsers" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <DsersIntegration />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/integrations/mailchimp" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <MailchimpIntegration />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/integrations/:integrationId" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <IntegrationDetailPage />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  
-                  {/* Onboarding et éditeurs */}
-                  <Route path="/onboarding" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <OnboardingWizard />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/template-editor" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <OptimizedTemplateEditor />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/template-preview" element={
-                    <AdminRouteGuard>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <TemplatePreview />
-                      </Suspense>
-                    </AdminRouteGuard>
-                  } />
-                </Routes>
-              </DomainBasedRouter>
-              
-              <Toaster />
-              <CookieConsent />
-            </Router>
+                    } />
+                    <Route path="/dashboard" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Dashboard />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/analytics" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Analytics />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/products" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Products />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/orders" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Orders />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/customers" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Customers />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/settings" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Settings />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/site-builder" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <SiteBuilder />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/integrations" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Integrations />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/categories" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Categories />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/store-config" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <StoreConfig />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/store-config/site-builder" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <SiteBuilder />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/store-config/site-builder/editor/:templateId" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <OptimizedTemplateEditor />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/shipping" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Shipping />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/payments" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Payments />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/themes" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Themes />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/domains" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Domains />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/testimonials-admin" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Testimonials />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    
+                    {/* Intégrations spécifiques */}
+                    <Route path="/integrations/dsers" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <DsersIntegration />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/integrations/mailchimp" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <MailchimpIntegration />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/integrations/:integrationId" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <IntegrationDetailPage />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    
+                    {/* Onboarding et éditeurs */}
+                    <Route path="/onboarding" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <OnboardingWizard />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/template-editor" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <OptimizedTemplateEditor />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                    <Route path="/template-preview" element={
+                      <AdminRouteGuard>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <TemplatePreview />
+                        </Suspense>
+                      </AdminRouteGuard>
+                    } />
+                  </Routes>
+                </DomainBasedRouter>
+                
+                <Toaster />
+                <ConditionalCookieConsent />
+              </Router>
+            </StorageInitializer>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>

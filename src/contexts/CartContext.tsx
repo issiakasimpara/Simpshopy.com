@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useCartSessions, CartItem } from '@/hooks/useCartSessions';
+import { isolatedStorage } from '@/utils/isolatedStorage';
 
 interface CartContextType {
   items: CartItem[];
@@ -71,8 +72,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     console.log('CartContext: setStoreId called with:', newStoreId);
     if (newStoreId !== storeId) {
       setStoreIdState(newStoreId);
-      // Persister le storeId dans localStorage
-      localStorage.setItem('cart_store_id', newStoreId);
+      // Persister le storeId avec le stockage isolé
+      isolatedStorage.setItem('cart_store_id', newStoreId);
       loadCart(newStoreId);
     }
   };
@@ -81,10 +82,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeCart = async () => {
       try {
-        // Récupérer le storeId persistant
-        const savedStoreId = localStorage.getItem('cart_store_id');
+        // Récupérer le storeId persistant avec le stockage isolé
+        const savedStoreId = isolatedStorage.getItem('cart_store_id');
         if (savedStoreId) {
-          console.log('CartContext: Restauration du storeId depuis localStorage:', savedStoreId);
+          console.log('CartContext: Restauration du storeId depuis le stockage isolé:', savedStoreId);
           setStoreIdState(savedStoreId);
           await loadCart(savedStoreId);
         }

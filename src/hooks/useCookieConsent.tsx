@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { isolatedStorage, isUserStorefront } from '@/utils/isolatedStorage';
 
 export interface CookiePreferences {
   essential: boolean;
@@ -19,8 +20,14 @@ export const useCookieConsent = () => {
 
   // Charger les préférences au démarrage
   useEffect(() => {
-    const savedConsent = localStorage.getItem('cookie_consent');
-    const consentDate = localStorage.getItem('cookie_consent_date');
+    // Si on est sur une boutique publique d'utilisateur, ne pas gérer les cookies
+    if (isUserStorefront()) {
+      setHasConsented(true); // Simuler un consentement pour éviter l'affichage
+      return;
+    }
+
+    const savedConsent = isolatedStorage.getItem('cookie_consent');
+    const consentDate = isolatedStorage.getItem('cookie_consent_date');
     
     if (savedConsent && consentDate) {
       // Vérifier si le consentement a moins de 12 mois
@@ -33,52 +40,17 @@ export const useCookieConsent = () => {
         const savedPreferences = JSON.parse(savedConsent);
         setPreferences(savedPreferences);
         setHasConsented(true);
-        
-        // Appliquer les préférences directement ici
-        // Cookies essentiels (toujours activés)
-        if (savedPreferences.essential) {
-          document.cookie = 'essential=true; path=/; max-age=31536000; SameSite=Strict';
-        }
-
-        // Cookies analytics
-        if (savedPreferences.analytics) {
-          if (typeof window !== 'undefined' && window.gtag) {
-            window.gtag('consent', 'update', {
-              analytics_storage: 'granted'
-            });
-          }
-        } else {
-          if (typeof window !== 'undefined' && window.gtag) {
-            window.gtag('consent', 'update', {
-              analytics_storage: 'denied'
-            });
-          }
-        }
-
-        // Cookies marketing
-        if (savedPreferences.marketing) {
-          document.cookie = 'marketing=true; path=/; max-age=31536000; SameSite=Lax';
-        } else {
-          document.cookie = 'marketing=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        }
-
-        // Cookies de préférences
-        if (savedPreferences.preferences) {
-          document.cookie = 'preferences=true; path=/; max-age=31536000; SameSite=Lax';
-        } else {
-          document.cookie = 'preferences=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        }
-      } else {
-        // Le consentement a expiré, le supprimer
-        localStorage.removeItem('cookie_consent');
-        localStorage.removeItem('cookie_consent_date');
-        setHasConsented(false);
       }
     }
   }, []);
 
   // Appliquer les préférences de cookies
   const applyCookiePreferences = useCallback((prefs: CookiePreferences) => {
+    // Si on est sur une boutique publique d'utilisateur, ne pas appliquer les cookies
+    if (isUserStorefront()) {
+      return;
+    }
+
     // Cookies essentiels (toujours activés)
     if (prefs.essential) {
       // Ces cookies sont nécessaires au fonctionnement
@@ -120,13 +92,18 @@ export const useCookieConsent = () => {
       document.cookie = 'preferences=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
 
-    // Sauvegarder les préférences
-    localStorage.setItem('cookie_consent', JSON.stringify(prefs));
-    localStorage.setItem('cookie_consent_date', new Date().toISOString());
+    // Sauvegarder les préférences avec le stockage isolé
+    isolatedStorage.setItem('cookie_consent', JSON.stringify(prefs));
+    isolatedStorage.setItem('cookie_consent_date', new Date().toISOString());
   }, []);
 
   // Accepter tous les cookies
   const acceptAll = useCallback(() => {
+    // Si on est sur une boutique publique d'utilisateur, ne rien faire
+    if (isUserStorefront()) {
+      return;
+    }
+
     const allAccepted = {
       essential: true,
       analytics: true,
@@ -140,6 +117,11 @@ export const useCookieConsent = () => {
 
   // Accepter seulement les cookies essentiels
   const acceptEssential = useCallback(() => {
+    // Si on est sur une boutique publique d'utilisateur, ne rien faire
+    if (isUserStorefront()) {
+      return;
+    }
+
     const essentialOnly = {
       essential: true,
       analytics: false,
@@ -151,47 +133,23 @@ export const useCookieConsent = () => {
     applyCookiePreferences(essentialOnly);
   }, [applyCookiePreferences]);
 
-  // Sauvegarder des préférences personnalisées
-  const savePreferences = useCallback((newPreferences: CookiePreferences) => {
-    setPreferences(newPreferences);
+  // Sauvegarder les préférences personnalisées
+  const savePreferences = useCallback((prefs: CookiePreferences) => {
+    // Si on est sur une boutique publique d'utilisateur, ne rien faire
+    if (isUserStorefront()) {
+      return;
+    }
+
+    setPreferences(prefs);
     setHasConsented(true);
-    applyCookiePreferences(newPreferences);
+    applyCookiePreferences(prefs);
   }, [applyCookiePreferences]);
-
-  // Vérifier si un type de cookie est autorisé
-  const isCookieAllowed = useCallback((type: keyof CookiePreferences) => {
-    return preferences[type];
-  }, [preferences]);
-
-  // Révoquer le consentement
-  const revokeConsent = useCallback(() => {
-    // Supprimer tous les cookies non essentiels
-    document.cookie = 'analytics=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'marketing=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'preferences=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    
-    // Supprimer les préférences du localStorage
-    localStorage.removeItem('cookie_consent');
-    localStorage.removeItem('cookie_consent_date');
-    
-    // Réinitialiser l'état
-    setPreferences({
-      essential: true,
-      analytics: false,
-      marketing: false,
-      preferences: false
-    });
-    setHasConsented(false);
-  }, []);
 
   return {
     preferences,
     hasConsented,
     acceptAll,
     acceptEssential,
-    savePreferences,
-    isCookieAllowed,
-    revokeConsent,
-    applyCookiePreferences
+    savePreferences
   };
 };
