@@ -53,11 +53,11 @@ import Home from './pages/Home'; // Main homepage - IMPORT SYNCHRONE pour perfor
 import Features from './pages/Features'; // Page importante - IMPORT SYNCHRONE
 import Pricing from './pages/Pricing'; // Page importante - IMPORT SYNCHRONE
 import About from './pages/About'; // Page importante - IMPORT SYNCHRONE
-const TestimonialsPublic = lazy(() => import('./pages/Testimonials'));
-const WhyChooseUs = lazy(() => import('./pages/WhyChooseUs'));
-const Support = lazy(() => import('./pages/Support'));
+import TestimonialsPublic from './pages/Testimonials'; // Page importante - IMPORT SYNCHRONE
+import WhyChooseUs from './pages/WhyChooseUs'; // Page importante - IMPORT SYNCHRONE
+import Support from './pages/Support'; // Page importante - IMPORT SYNCHRONE
 
-// Pages légales
+// Pages légales (peuvent rester en lazy loading car moins critiques)
 const Legal = lazy(() => import('./pages/Legal'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -168,23 +168,17 @@ function App() {
                     } />
                     <Route path="/testimonials" element={
                       <PublicRouteGuard>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <TestimonialsPublic />
-                        </Suspense>
+                        <TestimonialsPublic />
                       </PublicRouteGuard>
                     } />
                     <Route path="/why-choose-us" element={
                       <PublicRouteGuard>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <WhyChooseUs />
-                        </Suspense>
+                        <WhyChooseUs />
                       </PublicRouteGuard>
                     } />
                     <Route path="/support" element={
                       <PublicRouteGuard>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <Support />
-                        </Suspense>
+                        <Support />
                       </PublicRouteGuard>
                     } />
                     <Route path="/about" element={
