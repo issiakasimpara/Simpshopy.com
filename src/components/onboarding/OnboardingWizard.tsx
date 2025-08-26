@@ -44,7 +44,6 @@ const OnboardingWizard = () => {
 
   // Synchroniser l'état local avec les données d'onboarding
   useEffect(() => {
-    console.log('🔄 Synchronisation des données d\'onboarding:', onboardingData);
     setSelectedExperienceLevel(onboardingData.experience_level);
     setSelectedBusinessType(onboardingData.business_type);
     setSelectedSector(onboardingData.sector);
@@ -52,24 +51,8 @@ const OnboardingWizard = () => {
     setSelectedCurrency(onboardingData.currency_code);
   }, [onboardingData]);
 
-  // 🔍 LOGS DE DIAGNOSTIC
-  console.log('🔍 OnboardingWizard - État actuel:', {
-    user: user ? `✅ Connecté: ${user.email}` : '❌ Non connecté',
-    currentStep,
-    isOnboardingCompleted,
-    shouldShowOnboarding,
-    isLoading,
-    isSaving,
-    isCompleting,
-    onboardingData
-  });
-
   // Rediriger si l'onboarding est déjà terminé
   useEffect(() => {
-    console.log('🔍 OnboardingWizard - useEffect isOnboardingCompleted:', {
-      isOnboardingCompleted,
-      navigate: 'vers /dashboard'
-    });
     if (isOnboardingCompleted) {
       navigate('/dashboard');
     }
@@ -77,7 +60,6 @@ const OnboardingWizard = () => {
 
   // Rediriger si l'utilisateur n'est pas connecté
   if (!shouldShowOnboarding) {
-    console.log('🔍 OnboardingWizard - shouldShowOnboarding = false, retour null');
     return null;
   }
 

@@ -23,14 +23,6 @@ export const useOnboarding = () => {
   const storeId = store?.id;
   const { initializeCurrency } = useStoreCurrency(storeId);
 
-  // 🔍 LOGS DE DIAGNOSTIC
-  console.log('🔍 useOnboarding - État actuel:', {
-    user: user ? `✅ Connecté: ${user.email}` : '❌ Non connecté',
-    storeId,
-    currentStep,
-    onboardingData
-  });
-
   // Récupérer les données d'onboarding de l'utilisateur
   const { data: userOnboarding, isLoading: isLoadingOnboarding } = useQuery({
     queryKey: ['user-onboarding', user?.id],
@@ -51,17 +43,6 @@ export const useOnboarding = () => {
     queryKey: ['supported-currencies'],
     queryFn: OnboardingService.getSupportedCurrencies,
     staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-
-  // 🔍 LOGS DE DIAGNOSTIC - Résultats des requêtes
-  console.log('🔍 useOnboarding - Résultats des requêtes:', {
-    userOnboarding: userOnboarding ? {
-      onboarding_completed: userOnboarding.onboarding_completed,
-      onboarding_step: userOnboarding.onboarding_step
-    } : 'null',
-    isLoadingOnboarding,
-    isLoadingCountries,
-    isLoadingCurrencies
   });
 
   // Mutation pour sauvegarder les données d'onboarding
@@ -100,12 +81,6 @@ export const useOnboarding = () => {
   // Initialiser les données depuis la base de données
   useEffect(() => {
     if (userOnboarding) {
-      console.log('🔍 useOnboarding - Initialisation des données depuis la DB:', {
-        experience_level: userOnboarding.experience_level,
-        business_type: userOnboarding.business_type,
-        onboarding_step: userOnboarding.onboarding_step,
-        onboarding_completed: userOnboarding.onboarding_completed
-      });
       setOnboardingData({
         experience_level: userOnboarding.experience_level,
         business_type: userOnboarding.business_type,
@@ -133,21 +108,17 @@ export const useOnboarding = () => {
 
   // Passer à l'étape suivante
   const nextStep = useCallback(async () => {
-    console.log('🔄 nextStep appelé - user?.id:', user?.id, 'currentStep:', currentStep);
     
     if (!user?.id) {
-      console.log('❌ Pas d\'utilisateur connecté');
       return false;
     }
 
     const nextStepNumber = currentStep + 1;
-    console.log('📈 Passage de l\'étape', currentStep, 'à l\'étape', nextStepNumber);
     
     setCurrentStep(nextStepNumber);
 
     try {
       const success = await updateStepMutation.mutateAsync(nextStepNumber);
-      console.log('✅ updateStepMutation résultat:', success);
       if (success) {
         return true;
       }
@@ -208,13 +179,6 @@ export const useOnboarding = () => {
 
   // Déterminer si l'onboarding doit être affiché
   const shouldShowOnboarding = user?.id && !isOnboardingCompleted;
-
-  // 🔍 LOGS DE DIAGNOSTIC - Statut final
-  console.log('🔍 useOnboarding - Statut final:', {
-    isOnboardingCompleted,
-    shouldShowOnboarding,
-    user: user?.id ? 'connecté' : 'non connecté'
-  });
 
   // Fonction pour récupérer les devises d'un pays
   const getCurrenciesForCountry = useCallback(async (countryCode: string) => {

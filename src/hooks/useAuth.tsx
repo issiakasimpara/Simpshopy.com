@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean;
   redirectToAdmin: () => void;
   redirectToMain: () => void;
+  shareSessionToDomain: (targetDomain: string, path?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,13 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // 🔍 LOGS DE DIAGNOSTIC
-    console.log('🔍 useAuth - État actuel:', {
-        user: user ? `✅ Connecté: ${user.email}` : '❌ Non connecté',
-        session: session ? '✅ Session active' : '❌ Pas de session',
-        loading: loading ? '⏳ Chargement...' : '✅ Chargé'
-    });
 
     // Fonction pour rediriger vers l'interface admin (appelée explicitement)
     const redirectToAdmin = () => {
@@ -56,22 +50,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.location.href = mainUrl;
     };
 
+    // Fonction pour partager la session entre domaines
+    const shareSessionToDomain = (targetDomain: string, path: string = '/') => {
+      if (!session) return;
+      
+      // Créer un token temporaire pour partager la session
+      const sessionToken = session.access_token;
+      const sessionData = {
+        access_token: sessionToken,
+        refresh_token: session.refresh_token,
+        expires_at: session.expires_at,
+        user: session.user
+      };
+      
+      // Encoder les données de session
+      const encodedSession = btoa(JSON.stringify(sessionData));
+      
+      // Rediriger vers le domaine cible avec le token
+      const targetUrl = `https://${targetDomain}${path}?session=${encodedSession}`;
+      window.location.href = targetUrl;
+    };
+
     useEffect(() => {
         // Vérifier d'abord la session existante
         const getInitialSession = async () => {
-            console.log('🔍 useAuth - Vérification de la session existante...');
             const { data: { session }, error } = await supabase.auth.getSession();
             
             if (error) {
-                console.error('🔍 useAuth - Erreur lors de la vérification de session:', error);
+                console.error('Error getting session:', error);
             }
             
             if (session) {
-                console.log('🔍 useAuth - Session trouvée pour:', session.user?.email);
                 setSession(session);
                 setUser(session.user);
-            } else {
-                console.log('🔍 useAuth - Aucune session trouvée');
             }
             
             setLoading(false);
@@ -80,12 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Ensuite configurer l'écoute des changements d'état
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                console.log('🔍 useAuth - Changement d\'état auth:', {
-                    event,
-                    userEmail: session?.user?.email || 'aucun',
-                    hasSession: !!session
-                });
-                
                 setSession(session);
                 setUser(session?.user ?? null);
                 setLoading(false);
@@ -143,7 +148,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     loading,
     redirectToAdmin,
-    redirectToMain
+    redirectToMain,
+    shareSessionToDomain
   };
 
   return (

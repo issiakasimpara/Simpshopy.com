@@ -27,7 +27,7 @@ const Auth = () => {
     password: ''
   });
   
-  const { signUp, signIn, user, loading } = useAuth();
+  const { signUp, signIn, user, loading, shareSessionToDomain } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -79,45 +79,32 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    console.log('🔍 Auth - Début de la connexion pour:', signInData.email);
-
     try {
       const { data, error } = await signIn(signInData.email, signInData.password);
 
       if (error) {
-        console.log('🔍 Auth - Erreur de connexion:', error);
         toast({
           title: "Erreur de connexion",
           description: error.message,
           variant: "destructive"
         });
       } else {
-        console.log('🔍 Auth - Connexion réussie, redirection en cours...');
         toast({
           title: "Connexion réussie !",
           description: "Bienvenue ! Redirection vers votre tableau de bord...",
         });
-        // Redirection directe sans délai
+        // Redirection avec partage de session
         const currentHostname = window.location.hostname;
-        console.log('🔍 Auth - Hostname actuel:', currentHostname);
         if (currentHostname === 'admin.simpshopy.com') {
-          console.log('🔍 Auth - Redirection vers /onboarding (même domaine)');
-          // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
-          setTimeout(() => {
-            navigate('/onboarding');
-          }, 3000); // 3 secondes de délai
+          navigate('/onboarding');
         } else {
-          console.log('🔍 Auth - Redirection vers /dashboard (même domaine)');
-          // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 3000); // 3 secondes de délai
+          // Partager la session vers admin.simpshopy.com
+          shareSessionToDomain('admin.simpshopy.com', '/onboarding');
         }
       }
       
       setIsLoading(false);
     } catch (error) {
-      console.log('🔍 Auth - Erreur inattendue:', error);
       setIsLoading(false);
     }
   };
