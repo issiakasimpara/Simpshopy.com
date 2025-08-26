@@ -102,10 +102,16 @@ const Auth = () => {
         console.log('🔍 Auth - Hostname actuel:', currentHostname);
         if (currentHostname === 'admin.simpshopy.com') {
           console.log('🔍 Auth - Redirection vers /onboarding (même domaine)');
-          navigate('/onboarding');
+          // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
+          setTimeout(() => {
+            navigate('/onboarding');
+          }, 3000); // 3 secondes de délai
         } else {
           console.log('🔍 Auth - Redirection vers admin.simpshopy.com/onboarding');
-          window.location.href = 'https://admin.simpshopy.com/onboarding';
+          // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
+          setTimeout(() => {
+            window.location.href = 'https://admin.simpshopy.com/onboarding';
+          }, 3000); // 3 secondes de délai
         }
       }
       

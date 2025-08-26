@@ -67,7 +67,10 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
     // Seulement si on n'est pas déjà sur /auth et que l'utilisateur n'est vraiment pas connecté
     if (hostname === 'admin.simpshopy.com' && !user && pathname !== '/auth') {
       console.log('🔍 DomainBasedRouter - REDIRECTION: admin.simpshopy.com sans auth vers simpshopy.com/auth');
-      window.location.href = 'https://simpshopy.com/auth';
+      // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
+      setTimeout(() => {
+        window.location.href = 'https://simpshopy.com/auth';
+      }, 3000); // 3 secondes de délai
       return;
     }
 
@@ -79,7 +82,10 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
         pathname !== '/onboarding' && 
         pathname !== '/auth') {
       console.log('🔍 DomainBasedRouter - REDIRECTION: utilisateur connecté vers onboarding');
-      window.location.href = 'https://admin.simpshopy.com/onboarding';
+      // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
+      setTimeout(() => {
+        window.location.href = 'https://admin.simpshopy.com/onboarding';
+      }, 3000); // 3 secondes de délai
       return;
     }
 
@@ -89,7 +95,20 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
   // Chargement minimal
   if (!isInitialized || authLoading) {
     console.log('🔍 DomainBasedRouter - Affichage du loader minimal');
-    return <div className="min-h-screen bg-white" />;
+    return (
+      <div className="min-h-screen bg-white">
+        {/* MESSAGE TEMPORAIRE POUR DIAGNOSTIC */}
+        <div className="fixed top-4 right-4 p-4 bg-blue-100 border border-blue-400 rounded-lg z-50">
+          <p className="text-sm text-blue-800">
+            <strong>🔍 DomainBasedRouter :</strong><br/>
+            Initialized: {isInitialized ? '✅' : '❌'}<br/>
+            Auth Loading: {authLoading ? '⏳' : '✅'}<br/>
+            User: {user ? '✅' : '❌'}<br/>
+            Should Show Onboarding: {shouldShowOnboarding ? '✅' : '❌'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   console.log('🔍 DomainBasedRouter - Affichage du contenu principal');

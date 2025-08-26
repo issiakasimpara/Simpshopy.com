@@ -35,6 +35,17 @@ const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Vérification de l'authentification...</p>
+          {/* MESSAGE TEMPORAIRE POUR DIAGNOSTIC */}
+          <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>🔍 DIAGNOSTIC :</strong><br/>
+              User: {user ? '✅ Connecté' : '❌ Non connecté'}<br/>
+              Session: {session ? '✅ Active' : '❌ Pas de session'}<br/>
+              Loading: {loading ? '⏳ En cours' : '✅ Terminé'}<br/>
+              Pathname: {window.location.pathname}<br/>
+              Hostname: {window.location.hostname}
+            </p>
+          </div>
         </div>
       </div>
     );
