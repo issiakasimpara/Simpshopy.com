@@ -219,6 +219,16 @@ function App() {
                       <StoreConfig />
                     </Suspense>
                   } />
+                  <Route path="/store-config/site-builder" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <SiteBuilder />
+                    </Suspense>
+                  } />
+                  <Route path="/store-config/site-builder/editor/:templateId" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <OptimizedTemplateEditor />
+                    </Suspense>
+                  } />
                   <Route path="/shipping" element={
                     <Suspense fallback={<LoadingFallback />}>
                       <Shipping />
