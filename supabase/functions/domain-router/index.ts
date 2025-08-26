@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -15,50 +16,60 @@ serve(async (req) => {
     const url = new URL(req.url)
     let hostname = url.hostname
     
-    // Si c'est un appel direct à l'Edge Function, essayer de récupérer le hostname du body
+    // If it's a direct call to the Edge Function, try to get hostname from the body
     if (hostname.includes('supabase.co')) {
       try {
         const body = await req.json()
         hostname = body.hostname || hostname
       } catch (e) {
-        // Si pas de body JSON, utiliser l'hostname de l'URL
         console.log('No JSON body found, using URL hostname')
       }
     }
     
     console.log('🌐 Domain router - Hostname:', hostname)
+    
+    // Skip for localhost
+    if (hostname === 'localhost') {
+      console.log('✅ Localhost detected - serving admin interface')
+      return new Response('Continue to main app', { status: 200 })
+    }
 
-    // Skip for localhost or main domain (admin interface)
-    if (hostname === 'localhost' || hostname === 'simpshopy.com' || hostname.includes('vercel.app')) {
-      console.log('✅ Main domain detected - serving admin interface')
+    // Check for admin domain
+    if (hostname === 'admin.simpshopy.com') {
+      console.log('✅ Admin domain detected - serving admin interface')
+      return new Response('Continue to admin interface', { status: 200 })
+    }
+
+    // Skip for main domain (landing page)
+    if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
+      console.log('✅ Main domain detected - serving landing page')
+      return new Response('Continue to landing page', { status: 200 })
+    }
+
+    // Skip for Vercel preview domains
+    if (hostname.includes('vercel.app')) {
+      console.log('✅ Vercel preview domain detected - serving admin interface')
       return new Response('Continue to main app', { status: 200 })
     }
 
     // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
 
     // Check if this is a subdomain (boutique.simpshopy.com)
     if (hostname.includes('simpshopy.com')) {
       const subdomain = hostname.split('.')[0]
       console.log('🔍 Checking subdomain:', subdomain)
-
+      
       // Skip www subdomain
       if (subdomain === 'www') {
-        console.log('✅ www subdomain - redirecting to main domain')
-        return new Response(null, {
-          status: 302,
-          headers: {
-            'Location': 'https://simpshopy.com',
-            ...corsHeaders
-          }
-        })
+        console.log('🔍 www subdomain - redirecting to main domain')
+        return new Response('Redirect to main domain', { status: 301 })
       }
 
-      // Find the store for this subdomain using the new store_domains table
-      const { data: storeDomain, error: domainError } = await supabaseClient
+      // Query store_domains table for subdomain
+      const { data: storeDomain, error } = await supabaseClient
         .from('store_domains')
         .select(`
           store_id,
@@ -80,29 +91,26 @@ serve(async (req) => {
         .eq('verification_status', 'verified')
         .single()
 
-      if (domainError || !storeDomain) {
-        console.log('❌ Store not found for subdomain:', hostname)
+      if (error) {
+        console.log('❌ Error querying store_domains:', error.message)
         return new Response('Store not found', { status: 404 })
       }
 
-      // Check if store is active
-      if (storeDomain.stores.status !== 'active') {
-        console.log('❌ Store is not active:', storeDomain.stores.slug)
-        return new Response('Store is not active', { status: 404 })
+      if (storeDomain && storeDomain.stores) {
+        console.log('✅ Store found for subdomain:', storeDomain.stores.name)
+        return new Response(JSON.stringify({
+          success: true,
+          store: storeDomain.stores,
+          domain: storeDomain,
+          isSubdomain: true
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        })
+      } else {
+        console.log('❌ No store found for subdomain:', hostname)
+        return new Response('Store not found', { status: 404 })
       }
-
-      console.log('✅ Store found for subdomain:', storeDomain.stores.name)
-
-      // Return store data for the frontend to render
-      return new Response(JSON.stringify({
-        success: true,
-        store: storeDomain.stores,
-        domain: storeDomain,
-        isSubdomain: true
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      })
     }
 
     // Check for custom domains (domains personnalisés)
@@ -128,14 +136,13 @@ serve(async (req) => {
       .eq('verification_status', 'verified')
       .single()
 
-    if (!customError && customDomain) {
-      console.log('✅ Custom domain found:', customDomain.stores.name)
-
-      // Return store data for the frontend to render
+    if (!customError && customDomain && customDomain.stores) {
+      console.log('✅ Store found for custom domain:', customDomain.stores.name)
       return new Response(JSON.stringify({
         success: true,
         store: customDomain.stores,
         domain: customDomain,
+        isSubdomain: false,
         isCustomDomain: true
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -148,6 +155,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Domain router error:', error)
-    return new Response('Internal error', { status: 500 })
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500
+    })
   }
 }) 
