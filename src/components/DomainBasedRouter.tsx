@@ -66,10 +66,10 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
     // 🔒 SÉCURITÉ : admin.simpshopy.com sans authentification
     // Seulement si on n'est pas déjà sur /auth et que l'utilisateur n'est vraiment pas connecté
     if (hostname === 'admin.simpshopy.com' && !user && pathname !== '/auth') {
-      console.log('🔍 DomainBasedRouter - REDIRECTION: admin.simpshopy.com sans auth vers simpshopy.com/auth');
+      console.log('🔍 DomainBasedRouter - REDIRECTION: admin.simpshopy.com sans auth vers /auth');
       // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
       setTimeout(() => {
-        window.location.href = 'https://simpshopy.com/auth';
+        window.location.href = '/auth';
       }, 3000); // 3 secondes de délai
       return;
     }
@@ -84,7 +84,7 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
       console.log('🔍 DomainBasedRouter - REDIRECTION: utilisateur connecté vers onboarding');
       // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
       setTimeout(() => {
-        window.location.href = 'https://admin.simpshopy.com/onboarding';
+        window.location.href = '/onboarding';
       }, 3000); // 3 secondes de délai
       return;
     }

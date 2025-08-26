@@ -107,10 +107,10 @@ const Auth = () => {
             navigate('/onboarding');
           }, 3000); // 3 secondes de délai
         } else {
-          console.log('🔍 Auth - Redirection vers admin.simpshopy.com/onboarding');
+          console.log('🔍 Auth - Redirection vers /dashboard (même domaine)');
           // DÉLAI TEMPORAIRE POUR CAPTURER LES LOGS
           setTimeout(() => {
-            window.location.href = 'https://admin.simpshopy.com/onboarding';
+            navigate('/dashboard');
           }, 3000); // 3 secondes de délai
         }
       }
