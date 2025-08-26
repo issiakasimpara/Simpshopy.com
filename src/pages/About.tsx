@@ -115,7 +115,7 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             <AppLogo />
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10">
+            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10 ml-8">
               <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Accueil</Link>
               <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Fonctionnalités</Link>
               <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Tarifs</Link>
