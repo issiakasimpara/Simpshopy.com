@@ -70,7 +70,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { name: "Commandes", href: "/orders", icon: ShoppingCart },
     { name: "Clients", href: "/customers", icon: Users },
     { name: "Livraisons", href: "/shipping", icon: Truck },
-    { name: "Témoignages", href: "/testimonials", icon: MessageSquare },
+    { name: "Témoignages", href: "/testimonials-admin", icon: MessageSquare },
     { name: "Analyses", href: "/analytics", icon: BarChart3 },
     { name: "Paiements", href: "/payments", icon: CreditCard },
     { name: "Ma boutique", href: "/store-config", icon: Store },
