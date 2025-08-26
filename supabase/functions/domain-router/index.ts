@@ -13,7 +13,18 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const hostname = url.hostname
+    let hostname = url.hostname
+    
+    // Si c'est un appel direct à l'Edge Function, essayer de récupérer le hostname du body
+    if (hostname.includes('supabase.co')) {
+      try {
+        const body = await req.json()
+        hostname = body.hostname || hostname
+      } catch (e) {
+        // Si pas de body JSON, utiliser l'hostname de l'URL
+        console.log('No JSON body found, using URL hostname')
+      }
+    }
     
     console.log('🌐 Domain router - Hostname:', hostname)
 
