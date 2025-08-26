@@ -26,7 +26,6 @@ import Index from './pages/Index';
 
 // Lazy loading UNIQUEMENT pour les pages admin (pas critiques)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Auth = lazy(() => import('./pages/Auth'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Products = lazy(() => import('./pages/Products'));
 const Orders = lazy(() => import('./pages/Orders'));
@@ -56,6 +55,7 @@ import About from './pages/About'; // Page importante - IMPORT SYNCHRONE
 import TestimonialsPublic from './pages/Testimonials'; // Page importante - IMPORT SYNCHRONE
 import WhyChooseUs from './pages/WhyChooseUs'; // Page importante - IMPORT SYNCHRONE
 import Support from './pages/Support'; // Page importante - IMPORT SYNCHRONE
+import Auth from './pages/Auth'; // Page critique - IMPORT SYNCHRONE pour conversion
 
 // Pages légales (peuvent rester en lazy loading car moins critiques)
 const Legal = lazy(() => import('./pages/Legal'));
@@ -212,9 +212,7 @@ function App() {
                     
                     {/* �� AUTHENTIFICATION - Accessible sur les deux domaines */}
                     <Route path="/auth" element={
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Auth />
-                      </Suspense>
+                      <Auth />
                     } />
                     <Route path="/dashboard" element={
                       <AdminRouteGuard>
