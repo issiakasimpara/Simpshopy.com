@@ -55,32 +55,11 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
           return;
         }
 
-        // Call the domain-router edge function to get store data for subdomains/custom domains
-        const { data, error: routerError } = await supabase.functions.invoke(`domain-router?hostname=${encodeURIComponent(hostname)}`);
-
-        if (routerError) {
-          console.error('❌ Domain router error:', routerError);
-          setError('Erreur lors du chargement de la boutique');
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.success && data.store) {
-          console.log('✅ Store found for domain:', data.store.name);
-          setStoreData({
-            store: data.store,
-            domain: data.domain,
-            isSubdomain: data.isSubdomain,
-            isCustomDomain: data.isCustomDomain
-          });
-          setIsLoading(false);
-          return;
-        } else {
-          console.log('❌ Store not found for domain:', hostname);
-          setError('Boutique non trouvée');
-          setIsLoading(false);
-          return;
-        }
+        // For now, treat all non-main domains as admin interface
+        console.log('🔍 Non-main domain detected - serving admin interface');
+        setIsAdminDomain(true);
+        setIsLoading(false);
+        return;
 
       } catch (error) {
         console.error('❌ Subdomain routing error:', error);

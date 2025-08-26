@@ -40,22 +40,10 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
 
         console.log('🔍 StorefrontRenderer - Fetching data for:', hostname);
 
-                // Call the domain-router edge function to get store data
-    const { data, error: routerError } = await supabase.functions.invoke(`domain-router?hostname=${encodeURIComponent(hostname)}`);
-
-        if (routerError) {
-          console.error('❌ Domain router error:', routerError);
-          throw routerError;
-        }
-
-        if (!data.success || !data.store) {
-          console.error('❌ No store data returned:', data);
-          setError('Boutique non trouvée');
-          return;
-        }
-
-        console.log('✅ Store data received:', data.store.name);
-        setStoreData(data);
+        // For now, show a simple message since domain-router is removed
+        console.log('🔍 Storefront renderer - no domain router available');
+        setError('Fonctionnalité boutique temporairement indisponible');
+        return;
 
         // Fetch products for this store
         const { data: productsData, error: productsError } = await supabase

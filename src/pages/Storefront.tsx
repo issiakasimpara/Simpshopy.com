@@ -68,36 +68,10 @@ const Storefront = () => {
 
       console.log('🔍 Recherche de la boutique:', storeSlug);
 
-      // Utiliser la fonction domain-router pour récupérer les données de la boutique
-      // Simuler un hostname basé sur le slug pour utiliser la même logique
-      const hostname = `${storeSlug}.localhost`;
-
-      const { data, error: routerError } = await supabase.functions.invoke(`domain-router?hostname=${encodeURIComponent(hostname)}`, {
-        method: 'GET',
-      });
-
-      if (routerError) {
-        console.error('Erreur domain-router:', routerError);
-        // Fallback: recherche directe dans la base de données
-        await fetchStoreDataFallback();
-        return;
-      }
-
-      if (data.error || data.isMainDomain) {
-        console.log('Domain-router ne trouve pas la boutique, fallback...');
-        await fetchStoreDataFallback();
-        return;
-      }
-
-      // Succès avec domain-router
-      console.log('✅ Boutique trouvée via domain-router:', data);
-      setStore(data.store);
-      setProducts(data.products || []);
-      if (data.siteTemplate) {
-        setTemplate(data.siteTemplate);
-      }
-      setStoreId(data.store.id);
-      setLoading(false);
+      // Domain-router removed, use fallback directly
+      console.log('🔍 Domain-router removed, using fallback method');
+      await fetchStoreDataFallback();
+      return;
 
     } catch (err) {
       console.error('Erreur domain-router, fallback...', err);
