@@ -17,14 +17,14 @@ const Home = () => {
   // Fonction pour gérer la redirection intelligente
   const handleSmartRedirect = () => {
     if (user) {
-      // Utilisateur connecté
+      // Utilisateur connecté - rediriger vers admin.simpshopy.com
       if (shouldShowOnboarding) {
-        navigate('/onboarding');
+        window.location.href = 'https://admin.simpshopy.com/onboarding';
       } else {
-        navigate('/dashboard');
+        window.location.href = 'https://admin.simpshopy.com/dashboard';
       }
     } else {
-      // Nouvel utilisateur - rediriger vers l'auth
+      // Nouvel utilisateur - rediriger vers l'auth sur le domaine principal
       navigate('/auth');
     }
   };
