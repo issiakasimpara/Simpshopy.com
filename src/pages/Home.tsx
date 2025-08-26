@@ -8,26 +8,14 @@ import SEOHead from "@/components/SEOHead";
 import AppLogo from "@/components/ui/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import SmartNavigationButton from "@/components/SmartNavigationButton";
 
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { shouldShowOnboarding } = useOnboarding();
 
-  // Fonction pour gérer la redirection intelligente
-  const handleSmartRedirect = () => {
-    if (user) {
-      // Utilisateur connecté - rediriger vers admin.simpshopy.com
-      if (shouldShowOnboarding) {
-        window.location.href = 'https://admin.simpshopy.com/onboarding';
-      } else {
-        window.location.href = 'https://admin.simpshopy.com/dashboard';
-      }
-    } else {
-      // Nouvel utilisateur - rediriger vers l'auth sur le domaine principal
-      navigate('/auth');
-    }
-  };
+
 
 
 
@@ -171,12 +159,11 @@ const Home = () => {
                   <Link to="/auth">Connexion</Link>
                 </Button>
               )}
-              <Button 
-                onClick={handleSmartRedirect}
+              <SmartNavigationButton 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 {user ? 'Mon Dashboard' : 'Vendre'}
-              </Button>
+              </SmartNavigationButton>
             </div>
           </div>
         </div>
@@ -209,14 +196,12 @@ const Home = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-8 sm:mb-12 px-4">
-              <Button 
+              <SmartNavigationButton 
                 size="lg" 
-                onClick={handleSmartRedirect}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
               >
                 {user ? 'Mon Dashboard' : 'Créez ma boutique'}
-                <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-              </Button>
+              </SmartNavigationButton>
               <Button size="lg" variant="outline" className="text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl border-2 border-gray-300 hover:bg-gray-50 hover:border-blue-300 transition-all duration-300 font-medium">
                 <Play className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                 Visitez la démo
@@ -463,12 +448,11 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-12 sm:mt-16">
-            <Button 
-              onClick={handleSmartRedirect}
+            <SmartNavigationButton 
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Rejoignez nos entrepreneurs réussis
-            </Button>
+            </SmartNavigationButton>
           </div>
         </div>
       </section>
@@ -486,14 +470,12 @@ const Home = () => {
                   {feature.description}
                 </p>
                                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 px-4 lg:px-0">
-                   <Button 
+                   <SmartNavigationButton 
                      size="lg" 
-                     onClick={handleSmartRedirect}
                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
                    >
                      {user ? 'Mon Dashboard' : 'Créez une boutique gratuite'}
-                     <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-                   </Button>
+                   </SmartNavigationButton>
                   {index === 1 || index === 2 ? (
                     <Button size="lg" variant="ghost" className="text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 text-blue-600 font-medium hover:bg-blue-50 rounded-2xl">
                       En savoir plus
@@ -594,14 +576,12 @@ const Home = () => {
             </div>
           </div>
                      <div className="text-center mt-8 sm:mt-12">
-             <Button 
+             <SmartNavigationButton 
                size="lg" 
-               onClick={handleSmartRedirect}
                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg sm:text-xl px-6 sm:px-10 py-4 sm:py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-medium"
              >
                {user ? 'Mon Dashboard' : 'Choisir Simpshopy'}
-               <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-             </Button>
+             </SmartNavigationButton>
            </div>
         </div>
       </section>
@@ -645,14 +625,12 @@ const Home = () => {
           <p className="text-lg sm:text-xl text-white/90 mb-8 sm:mb-12 leading-relaxed px-4">
             Rejoignez des milliers d'entrepreneurs qui font confiance à Simpshopy
           </p>
-                     <Button 
+                     <SmartNavigationButton 
              size="lg" 
-             onClick={handleSmartRedirect}
              className="bg-white text-blue-600 hover:bg-gray-100 text-lg sm:text-xl px-8 sm:px-12 py-6 sm:py-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 font-bold"
            >
              {user ? 'Mon Dashboard' : 'Créez votre boutique'}
-             <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-           </Button>
+           </SmartNavigationButton>
         </div>
       </section>
 

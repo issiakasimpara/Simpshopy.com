@@ -11,8 +11,9 @@ import { Toaster } from './components/ui/toaster';
 import CookieConsent from './components/CookieConsent';
 import ConditionalPreloading from './components/ConditionalPreloading';
 import LoadingFallback from './components/LoadingFallback';
-import SubdomainRouter from './components/SubdomainRouter';
+import DomainBasedRouter from './components/DomainBasedRouter';
 import AdminRouteGuard from './components/AdminRouteGuard';
+import PublicRouteGuard from './components/PublicRouteGuard';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -97,62 +98,122 @@ function App() {
               <GlobalOptimizations />
               <ConditionalPreloading />
               
-              {/* 🌐 SUBDOMAIN ROUTER - Sépare admin et storefront */}
-              <SubdomainRouter>
+              {/* 🌐 DOMAIN BASED ROUTER - Gère le routage basé sur les domaines */}
+              <DomainBasedRouter>
                 {/* 🏢 INTERFACE ADMIN - simpshopy.com */}
                 <Routes>
-                  {/* ⚡ ROUTES E-COMMERCE PUBLIQUES - Accessibles sur simpshopy.com et sous-domaines */}
-                  <Route path="/store/:storeSlug" element={<Storefront />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/payment-success" element={<PaymentSuccess />} />
-                  <Route path="/store/:storeSlug/cart" element={<Cart />} />
-                  <Route path="/store/:storeSlug/checkout" element={<Checkout />} />
-                  <Route path="/product/:productId" element={<Storefront />} />
+                  {/* ⚡ ROUTES E-COMMERCE PUBLIQUES - Accessibles sur simpshopy.com uniquement */}
+                  <Route path="/store/:storeSlug" element={
+                    <PublicRouteGuard>
+                      <Storefront />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/cart" element={
+                    <PublicRouteGuard>
+                      <Cart />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/checkout" element={
+                    <PublicRouteGuard>
+                      <Checkout />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/payment-success" element={
+                    <PublicRouteGuard>
+                      <PaymentSuccess />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/store/:storeSlug/cart" element={
+                    <PublicRouteGuard>
+                      <Cart />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/store/:storeSlug/checkout" element={
+                    <PublicRouteGuard>
+                      <Checkout />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/product/:productId" element={
+                    <PublicRouteGuard>
+                      <Storefront />
+                    </PublicRouteGuard>
+                  } />
                   
                   {/* Pages critiques - CHARGEMENT SYNCHRONE */}
                   {/* Page d'accueil principale */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/index" element={<Index />} />
+                  <Route path="/" element={
+                    <PublicRouteGuard>
+                      <Home />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/index" element={
+                    <PublicRouteGuard>
+                      <Index />
+                    </PublicRouteGuard>
+                  } />
                   
                   {/* Pages publiques SEO optimisées */}
-                  <Route path="/features" element={<Features />} />
-                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/features" element={
+                    <PublicRouteGuard>
+                      <Features />
+                    </PublicRouteGuard>
+                  } />
+                  <Route path="/pricing" element={
+                    <PublicRouteGuard>
+                      <Pricing />
+                    </PublicRouteGuard>
+                  } />
                   <Route path="/testimonials" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <TestimonialsPublic />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <TestimonialsPublic />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
                   <Route path="/why-choose-us" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <WhyChooseUs />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <WhyChooseUs />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
                   <Route path="/support" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Support />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Support />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
-                  <Route path="/about" element={<About />} />
+                  <Route path="/about" element={
+                    <PublicRouteGuard>
+                      <About />
+                    </PublicRouteGuard>
+                  } />
                   
                   {/* Pages légales */}
                   <Route path="/legal" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Legal />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Legal />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
                   <Route path="/privacy" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Privacy />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Privacy />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
                   <Route path="/terms" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Terms />
-                    </Suspense>
+                    <PublicRouteGuard>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <Terms />
+                      </Suspense>
+                    </PublicRouteGuard>
                   } />
                   
-                  {/* 🔒 ROUTES ADMIN PROTÉGÉES - Uniquement pour admin.simpshopy.com */}
+                  {/* 🔐 AUTHENTIFICATION - Accessible sur les deux domaines */}
                   <Route path="/auth" element={
                     <Suspense fallback={<LoadingFallback />}>
                       <Auth />
@@ -324,7 +385,7 @@ function App() {
                     </AdminRouteGuard>
                   } />
                 </Routes>
-              </SubdomainRouter>
+              </DomainBasedRouter>
               
               <Toaster />
               <CookieConsent />

@@ -98,8 +98,13 @@ const Auth = () => {
         title: "Connexion réussie !",
         description: "Bienvenue ! Configuration de votre boutique en cours...",
       });
-      // Rediriger vers l'onboarding au lieu du dashboard
-      navigate('/onboarding');
+      // Rediriger vers admin.simpshopy.com après connexion
+      const currentHostname = window.location.hostname;
+      if (currentHostname === 'admin.simpshopy.com') {
+        navigate('/onboarding');
+      } else {
+        window.location.href = 'https://admin.simpshopy.com/onboarding';
+      }
     }
     
     setIsLoading(false);

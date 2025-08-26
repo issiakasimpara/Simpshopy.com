@@ -11,6 +11,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   loading: boolean;
   redirectToAdmin: () => void;
+  redirectToMain: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +33,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Rediriger vers admin.simpshopy.com
     const adminUrl = `https://admin.simpshopy.com${window.location.pathname === '/' ? '/dashboard' : window.location.pathname}`;
     window.location.href = adminUrl;
+  };
+
+  // Fonction pour rediriger vers le domaine principal
+  const redirectToMain = () => {
+    const currentHostname = window.location.hostname;
+    
+    // Si on est déjà sur simpshopy.com, ne rien faire
+    if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
+      return;
+    }
+    
+    // Rediriger vers simpshopy.com
+    const mainUrl = `https://simpshopy.com${window.location.pathname}`;
+    window.location.href = mainUrl;
   };
 
   useEffect(() => {
@@ -137,7 +152,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signIn,
     signOut,
     loading,
-    redirectToAdmin
+    redirectToAdmin,
+    redirectToMain
   };
 
   return (
