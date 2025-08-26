@@ -79,10 +79,10 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    console.log('🔍 Auth - Début de la connexion pour:', email);
+    console.log('🔍 Auth - Début de la connexion pour:', signInData.email);
 
     try {
-      const { data, error } = await signIn(email, password);
+      const { data, error } = await signIn(signInData.email, signInData.password);
 
       if (error) {
         console.log('🔍 Auth - Erreur de connexion:', error);
