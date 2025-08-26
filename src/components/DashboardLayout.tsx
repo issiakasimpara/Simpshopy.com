@@ -51,8 +51,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         title: "Déconnexion réussie",
         description: "À bientôt !",
       });
-      // Rediriger vers la page d'accueil après la déconnexion
-      navigate('/');
+             // Rediriger vers la page d'accueil principale après la déconnexion
+       window.location.href = 'https://simpshopy.com';
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       toast({
@@ -100,7 +100,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         {/* Logo avec effet de gradient */}
         <div className="relative flex items-center h-20 px-6 border-b border-border/30 flex-shrink-0 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5" />
-          <Link to="/" className="relative group transition-transform duration-200 hover:scale-105">
+          <Link to="/dashboard" className="relative group transition-transform duration-200 hover:scale-105">
             <AppLogo size="md" useRealLogo={true} />
           </Link>
         </div>
