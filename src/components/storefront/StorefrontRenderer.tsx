@@ -40,10 +40,8 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
 
         console.log('🔍 StorefrontRenderer - Fetching data for:', hostname);
 
-        // Call the domain-router edge function to get store data
-        const { data, error: routerError } = await supabase.functions.invoke('domain-router', {
-          body: { hostname },
-        });
+                // Call the domain-router edge function to get store data
+    const { data, error: routerError } = await supabase.functions.invoke(`domain-router?hostname=${encodeURIComponent(hostname)}`);
 
         if (routerError) {
           console.error('❌ Domain router error:', routerError);

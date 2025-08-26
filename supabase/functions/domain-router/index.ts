@@ -18,6 +18,13 @@ serve(async (req) => {
     const url = new URL(req.url)
     let hostname = url.hostname
     
+    // Try to get hostname from query parameters first
+    const urlParams = new URLSearchParams(url.search)
+    const queryHostname = urlParams.get('hostname')
+    if (queryHostname) {
+      hostname = queryHostname
+    }
+    
     // If it's a direct call to the Edge Function, try to get hostname from the body
     if (hostname.includes('supabase.co')) {
       try {

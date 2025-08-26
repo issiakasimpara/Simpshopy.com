@@ -56,9 +56,7 @@ const SubdomainRouter: React.FC<SubdomainRouterProps> = ({ children }) => {
         }
 
         // Call the domain-router edge function to get store data for subdomains/custom domains
-        const { data, error: routerError } = await supabase.functions.invoke('domain-router', {
-          body: { hostname },
-        });
+        const { data, error: routerError } = await supabase.functions.invoke(`domain-router?hostname=${encodeURIComponent(hostname)}`);
 
         if (routerError) {
           console.error('❌ Domain router error:', routerError);
