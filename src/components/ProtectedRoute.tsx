@@ -1,44 +1,27 @@
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useOnboarding } from '@/hooks/useOnboarding';
+import LoadingFallback from './LoadingFallback';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading: authLoading } = useAuth();
-  const { shouldShowOnboarding, isLoading: onboardingLoading } = useOnboarding();
-  const navigate = useNavigate();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  // Si l'authentification ou l'onboarding est en cours de chargement
-  if (authLoading || onboardingLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+  // Afficher un loader pendant la vérification de l'authentification
+  if (loading) {
+    return <LoadingFallback />;
   }
 
-  // Si l'utilisateur n'est pas connecté
+  // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
   if (!user) {
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
-  // Si l'utilisateur doit passer par l'onboarding et n'est pas déjà sur la page d'onboarding
-  if (shouldShowOnboarding && window.location.pathname !== '/onboarding') {
-    navigate('/onboarding');
-    return null;
-  }
-
+  // Si l'utilisateur est connecté, afficher le contenu
   return <>{children}</>;
 };
 

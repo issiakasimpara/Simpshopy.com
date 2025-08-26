@@ -27,7 +27,7 @@ const Auth = () => {
     password: ''
   });
   
-  const { signUp, signIn, user, loading, shareSessionToDomain } = useAuth();
+  const { signUp, signIn, user, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -93,14 +93,8 @@ const Auth = () => {
           title: "Connexion réussie !",
           description: "Bienvenue ! Redirection vers votre tableau de bord...",
         });
-        // Redirection avec partage de session
-        const currentHostname = window.location.hostname;
-        if (currentHostname === 'admin.simpshopy.com') {
-          navigate('/onboarding');
-        } else {
-          // Partager la session vers admin.simpshopy.com
-          shareSessionToDomain('admin.simpshopy.com', '/onboarding');
-        }
+        // Redirection simple vers le dashboard
+        navigate('/dashboard');
       }
       
       setIsLoading(false);

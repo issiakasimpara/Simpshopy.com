@@ -10,9 +10,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
-  redirectToAdmin: () => void;
-  redirectToMain: () => void;
-  shareSessionToDomain: (targetDomain: string, path?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,55 +18,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // Fonction pour rediriger vers l'interface admin (appelée explicitement)
-    const redirectToAdmin = () => {
-      const currentHostname = window.location.hostname;
-      
-      // Si on est déjà sur admin.simpshopy.com, ne rien faire
-      if (currentHostname === 'admin.simpshopy.com') {
-        return;
-      }
-      
-      // Rediriger vers admin.simpshopy.com
-      const adminUrl = `https://admin.simpshopy.com${window.location.pathname === '/' ? '/dashboard' : window.location.pathname}`;
-      window.location.href = adminUrl;
-    };
-
-    // Fonction pour rediriger vers le domaine principal
-    const redirectToMain = () => {
-      const currentHostname = window.location.hostname;
-      
-      // Si on est déjà sur simpshopy.com, ne rien faire
-      if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
-        return;
-      }
-      
-      // Rediriger vers simpshopy.com
-      const mainUrl = `https://simpshopy.com${window.location.pathname}`;
-      window.location.href = mainUrl;
-    };
-
-    // Fonction pour partager la session entre domaines
-    const shareSessionToDomain = (targetDomain: string, path: string = '/') => {
-      if (!session) return;
-      
-      // Créer un token temporaire pour partager la session
-      const sessionToken = session.access_token;
-      const sessionData = {
-        access_token: sessionToken,
-        refresh_token: session.refresh_token,
-        expires_at: session.expires_at,
-        user: session.user
-      };
-      
-      // Encoder les données de session
-      const encodedSession = btoa(JSON.stringify(sessionData));
-      
-      // Rediriger vers le domaine cible avec le token
-      const targetUrl = `https://${targetDomain}${path}?session=${encodedSession}`;
-      window.location.href = targetUrl;
-    };
 
     useEffect(() => {
         // Vérifier d'abord la session existante
@@ -147,9 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     loading,
-    redirectToAdmin,
-    redirectToMain,
-    shareSessionToDomain
   };
 
   return (
