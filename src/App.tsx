@@ -47,12 +47,12 @@ const TemplatePreview = lazy(() => import('./components/site-builder/TemplatePre
 
 // Pages publiques SEO optimisées (chargement synchrone)
 import Home from './pages/Home'; // Main homepage - IMPORT SYNCHRONE pour performance
-const Features = lazy(() => import('./pages/Features'));
-const Pricing = lazy(() => import('./pages/Pricing'));
+import Features from './pages/Features'; // Page importante - IMPORT SYNCHRONE
+import Pricing from './pages/Pricing'; // Page importante - IMPORT SYNCHRONE
+import About from './pages/About'; // Page importante - IMPORT SYNCHRONE
 const TestimonialsPublic = lazy(() => import('./pages/Testimonials'));
 const WhyChooseUs = lazy(() => import('./pages/WhyChooseUs'));
 const Support = lazy(() => import('./pages/Support'));
-const About = lazy(() => import('./pages/About'));
 
 // Pages légales
 const Legal = lazy(() => import('./pages/Legal'));
@@ -112,20 +112,12 @@ function App() {
                   
                   {/* Pages critiques - CHARGEMENT SYNCHRONE */}
                   {/* Page d'accueil principale */}
-                  <Route path="/" element={<Suspense fallback={<LoadingFallback />}><Home /></Suspense>} />
+                  <Route path="/" element={<Home />} />
                   <Route path="/index" element={<Index />} />
                   
                   {/* Pages publiques SEO optimisées */}
-                  <Route path="/features" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Features />
-                    </Suspense>
-                  } />
-                  <Route path="/pricing" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Pricing />
-                    </Suspense>
-                  } />
+                  <Route path="/features" element={<Features />} />
+                  <Route path="/pricing" element={<Pricing />} />
                   <Route path="/testimonials" element={
                     <Suspense fallback={<LoadingFallback />}>
                       <TestimonialsPublic />
@@ -141,11 +133,7 @@ function App() {
                       <Support />
                     </Suspense>
                   } />
-                  <Route path="/about" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <About />
-                    </Suspense>
-                  } />
+                  <Route path="/about" element={<About />} />
                   
                   {/* Pages légales */}
                   <Route path="/legal" element={
