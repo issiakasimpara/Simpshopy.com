@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,9 +27,21 @@ const Auth = () => {
     password: ''
   });
   
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, user, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Rediriger automatiquement si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (user && !loading) {
+      const currentHostname = window.location.hostname;
+      if (currentHostname === 'admin.simpshopy.com') {
+        navigate('/onboarding');
+      } else {
+        window.location.href = 'https://admin.simpshopy.com/onboarding';
+      }
+    }
+  }, [user, loading, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,17 +106,21 @@ const Auth = () => {
         variant: "destructive"
       });
     } else {
-      toast({
-        title: "Connexion réussie !",
-        description: "Bienvenue ! Configuration de votre boutique en cours...",
-      });
-      // Rediriger vers admin.simpshopy.com après connexion
-      const currentHostname = window.location.hostname;
-      if (currentHostname === 'admin.simpshopy.com') {
-        navigate('/onboarding');
-      } else {
-        window.location.href = 'https://admin.simpshopy.com/onboarding';
-      }
+              toast({
+          title: "Connexion réussie !",
+          description: "Bienvenue ! Redirection vers votre tableau de bord...",
+        });
+        
+        // Attendre un peu pour que le toast s'affiche
+        setTimeout(() => {
+          // Rediriger vers admin.simpshopy.com après connexion
+          const currentHostname = window.location.hostname;
+          if (currentHostname === 'admin.simpshopy.com') {
+            navigate('/onboarding');
+          } else {
+            window.location.href = 'https://admin.simpshopy.com/onboarding';
+          }
+        }, 1500);
     }
     
     setIsLoading(false);

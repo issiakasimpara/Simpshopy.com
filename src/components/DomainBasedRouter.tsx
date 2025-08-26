@@ -8,6 +8,7 @@ interface DomainBasedRouterProps {
 
 const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { shouldShowOnboarding, isLoading: onboardingLoading } = useOnboarding();
 
@@ -29,23 +30,30 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
 
   // Redirections critiques uniquement
   useEffect(() => {
-    if (!isInitialized || authLoading || onboardingLoading) return;
+    if (!isInitialized || authLoading || onboardingLoading || hasRedirected) return;
 
     const hostname = window.location.hostname;
     const pathname = window.location.pathname;
 
     // 🔒 SÉCURITÉ CRITIQUE : admin.simpshopy.com sans authentification
     if (hostname === 'admin.simpshopy.com' && !user) {
+      setHasRedirected(true);
       window.location.href = 'https://simpshopy.com/auth';
       return;
     }
 
     // 🔄 ONBOARDING CRITIQUE : utilisateur connecté mais pas d'onboarding
-    if (hostname === 'admin.simpshopy.com' && user && shouldShowOnboarding && pathname !== '/onboarding') {
+    // Éviter la redirection si on est déjà sur /onboarding ou /auth
+    if (hostname === 'admin.simpshopy.com' && 
+        user && 
+        shouldShowOnboarding && 
+        pathname !== '/onboarding' && 
+        pathname !== '/auth') {
+      setHasRedirected(true);
       window.location.href = 'https://admin.simpshopy.com/onboarding';
       return;
     }
-  }, [isInitialized, user, authLoading, onboardingLoading, shouldShowOnboarding]);
+  }, [isInitialized, user, authLoading, onboardingLoading, shouldShowOnboarding, hasRedirected]);
 
   // Chargement minimal
   if (!isInitialized || authLoading || onboardingLoading) {
