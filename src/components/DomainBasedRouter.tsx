@@ -35,7 +35,7 @@ const DomainBasedRouter: React.FC<DomainBasedRouterProps> = ({ children }) => {
     const pathname = window.location.pathname;
 
     // 🔒 SÉCURITÉ : admin.simpshopy.com sans authentification
-    // Seulement si on n'est pas déjà sur /auth
+    // Seulement si on n'est pas déjà sur /auth et que l'utilisateur n'est vraiment pas connecté
     if (hostname === 'admin.simpshopy.com' && !user && pathname !== '/auth') {
       window.location.href = 'https://simpshopy.com/auth';
       return;
