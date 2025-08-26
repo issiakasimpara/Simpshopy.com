@@ -15,16 +15,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 interface StoreData {
-  domain: any;
   store: any;
-  products: any[];
-  siteTemplate: any;
-  metadata: {
-    totalProducts: number;
-    storeActive: boolean;
-    sslEnabled: boolean;
-    lastUpdated: string;
-  };
+  domain: any;
+  isSubdomain: boolean;
+  isCustomDomain: boolean;
 }
 
 interface StorefrontRendererProps {
@@ -33,6 +27,7 @@ interface StorefrontRendererProps {
 
 const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
   const [storeData, setStoreData] = useState<StoreData | null>(null);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { formatPrice } = useStoreCurrency(storeData?.store?.id);
@@ -43,26 +38,52 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
         setLoading(true);
         setError(null);
 
+        console.log('🔍 StorefrontRenderer - Fetching data for:', hostname);
+
+        // Call the domain-router edge function to get store data
         const { data, error: routerError } = await supabase.functions.invoke('domain-router', {
           body: { hostname },
         });
 
-        if (routerError) throw routerError;
+        if (routerError) {
+          console.error('❌ Domain router error:', routerError);
+          throw routerError;
+        }
 
-        if (data.error) {
-          setError(data.error);
+        if (!data.success || !data.store) {
+          console.error('❌ No store data returned:', data);
+          setError('Boutique non trouvée');
           return;
         }
 
-        if (data.isMainDomain) {
-          // Redirect to main app
-          window.location.href = '/';
-          return;
-        }
-
+        console.log('✅ Store data received:', data.store.name);
         setStoreData(data);
+
+        // Fetch products for this store
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select(`
+            id,
+            name,
+            description,
+            price,
+            images,
+            status,
+            sku
+          `)
+          .eq('store_id', data.store.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        if (productsError) {
+          console.error('❌ Error fetching products:', productsError);
+        } else {
+          console.log('✅ Products loaded:', productsData?.length || 0);
+          setProducts(productsData || []);
+        }
+
       } catch (err) {
-        console.error('Error fetching store data:', err);
+        console.error('❌ Error fetching store data:', err);
         setError('Erreur lors du chargement de la boutique');
       } finally {
         setLoading(false);
@@ -97,6 +118,12 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
             <p className="text-sm text-muted-foreground">
               Domaine : <code className="bg-muted px-2 py-1 rounded">{hostname}</code>
             </p>
+            <Button 
+              onClick={() => window.location.href = 'https://simpshopy.com'}
+              className="mt-4"
+            >
+              Retour à SimpShopy
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -105,7 +132,7 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
 
   if (!storeData) return null;
 
-  const { store, products, domain, metadata } = storeData;
+  const { store, domain, isSubdomain, isCustomDomain } = storeData;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
@@ -129,12 +156,10 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
                 <h1 className="text-2xl font-bold">{store.name}</h1>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Globe className="h-3 w-3" />
-                  {domain.custom_domain}
-                  {metadata.sslEnabled && (
-                    <Badge variant="secondary" className="text-xs ml-2">
-                      SSL sécurisé
-                    </Badge>
-                  )}
+                  {isSubdomain ? `${store.slug}.simpshopy.com` : domain.domain_name}
+                  <Badge variant="secondary" className="text-xs ml-2">
+                    {isSubdomain ? 'Sous-domaine' : 'Domaine personnalisé'}
+                  </Badge>
                 </p>
               </div>
             </div>
@@ -158,7 +183,7 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
             </p>
           )}
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-            <span>{metadata.totalProducts} produits</span>
+            <span>{products.length} produits</span>
             <span>•</span>
             <span>Livraison rapide</span>
             <span>•</span>
@@ -242,7 +267,7 @@ const StorefrontRenderer = ({ hostname }: StorefrontRendererProps) => {
             <span className="font-semibold">{store.name}</span>
           </div>
           <p className="text-muted-foreground mb-4">
-            Boutique en ligne propulsée par MalibaShopy
+            Boutique en ligne propulsée par SimpShopy
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 {store.name}</span>

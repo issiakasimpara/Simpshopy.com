@@ -17,8 +17,9 @@ serve(async (req) => {
     
     console.log('🌐 Domain router - Hostname:', hostname)
 
-    // Skip for localhost or simpshopy.com
+    // Skip for localhost or main domain (admin interface)
     if (hostname === 'localhost' || hostname === 'simpshopy.com' || hostname.includes('vercel.app')) {
+      console.log('✅ Main domain detected - serving admin interface')
       return new Response('Continue to main app', { status: 200 })
     }
 
@@ -28,39 +29,111 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Find the store for this domain
-    const { data: domain, error } = await supabaseClient
-      .from('custom_domains')
-      .select(`
-        store_id,
-        store_slug,
-        verified,
-        stores (
-          name,
-          slug
-        )
-      `)
-      .eq('custom_domain', hostname)
-      .eq('verified', true)
-      .single()
+    // Check if this is a subdomain (boutique.simpshopy.com)
+    if (hostname.includes('simpshopy.com')) {
+      const subdomain = hostname.split('.')[0]
+      console.log('🔍 Checking subdomain:', subdomain)
 
-    if (error || !domain) {
-      console.log('❌ Domain not found or not verified:', hostname)
-      return new Response('Domain not found', { status: 404 })
+      // Skip www subdomain
+      if (subdomain === 'www') {
+        console.log('✅ www subdomain - redirecting to main domain')
+        return new Response(null, {
+          status: 302,
+          headers: {
+            'Location': 'https://simpshopy.com',
+            ...corsHeaders
+          }
+        })
+      }
+
+      // Find the store for this subdomain using the new store_domains table
+      const { data: storeDomain, error: domainError } = await supabaseClient
+        .from('store_domains')
+        .select(`
+          store_id,
+          domain_name,
+          domain_type,
+          is_active,
+          verification_status,
+          stores (
+            id,
+            name,
+            slug,
+            status,
+            settings
+          )
+        `)
+        .eq('domain_name', hostname)
+        .eq('domain_type', 'subdomain')
+        .eq('is_active', true)
+        .eq('verification_status', 'verified')
+        .single()
+
+      if (domainError || !storeDomain) {
+        console.log('❌ Store not found for subdomain:', hostname)
+        return new Response('Store not found', { status: 404 })
+      }
+
+      // Check if store is active
+      if (storeDomain.stores.status !== 'active') {
+        console.log('❌ Store is not active:', storeDomain.stores.slug)
+        return new Response('Store is not active', { status: 404 })
+      }
+
+      console.log('✅ Store found for subdomain:', storeDomain.stores.name)
+
+      // Return store data for the frontend to render
+      return new Response(JSON.stringify({
+        success: true,
+        store: storeDomain.stores,
+        domain: storeDomain,
+        isSubdomain: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      })
     }
 
-    console.log('✅ Domain found:', domain)
+    // Check for custom domains (domains personnalisés)
+    const { data: customDomain, error: customError } = await supabaseClient
+      .from('store_domains')
+      .select(`
+        store_id,
+        domain_name,
+        domain_type,
+        is_active,
+        verification_status,
+        stores (
+          id,
+          name,
+          slug,
+          status,
+          settings
+        )
+      `)
+      .eq('domain_name', hostname)
+      .eq('domain_type', 'custom')
+      .eq('is_active', true)
+      .eq('verification_status', 'verified')
+      .single()
 
-    // Redirect to the store
-    const storeUrl = `https://simpshopy.com/store/${domain.stores.slug}`
-    
-    return new Response(null, {
-      status: 302,
-      headers: {
-        'Location': storeUrl,
-        ...corsHeaders
-      }
-    })
+    if (!customError && customDomain) {
+      console.log('✅ Custom domain found:', customDomain.stores.name)
+
+      // Return store data for the frontend to render
+      return new Response(JSON.stringify({
+        success: true,
+        store: customDomain.stores,
+        domain: customDomain,
+        isCustomDomain: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      })
+    }
+
+    console.log('❌ No matching domain found:', hostname)
+    return new Response('Domain not found', { status: 404 })
 
   } catch (error) {
     console.error('❌ Domain router error:', error)
