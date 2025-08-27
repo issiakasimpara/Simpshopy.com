@@ -72,7 +72,9 @@ export const useStoreCurrency = (storeId?: string) => {
     queryKey: ['store-currency', storeId],
     queryFn: () => StoreCurrencyService.getStoreCurrency(storeId!),
     enabled: isValidStoreId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes (augmenté de 5 à 15)
+    cacheTime: 30 * 60 * 1000, // 30 minutes (augmenté de 10 à 30)
+    refetchOnWindowFocus: false, // Éviter les refetch inutiles
     retry: false, // Ne pas retenter si la requête échoue
   });
 
@@ -81,7 +83,9 @@ export const useStoreCurrency = (storeId?: string) => {
     queryKey: ['store-currency-settings', storeId],
     queryFn: () => StoreCurrencyService.getStoreCurrencySettings(storeId!),
     enabled: isValidStoreId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes (augmenté de 5 à 15)
+    cacheTime: 30 * 60 * 1000, // 30 minutes (augmenté de 10 à 30)
+    refetchOnWindowFocus: false, // Éviter les refetch inutiles
     retry: false, // Ne pas retenter si la requête échoue
   });
 
@@ -98,21 +102,7 @@ export const useStoreCurrency = (storeId?: string) => {
     }
   }, [isValidStoreId, storeId, user?.id, refetchCurrency, refetchSettings]);
 
-  // Rafraîchissement périodique pour s'assurer que les données sont à jour
-  useEffect(() => {
-    if (!isValidStoreId || !storeId) return;
 
-    const interval = setInterval(() => {
-      // Log seulement en développement et très rarement
-      if (import.meta.env.DEV && Math.random() < 0.01) { // 1% de chance de log
-        console.log('🔄 Rafraîchissement périodique des données de devise');
-      }
-      refetchCurrency();
-      refetchSettings();
-    }, 30000); // Rafraîchir toutes les 30 secondes
-
-    return () => clearInterval(interval);
-  }, [isValidStoreId, storeId, user?.id, refetchCurrency, refetchSettings]);
 
   // Configuration du temps réel pour les changements de devise
   useEffect(() => {

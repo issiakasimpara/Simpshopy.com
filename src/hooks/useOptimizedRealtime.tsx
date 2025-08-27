@@ -5,6 +5,7 @@ import { supabase } from '../integrations/supabase/client';
 // Cache global pour éviter les subscriptions multiples
 const channelCache = new Map<string, RealtimeChannel>();
 const subscriptionCount = new Map<string, number>();
+const lastCallTime = new Map<string, number>();
 
 interface UseOptimizedRealtimeOptions {
   table: string;
@@ -12,24 +13,55 @@ interface UseOptimizedRealtimeOptions {
   filter?: string;
   debounceMs?: number;
   enabled?: boolean;
+  maxCallsPerMinute?: number; // Nouvelle option pour limiter la fréquence
 }
 
 export function useOptimizedRealtime<T = any>(
   options: UseOptimizedRealtimeOptions,
   callback?: (payload: RealtimePostgresChangesPayload<T>) => void
 ) {
-  const { table, event = '*', filter, debounceMs = 1000, enabled = true } = options;
+  const { table, event = '*', filter, debounceMs = 5000, enabled = true, maxCallsPerMinute = 12 } = options;
   const [data, setData] = useState<T[]>([]);
   const callbackRef = useRef(callback);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const lastPayloadRef = useRef<string>('');
 
   // Mise à jour du callback
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
 
-  // Fonction debounced pour éviter les appels multiples
+  // Fonction debounced optimisée avec limitation de fréquence
   const debouncedCallback = useCallback((payload: RealtimePostgresChangesPayload<T>) => {
+    const channelKey = `${table}:${event}:${filter || 'all'}`;
+    const now = Date.now();
+    
+    // Vérifier la limitation de fréquence
+    const lastCall = lastCallTime.get(channelKey) || 0;
+    const timeSinceLastCall = now - lastCall;
+    const minInterval = 60000 / maxCallsPerMinute; // Intervalle minimum entre les appels
+    
+    if (timeSinceLastCall < minInterval) {
+      console.log(`🚫 Appel realtime ignoré - trop fréquent pour ${channelKey}`);
+      return;
+    }
+    
+    // Créer une clé unique pour ce payload
+    const payloadKey = JSON.stringify({
+      eventType: payload.eventType,
+      table: payload.table,
+      schema: payload.schema,
+      commit_timestamp: payload.commit_timestamp
+    });
+
+    // Éviter les doublons de payload
+    if (lastPayloadRef.current === payloadKey) {
+      console.log(`🚫 Payload dupliqué ignoré pour ${channelKey}`);
+      return;
+    }
+    lastPayloadRef.current = payloadKey;
+    lastCallTime.set(channelKey, now);
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
