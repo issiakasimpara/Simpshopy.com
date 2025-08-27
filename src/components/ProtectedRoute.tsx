@@ -18,7 +18,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    const currentHostname = window.location.hostname;
+    
+    // Si on est déjà sur admin.simpshopy.com, rediriger vers /auth
+    if (currentHostname === 'admin.simpshopy.com') {
+      return <Navigate to="/auth" replace />;
+    }
+    
+    // Sinon, rediriger vers admin.simpshopy.com/auth
+    window.location.href = 'https://admin.simpshopy.com/auth';
+    return null;
   }
 
   // Si l'utilisateur est connecté, afficher le contenu

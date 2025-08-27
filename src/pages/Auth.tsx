@@ -93,8 +93,13 @@ const Auth = () => {
           title: "Connexion réussie !",
           description: "Bienvenue ! Redirection vers votre tableau de bord...",
         });
-        // Redirection simple vers le dashboard
-        navigate('/dashboard');
+        // Redirection vers admin.simpshopy.com/dashboard
+        const currentHostname = window.location.hostname;
+        if (currentHostname === 'admin.simpshopy.com') {
+          navigate('/dashboard');
+        } else {
+          window.location.href = 'https://admin.simpshopy.com/dashboard';
+        }
       }
       
       setIsLoading(false);

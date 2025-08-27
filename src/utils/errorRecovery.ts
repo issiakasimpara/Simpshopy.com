@@ -183,9 +183,16 @@ class ErrorRecoveryManager {
    * 🔐 Gérer les erreurs d'authentification
    */
   private async handleAuthError(context: ErrorContext): Promise<void> {
-    // Rediriger vers la page de connexion
-    if (window.location.pathname !== '/auth') {
-      window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname);
+    // Rediriger vers la page de connexion sur admin.simpshopy.com
+    const currentHostname = window.location.hostname;
+    const currentPath = window.location.pathname;
+    
+    if (currentHostname === 'admin.simpshopy.com') {
+      if (currentPath !== '/auth') {
+        window.location.href = '/auth?redirect=' + encodeURIComponent(currentPath);
+      }
+    } else {
+      window.location.href = 'https://admin.simpshopy.com/auth?redirect=' + encodeURIComponent(currentPath);
     }
   }
 

@@ -61,8 +61,13 @@ errorRecoveryManager.registerRecoveryAction('Products_create_product_Error', {
 errorRecoveryManager.registerRecoveryAction('Auth_signIn_Error', {
   type: 'redirect',
   action: async () => {
-    // Rediriger vers la page de connexion
-    window.location.href = '/auth';
+    // Rediriger vers la page de connexion sur admin.simpshopy.com
+    const currentHostname = window.location.hostname;
+    if (currentHostname === 'admin.simpshopy.com') {
+      window.location.href = '/auth';
+    } else {
+      window.location.href = 'https://admin.simpshopy.com/auth';
+    }
   },
   maxAttempts: 1,
   delay: 0

@@ -41,11 +41,11 @@ const SmartNavigationButton: React.FC<SmartNavigationButtonProps> = ({
         }
       }
     } else {
-      // Utilisateur non connecté - rediriger vers l'auth sur le domaine principal
-      if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
+      // Utilisateur non connecté - rediriger vers l'auth sur admin.simpshopy.com
+      if (currentHostname === 'admin.simpshopy.com') {
         window.location.href = '/auth';
       } else {
-        window.location.href = 'https://simpshopy.com/auth';
+        window.location.href = 'https://admin.simpshopy.com/auth';
       }
     }
   };

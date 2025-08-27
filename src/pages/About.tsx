@@ -124,9 +124,12 @@ const About = () => {
               <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
             </nav>
             <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-              <Button variant="ghost" asChild className="text-sm lg:text-lg px-2 sm:px-4">
-                <Link to="/auth">Connexion</Link>
-              </Button>
+                <Link 
+                  to="https://admin.simpshopy.com/auth"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                >
+                  Connexion
+                </Link>
               <Button 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               >

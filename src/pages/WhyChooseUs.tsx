@@ -144,10 +144,19 @@ const WhyChooseUs = () => {
             </nav>
             <div className="flex items-center space-x-4">
               <Button variant="outline" asChild>
-                <Link to="/auth">Se connecter</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/auth">S'inscrire</Link>
+                <Link 
+                  to="https://admin.simpshopy.com/auth"
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Se connecter
+                </Link>
+                {' '}ou{' '}
+                <Link 
+                  to="https://admin.simpshopy.com/auth"
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  S'inscrire
+                </Link>
               </Button>
             </div>
           </div>

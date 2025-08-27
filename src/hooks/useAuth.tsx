@@ -75,6 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password
     });
     
+    // Après connexion réussie, rediriger vers admin.simpshopy.com/dashboard
+    if (!error) {
+      const currentHostname = window.location.hostname;
+      if (currentHostname !== 'admin.simpshopy.com') {
+        window.location.href = 'https://admin.simpshopy.com/dashboard';
+      }
+    }
+    
     return { error };
   };
 

@@ -108,7 +108,7 @@ const Index = () => {
             </nav>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" asChild className="font-medium">
-                <Link to="/auth">Connexion</Link>
+                <Link to="https://admin.simpshopy.com/auth">Connexion</Link>
               </Button>
               <Button 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
@@ -122,7 +122,7 @@ const Index = () => {
                     }
                   } else {
                     // Nouvel utilisateur - rediriger vers l'auth avec un paramètre pour indiquer qu'il faut faire l'onboarding après
-                    navigate('/auth?onboarding=true');
+                    window.location.href = 'https://admin.simpshopy.com/auth?onboarding=true';
                   }
                 }}
               >

@@ -14,10 +14,10 @@ const SimpleIndex = () => {
               <span className="text-2xl font-bold text-gray-900">MalibaShopy</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/auth">
+              <Link to="https://admin.simpshopy.com/auth">
                 <Button variant="outline">Se connecter</Button>
               </Link>
-              <Link to="/auth">
+              <Link to="https://admin.simpshopy.com/auth">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   Commencer
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -41,7 +41,7 @@ const SimpleIndex = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth">
+            <Link to="https://admin.simpshopy.com/auth">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-4">
                 <Store className="mr-2 h-5 w-5" />
                 Créer ma boutique
