@@ -31,6 +31,20 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Gestion de la redirection selon le domaine
+  useEffect(() => {
+    const currentHostname = window.location.hostname;
+    
+    // Si on est sur simpshopy.com en production, rediriger vers admin.simpshopy.com
+    if (currentHostname === 'simpshopy.com' || currentHostname === 'www.simpshopy.com') {
+      window.location.href = 'https://admin.simpshopy.com/auth';
+      return;
+    }
+    
+    // En développement local, on reste sur localhost/auth
+    // Sur admin.simpshopy.com, on reste sur admin.simpshopy.com/auth
+  }, []);
+
   // Supprimer la redirection automatique pour éviter la boucle
   // Laisser DomainBasedRouter gérer les redirections
 

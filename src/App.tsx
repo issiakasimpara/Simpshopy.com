@@ -12,7 +12,6 @@ import LoadingFallback from './components/LoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
-import AuthRedirect from './components/AuthRedirect';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -137,11 +136,9 @@ function App() {
                   
                   {/* 🔐 AUTHENTIFICATION */}
                   <Route path="/auth" element={
-                    <AuthRedirect>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Auth />
-                      </Suspense>
-                    </AuthRedirect>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Auth />
+                    </Suspense>
                   } />
                   
                   {/* 🎛️ INTERFACE ADMIN */}
