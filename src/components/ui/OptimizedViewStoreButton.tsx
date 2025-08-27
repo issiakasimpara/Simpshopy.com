@@ -43,8 +43,21 @@ const OptimizedViewStoreButton = ({
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
 
-      // Ouvrir la boutique dans une nouvelle fenêtre
-      const storeUrl = `/store/${storeSlug}`;
+      // Ouvrir la boutique dans une nouvelle fenêtre sur le bon domaine
+      const currentHostname = window.location.hostname;
+      let storeUrl;
+      
+      if (currentHostname === 'localhost' || currentHostname.includes('localhost')) {
+        // En développement, rester sur localhost
+        storeUrl = `http://localhost:8080/store/${storeSlug}`;
+      } else if (currentHostname === 'admin.simpshopy.com') {
+        // En production, rediriger vers simpshopy.com
+        storeUrl = `https://simpshopy.com/store/${storeSlug}`;
+      } else {
+        // Fallback pour autres cas
+        storeUrl = `/store/${storeSlug}`;
+      }
+      
       window.open(storeUrl, '_blank');
       
       // Feedback positif

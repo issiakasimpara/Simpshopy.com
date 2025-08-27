@@ -47,6 +47,16 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
         // Check if this is the admin subdomain - treat as main domain
         if (hostname === 'admin.simpshopy.com') {
           console.log('🔍 Admin subdomain detected - treating as main domain');
+          
+          // Redirection automatique pour les routes de boutiques
+          const currentPath = window.location.pathname;
+          if (currentPath.startsWith('/store/')) {
+            const storeSlug = currentPath.replace('/store/', '');
+            console.log('🔍 Redirecting store route from admin to main domain:', storeSlug);
+            window.location.href = `https://simpshopy.com/store/${storeSlug}`;
+            return;
+          }
+          
           setIsMainDomain(true);
           setIsLoading(false);
           return;
