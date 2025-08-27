@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useOptimizedRealtime } from '../hooks/useOptimizedRealtime';
 import { useOptimizedCartSessions } from '../hooks/useOptimizedCartSessions';
 import { useSessionOptimizer } from '../hooks/useSessionOptimizer';
+import { useStores } from '@/hooks/useStores';
+import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
+import AbandonedCartsWidget from './AbandonedCartsWidget';
 
 interface DashboardStats {
   totalOrders: number;
@@ -11,6 +14,9 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
+  const { store } = useStores();
+  const { stats: abandonedStats } = useAbandonedCarts(store?.id);
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -114,38 +120,44 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Paniers</h3>
-          <p className="text-3xl font-bold text-orange-600">{stats.cartSessions}</p>
-          <p className="text-sm text-gray-500">Sessions actives</p>
+          <h3 className="text-lg font-semibold text-gray-700">Paniers abandonnés</h3>
+          <p className="text-3xl font-bold text-orange-600">{abandonedStats.totalAbandoned}</p>
+          <p className="text-sm text-gray-500">Valeur perdue: ${abandonedStats.totalValue.toLocaleString()}</p>
         </div>
       </div>
 
-      {/* Section des optimisations */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">État des Optimisations</h2>
+      {/* Section des widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Widget des paniers abandonnés */}
+        <AbandonedCartsWidget maxItems={3} />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-800">✅ Realtime Optimisé</h3>
-            <p className="text-sm text-green-600">
-              {realtimeOrders.length} événements en cache
-            </p>
-          </div>
+        {/* Section des optimisations */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">État des Optimisations</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h3 className="font-semibold text-green-800">✅ Realtime Optimisé</h3>
+              <p className="text-sm text-green-600">
+                {realtimeOrders.length} événements en cache
+              </p>
+            </div>
 
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800">
-              {cartLoading ? '⏳' : '✅'} Sessions Panier
-            </h3>
-            <p className="text-sm text-blue-600">
-              {cartSession ? 'Session active' : 'Aucune session'}
-            </p>
-          </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-blue-800">
+                {cartLoading ? '⏳' : '✅'} Sessions Panier
+              </h3>
+              <p className="text-sm text-blue-600">
+                {cartSession ? 'Session active' : 'Aucune session'}
+              </p>
+            </div>
 
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <h3 className="font-semibold text-purple-800">✅ Sessions Configurées</h3>
-            <p className="text-sm text-purple-600">
-              {getCacheSize()} configurations en cache
-            </p>
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <h3 className="font-semibold text-purple-800">✅ Sessions Configurées</h3>
+              <p className="text-sm text-purple-600">
+                {getCacheSize()} configurations en cache
+              </p>
+            </div>
           </div>
         </div>
       </div>
