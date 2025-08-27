@@ -1,29 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../integrations/supabase/client';
-
-interface MarketSettings {
-  id: string;
-  store_id: string;
-  default_currency: string;
-  currency_symbol: string;
-  currency_position: 'before' | 'after';
-  decimal_places: number;
-  thousand_separator: string;
-  decimal_separator: string;
-  created_at: string;
-  updated_at: string;
-}
+import { StoreCurrencyService, type StoreCurrencySettings } from '@/services/storeCurrencyService';
 
 // Cache global pour éviter les requêtes multiples
-const globalMarketSettingsCache = new Map<string, MarketSettings>();
+const globalMarketSettingsCache = new Map<string, StoreCurrencySettings>();
 
 export function useGlobalMarketSettings(storeId: string | null) {
-  const queryClient = useQueryClient();
   const cacheKey = `global-market-settings-${storeId}`;
 
   return useQuery({
     queryKey: [cacheKey],
-    queryFn: async (): Promise<MarketSettings | null> => {
+    queryFn: async (): Promise<StoreCurrencySettings | null> => {
       if (!storeId) return null;
 
       // 🔐 Validation multi-tenant supplémentaire
@@ -40,19 +26,16 @@ export function useGlobalMarketSettings(storeId: string | null) {
 
       console.log(`🌐 Requête globale market_settings pour store ${storeId}`);
       
-      const { data, error } = await supabase
-        .from('market_settings')
-        .select('*')
-        .eq('store_id', storeId)
-        .single();
+      // Utiliser le service existant au lieu d'appels directs à Supabase
+      const data = await StoreCurrencyService.getStoreCurrencySettings(storeId);
 
-      if (error) {
-        console.error('Erreur market_settings globale:', error);
+      if (!data) {
+        console.error('Erreur market_settings globale: données non trouvées');
         return null;
       }
 
       // 🔐 Validation multi-tenant des données reçues
-      if (data && data.store_id !== storeId) {
+      if (data.store_id !== storeId) {
         console.error('❌ Violation multi-tenant détectée:', {
           requested: storeId,
           received: data.store_id
@@ -67,22 +50,30 @@ export function useGlobalMarketSettings(storeId: string | null) {
     },
     enabled: !!storeId,
     staleTime: 30 * 60 * 1000, // 30 minutes
-    cacheTime: 60 * 60 * 1000, // 1 heure
+    gcTime: 60 * 60 * 1000, // 1 heure (remplace cacheTime)
     refetchOnWindowFocus: false,
     retry: false,
   });
 }
 
-// Fonction pour invalider le cache global
-export function invalidateGlobalMarketSettings(storeId: string) {
-  globalMarketSettingsCache.delete(storeId);
-  queryClient.invalidateQueries({ queryKey: [`global-market-settings-${storeId}`] });
+// Hook pour invalider le cache global
+export function useInvalidateGlobalMarketSettings() {
+  const queryClient = useQueryClient();
+  
+  return (storeId: string) => {
+    globalMarketSettingsCache.delete(storeId);
+    queryClient.invalidateQueries({ queryKey: [`global-market-settings-${storeId}`] });
+  };
 }
 
-// Fonction pour mettre à jour le cache global
-export function updateGlobalMarketSettings(storeId: string, settings: MarketSettings) {
-  globalMarketSettingsCache.set(storeId, settings);
-  queryClient.setQueryData([`global-market-settings-${storeId}`], settings);
+// Hook pour mettre à jour le cache global
+export function useUpdateGlobalMarketSettings() {
+  const queryClient = useQueryClient();
+  
+  return (storeId: string, settings: StoreCurrencySettings) => {
+    globalMarketSettingsCache.set(storeId, settings);
+    queryClient.setQueryData([`global-market-settings-${storeId}`], settings);
+  };
 }
 
 // Hook pour nettoyer le cache global
