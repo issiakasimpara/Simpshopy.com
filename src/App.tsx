@@ -12,6 +12,7 @@ import LoadingFallback from './components/LoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
+import { useGlobalMarketSettingsCleanup } from './hooks/useGlobalMarketSettings';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -75,6 +76,9 @@ function GlobalOptimizations() {
   // Optimiseur de session global
   const { configureSession } = useSessionOptimizer();
   
+  // Nettoyage du cache global market_settings
+  const cleanupMarketSettings = useGlobalMarketSettingsCleanup();
+  
   // Configuration de session optimisée au démarrage
   React.useEffect(() => {
     configureSession({
@@ -82,6 +86,11 @@ function GlobalOptimizations() {
       role: 'authenticated'
     });
   }, [configureSession]);
+
+  // Nettoyage au démontage
+  React.useEffect(() => {
+    return cleanupMarketSettings;
+  }, [cleanupMarketSettings]);
 
   return null;
 }

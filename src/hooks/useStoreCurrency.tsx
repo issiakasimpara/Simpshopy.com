@@ -5,6 +5,7 @@ import { StoreCurrencyService, type StoreCurrencySettings } from '@/services/sto
 import { formatCurrency, type Currency } from '@/utils/formatCurrency';
 import { useToast } from './use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useGlobalMarketSettings } from './useGlobalMarketSettings';
 
 // Canal global partagé pour éviter les souscriptions multiples
 let globalChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -78,16 +79,8 @@ export const useStoreCurrency = (storeId?: string) => {
     retry: false, // Ne pas retenter si la requête échoue
   });
 
-  // Récupérer tous les paramètres de devise
-  const { data: currencySettings, isLoading: isLoadingSettings, refetch: refetchSettings } = useQuery({
-    queryKey: ['store-currency-settings', storeId],
-    queryFn: () => StoreCurrencyService.getStoreCurrencySettings(storeId!),
-    enabled: isValidStoreId,
-    staleTime: 15 * 60 * 1000, // 15 minutes (augmenté de 5 à 15)
-    cacheTime: 30 * 60 * 1000, // 30 minutes (augmenté de 10 à 30)
-    refetchOnWindowFocus: false, // Éviter les refetch inutiles
-    retry: false, // Ne pas retenter si la requête échoue
-  });
+  // Utiliser le hook global pour les market_settings
+  const { data: currencySettings, isLoading: isLoadingSettings, refetch: refetchSettings } = useGlobalMarketSettings(storeId || null);
 
   // Forcer le refetch quand le storeId devient valide
   useEffect(() => {
