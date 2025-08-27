@@ -12,6 +12,7 @@ import LoadingFallback from './components/LoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicStoreRouter from './components/PublicStoreRouter';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -103,7 +104,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   
                   {/* 🛍️ BOUTIQUE PUBLIQUE */}
-                  <Route path="/store/:storeId" element={<Storefront />} />
+                  <Route path="/store/:storeId" element={<PublicStoreRouter />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/payment-success" element={<PaymentSuccess />} />

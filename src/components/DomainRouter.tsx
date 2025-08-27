@@ -44,6 +44,14 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           return;
         }
 
+        // Check if this is the admin subdomain - treat as main domain
+        if (hostname === 'admin.simpshopy.com') {
+          console.log('🔍 Admin subdomain detected - treating as main domain');
+          setIsMainDomain(true);
+          setIsLoading(false);
+          return;
+        }
+
         console.log('🔍 Checking for custom domain:', hostname);
 
         // Check for custom domain
@@ -98,7 +106,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
         const subdomain = hostname.split('.')[0];
         console.log('🔍 Checking subdomain:', subdomain);
         
-        if (hostname.includes('simpshopy.com') && subdomain !== 'www') {
+        if (hostname.includes('simpshopy.com') && subdomain !== 'www' && subdomain !== 'admin') {
           // This is a subdomain, find the store
           const { data: store, error: storeError } = await supabase
             .from('stores')
