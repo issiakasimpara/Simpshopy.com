@@ -100,7 +100,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats en temps réel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-gray-700">Commandes</h3>
           <p className="text-3xl font-bold text-blue-600">{stats.totalOrders}</p>
@@ -117,6 +117,12 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-gray-700">Clients</h3>
           <p className="text-3xl font-bold text-purple-600">{stats.activeCustomers}</p>
           <p className="text-sm text-gray-500">Clients actifs</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-gray-700">Produits</h3>
+          <p className="text-3xl font-bold text-indigo-600">{stats.cartSessions}</p>
+          <p className="text-sm text-gray-500">Produits actifs</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
