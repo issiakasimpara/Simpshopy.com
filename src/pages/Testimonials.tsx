@@ -1,11 +1,12 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Quote, ArrowRight, Users, TrendingUp, Globe, Award } from "lucide-react";
+import { Star, Quote, Users, Globe, DollarSign, TrendingUp, CheckCircle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import AppLogo from "@/components/ui/AppLogo";
+import PublicPageHeader from "@/components/PublicPageHeader";
 
 const Testimonials = () => {
   const testimonials = [
@@ -82,38 +83,7 @@ const Testimonials = () => {
       />
 
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <AppLogo />
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Accueil</Link>
-              <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Fonctionnalités</Link>
-              <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Tarifs</Link>
-              <Link to="/testimonials" className="text-blue-600 font-medium">Témoignages</Link>
-              <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Pourquoi nous choisir</Link>
-              <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Support</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link 
-                  to="https://admin.simpshopy.com/auth"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Se connecter
-                </Link>
-                {' '}ou{' '}
-                <Link 
-                  to="https://admin.simpshopy.com/auth"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  S'inscrire
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicPageHeader />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-purple-50 py-20">
@@ -272,7 +242,7 @@ const Testimonials = () => {
             <Card className="border-0 shadow-lg text-center">
               <CardHeader>
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award className="h-8 w-8 text-blue-600" />
+                  <CheckCircle className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle>Excellence reconnue</CardTitle>
               </CardHeader>

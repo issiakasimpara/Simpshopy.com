@@ -143,21 +143,25 @@ const WhyChooseUs = () => {
               <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Support</Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link 
-                  to="https://admin.simpshopy.com/auth"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Se connecter
-                </Link>
-                {' '}ou{' '}
-                <Link 
-                  to="https://admin.simpshopy.com/auth"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  S'inscrire
-                </Link>
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" asChild>
+                  <Link 
+                    to="https://admin.simpshopy.com/auth"
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Se connecter
+                  </Link>
+                </Button>
+                <span className="text-gray-600">ou</span>
+                <Button variant="outline" asChild>
+                  <Link 
+                    to="https://admin.simpshopy.com/auth"
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    S'inscrire
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

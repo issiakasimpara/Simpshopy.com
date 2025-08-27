@@ -9,6 +9,7 @@ import AppLogo from "@/components/ui/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import SmartNavigationButton from "@/components/SmartNavigationButton";
+import PublicPageHeader from "@/components/PublicPageHeader";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -140,37 +141,7 @@ const Home = () => {
         type="website"
       />
 
-      {/* Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            <AppLogo />
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-10 ml-8">
-               <Link to="/" className="text-blue-600 font-medium text-sm xl:text-lg">Accueil</Link>
-               <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Fonctionnalités</Link>
-               <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Tarifs</Link>
-               <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Témoignages</Link>
-               <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Pourquoi nous choisir</Link>
-               <Link to="/support" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm xl:text-lg">Support</Link>
-             </nav>
-            <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-              {!user && (
-                <Link 
-                  to="https://admin.simpshopy.com/auth"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                >
-                  Connexion
-                </Link>
-              )}
-              <SmartNavigationButton 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl text-sm lg:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {user ? 'Mon Dashboard' : 'Vendre'}
-              </SmartNavigationButton>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicPageHeader activePage="home" />
 
       {/* Hero Section */}
       <section className="relative py-16 sm:py-24 lg:py-32 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">

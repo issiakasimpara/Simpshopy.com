@@ -8,6 +8,7 @@ import { Headphones, MessageCircle, BookOpen, Users, Clock, Globe, Mail, Phone, 
 import { Link } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import AppLogo from "@/components/ui/AppLogo";
+import PublicPageHeader from "@/components/PublicPageHeader";
 
 const Support = () => {
   const supportChannels = [
@@ -120,37 +121,7 @@ const Support = () => {
         type="website"
       />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <AppLogo />
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Accueil</Link>
-              <Link to="/features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Fonctionnalités</Link>
-              <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Tarifs</Link>
-              <Link to="/testimonials" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Témoignages</Link>
-              <Link to="/why-choose-us" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Pourquoi nous choisir</Link>
-              <Link to="/support" className="text-blue-600 font-medium">Support</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link 
-                to="https://admin.simpshopy.com/auth"
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Se connecter
-              </Link>
-              {' '}ou{' '}
-              <Link 
-                to="https://admin.simpshopy.com/auth"
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                S'inscrire
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicPageHeader activePage="support" />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-purple-50 py-20">
