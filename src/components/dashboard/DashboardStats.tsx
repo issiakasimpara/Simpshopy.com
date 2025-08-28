@@ -98,11 +98,8 @@ const DashboardStats = () => {
       <div className="w-full">
         <Card className="hover:shadow-lg transition-shadow relative">
           {/* Indicateur en ligne animé */}
-          <div className="absolute top-3 right-3 flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-600 font-medium">EN LIGNE</span>
-            </div>
+          <div className="absolute top-3 right-3">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
           
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-8">

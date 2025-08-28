@@ -85,14 +85,14 @@ export const useActiveVisitors = (storeId?: string) => {
     try {
       setIsLoading(true);
       
-      // Récupérer les sessions actives (activité dans les 5 dernières minutes)
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      // Récupérer les sessions actives (activité dans les 2 dernières minutes - plus strict)
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
       
       const { data, error } = await supabase
         .from('active_sessions')
         .select('*')
         .eq('store_id', storeId)
-        .gte('last_activity', fiveMinutesAgo)
+        .gte('last_activity', twoMinutesAgo)
         .order('last_activity', { ascending: false });
 
       if (error) {
@@ -126,13 +126,13 @@ export const useActiveVisitors = (storeId?: string) => {
     if (!storeId) return;
 
     try {
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
       
       await supabase
         .from('active_sessions')
         .delete()
         .eq('store_id', storeId)
-        .lt('last_activity', fiveMinutesAgo);
+        .lt('last_activity', twoMinutesAgo);
     } catch (error) {
       console.error('Erreur nettoyage sessions expirées:', error);
     }
@@ -163,11 +163,11 @@ export const useActiveVisitors = (storeId?: string) => {
       )
       .subscribe();
 
-    // Nettoyer les sessions expirées toutes les minutes
-    const cleanupInterval = setInterval(cleanupExpiredSessions, 60 * 1000);
+    // Nettoyer les sessions expirées toutes les 30 secondes (plus fréquent)
+    const cleanupInterval = setInterval(cleanupExpiredSessions, 30 * 1000);
 
-    // Mettre à jour les données toutes les 30 secondes
-    const updateInterval = setInterval(fetchActiveVisitors, 30 * 1000);
+    // Mettre à jour les données toutes les 15 secondes (plus fréquent)
+    const updateInterval = setInterval(fetchActiveVisitors, 15 * 1000);
 
     return () => {
       channel.unsubscribe();

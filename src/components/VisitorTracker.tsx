@@ -26,10 +26,10 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
 
     trackInitialVisit();
 
-    // Heartbeat toutes les 30 secondes pour maintenir la session active
+    // Heartbeat toutes les 15 secondes pour maintenir la session active (plus fréquent)
     heartbeatIntervalRef.current = setInterval(async () => {
       await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
-    }, 30 * 1000);
+    }, 15 * 1000);
 
     // Tracker les interactions utilisateur
     const handleUserActivity = async () => {
