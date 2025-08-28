@@ -47,3 +47,4 @@ credentials.json
 # 🔐 SÉCURITÉ - Fichiers sensibles
 cloudflare-secrets.ts
 supabase-secrets.ts
+.vercel
