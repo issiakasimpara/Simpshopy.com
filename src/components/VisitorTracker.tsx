@@ -12,12 +12,12 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Générer un ID de session unique pour ce visiteur
-    sessionIdRef.current = generateSessionId();
-    
     // Récupérer les informations du navigateur
     const userAgent = navigator.userAgent;
     const ipAddress = 'unknown'; // En production, récupérer via API
+
+    // Générer un ID de session stable pour ce visiteur
+    sessionIdRef.current = generateSessionId(userAgent, ipAddress);
 
     // Tracker le visiteur initial
     const trackInitialVisit = async () => {

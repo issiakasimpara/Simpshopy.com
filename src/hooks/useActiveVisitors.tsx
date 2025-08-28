@@ -30,9 +30,11 @@ export const useActiveVisitors = (storeId?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Générer un ID de session unique
-  const generateSessionId = useCallback(() => {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Générer un ID de session stable basé sur l'IP et User Agent
+  const generateSessionId = useCallback((userAgent: string, ipAddress: string) => {
+    // Créer un hash stable basé sur l'IP et User Agent
+    const sessionKey = `${ipAddress}_${userAgent}`;
+    return `session_${btoa(sessionKey).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16)}`;
   }, []);
 
   // Créer ou mettre à jour une session active
@@ -100,13 +102,14 @@ export const useActiveVisitors = (storeId?: string) => {
 
       setActiveVisitors(data || []);
       
-      // Calculer les statistiques
+      // Calculer les statistiques CORRIGÉES
+      // Utiliser session_id pour compter les sessions uniques (pas ip_address)
+      const uniqueSessions = new Set(data?.map(v => v.session_id) || []).size;
       const uniqueVisitors = new Set(data?.map(v => v.ip_address) || []).size;
-      const totalVisitors = data?.length || 0;
       
       setStats({
-        totalVisitors,
-        uniqueVisitors,
+        totalVisitors: uniqueSessions, // Nombre de sessions actives
+        uniqueVisitors, // Nombre de visiteurs uniques (par IP)
         averageSessionDuration: 0, // À implémenter si nécessaire
         mostActivePage: '' // À implémenter si nécessaire
       });
