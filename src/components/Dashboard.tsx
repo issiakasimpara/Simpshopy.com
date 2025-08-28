@@ -2,9 +2,6 @@ import { useState, useEffect } from 'react';
 import { useOptimizedRealtime } from '../hooks/useOptimizedRealtime';
 import { useOptimizedCartSessions } from '../hooks/useOptimizedCartSessions';
 import { useSessionOptimizer } from '../hooks/useSessionOptimizer';
-import { useStores } from '@/hooks/useStores';
-import { useAbandonedCarts } from '@/hooks/useAbandonedCarts';
-import AbandonedCartsWidget from './AbandonedCartsWidget';
 
 interface DashboardStats {
   totalOrders: number;
@@ -14,18 +11,6 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const { store, stores, hasStore } = useStores();
-  const { stats: abandonedStats, isLoading: abandonedLoading } = useAbandonedCarts(store?.id);
-  
-  // Debug logs
-  console.log('🔍 Dashboard Debug:', {
-    storeId: store?.id,
-    storeExists: !!store,
-    storesLength: Array.isArray(stores) ? stores.length : 0,
-    abandonedStats,
-    abandonedLoading,
-    hasStore
-  });
   
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
@@ -110,7 +95,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats en temps réel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-gray-700">Commandes</h3>
           <p className="text-3xl font-bold text-blue-600">{stats.totalOrders}</p>
@@ -134,35 +119,10 @@ export default function Dashboard() {
           <p className="text-3xl font-bold text-indigo-600">{stats.cartSessions}</p>
           <p className="text-sm text-gray-500">Produits actifs</p>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Paniers abandonnés</h3>
-          {abandonedLoading ? (
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-32"></div>
-            </div>
-          ) : (
-            <>
-              <p className="text-3xl font-bold text-orange-600">
-                {abandonedStats?.totalAbandoned || 0}
-              </p>
-              <p className="text-sm text-gray-500">
-                Valeur perdue: ${(abandonedStats?.totalValue || 0).toLocaleString()}
-              </p>
-              {!store?.id && (
-                <p className="text-xs text-red-500 mt-1">Store ID manquant</p>
-              )}
-            </>
-          )}
-        </div>
       </div>
 
-      {/* Section des widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Widget des paniers abandonnés */}
-        <AbandonedCartsWidget maxItems={3} />
-        
+      {/* Section des optimisations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Section des optimisations */}
         <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">État des Optimisations</h2>
