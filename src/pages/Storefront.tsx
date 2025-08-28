@@ -9,6 +9,7 @@ import { Template } from '@/types/template';
 import { supabase } from '@/integrations/supabase/client';
 import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 import type { Tables } from '@/integrations/supabase/types';
+import VisitorTracker from '@/components/VisitorTracker';
 
 import { useBranding } from '@/hooks/useBranding';
 
@@ -567,6 +568,9 @@ const Storefront = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Tracker les visiteurs en temps réel */}
+      {store && <VisitorTracker storeId={store.id} storeSlug={storeSlug} />}
+      
       {renderNavigation()}
       {renderBreadcrumb()}
 
