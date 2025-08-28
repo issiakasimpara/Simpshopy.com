@@ -1,13 +1,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package, AlertTriangle, Eye } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package, AlertTriangle, Eye, Moon, Zap } from "lucide-react";
 import { useStoreCurrency } from "@/hooks/useStoreCurrency";
 import { useOrders } from "@/hooks/useOrders";
 import { useProducts } from "@/hooks/useProducts";
 import { useStores } from "@/hooks/useStores";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAbandonedCarts } from "@/hooks/useAbandonedCarts";
-import { useActiveVisitors } from "@/hooks/useActiveVisitors";
+import { useSmartVisitorTracking, TrackingState } from "@/hooks/useSmartVisitorTracking";
+import TrackingMonitor from "./TrackingMonitor";
 
 const DashboardStats = () => {
   const { store } = useStores();
@@ -16,7 +17,7 @@ const DashboardStats = () => {
   const { products, isLoading: isLoadingProducts } = useProducts(store?.id, 'active');
   const { analytics, isLoading: analyticsLoading } = useAnalytics();
   const { stats: abandonedStats, isLoading: abandonedLoading } = useAbandonedCarts(store?.id);
-  const { stats: visitorStats, isLoading: visitorLoading } = useActiveVisitors(store?.id);
+  const { stats: visitorStats, isLoading: visitorLoading, trackingState } = useSmartVisitorTracking(store?.id);
 
   // Utiliser les analytics pour les statistiques
   const revenue = analytics?.totalRevenue || stats?.totalRevenue || 0;
@@ -64,12 +65,49 @@ const DashboardStats = () => {
     },
   ];
 
+  // Déterminer l'icône et le texte selon l'état du tracking
+  const getTrackingStatus = () => {
+    switch (trackingState) {
+      case TrackingState.ACTIVE:
+        return {
+          icon: Zap,
+          statusText: "Mode actif",
+          statusClass: "text-green-500",
+          indicatorClass: "bg-green-500"
+        };
+      case TrackingState.SLEEP:
+        return {
+          icon: Moon,
+          statusText: "Mode veille",
+          statusClass: "text-gray-500",
+          indicatorClass: "bg-gray-400"
+        };
+      case TrackingState.TRANSITIONING:
+        return {
+          icon: Eye,
+          statusText: "Transition...",
+          statusClass: "text-yellow-500",
+          indicatorClass: "bg-yellow-500 animate-pulse"
+        };
+      default:
+        return {
+          icon: Eye,
+          statusText: "Inconnu",
+          statusClass: "text-gray-500",
+          indicatorClass: "bg-gray-400"
+        };
+    }
+  };
+
+  const trackingStatus = getTrackingStatus();
+
   const visitorCard = {
     title: "Visiteurs en ligne",
     value: visitorLoading ? "..." : (visitorStats?.totalVisitors || 0).toString(),
     change: visitorLoading ? "En temps réel..." : `${visitorStats?.uniqueVisitors || 0} visiteurs uniques`,
     icon: Eye,
     trend: "neutral" as const,
+    status: trackingStatus
   };
 
   return (
@@ -97,9 +135,12 @@ const DashboardStats = () => {
       {/* Carte visiteurs en ligne - Pleine largeur */}
       <div className="w-full">
         <Card className="hover:shadow-lg transition-shadow relative">
-          {/* Indicateur en ligne animé */}
-          <div className="absolute top-3 right-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          {/* Indicateur en ligne animé avec état du tracking */}
+          <div className="absolute top-3 right-3 flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${visitorCard.status.indicatorClass}`}></div>
+            <span className={`text-xs font-medium ${visitorCard.status.statusClass}`}>
+              {visitorCard.status.statusText}
+            </span>
           </div>
           
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-8">
@@ -115,6 +156,11 @@ const DashboardStats = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Monitoring du tracking intelligent */}
+      <div className="w-full">
+        <TrackingMonitor trackingState={trackingState} storeId={store?.id} />
       </div>
     </div>
   );

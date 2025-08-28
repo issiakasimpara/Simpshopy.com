@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useActiveVisitors } from '@/hooks/useActiveVisitors';
+import { useSmartVisitorTracking, TrackingState } from '@/hooks/useSmartVisitorTracking';
 
 interface VisitorTrackerProps {
   storeId: string;
@@ -7,7 +7,7 @@ interface VisitorTrackerProps {
 }
 
 const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) => {
-  const { trackVisitor, generateSessionId } = useActiveVisitors(storeId);
+  const { trackVisitor, generateSessionId, trackingState } = useSmartVisitorTracking(storeId);
   const sessionIdRef = useRef<string>('');
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -19,21 +19,51 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
     // Générer un ID de session stable pour ce visiteur
     sessionIdRef.current = generateSessionId(userAgent, ipAddress);
 
+    console.log('👤 VisitorTracker initialisé:', {
+      storeId,
+      storeSlug,
+      sessionId: sessionIdRef.current,
+      trackingState
+    });
+
     // Tracker le visiteur initial
     const trackInitialVisit = async () => {
       await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+      console.log('✅ Visiteur initial tracké');
     };
 
     trackInitialVisit();
 
-    // Heartbeat toutes les 15 secondes pour maintenir la session active (plus fréquent)
-    heartbeatIntervalRef.current = setInterval(async () => {
-      await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
-    }, 15 * 1000);
+    // Heartbeat intelligent - seulement en mode actif
+    const startHeartbeat = () => {
+      if (trackingState === TrackingState.ACTIVE) {
+        heartbeatIntervalRef.current = setInterval(async () => {
+          await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+        }, 15 * 1000);
+        console.log('💓 Heartbeat démarré (mode actif)');
+      }
+    };
 
-    // Tracker les interactions utilisateur
+    const stopHeartbeat = () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+        console.log('💓 Heartbeat arrêté');
+      }
+    };
+
+    // Gérer le heartbeat selon l'état du tracking
+    if (trackingState === TrackingState.ACTIVE) {
+      startHeartbeat();
+    } else {
+      stopHeartbeat();
+    }
+
+    // Tracker les interactions utilisateur (seulement en mode actif)
     const handleUserActivity = async () => {
-      await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+      if (trackingState === TrackingState.ACTIVE) {
+        await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+      }
     };
 
     // Écouter les événements d'activité utilisateur
@@ -45,7 +75,9 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
 
     // Tracker le changement de page
     const handlePageChange = async () => {
-      await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+      if (trackingState === TrackingState.ACTIVE) {
+        await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
+      }
     };
 
     // Écouter les changements de route (si applicable)
@@ -55,9 +87,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
 
     // Cleanup lors du démontage
     return () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
+      stopHeartbeat();
 
       events.forEach(event => {
         document.removeEventListener(event, handleUserActivity);
@@ -66,8 +96,10 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
       if (typeof window !== 'undefined') {
         window.removeEventListener('popstate', handlePageChange);
       }
+
+      console.log('🧹 VisitorTracker cleanup terminé');
     };
-  }, [storeId, trackVisitor, generateSessionId]);
+  }, [storeId, trackVisitor, generateSessionId, trackingState]);
 
   // Composant invisible - ne rend rien
   return null;
