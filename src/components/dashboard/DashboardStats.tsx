@@ -96,8 +96,16 @@ const DashboardStats = () => {
 
       {/* Carte visiteurs en ligne - Pleine largeur */}
       <div className="w-full">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6">
+        <Card className="hover:shadow-lg transition-shadow relative">
+          {/* Indicateur en ligne animé */}
+          <div className="absolute top-3 right-3 flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-600 font-medium">EN LIGNE</span>
+            </div>
+          </div>
+          
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-8">
             <CardTitle className="text-sm sm:text-base font-medium">{visitorCard.title}</CardTitle>
             <visitorCard.icon className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
