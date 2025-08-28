@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useOptimizedRealtime } from '../hooks/useOptimizedRealtime';
 import { useOptimizedCartSessions } from '../hooks/useOptimizedCartSessions';
 import { useSessionOptimizer } from '../hooks/useSessionOptimizer';
@@ -127,8 +127,12 @@ export default function Dashboard() {
 
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-gray-700">Paniers abandonnés</h3>
-          <p className="text-3xl font-bold text-orange-600">{abandonedStats.totalAbandoned}</p>
-          <p className="text-sm text-gray-500">Valeur perdue: ${abandonedStats.totalValue.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-orange-600">
+            {abandonedStats?.totalAbandoned || 0}
+          </p>
+          <p className="text-sm text-gray-500">
+            Valeur perdue: ${(abandonedStats?.totalValue || 0).toLocaleString()}
+          </p>
         </div>
       </div>
 

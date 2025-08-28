@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CartSession } from './useCartSessions';
@@ -34,7 +34,7 @@ export const useAbandonedCarts = (storeId?: string) => {
   const { toast } = useToast();
 
   // Récupérer les statistiques des paniers abandonnés
-  const fetchAbandonedCartsStats = async () => {
+  const fetchAbandonedCartsStats = useCallback(async () => {
     if (!storeId) {
       console.log('❌ Pas de storeId fourni pour les stats');
       return;
@@ -136,7 +136,7 @@ export const useAbandonedCarts = (storeId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [storeId, toast]);
 
   // Récupérer les paniers abandonnés
   const fetchAbandonedCarts = async () => {
