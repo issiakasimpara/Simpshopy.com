@@ -1,11 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package, AlertTriangle } from "lucide-react";
 import { useStoreCurrency } from "@/hooks/useStoreCurrency";
 import { useOrders } from "@/hooks/useOrders";
 import { useProducts } from "@/hooks/useProducts";
 import { useStores } from "@/hooks/useStores";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAbandonedCarts } from "@/hooks/useAbandonedCarts";
 
 const DashboardStats = () => {
   const { store } = useStores();
@@ -13,6 +14,7 @@ const DashboardStats = () => {
   const { stats, isLoadingStats } = useOrders();
   const { products, isLoading: isLoadingProducts } = useProducts(store?.id, 'active');
   const { analytics, isLoading: analyticsLoading } = useAnalytics();
+  const { stats: abandonedStats, isLoading: abandonedLoading } = useAbandonedCarts(store?.id);
 
   // Utiliser les analytics pour les statistiques
   const revenue = analytics?.totalRevenue || stats?.totalRevenue || 0;
@@ -51,10 +53,17 @@ const DashboardStats = () => {
       icon: Package,
       trend: "neutral" as const,
     },
+    {
+      title: "Paniers abandonnés",
+      value: abandonedLoading ? "..." : (abandonedStats?.totalAbandoned || 0).toString(),
+      change: abandonedLoading ? "Chargement..." : `Valeur perdue: ${formatConvertedPrice(abandonedStats?.totalValue || 0, 'XOF')}`,
+      icon: AlertTriangle,
+      trend: "neutral" as const,
+    },
   ];
 
   return (
-    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-5">
       {cards.map((card) => (
         <Card key={card.title} className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6">
