@@ -21,9 +21,11 @@ import Checkout from './pages/Checkout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Index from './pages/Index';
 
-// Lazy loading UNIQUEMENT pour les pages admin (pas critiques)
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Analytics = lazy(() => import('./pages/Analytics'));
+// ⚡ IMPORT SYNCHRONE pour les pages admin critiques (rapide)
+import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
+
+// Lazy loading pour les pages admin moins critiques
 const Products = lazy(() => import('./pages/Products'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Customers = lazy(() => import('./pages/Customers'));

@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useStores } from '@/hooks/useStores';
+import { usePreloading } from '@/hooks/usePreloading';
+import { usePageCache } from '@/hooks/usePageCache';
+import { PerformanceIndicator } from '@/components/PerformanceIndicator';
 import AppLogo from '@/components/ui/AppLogo';
 import OptimizedViewStoreButton from '@/components/ui/OptimizedViewStoreButton';
 import {
@@ -41,6 +44,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const { store, hasStore } = useStores();
+  const { preloadRoute } = usePreloading();
+  const { cachePage, isPageCached } = usePageCache();
 
   const handleSignOut = async () => {
     try {
@@ -223,7 +228,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     ? `bg-gradient-to-r ${item.color} text-white shadow-lg scale-105`
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  // Cache la page actuelle
+                  const currentPath = location.pathname;
+                  if (currentPath && currentPath !== '/dashboard') {
+                    cachePage(currentPath, { timestamp: Date.now() });
+                  }
+                }}
+                onMouseEnter={() => {
+                  // Preloading intelligent au survol
+                  const routePath = item.href.replace('/', '');
+                  if (routePath && routePath !== 'dashboard') {
+                    preloadRoute(routePath);
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -307,6 +326,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {children}
         </main>
       </div>
+      
+      {/* Indicateur de performance */}
+      <PerformanceIndicator />
     </div>
   );
 };

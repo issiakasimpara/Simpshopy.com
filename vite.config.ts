@@ -58,6 +58,24 @@ export default defineConfig(({ mode }) => ({
           'vendor-charts': ['recharts'],
           'vendor-icons': ['lucide-react'],
           'vendor-carousel': ['embla-carousel-react'],
+          // Chunks optimisés pour les pages admin
+          'admin-core': [
+            './src/pages/Dashboard.tsx',
+            './src/pages/Analytics.tsx',
+            './src/components/DashboardLayout.tsx'
+          ],
+          'admin-products': [
+            './src/pages/Products.tsx',
+            './src/pages/Categories.tsx'
+          ],
+          'admin-orders': [
+            './src/pages/Orders.tsx',
+            './src/pages/Customers.tsx'
+          ],
+          'admin-settings': [
+            './src/pages/Settings.tsx',
+            './src/pages/StoreConfig.tsx'
+          ],
         },
       },
     },
