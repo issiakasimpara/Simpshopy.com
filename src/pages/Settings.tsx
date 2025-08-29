@@ -253,8 +253,8 @@ const Settings = () => {
           <div className="bg-white dark:bg-slate-900 min-h-[calc(100vh-8rem)]">
               <div className="flex flex-col lg:flex-row h-full">
                 {/* Sidebar */}
-                <div className="lg:w-64 flex-shrink-0 -ml-4">
-                  <div className="bg-slate-100 dark:bg-slate-800 p-4 h-full">
+                <div className="lg:w-64 flex-shrink-0">
+                  <div className="bg-slate-100 dark:bg-slate-800 px-4 py-6 h-full">
                     <div className="space-y-2">
                       {/* Onglets principaux */}
                       {mainSections.map((section) => {
