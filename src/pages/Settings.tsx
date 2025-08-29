@@ -1,11 +1,12 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import { 
   User, 
   Shield, 
   Bell, 
   Palette,
-  Coins
+  Coins,
+  Settings as SettingsIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -17,11 +18,12 @@ import { SecurityTab } from "@/components/settings/SecurityTab";
 import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { AppearanceTab } from "@/components/settings/AppearanceTab";
 import { CurrencySection } from "@/components/settings/sections/CurrencySection";
-
+import { cn } from "@/lib/utils";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { store } = useStores(); // Récupérer le store de l'utilisateur
+  const { store } = useStores();
+  const [activeSection, setActiveSection] = useState("profile");
 
   const {
     profileData,
@@ -57,6 +59,84 @@ const Settings = () => {
     });
   };
 
+  const sidebarItems = [
+    {
+      id: "profile",
+      label: "Profil",
+      icon: User,
+      activeGradient: "from-blue-500 to-purple-500",
+      iconBg: "from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40",
+      iconColor: "text-blue-600 dark:text-blue-400"
+    },
+    {
+      id: "security",
+      label: "Sécurité",
+      icon: Shield,
+      activeGradient: "from-green-500 to-emerald-500",
+      iconBg: "from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40",
+      iconColor: "text-green-600 dark:text-green-400"
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      activeGradient: "from-orange-500 to-amber-500",
+      iconBg: "from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40",
+      iconColor: "text-orange-600 dark:text-orange-400"
+    },
+    {
+      id: "appearance",
+      label: "Apparence",
+      icon: Palette,
+      activeGradient: "from-purple-500 to-pink-500",
+      iconBg: "from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40",
+      iconColor: "text-purple-600 dark:text-purple-400"
+    },
+    {
+      id: "currency",
+      label: "Devise",
+      icon: Coins,
+      activeGradient: "from-yellow-500 to-orange-500",
+      iconBg: "from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40",
+      iconColor: "text-yellow-600 dark:text-yellow-400"
+    }
+  ];
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "profile":
+        return (
+          <ProfileTab
+            profileData={profileData}
+            loading={loading}
+            onProfileDataChange={setProfileData}
+            onSave={handleProfileSave}
+          />
+        );
+      case "security":
+        return (
+          <SecurityTab
+            loading={loading}
+            onPasswordChange={handlePasswordChange}
+          />
+        );
+      case "notifications":
+        return (
+          <NotificationsTab
+            notifications={notifications}
+            onNotificationsChange={setNotifications}
+            onSave={handleNotificationSave}
+          />
+        );
+      case "appearance":
+        return <AppearanceTab />;
+      case "currency":
+        return <CurrencySection storeId={store?.id} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="relative">
@@ -67,87 +147,61 @@ const Settings = () => {
           <SettingsHeader />
 
           <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
-            <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6 lg:space-y-8">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 shadow-lg rounded-2xl p-1 sm:p-2 h-auto min-h-12 sm:min-h-14 lg:min-h-16">
-                <TabsTrigger 
-                  value="profile" 
-                  className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50 px-2 sm:px-3 py-2"
-                >
-                  <div className="p-1 sm:p-1.5 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-lg data-[state=active]:bg-white/20">
-                    <User className="h-3 w-3 sm:h-4 sm:w-4" />
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+              {/* Sidebar */}
+              <div className="lg:w-64 flex-shrink-0">
+                <div className="bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 border border-border/30 rounded-2xl p-4 shadow-lg">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-200/30 dark:border-blue-800/30">
+                      <div className="p-2 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-lg">
+                        <SettingsIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className="font-bold text-blue-700 dark:text-blue-300">Compte</span>
+                    </div>
+                    
+                                         {sidebarItems.map((item) => {
+                       const Icon = item.icon;
+                       const isActive = activeSection === item.id;
+                       
+                       return (
+                         <button
+                           key={item.id}
+                           onClick={() => setActiveSection(item.id)}
+                           className={cn(
+                             "w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-muted/50",
+                             isActive 
+                               ? `bg-gradient-to-r ${item.activeGradient} text-white shadow-lg scale-105` 
+                               : "text-muted-foreground hover:text-foreground"
+                           )}
+                         >
+                           <div className={cn(
+                             "p-2 rounded-lg transition-all duration-300",
+                             isActive 
+                               ? "bg-white/20" 
+                               : `bg-gradient-to-br ${item.iconBg}`
+                           )}>
+                             <Icon className={cn(
+                               "h-4 w-4 transition-all duration-300",
+                               isActive 
+                                 ? "text-white" 
+                                 : item.iconColor
+                             )} />
+                           </div>
+                           <span className="font-semibold text-sm">{item.label}</span>
+                         </button>
+                       );
+                     })}
                   </div>
-                  <span className="font-semibold text-xs sm:text-sm lg:text-base text-center">Profil</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="security" 
-                  className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50 px-2 sm:px-3 py-2"
-                >
-                  <div className="p-1 sm:p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 rounded-lg data-[state=active]:bg-white/20">
-                    <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </div>
-                  <span className="font-semibold text-xs sm:text-sm lg:text-base text-center">Sécurité</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="notifications" 
-                  className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50 px-2 sm:px-3 py-2"
-                >
-                  <div className="p-1 sm:p-1.5 bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 rounded-lg data-[state=active]:bg-white/20">
-                    <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </div>
-                  <span className="font-semibold text-xs sm:text-sm lg:text-base text-center">Notifications</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="appearance" 
-                  className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50 px-2 sm:px-3 py-2"
-                >
-                  <div className="p-1 sm:p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg data-[state=active]:bg-white/20">
-                    <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </div>
-                  <span className="font-semibold text-xs sm:text-sm lg:text-base text-center">Apparence</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="currency" 
-                  className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 lg:gap-3 h-10 sm:h-12 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 hover:bg-muted/50 px-2 sm:px-3 py-2"
-                >
-                  <div className="p-1 sm:p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-lg data-[state=active]:bg-white/20">
-                    <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </div>
-                  <span className="font-semibold text-xs sm:text-sm lg:text-base text-center">Devise</span>
-                </TabsTrigger>
-              </TabsList>
+                </div>
+              </div>
 
-              <TabsContent value="profile" className="mt-4 sm:mt-6 lg:mt-8">
-                <ProfileTab
-                  profileData={profileData}
-                  loading={loading}
-                  onProfileDataChange={setProfileData}
-                  onSave={handleProfileSave}
-                />
-              </TabsContent>
-
-              <TabsContent value="security" className="mt-4 sm:mt-6 lg:mt-8">
-                <SecurityTab
-                  loading={loading}
-                  onPasswordChange={handlePasswordChange}
-                />
-              </TabsContent>
-
-              <TabsContent value="notifications" className="mt-4 sm:mt-6 lg:mt-8">
-                <NotificationsTab
-                  notifications={notifications}
-                  onNotificationsChange={setNotifications}
-                  onSave={handleNotificationSave}
-                />
-              </TabsContent>
-
-              <TabsContent value="appearance" className="mt-4 sm:mt-6 lg:mt-8">
-                <AppearanceTab />
-              </TabsContent>
-
-              <TabsContent value="currency" className="mt-4 sm:mt-6 lg:mt-8">
-                <CurrencySection storeId={store?.id} />
-              </TabsContent>
-            </Tabs>
+              {/* Main Content */}
+              <div className="flex-1 min-w-0">
+                <div className="space-y-6">
+                  {renderContent()}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
