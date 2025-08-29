@@ -12,14 +12,21 @@ import { useStores } from "@/hooks/useStores";
 import { useSiteTemplates } from "@/hooks/useSiteTemplates";
 import { useToast } from "@/hooks/use-toast";
 import { siteTemplateService } from "@/services/siteTemplateService";
+import { useStylesheetOptimizer } from "@/hooks/useStylesheetOptimizer";
 
 const SiteBuilder = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { store, hasStore } = useStores();
   const { toast } = useToast();
+  const { preloadCriticalStylesheets } = useStylesheetOptimizer();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isChangingTheme, setIsChangingTheme] = useState<string | null>(null);
+
+  // Optimiser le chargement des stylesheets
+  useEffect(() => {
+    preloadCriticalStylesheets();
+  }, [preloadCriticalStylesheets]);
 
   // Redirection conditionnelle selon le contexte
   useEffect(() => {
