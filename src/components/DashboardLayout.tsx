@@ -130,9 +130,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       name: "Popups et Reductions", 
       href: "/popups-reductions", 
       icon: Gift,
-      color: "from-rose-500 to-pink-500",
-      iconBg: "from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40",
-      iconColor: "text-rose-600 dark:text-rose-400"
+      color: "from-blue-500 to-indigo-500",
+      iconBg: "from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40",
+      iconColor: "text-blue-600 dark:text-blue-400"
     },
     { 
       name: "Paiements", 

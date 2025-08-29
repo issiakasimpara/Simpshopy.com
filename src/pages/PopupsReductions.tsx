@@ -31,16 +31,16 @@ const PopupsReductions = () => {
       <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header avec gradient moderne */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-rose-600/5 via-pink-600/5 to-purple-600/5 rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-indigo-600/5 to-purple-600/5 rounded-3xl" />
           <div className="relative p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/20 rounded-3xl border border-border/50 shadow-lg">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-2 sm:p-3 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40 rounded-xl shadow-md">
-                    <Gift className="h-5 w-5 sm:h-7 sm:w-7 text-rose-600 dark:text-rose-400" />
+                  <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-xl shadow-md">
+                    <Gift className="h-5 w-5 sm:h-7 sm:w-7 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 dark:from-rose-400 dark:via-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                       Popups et Reductions
                     </h1>
                     <p className="text-sm sm:text-base lg:text-lg text-muted-foreground font-medium">
@@ -51,11 +51,11 @@ const PopupsReductions = () => {
               </div>
               
               <div className="flex gap-2 sm:gap-3">
-                <Button variant="outline" className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 border-rose-200/50 dark:border-rose-800/30 hover:bg-gradient-to-r hover:from-rose-100 hover:to-pink-100 transition-all duration-300">
+                <Button variant="outline" className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200/50 dark:border-blue-800/30 hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-all duration-300">
                   <Eye className="mr-2 h-4 w-4" />
                   Aperçu
                 </Button>
-                <Button className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 group">
                   <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                   Créer
                 </Button>
@@ -68,15 +68,15 @@ const PopupsReductions = () => {
         <div className="bg-gradient-to-br from-background via-background to-muted/10 rounded-2xl border border-border/50 shadow-lg p-3 sm:p-4 lg:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 bg-gradient-to-br from-background via-background to-muted/10">
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 via-pink-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
               
               <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-rose-600 transition-colors">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-blue-600 transition-colors">
                   Popups actifs
                 </CardTitle>
-                <div className="p-2 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40 rounded-lg shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <Gift className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-lg shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                  <Gift className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </CardHeader>
               <CardContent className="relative">
@@ -155,7 +155,7 @@ const PopupsReductions = () => {
             <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl">
               <TabsTrigger 
                 value="popups" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
               >
                 <Gift className="mr-2 h-4 w-4" />
                 Popups
