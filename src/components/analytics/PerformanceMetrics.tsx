@@ -47,28 +47,28 @@ const PerformanceMetrics = () => {
       title: "Taux de conversion",
       value: `${performanceMetrics?.conversionRate || 0}%`,
       target: "4.0%",
-      progress: (performanceMetrics?.conversionRate || 0) * 25, // 4% = 100%
+      progress: Math.min(100, (performanceMetrics?.conversionRate || 0) * 25), // 4% = 100%
       icon: Target
     },
     {
       title: "Temps moyen sur site",
       value: performanceMetrics?.avgTimeOnSite || "0m 0s",
       target: "3m 00s",
-      progress: performanceMetrics?.avgTimeOnSiteProgress || 0,
+      progress: Math.min(100, performanceMetrics?.avgTimeOnSiteProgress || 0),
       icon: Clock
     },
     {
       title: "Panier abandonné",
       value: `${performanceMetrics?.cartAbandonmentRate || 0}%`,
       target: "60.0%",
-      progress: 100 - (performanceMetrics?.cartAbandonmentRate || 0), // Lower is better
+      progress: Math.max(0, 100 - (performanceMetrics?.cartAbandonmentRate || 0)), // Lower is better
       icon: ShoppingBag
     },
     {
       title: "Paiements réussis",
       value: `${performanceMetrics?.paymentSuccessRate || 0}%`,
       target: "95.0%",
-      progress: (performanceMetrics?.paymentSuccessRate || 0) * 1.05, // 95% = 100%
+      progress: Math.min(100, (performanceMetrics?.paymentSuccessRate || 0) * 1.05), // 95% = 100%
       icon: CreditCard
     }
   ];
