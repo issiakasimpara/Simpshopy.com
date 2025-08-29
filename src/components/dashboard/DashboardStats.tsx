@@ -8,7 +8,7 @@ import { useStores } from "@/hooks/useStores";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAbandonedCarts } from "@/hooks/useAbandonedCarts";
 import { useSmartVisitorTracking, TrackingState } from "@/hooks/useSmartVisitorTracking";
-import TrackingMonitor from "./TrackingMonitor";
+
 
 const DashboardStats = () => {
   const { store } = useStores();
@@ -158,10 +158,7 @@ const DashboardStats = () => {
         </Card>
       </div>
 
-      {/* Monitoring du tracking intelligent */}
-      <div className="w-full">
-        <TrackingMonitor trackingState={trackingState} storeId={store?.id} />
-      </div>
+      
     </div>
   );
 };
