@@ -9,13 +9,14 @@ import { Coins, Globe, AlertTriangle, CheckCircle, RefreshCw } from "lucide-reac
 import { useStoreCurrency } from "@/hooks/useStoreCurrency";
 import { CURRENCIES } from "@/utils/formatCurrency";
 import { useToast } from "@/hooks/use-toast";
+import { LanguageSection } from "./LanguageSection";
 
 
-interface CurrencySectionProps {
+interface CurrencyAndLanguageSectionProps {
   storeId?: string;
 }
 
-export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
+export const CurrencyAndLanguageSection = ({ storeId }: CurrencyAndLanguageSectionProps) => {
   const { toast } = useToast();
   
   // Vérifier si storeId est valide avant d'appeler useStoreCurrency
@@ -74,7 +75,7 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
       'KES': '🇰🇪', // Kenya
       'UGX': '🇺🇬', // Ouganda
       'TZS': '🇹🇿', // Tanzanie
-      'MAD': '��🇦', // Maroc
+      'MAD': '🇲🇦', // Maroc
       'DZD': '🇩🇿', // Algérie
       'TND': '🇹🇳', // Tunisie
       'LYD': '🇱🇾', // Libye
@@ -89,7 +90,7 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
       'RWF': '🇷🇼', // Rwanda
       'CDF': '🇨🇩', // RDC
       'GMD': '🇬🇲', // Gambie
-      'SLL': '🇸��', // Sierra Leone
+      'SLL': '🇸🇱', // Sierra Leone
       
       // Europe (30 devises)
       'EUR': '🇪🇺', // Euro
@@ -267,8 +268,8 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Section principale */}
+    <div className="space-y-8">
+      {/* Section Devise */}
       <Card className="border-2 border-dashed border-gray-200 dark:border-gray-700">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-700 dark:text-gray-300">
@@ -346,7 +347,8 @@ export const CurrencySection = ({ storeId }: CurrencySectionProps) => {
         </CardContent>
       </Card>
 
-
+      {/* Section Langue et Région */}
+      <LanguageSection />
     </div>
   );
 };

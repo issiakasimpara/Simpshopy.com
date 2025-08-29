@@ -17,7 +17,7 @@ import { ProfileTab } from "@/components/settings/ProfileTab";
 import { SecurityTab } from "@/components/settings/SecurityTab";
 import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { AppearanceTab } from "@/components/settings/AppearanceTab";
-import { CurrencySection } from "@/components/settings/sections/CurrencySection";
+import { CurrencyAndLanguageSection } from "@/components/settings/sections/CurrencySection";
 import { cn } from "@/lib/utils";
 
 const Settings = () => {
@@ -94,7 +94,7 @@ const Settings = () => {
     },
     {
       id: "currency",
-      label: "Devise",
+      label: "Devise et langue",
       icon: Coins,
       activeGradient: "from-yellow-500 to-orange-500",
       iconBg: "from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40",
@@ -131,7 +131,7 @@ const Settings = () => {
       case "appearance":
         return <AppearanceTab />;
       case "currency":
-        return <CurrencySection storeId={store?.id} />;
+        return <CurrencyAndLanguageSection storeId={store?.id} />;
       default:
         return null;
     }
