@@ -75,6 +75,29 @@ export const useStylesheetOptimizer = () => {
     loadStylesheets(criticalStylesheets);
   };
 
+  // Bloquer les stylesheets problématiques
+  const blockProblematicStylesheets = () => {
+    // Intercepter les tentatives de chargement de stylesheets externes
+    const originalCreateElement = document.createElement;
+    document.createElement = function(tagName: string) {
+      const element = originalCreateElement.call(document, tagName);
+      
+      if (tagName.toLowerCase() === 'link') {
+        const originalSetAttribute = element.setAttribute;
+        element.setAttribute = function(name: string, value: string) {
+          if (name === 'href' && value.includes('http') && !value.includes('localhost')) {
+            // Bloquer les stylesheets externes problématiques
+            console.warn(`Blocked external stylesheet: ${value}`);
+            return;
+          }
+          return originalSetAttribute.call(this, name, value);
+        };
+      }
+      
+      return element;
+    };
+  };
+
   // Nettoyer les stylesheets non utilisées
   const cleanupUnusedStylesheets = () => {
     const links = document.querySelectorAll('link[rel="stylesheet"]');
@@ -89,6 +112,7 @@ export const useStylesheetOptimizer = () => {
 
   // Optimiser le chargement au démarrage
   useEffect(() => {
+    blockProblematicStylesheets();
     preloadCriticalStylesheets();
     
     // Nettoyer au démontage
@@ -101,6 +125,7 @@ export const useStylesheetOptimizer = () => {
     loadStylesheet,
     loadStylesheets,
     preloadCriticalStylesheets,
-    cleanupUnusedStylesheets
+    cleanupUnusedStylesheets,
+    blockProblematicStylesheets
   };
 };
