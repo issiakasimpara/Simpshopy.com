@@ -44,15 +44,17 @@ const OnboardingWizard = lazy(() => import('./components/onboarding/OnboardingWi
 const OptimizedTemplateEditor = lazy(() => import('./components/site-builder/OptimizedTemplateEditor'));
 const TemplatePreview = lazy(() => import('./components/site-builder/TemplatePreview'));
 
-// Pages publiques SEO optimisées (chargement synchrone)
+// Pages publiques critiques (chargement synchrone) - SEULEMENT les plus importantes
 import Home from './pages/Home'; // Main homepage - IMPORT SYNCHRONE pour performance
-import Features from './pages/Features'; // Page importante - IMPORT SYNCHRONE
-import Pricing from './pages/Pricing'; // Page importante - IMPORT SYNCHRONE
-import About from './pages/About'; // Page importante - IMPORT SYNCHRONE
-import TestimonialsPublic from './pages/Testimonials'; // Page importante - IMPORT SYNCHRONE
-import WhyChooseUs from './pages/WhyChooseUs'; // Page importante - IMPORT SYNCHRONE
-import Support from './pages/Support'; // Page importante - IMPORT SYNCHRONE
 import Auth from './pages/Auth'; // Page critique - IMPORT SYNCHRONE pour conversion
+
+// Pages publiques secondaires (lazy loading pour optimiser le bundle principal)
+const Features = lazy(() => import('./pages/Features'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const About = lazy(() => import('./pages/About'));
+const TestimonialsPublic = lazy(() => import('./pages/Testimonials'));
+const WhyChooseUs = lazy(() => import('./pages/WhyChooseUs'));
+const Support = lazy(() => import('./pages/Support'));
 
 // Pages légales (peuvent rester en lazy loading car moins critiques)
 const Legal = lazy(() => import('./pages/Legal'));
@@ -119,12 +121,36 @@ function App() {
                   <Route path="/product/:productId" element={<Index />} />
                   
                   {/* 📄 PAGES PUBLIQUES SEO OPTIMISÉES */}
-                  <Route path="/features" element={<Features />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/testimonials" element={<TestimonialsPublic />} />
-                  <Route path="/why-choose-us" element={<WhyChooseUs />} />
-                  <Route path="/support" element={<Support />} />
-                  <Route path="/about" element={<About />} />
+                  <Route path="/features" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Features />
+                    </Suspense>
+                  } />
+                  <Route path="/pricing" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Pricing />
+                    </Suspense>
+                  } />
+                  <Route path="/testimonials" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <TestimonialsPublic />
+                    </Suspense>
+                  } />
+                  <Route path="/why-choose-us" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <WhyChooseUs />
+                    </Suspense>
+                  } />
+                  <Route path="/support" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Support />
+                    </Suspense>
+                  } />
+                  <Route path="/about" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <About />
+                    </Suspense>
+                  } />
                   
                   {/* 📜 PAGES LÉGALES */}
                   <Route path="/legal" element={
