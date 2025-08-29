@@ -6,7 +6,10 @@ import {
   Bell, 
   Palette,
   Coins,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  CreditCard,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -23,7 +26,9 @@ import { cn } from "@/lib/utils";
 const Settings = () => {
   const { toast } = useToast();
   const { store } = useStores();
-  const [activeSection, setActiveSection] = useState("profile");
+  const [activeMainSection, setActiveMainSection] = useState("compte");
+  const [expandedSection, setExpandedSection] = useState<string | null>("compte");
+  const [activeSubSection, setActiveSubSection] = useState("profile");
 
   const {
     profileData,
@@ -59,82 +64,130 @@ const Settings = () => {
     });
   };
 
-  const sidebarItems = [
+  const handleMainSectionClick = (sectionId: string) => {
+    if (sectionId === "compte") {
+      // Si on clique sur Compte, on expand/collapse
+      setExpandedSection(expandedSection === "compte" ? null : "compte");
+      setActiveMainSection("compte");
+    } else {
+      // Si on clique sur un autre onglet principal, on collapse Compte
+      setExpandedSection(null);
+      setActiveMainSection(sectionId);
+    }
+  };
+
+  const handleSubSectionClick = (subSectionId: string) => {
+    setActiveSubSection(subSectionId);
+    setActiveMainSection("compte");
+  };
+
+  const mainSections = [
+    {
+      id: "compte",
+      label: "Compte",
+      icon: SettingsIcon,
+      color: "from-blue-500 to-purple-500",
+      iconBg: "from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40",
+      iconColor: "text-blue-600 dark:text-blue-400",
+      hasSubSections: true
+    },
+    {
+      id: "abonnement",
+      label: "Abonnement",
+      icon: CreditCard,
+      color: "from-green-500 to-emerald-500",
+      iconBg: "from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40",
+      iconColor: "text-green-600 dark:text-green-400",
+      hasSubSections: false
+    }
+  ];
+
+  const compteSubSections = [
     {
       id: "profile",
       label: "Profil",
       icon: User,
-      activeGradient: "from-blue-500 to-purple-500",
-      iconBg: "from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40",
-      iconColor: "text-blue-600 dark:text-blue-400"
+      color: "from-blue-500 to-purple-500"
     },
     {
       id: "security",
       label: "Sécurité",
       icon: Shield,
-      activeGradient: "from-green-500 to-emerald-500",
-      iconBg: "from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40",
-      iconColor: "text-green-600 dark:text-green-400"
+      color: "from-green-500 to-emerald-500"
     },
     {
       id: "notifications",
       label: "Notifications",
       icon: Bell,
-      activeGradient: "from-orange-500 to-amber-500",
-      iconBg: "from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40",
-      iconColor: "text-orange-600 dark:text-orange-400"
+      color: "from-orange-500 to-amber-500"
     },
     {
       id: "appearance",
       label: "Apparence",
       icon: Palette,
-      activeGradient: "from-purple-500 to-pink-500",
-      iconBg: "from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40",
-      iconColor: "text-purple-600 dark:text-purple-400"
+      color: "from-purple-500 to-pink-500"
     },
     {
       id: "currency",
       label: "Devise et langue",
       icon: Coins,
-      activeGradient: "from-yellow-500 to-orange-500",
-      iconBg: "from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40",
-      iconColor: "text-yellow-600 dark:text-yellow-400"
+      color: "from-yellow-500 to-orange-500"
     }
   ];
 
   const renderContent = () => {
-    switch (activeSection) {
-      case "profile":
-        return (
-          <ProfileTab
-            profileData={profileData}
-            loading={loading}
-            onProfileDataChange={setProfileData}
-            onSave={handleProfileSave}
-          />
-        );
-      case "security":
-        return (
-          <SecurityTab
-            loading={loading}
-            onPasswordChange={handlePasswordChange}
-          />
-        );
-      case "notifications":
-        return (
-          <NotificationsTab
-            notifications={notifications}
-            onNotificationsChange={setNotifications}
-            onSave={handleNotificationSave}
-          />
-        );
-      case "appearance":
-        return <AppearanceTab />;
-      case "currency":
-        return <CurrencyAndLanguageSection storeId={store?.id} />;
-      default:
-        return null;
+    if (activeMainSection === "compte") {
+      switch (activeSubSection) {
+        case "profile":
+          return (
+            <ProfileTab
+              profileData={profileData}
+              loading={loading}
+              onProfileDataChange={setProfileData}
+              onSave={handleProfileSave}
+            />
+          );
+        case "security":
+          return (
+            <SecurityTab
+              loading={loading}
+              onPasswordChange={handlePasswordChange}
+            />
+          );
+        case "notifications":
+          return (
+            <NotificationsTab
+              notifications={notifications}
+              onNotificationsChange={setNotifications}
+              onSave={handleNotificationSave}
+            />
+          );
+        case "appearance":
+          return <AppearanceTab />;
+        case "currency":
+          return <CurrencyAndLanguageSection storeId={store?.id} />;
+        default:
+          return null;
+      }
+    } else if (activeMainSection === "abonnement") {
+      return (
+        <div className="space-y-6">
+          <div className="text-center py-12">
+            <div className="p-4 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 rounded-2xl inline-block mb-4">
+              <CreditCard className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2">
+              Gestion de l'abonnement
+            </h2>
+            <p className="text-muted-foreground">
+              Gérez votre plan d'abonnement et vos factures
+            </p>
+          </div>
+          {/* Contenu de l'abonnement à implémenter */}
+        </div>
+      );
     }
+    return null;
   };
 
   return (
@@ -152,45 +205,84 @@ const Settings = () => {
               <div className="lg:w-64 flex-shrink-0">
                 <div className="bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 border border-border/30 rounded-2xl p-4 shadow-lg">
                   <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-200/30 dark:border-blue-800/30">
-                      <div className="p-2 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-lg">
-                        <SettingsIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <span className="font-bold text-blue-700 dark:text-blue-300">Compte</span>
-                    </div>
-                    
-                                         {sidebarItems.map((item) => {
-                       const Icon = item.icon;
-                       const isActive = activeSection === item.id;
-                       
-                       return (
-                         <button
-                           key={item.id}
-                           onClick={() => setActiveSection(item.id)}
-                           className={cn(
-                             "w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-muted/50",
-                             isActive 
-                               ? `bg-gradient-to-r ${item.activeGradient} text-white shadow-lg scale-105` 
-                               : "text-muted-foreground hover:text-foreground"
-                           )}
-                         >
-                           <div className={cn(
-                             "p-2 rounded-lg transition-all duration-300",
-                             isActive 
-                               ? "bg-white/20" 
-                               : `bg-gradient-to-br ${item.iconBg}`
-                           )}>
-                             <Icon className={cn(
-                               "h-4 w-4 transition-all duration-300",
-                               isActive 
-                                 ? "text-white" 
-                                 : item.iconColor
-                             )} />
-                           </div>
-                           <span className="font-semibold text-sm">{item.label}</span>
-                         </button>
-                       );
-                     })}
+                    {/* Onglets principaux */}
+                    {mainSections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = activeMainSection === section.id;
+                      const isExpanded = expandedSection === section.id;
+                      
+                      return (
+                        <div key={section.id}>
+                          <button
+                            onClick={() => handleMainSectionClick(section.id)}
+                            className={cn(
+                              "w-full flex items-center justify-between gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-muted/50",
+                              isActive 
+                                ? `bg-gradient-to-r ${section.color} text-white shadow-lg scale-105` 
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "p-2 rounded-lg transition-all duration-300",
+                                isActive 
+                                  ? "bg-white/20" 
+                                  : `bg-gradient-to-br ${section.iconBg}`
+                              )}>
+                                <Icon className={cn(
+                                  "h-4 w-4 transition-all duration-300",
+                                  isActive 
+                                    ? "text-white" 
+                                    : section.iconColor
+                                )} />
+                              </div>
+                              <span className="font-semibold text-sm">{section.label}</span>
+                            </div>
+                            {section.hasSubSections && (
+                              <div className={cn(
+                                "transition-transform duration-300",
+                                isExpanded ? "rotate-180" : "rotate-0"
+                              )}>
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </div>
+                            )}
+                          </button>
+
+                          {/* Sous-onglets pour Compte */}
+                          {section.hasSubSections && isExpanded && (
+                            <div className="mt-2 ml-4 space-y-1">
+                              {compteSubSections.map((subSection) => {
+                                const SubIcon = subSection.icon;
+                                const isSubActive = activeSubSection === subSection.id;
+                                
+                                return (
+                                  <button
+                                    key={subSection.id}
+                                    onClick={() => handleSubSectionClick(subSection.id)}
+                                    className={cn(
+                                      "w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-300 hover:bg-muted/30 text-left",
+                                      isSubActive 
+                                        ? `bg-gradient-to-r ${subSection.color} text-white shadow-md` 
+                                        : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                  >
+                                    <SubIcon className={cn(
+                                      "h-3 w-3 transition-all duration-300",
+                                      isSubActive ? "text-white" : "text-muted-foreground"
+                                    )} />
+                                    <span className="text-xs font-medium">{subSection.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
