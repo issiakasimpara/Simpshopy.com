@@ -21,25 +21,23 @@ import Checkout from './pages/Checkout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Index from './pages/Index';
 
-// ⚡ IMPORT SYNCHRONE pour les pages admin critiques (rapide)
+// ⚡ IMPORT SYNCHRONE pour TOUTES les pages admin (navigation instantanée)
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
-
-// Lazy loading pour les pages admin moins critiques
-const Products = lazy(() => import('./pages/Products'));
-const Orders = lazy(() => import('./pages/Orders'));
-const Customers = lazy(() => import('./pages/Customers'));
-const Settings = lazy(() => import('./pages/Settings'));
-const SiteBuilder = lazy(() => import('./pages/SiteBuilder'));
-const Integrations = lazy(() => import('./pages/Integrations'));
-const Testimonials = lazy(() => import('./pages/admin/TestimonialsPage'));
-const Categories = lazy(() => import('./pages/Categories'));
-const StoreConfig = lazy(() => import('./pages/StoreConfig'));
-const Shipping = lazy(() => import('./pages/MarketsShipping'));
-const Payments = lazy(() => import('./pages/Payments'));
-const Themes = lazy(() => import('./pages/Themes'));
-const Domains = lazy(() => import('./pages/Domains'));
-const PopupsReductions = lazy(() => import('./pages/PopupsReductions'));
+import Products from './pages/Products';
+import Orders from './pages/Orders';
+import Customers from './pages/Customers';
+import Settings from './pages/Settings';
+import SiteBuilder from './pages/SiteBuilder';
+import Integrations from './pages/Integrations';
+import Testimonials from './pages/admin/TestimonialsPage';
+import Categories from './pages/Categories';
+import StoreConfig from './pages/StoreConfig';
+import Shipping from './pages/MarketsShipping';
+import Payments from './pages/Payments';
+import Themes from './pages/Themes';
+import Domains from './pages/Domains';
+import PopupsReductions from './pages/PopupsReductions';
 const DsersIntegration = lazy(() => import('./pages/integrations/DsersIntegration'));
 const MailchimpIntegration = lazy(() => import('./pages/integrations/MailchimpIntegration'));
 const IntegrationDetailPage = lazy(() => import('./pages/IntegrationDetailPage'));
@@ -179,75 +177,55 @@ function App() {
                     </Suspense>
                   } />
                   
-                  {/* 🎛️ INTERFACE ADMIN */}
+                  {/* 🎛️ INTERFACE ADMIN - NAVIGATION INSTANTANÉE */}
                   <Route path="/dashboard" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Dashboard />
-                      </Suspense>
+                      <Dashboard />
                     </ProtectedRoute>
                   } />
                   <Route path="/analytics" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Analytics />
-                      </Suspense>
+                      <Analytics />
                     </ProtectedRoute>
                   } />
                   <Route path="/products" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Products />
-                      </Suspense>
+                      <Products />
                     </ProtectedRoute>
                   } />
                   <Route path="/orders" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Orders />
-                      </Suspense>
+                      <Orders />
                     </ProtectedRoute>
                   } />
                   <Route path="/customers" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Customers />
-                      </Suspense>
+                      <Customers />
                     </ProtectedRoute>
                   } />
                   <Route path="/settings" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Settings />
-                      </Suspense>
+                      <Settings />
                     </ProtectedRoute>
                   } />
                   <Route path="/site-builder" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <SiteBuilder />
-                      </Suspense>
+                      <SiteBuilder />
                     </ProtectedRoute>
                   } />
                   <Route path="/integrations" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Integrations />
-                      </Suspense>
+                      <Integrations />
                     </ProtectedRoute>
                   } />
                   <Route path="/categories" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Categories />
-                      </Suspense>
+                      <Categories />
                     </ProtectedRoute>
                   } />
                   <Route path="/store-config" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <StoreConfig />
-                      </Suspense>
+                      <StoreConfig />
                     </ProtectedRoute>
                   } />
                   <Route path="/store-config/site-builder" element={
@@ -266,44 +244,32 @@ function App() {
                   } />
                   <Route path="/shipping" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Shipping />
-                      </Suspense>
+                      <Shipping />
                     </ProtectedRoute>
                   } />
                   <Route path="/payments" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Payments />
-                      </Suspense>
+                      <Payments />
                     </ProtectedRoute>
                   } />
                   <Route path="/popups-reductions" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <PopupsReductions />
-                      </Suspense>
+                      <PopupsReductions />
                     </ProtectedRoute>
                   } />
                   <Route path="/themes" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Themes />
-                      </Suspense>
+                      <Themes />
                     </ProtectedRoute>
                   } />
                   <Route path="/domains" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Domains />
-                      </Suspense>
+                      <Domains />
                     </ProtectedRoute>
                   } />
                   <Route path="/testimonials-admin" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Testimonials />
-                      </Suspense>
+                      <Testimonials />
                     </ProtectedRoute>
                   } />
                   

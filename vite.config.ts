@@ -28,11 +28,14 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Chunks de base stables
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-supabase': ['@supabase/supabase-js'],
+          // Chunks optimisés pour performance maximale
+          'vendor-core': [
+            'react', 
+            'react-dom', 
+            'react-router-dom',
+            '@tanstack/react-query',
+            '@supabase/supabase-js'
+          ],
           'vendor-ui': [
             '@radix-ui/react-dialog', 
             '@radix-ui/react-dropdown-menu', 
@@ -44,42 +47,43 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-slider',
             '@radix-ui/react-toast',
             '@radix-ui/react-progress',
-            '@radix-ui/react-tooltip'
-          ],
-          'vendor-utils': [
+            '@radix-ui/react-tooltip',
             'clsx', 
             'tailwind-merge', 
             'class-variance-authority',
-            'date-fns',
+            'lucide-react'
+          ],
+          'vendor-forms': [
             'react-hook-form',
             '@hookform/resolvers',
-            'zod'
+            'zod',
+            'date-fns'
           ],
           'vendor-charts': ['recharts'],
-          'vendor-icons': ['lucide-react'],
           'vendor-carousel': ['embla-carousel-react'],
-          // Chunks optimisés pour les pages admin
-          'admin-core': [
+          // Bundle principal optimisé (toutes les pages admin)
+          'admin-bundle': [
             './src/pages/Dashboard.tsx',
             './src/pages/Analytics.tsx',
-            './src/components/DashboardLayout.tsx'
-          ],
-          'admin-products': [
             './src/pages/Products.tsx',
-            './src/pages/Categories.tsx'
-          ],
-          'admin-orders': [
             './src/pages/Orders.tsx',
-            './src/pages/Customers.tsx'
-          ],
-          'admin-settings': [
+            './src/pages/Customers.tsx',
             './src/pages/Settings.tsx',
-            './src/pages/StoreConfig.tsx'
+            './src/pages/SiteBuilder.tsx',
+            './src/pages/Integrations.tsx',
+            './src/pages/Categories.tsx',
+            './src/pages/StoreConfig.tsx',
+            './src/pages/MarketsShipping.tsx',
+            './src/pages/Payments.tsx',
+            './src/pages/Themes.tsx',
+            './src/pages/Domains.tsx',
+            './src/pages/PopupsReductions.tsx',
+            './src/components/DashboardLayout.tsx'
           ],
         },
       },
     },
-    // Optimisations de build
+    // Optimisations de build ultra-agressives
     target: 'esnext',
     minify: 'terser',
     terserOptions: {
@@ -87,12 +91,25 @@ export default defineConfig(({ mode }) => ({
         drop_console: mode === 'production',
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 2,
+        unsafe: true,
+        unsafe_comps: true,
+        unsafe_Function: true,
+        unsafe_math: true,
+        unsafe_proto: true,
+        unsafe_regexp: true,
+        unsafe_undefined: true,
       },
       mangle: {
         toplevel: true,
+        safari10: true,
+      },
+      format: {
+        comments: false,
       },
     },
-    chunkSizeWarningLimit: 300,
+    chunkSizeWarningLimit: 500,
+    sourcemap: false,
   },
   optimizeDeps: {
     include: [
@@ -101,6 +118,21 @@ export default defineConfig(({ mode }) => ({
       'react-router-dom',
       '@supabase/supabase-js',
       '@tanstack/react-query',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      'clsx',
+      'tailwind-merge',
+      'lucide-react',
+      'recharts',
+    ],
+    exclude: [
+      'embla-carousel-react',
+      'date-fns',
+      'react-hook-form',
+      '@hookform/resolvers',
+      'zod',
     ],
   },
 }));

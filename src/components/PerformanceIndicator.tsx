@@ -36,8 +36,8 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
   }, []);
 
   const cacheStats = getCacheStats();
-  const isFast = pageLoadTime < 1000;
-  const isMedium = pageLoadTime >= 1000 && pageLoadTime < 3000;
+  const isFast = pageLoadTime < 500;
+  const isMedium = pageLoadTime >= 500 && pageLoadTime < 1000;
 
   if (!isVisible) return null;
 

@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStores } from '@/hooks/useStores';
 import { usePreloading } from '@/hooks/usePreloading';
 import { usePageCache } from '@/hooks/usePageCache';
+import { useFastNavigation } from '@/hooks/useFastNavigation';
 import { PerformanceIndicator } from '@/components/PerformanceIndicator';
 import AppLogo from '@/components/ui/AppLogo';
 import OptimizedViewStoreButton from '@/components/ui/OptimizedViewStoreButton';
@@ -46,6 +47,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { store, hasStore } = useStores();
   const { preloadRoute } = usePreloading();
   const { cachePage, isPageCached } = usePageCache();
+  const { fastNavigate } = useFastNavigation();
 
   const handleSignOut = async () => {
     try {
@@ -218,18 +220,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {navigation.map((item, index) => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
             return (
-              <Link
+              <button
                 key={item.name}
-                to={item.href}
-                tabIndex={0}
-                className={cn(
-                  "group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                  isActive
-                    ? `bg-gradient-to-r ${item.color} text-white shadow-lg scale-105`
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
                 onClick={() => {
                   setSidebarOpen(false);
+                  // Navigation ultra-rapide
+                  fastNavigate(item.href);
                   // Cache la page actuelle
                   const currentPath = location.pathname;
                   if (currentPath && currentPath !== '/dashboard') {
@@ -247,8 +243,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     setSidebarOpen(false);
+                    fastNavigate(item.href);
                   }
                 }}
+                tabIndex={0}
+                className={cn(
+                  "group flex items-center w-full px-3 py-3 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  isActive
+                    ? `bg-gradient-to-r ${item.color} text-white shadow-lg scale-105`
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className={cn(
@@ -266,7 +270,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
                 
                 <span className="flex-1">{item.name}</span>
-              </Link>
+              </button>
             );
           })}
         </nav>
