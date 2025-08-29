@@ -9,24 +9,7 @@ export const LivePreviewSection = () => {
   const { settings } = useDisplaySettings();
   const { theme, systemTheme } = useTheme();
 
-  const getLanguageLabel = (lang: string) => {
-    const languages = {
-      'fr': '🇫🇷 Français',
-      'en': '🇺🇸 English',
-      'es': '🇪🇸 Español',
-      'de': '🇩🇪 Deutsch'
-    };
-    return languages[lang as keyof typeof languages] || lang;
-  };
 
-  const getDateFormatLabel = (format: string) => {
-    const formats = {
-      'fr': 'JJ/MM/AAAA',
-      'us': 'MM/JJ/AAAA',
-      'iso': 'AAAA-MM-JJ'
-    };
-    return formats[format as keyof typeof formats] || format;
-  };
 
   const getThemeStatus = () => {
     if (theme === "system") {
@@ -70,16 +53,6 @@ export const LivePreviewSection = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl border border-emerald-200/50 dark:border-emerald-800/50">
-              <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">Langue</div>
-              <div className="text-base font-bold text-emerald-800 dark:text-emerald-200">{getLanguageLabel(settings.language)}</div>
-            </div>
-            
-            <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
-              <div className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">Format Date</div>
-              <div className="text-base font-bold text-blue-800 dark:text-blue-200">{getDateFormatLabel(settings.dateFormat)}</div>
-            </div>
-            
             <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl border border-orange-200/50 dark:border-orange-800/50">
               <div className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-2">Taille Police</div>
               <div className="text-base font-bold text-orange-800 dark:text-orange-200">
