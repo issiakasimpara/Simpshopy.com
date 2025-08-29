@@ -248,7 +248,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 }}
                 tabIndex={0}
                 className={cn(
-                  "group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  "group flex items-center w-full text-left px-3 py-3 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
                   isActive
                     ? `bg-gradient-to-r ${item.color} text-white shadow-lg scale-105`
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
