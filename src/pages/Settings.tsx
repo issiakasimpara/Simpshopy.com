@@ -198,10 +198,10 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/20">
+    <div className="settings-fullscreen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/20">
       {/* Header de la page */}
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo et navigation */}
             <div className="flex items-center gap-4">
@@ -246,19 +246,19 @@ const Settings = () => {
       </header>
 
       {/* Contenu principal */}
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="w-full p-6">
         <div className="relative">
           {/* Background gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-pink-950/20 pointer-events-none rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-pink-950/20 pointer-events-none" />
           
-          <div className="relative space-y-4 sm:space-y-6 lg:space-y-8 p-1">
+          <div className="relative space-y-6">
             <SettingsHeader />
 
-            <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-8rem)]">
+            <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm border border-border/50 shadow-xl p-6 min-h-[calc(100vh-8rem)]">
               <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full">
                 {/* Sidebar */}
                 <div className="lg:w-64 flex-shrink-0">
-                  <div className="bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 border border-border/30 rounded-2xl p-4 shadow-lg">
+                  <div className="bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 border border-border/30 rounded-xl p-4 shadow-lg">
                     <div className="space-y-2">
                       {/* Onglets principaux */}
                       {mainSections.map((section) => {

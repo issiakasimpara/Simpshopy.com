@@ -3,6 +3,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reset complet pour full screen */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Styles pour la page Settings en full screen */
+.settings-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Suppression des marges par défaut */
+* {
+  box-sizing: border-box;
+}
+
 /* Solution radicale contre les images parasites */
 .hero-section img,
 .hero-section [style*="background-image"],
