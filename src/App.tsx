@@ -37,6 +37,7 @@ const Shipping = lazy(() => import('./pages/MarketsShipping'));
 const Payments = lazy(() => import('./pages/Payments'));
 const Themes = lazy(() => import('./pages/Themes'));
 const Domains = lazy(() => import('./pages/Domains'));
+const PopupsReductions = lazy(() => import('./pages/PopupsReductions'));
 const DsersIntegration = lazy(() => import('./pages/integrations/DsersIntegration'));
 const MailchimpIntegration = lazy(() => import('./pages/integrations/MailchimpIntegration'));
 const IntegrationDetailPage = lazy(() => import('./pages/IntegrationDetailPage'));
@@ -272,6 +273,13 @@ function App() {
                     <ProtectedRoute>
                       <Suspense fallback={<LoadingFallback />}>
                         <Payments />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/popups-reductions" element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <PopupsReductions />
                       </Suspense>
                     </ProtectedRoute>
                   } />

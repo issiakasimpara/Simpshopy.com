@@ -25,7 +25,9 @@ import {
   Settings,
   Menu,
   Bell,
-  LogOut
+  LogOut,
+  Tag,
+  Gift
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -123,6 +125,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       color: "from-violet-500 to-purple-500",
       iconBg: "from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40",
       iconColor: "text-violet-600 dark:text-violet-400"
+    },
+    { 
+      name: "Popups et Reductions", 
+      href: "/popups-reductions", 
+      icon: Gift,
+      color: "from-rose-500 to-pink-500",
+      iconBg: "from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40",
+      iconColor: "text-rose-600 dark:text-rose-400"
     },
     { 
       name: "Paiements", 
