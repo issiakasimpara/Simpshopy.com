@@ -13,8 +13,8 @@ import {
   ArrowLeft,
   LogOut,
   Bell as BellIcon,
-  ExternalLink
 } from "lucide-react";
+import OptimizedViewStoreButton from "@/components/ui/OptimizedViewStoreButton";
 import { useToast } from "@/hooks/use-toast";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useStores } from "@/hooks/useStores";
@@ -220,10 +220,7 @@ const Settings = () => {
               </Button>
 
               {/* Voir le site */}
-              <Button variant="outline" size="sm" className="gap-2">
-                <ExternalLink className="h-4 w-4" />
-                Voir le site
-              </Button>
+              <OptimizedViewStoreButton />
 
               {/* Profil utilisateur */}
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
