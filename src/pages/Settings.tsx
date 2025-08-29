@@ -247,13 +247,13 @@ const Settings = () => {
 
       {/* Contenu principal */}
       <main className="w-full">
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
           <SettingsHeader />
 
-          <div className="bg-white dark:bg-slate-900 p-6 min-h-[calc(100vh-8rem)]">
+          <div className="bg-white dark:bg-slate-900 min-h-[calc(100vh-8rem)]">
               <div className="flex flex-col lg:flex-row h-full">
                 {/* Sidebar */}
-                <div className="lg:w-64 flex-shrink-0">
+                <div className="lg:w-64 flex-shrink-0 -ml-6">
                   <div className="bg-slate-100 dark:bg-slate-800 p-4 h-full">
                     <div className="space-y-2">
                       {/* Onglets principaux */}
@@ -339,7 +339,7 @@ const Settings = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 min-w-0 h-full pl-6">
+                <div className="flex-1 min-w-0 h-full p-6">
                   <div className="space-y-6 h-full">
                     {renderContent()}
                   </div>
