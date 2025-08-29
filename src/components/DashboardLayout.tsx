@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useStores } from '@/hooks/useStores';
-import AppLogo from '@/components/AppLogo';
-import OptimizedViewStoreButton from '@/components/OptimizedViewStoreButton';
+import AppLogo from '@/components/ui/AppLogo';
+import OptimizedViewStoreButton from '@/components/ui/OptimizedViewStoreButton';
 import {
   Home,
   Package,
