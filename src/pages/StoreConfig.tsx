@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Palette, Loader2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -17,8 +17,7 @@ import DomainManager from '@/components/store-config/domain/DomainManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Template } from '@/types/template';
 
-// Lazy load StorePreview pour améliorer les performances
-const StorePreview = lazy(() => import('@/components/store-config/StorePreview'));
+import StorePreview from '@/components/store-config/StorePreview';
 
 const StoreConfig = () => {
   const [showCreateStore, setShowCreateStore] = useState(false);
@@ -203,19 +202,10 @@ const StoreConfig = () => {
                   </div>
                 ) : storeTemplate ? (
                   <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center py-12">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                          <p className="text-gray-600">Chargement de l'aperçu...</p>
-                        </div>
-                      </div>
-                    }>
-                      <StorePreview 
-                        selectedStore={store}
-                        onViewModeChange={setViewMode}
-                      />
-                    </Suspense>
+                    <StorePreview 
+                      selectedStore={store}
+                      onViewModeChange={setViewMode}
+                    />
                   </div>
                 ) : null
               )}
@@ -275,19 +265,10 @@ const StoreConfig = () => {
                           </TabsContent>
 
                           <TabsContent value="preview" className="space-y-4 sm:space-y-6">
-                            <Suspense fallback={
-                              <div className="flex items-center justify-center py-8">
-                                <div className="text-center">
-                                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3 text-blue-600" />
-                                  <p className="text-sm text-gray-600">Chargement de l'aperçu...</p>
-                                </div>
-                              </div>
-                            }>
-                              <StorePreview 
-                                selectedStore={store}
-                                onViewModeChange={setViewMode}
-                              />
-                            </Suspense>
+                            <StorePreview 
+                              selectedStore={store}
+                              onViewModeChange={setViewMode}
+                            />
                           </TabsContent>
                         </Tabs>
                       </div>
