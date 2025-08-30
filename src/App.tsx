@@ -117,6 +117,8 @@ function App() {
                   
                   {/* 🛍️ BOUTIQUE PUBLIQUE */}
                   <Route path="/store/:storeSlug" element={<Storefront />} />
+                  <Route path="/store/:storeSlug/cart" element={<Cart />} />
+                  <Route path="/store/:storeSlug/checkout" element={<Checkout />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/payment-success" element={<PaymentSuccess />} />
