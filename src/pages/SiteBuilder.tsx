@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,49 @@ import { useSiteTemplates } from "@/hooks/useSiteTemplates";
 import { useToast } from "@/hooks/use-toast";
 import { siteTemplateService } from "@/services/siteTemplateService";
 import { useStylesheetOptimizer } from "@/hooks/useStylesheetOptimizer";
+import { useOptimizedImageLoader, useBatchImagePreloader } from "@/hooks/useOptimizedImageLoader";
+
+// Composant optimisé pour les images de preview
+const OptimizedPreviewImage = ({ category, templateName }: { category: string; templateName: string }) => {
+  const { isLoading, isLoaded, isError, optimizedSrc, ref } = useOptimizedImageLoader(category, {
+    priority: 'low',
+    threshold: 0.1,
+    rootMargin: '100px'
+  });
+
+  return (
+    <div 
+      ref={ref}
+      className="relative w-full h-24 sm:h-32 rounded-xl mb-3 sm:mb-4 overflow-hidden shadow-inner group-hover:shadow-lg transition-shadow duration-300"
+    >
+      {isLoading && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse z-10" />
+      )}
+      
+      {isError ? (
+        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+          <Palette className="h-8 w-8 text-gray-400" />
+        </div>
+      ) : (
+        <img 
+          src={optimizedSrc}
+          alt={`Aperçu ${templateName}`}
+          className={`w-full h-full object-cover transition-all duration-300 ${
+            isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+          } group-hover:scale-105`}
+          loading="lazy"
+        />
+      )}
+      
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 group-hover:opacity-80 transition-opacity duration-300" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="bg-white/90 dark:bg-gray-900/90 rounded-full p-1.5 sm:p-2">
+          <Eye className="h-4 w-4 sm:h-6 sm:w-6 text-purple-500" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SiteBuilder = () => {
   const navigate = useNavigate();
@@ -28,7 +71,7 @@ const SiteBuilder = () => {
     preloadCriticalStylesheets();
   }, [preloadCriticalStylesheets]);
 
-  // Redirection conditionnelle selon le contexte
+  // Redirection conditionnelle selon le contexte - OPTIMISÉE
   useEffect(() => {
     // Si on vient de /store-config/site-builder ET qu'on a une boutique, rediriger vers l'éditeur
     if (location.pathname === '/store-config/site-builder' && store) {
@@ -45,9 +88,19 @@ const SiteBuilder = () => {
   const isThemeGallery = location.pathname === '/themes/gallery';
   const isStoreCustomization = location.pathname.includes('/store-config/site-builder');
 
-  const filteredTemplates = selectedCategory === 'all' 
-    ? preBuiltTemplates 
-    : preBuiltTemplates.filter(template => template.category === selectedCategory);
+  // OPTIMISATION : Mémoisation des templates filtrés
+  const filteredTemplates = useMemo(() => {
+    return selectedCategory === 'all' 
+      ? preBuiltTemplates 
+      : preBuiltTemplates.filter(template => template.category === selectedCategory);
+  }, [selectedCategory]);
+
+  // Préchargement des images des templates visibles
+  const visibleCategories = useMemo(() => {
+    return [...new Set(filteredTemplates.map(t => t.category))];
+  }, [filteredTemplates]);
+
+  useBatchImagePreloader(visibleCategories);
 
   const getCategoryName = (categoryId: string) => {
     const category = templateCategories.find(cat => cat.id === categoryId);
@@ -60,22 +113,7 @@ const SiteBuilder = () => {
     return categoryData?.icon || '🎨';
   };
 
-  // Function to get preview image based on template category
-  const getPreviewImage = (category: string) => {
-    const previewImages = {
-      fashion: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=250&fit=crop", // Fashion boutique
-      electronics: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=250&fit=crop", // Electronics/tech
-      beauty: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=250&fit=crop", // Beauty products
-      food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=250&fit=crop", // Food/restaurant
-      sports: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop", // Sports equipment
-      home: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=250&fit=crop", // Home decor
-      art: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=250&fit=crop", // Art gallery
-      default: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=250&fit=crop"
-    };
-    return previewImages[category] || previewImages.default;
-  };
-
-  // Fonction pour changer le thème d'une boutique existante
+  // Fonction pour changer le thème d'une boutique existante - OPTIMISÉE
   const handleThemeChange = async (templateId: string) => {
     if (!store) {
       toast({
@@ -119,10 +157,7 @@ const SiteBuilder = () => {
         description: `Votre boutique utilise maintenant le thème "${templateData.name}". Redirection vers l'éditeur...`,
       });
 
-      // Attendre un peu pour que la base de données se synchronise
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Rediriger vers l'éditeur pour personnaliser le nouveau thème
+      // SUPPRESSION DU DÉLAI ARTIFICIEL - Navigation instantanée
       navigate(`/store-config/site-builder/editor/${templateId}`);
 
     } catch (error) {
@@ -220,7 +255,7 @@ const SiteBuilder = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredTemplates.map((template) => (
-                <Card key={template.id} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 bg-gradient-to-br from-background via-background to-muted/10 cursor-pointer">
+                <Card key={template.id} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 bg-gradient-to-br from-background via-background to-muted/10 cursor-pointer" data-template={template.name}>
                   {/* Gradient border effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg" />
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60" />
@@ -249,20 +284,11 @@ const SiteBuilder = () => {
                   </CardHeader>
                   
                   <CardContent className="relative pt-0">
-                    {/* Preview Image */}
-                    <div className="relative w-full h-24 sm:h-32 rounded-xl mb-3 sm:mb-4 overflow-hidden shadow-inner group-hover:shadow-lg transition-shadow duration-300">
-                      <img 
-                        src={getPreviewImage(template.category)} 
-                        alt={`Aperçu ${template.name}`}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 group-hover:opacity-80 transition-opacity duration-300" />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="bg-white/90 dark:bg-gray-900/90 rounded-full p-1.5 sm:p-2">
-                          <Eye className="h-4 w-4 sm:h-6 sm:w-6 text-purple-500" />
-                        </div>
-                      </div>
-                    </div>
+                    {/* Preview Image - OPTIMISÉE */}
+                    <OptimizedPreviewImage 
+                      category={template.category} 
+                      templateName={template.name}
+                    />
                     
                     {/* Template Info */}
                     <div className="flex items-center justify-between mb-3 sm:mb-4">

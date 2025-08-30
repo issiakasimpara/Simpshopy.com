@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Template } from '@/types/template';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,8 +14,58 @@ interface LoadingState {
   error: string | null;
 }
 
-const CACHE_KEY_PREFIX = 'template_cache_';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY_PREFIX = 'template_cache_';
+
+// Cache global pour les templates précompilés
+const templateCompilationCache = new Map<string, Template>();
+
+// Fonction pour précompiler un template (optimisation des images et données)
+const precompileTemplate = (template: Template): Template => {
+  // Vérifier si déjà précompilé
+  if (templateCompilationCache.has(template.id)) {
+    return templateCompilationCache.get(template.id)!;
+  }
+
+  // Optimiser les images dans les blocs
+  const optimizedBlocks = template.blocks?.map(block => {
+    if (block.content?.backgroundImage) {
+      // Optimiser les URLs d'images avec compression WebP
+      const originalUrl = block.content.backgroundImage;
+      if (originalUrl.includes('unsplash.com')) {
+        block.content.backgroundImage = `${originalUrl}?w=800&h=600&fit=crop&auto=format&q=75&fm=webp`;
+      }
+    }
+    return block;
+  });
+
+  // Optimiser les pages
+  const optimizedPages = template.pages ? Object.fromEntries(
+    Object.entries(template.pages).map(([pageName, pageBlocks]) => [
+      pageName,
+      pageBlocks.map(block => {
+        if (block.content?.backgroundImage) {
+          const originalUrl = block.content.backgroundImage;
+          if (originalUrl.includes('unsplash.com')) {
+            block.content.backgroundImage = `${originalUrl}?w=800&h=600&fit=crop&auto=format&q=75&fm=webp`;
+          }
+        }
+        return block;
+      })
+    ])
+  ) : {};
+
+  const optimizedTemplate: Template = {
+    ...template,
+    blocks: optimizedBlocks,
+    pages: optimizedPages
+  };
+
+  // Mettre en cache
+  templateCompilationCache.set(template.id, optimizedTemplate);
+  
+  return optimizedTemplate;
+};
 
 export const useOptimizedTemplateLoader = (templateId: string) => {
   const { toast } = useToast();
@@ -32,14 +82,15 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
     error: null
   });
 
-  // Cache utilities
+  // Cache utilities optimisées
   const getCachedTemplate = useCallback((id: string): Template | null => {
     try {
       const cached = localStorage.getItem(`${CACHE_KEY_PREFIX}${id}`);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_DURATION) {
-          return data;
+          // Précompiler le template mis en cache
+          return precompileTemplate(data);
         }
         localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
       }
@@ -64,6 +115,39 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
     setLoadingState(prev => ({ ...prev, currentStep: step, progress }));
   }, []);
 
+  // Préchargement des images critiques
+  const preloadCriticalImages = useCallback(async (template: Template) => {
+    const imageUrls: string[] = [];
+    
+    // Collecter toutes les URLs d'images du template
+    template.blocks?.forEach(block => {
+      if (block.content?.backgroundImage) {
+        imageUrls.push(block.content.backgroundImage);
+      }
+    });
+
+    Object.values(template.pages || {}).forEach(pageBlocks => {
+      pageBlocks.forEach(block => {
+        if (block.content?.backgroundImage) {
+          imageUrls.push(block.content.backgroundImage);
+        }
+      });
+    });
+
+    // Précharger les 3 premières images en priorité
+    const criticalImages = imageUrls.slice(0, 3);
+    const preloadPromises = criticalImages.map(url => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Continuer même en cas d'erreur
+        img.src = url;
+      });
+    });
+
+    await Promise.allSettled(preloadPromises);
+  }, []);
+
   const loadTemplateData = useCallback(async () => {
     if (!templateId || !selectedStore) return;
 
@@ -85,8 +169,9 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
       
       if (savedTemplate) {
         console.log('Template loaded from database:', savedTemplate);
-        setTemplate(savedTemplate);
-        setCachedTemplate(templateId, savedTemplate);
+        const optimizedTemplate = precompileTemplate(savedTemplate);
+        setTemplate(optimizedTemplate);
+        setCachedTemplate(templateId, optimizedTemplate);
       } else {
         // Load pre-built template
         updateProgress('template', 70);
@@ -94,8 +179,13 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
         
         if (foundTemplate) {
           console.log('Pre-built template loaded:', foundTemplate);
-          setTemplate(foundTemplate);
-          setCachedTemplate(templateId, foundTemplate);
+          const optimizedTemplate = precompileTemplate(foundTemplate);
+          setTemplate(optimizedTemplate);
+          setCachedTemplate(templateId, optimizedTemplate);
+          
+          // Précharger les images critiques en arrière-plan
+          updateProgress('images', 85);
+          preloadCriticalImages(optimizedTemplate).catch(console.warn);
           
           // Save to database in background
           updateProgress('template', 80);
@@ -114,88 +204,52 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
       setLoadingState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
       console.error('Template loading error:', error);
-      setLoadingState(prev => ({
-        ...prev,
-        error: 'Erreur lors du chargement du template',
-        isLoading: false
+      setLoadingState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       }));
-      toast({
-        title: "Erreur de chargement",
-        description: "Impossible de charger le template.",
-        variant: "destructive"
-      });
     }
-  }, [templateId, selectedStore, loadTemplate, saveTemplate, getCachedTemplate, setCachedTemplate, updateProgress, toast]);
+  }, [templateId, selectedStore, getCachedTemplate, setCachedTemplate, updateProgress, loadTemplate, saveTemplate, preloadCriticalImages]);
 
+  // Initialization
   useEffect(() => {
-    const initializeLoader = async () => {
-      // Step 1: Authentication
-      if (authLoading) {
-        updateProgress('auth', 20);
-        return;
-      }
+    if (authLoading || storesLoading) {
+      updateProgress('auth', authLoading ? 20 : 40);
+      return;
+    }
 
-      if (!user) {
-        setLoadingState(prev => ({
-          ...prev,
-          error: 'Authentification requise',
-          isLoading: false
-        }));
-        return;
-      }
+    if (!user) {
+      setLoadingState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: 'Authentication required' 
+      }));
+      return;
+    }
 
-      // Step 2: Stores
-      updateProgress('stores', 40);
-      if (storesLoading) return;
+    if (!selectedStore) {
+      setLoadingState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: 'No store found' 
+      }));
+      return;
+    }
 
-      if (!selectedStore) {
-        // Essayer de recharger les stores une fois
-        console.log('⚠️ Aucune boutique trouvée, tentative de rechargement...');
-        updateProgress('stores', 50);
+    loadTemplateData();
+  }, [user, authLoading, storesLoading, selectedStore, loadTemplateData, updateProgress]);
 
-        try {
-          await refetchStores();
-          // Attendre un peu et vérifier à nouveau
-          setTimeout(() => {
-            if (stores.length === 0) {
-              setLoadingState(prev => ({
-                ...prev,
-                error: 'Aucune boutique disponible. Veuillez d\'abord créer une boutique.',
-                isLoading: false
-              }));
-            }
-          }, 1000);
-        } catch (error) {
-          console.error('Erreur lors du rechargement des stores:', error);
-          setLoadingState(prev => ({
-            ...prev,
-            error: 'Erreur lors du chargement des boutiques',
-            isLoading: false
-          }));
-        }
-        return;
-      }
-
-      // Step 3: Template
-      await loadTemplateData();
-    };
-
-    initializeLoader();
-  }, [authLoading, user, storesLoading, selectedStore, loadTemplateData, updateProgress]);
-
-  const clearCache = useCallback(() => {
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith(CACHE_KEY_PREFIX)) {
-        localStorage.removeItem(key);
-      }
-    });
-  }, []);
+  // Mémoisation de l'état de prêt
+  const isReady = useMemo(() => {
+    return !loadingState.isLoading && !loadingState.error && template !== null;
+  }, [loadingState.isLoading, loadingState.error, template]);
 
   return {
     template,
     loadingState,
     selectedStore,
-    clearCache,
-    isReady: !loadingState.isLoading && !loadingState.error && template !== null
+    isReady,
+    refetch: loadTemplateData
   };
 };
