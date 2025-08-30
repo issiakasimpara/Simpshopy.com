@@ -9,6 +9,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
 import ConditionalPreloading from './components/ConditionalPreloading';
 import LoadingFallback from './components/LoadingFallback';
+import SiteBuilderLoadingFallback from './components/SiteBuilderLoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -230,14 +231,14 @@ function App() {
                   } />
                   <Route path="/store-config/site-builder" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
+                      <Suspense fallback={<SiteBuilderLoadingFallback />}>
                         <SiteBuilder />
                       </Suspense>
                     </ProtectedRoute>
                   } />
                   <Route path="/store-config/site-builder/editor/:templateId" element={
                     <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
+                      <Suspense fallback={<SiteBuilderLoadingFallback />}>
                         <OptimizedTemplateEditor />
                       </Suspense>
                     </ProtectedRoute>
