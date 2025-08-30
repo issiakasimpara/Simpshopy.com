@@ -9,7 +9,6 @@ import { useStores } from '@/hooks/useStores';
 import { usePreloading } from '@/hooks/usePreloading';
 import { usePageCache } from '@/hooks/usePageCache';
 import { useFastNavigation } from '@/hooks/useFastNavigation';
-import { PerformanceIndicator } from '@/components/PerformanceIndicator';
 import AppLogo from '@/components/ui/AppLogo';
 import OptimizedViewStoreButton from '@/components/ui/OptimizedViewStoreButton';
 import {
@@ -330,9 +329,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {children}
         </main>
       </div>
-      
-      {/* Indicateur de performance */}
-      <PerformanceIndicator />
     </div>
   );
 };
