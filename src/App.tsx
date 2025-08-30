@@ -9,7 +9,6 @@ import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
 import OptimizedPreloader from './components/OptimizedPreloader';
 import LoadingFallback from './components/LoadingFallback';
-import SiteBuilderLoadingFallback from './components/SiteBuilderLoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -43,8 +42,8 @@ const DsersIntegration = lazy(() => import('./pages/integrations/DsersIntegratio
 const MailchimpIntegration = lazy(() => import('./pages/integrations/MailchimpIntegration'));
 const IntegrationDetailPage = lazy(() => import('./pages/IntegrationDetailPage'));
 const OnboardingWizard = lazy(() => import('./components/onboarding/OnboardingWizard'));
-const OptimizedTemplateEditor = lazy(() => import('./components/site-builder/OptimizedTemplateEditor'));
-const TemplatePreview = lazy(() => import('./components/site-builder/TemplatePreview'));
+import OptimizedTemplateEditor from './components/site-builder/OptimizedTemplateEditor';
+import TemplatePreview from './components/site-builder/TemplatePreview';
 
 // Pages publiques critiques (chargement synchrone) - SEULEMENT les plus importantes
 import Home from './pages/Home'; // Main homepage - IMPORT SYNCHRONE pour performance
@@ -231,20 +230,16 @@ function App() {
                       <StoreConfig />
                     </ProtectedRoute>
                   } />
-                  <Route path="/store-config/site-builder" element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<SiteBuilderLoadingFallback />}>
-                        <SiteBuilder />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/store-config/site-builder/editor/:templateId" element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<SiteBuilderLoadingFallback />}>
-                        <OptimizedTemplateEditor />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } />
+                                     <Route path="/store-config/site-builder" element={
+                     <ProtectedRoute>
+                       <SiteBuilder />
+                     </ProtectedRoute>
+                   } />
+                                     <Route path="/store-config/site-builder/editor/:templateId" element={
+                     <ProtectedRoute>
+                       <OptimizedTemplateEditor />
+                     </ProtectedRoute>
+                   } />
                   <Route path="/shipping" element={
                     <ProtectedRoute>
                       <Shipping />
@@ -307,20 +302,16 @@ function App() {
                       </Suspense>
                     </ProtectedRoute>
                   } />
-                  <Route path="/template-editor" element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <OptimizedTemplateEditor />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/template-preview" element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <TemplatePreview />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } />
+                                     <Route path="/template-editor" element={
+                     <ProtectedRoute>
+                       <OptimizedTemplateEditor />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/template-preview" element={
+                     <ProtectedRoute>
+                       <TemplatePreview />
+                     </ProtectedRoute>
+                   } />
                 </Routes>
                 
                 <Toaster />
