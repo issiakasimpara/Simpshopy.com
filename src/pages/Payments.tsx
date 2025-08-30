@@ -5,56 +5,49 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { usePayments } from '@/hooks/usePayments';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useStores } from '@/hooks/useStores';
-import { useStoreCurrency } from '@/hooks/useStoreCurrency';
-import { useToast } from '@/hooks/use-toast';
+import { usePaymentConfigurations } from '@/hooks/usePaymentConfigurations';
 import { 
   CreditCard, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
+  Settings,
   CheckCircle, 
   XCircle,
-  AlertCircle,
-  Download
+  ExternalLink,
+  Eye,
+  EyeOff,
+  TestTube,
+  Shield,
+  Zap
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 const Payments = () => {
   const navigate = useNavigate();
   const { stores, store: currentStore } = useStores();
-  const { formatConvertedPrice } = useStoreCurrency(currentStore?.id);
-  const { payments, paymentStats, isLoading, verifyPayment } = usePayments(currentStore?.id);
-  const { toast } = useToast();
+  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  
+  const {
+    providers,
+    loading,
+    saving,
+    testing,
+    configuredProviders,
+    enabledProviders,
+    saveConfiguration,
+    testProvider,
+    toggleProvider,
+    updateProvider
+  } = usePaymentConfigurations(currentStore?.id);
 
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Payé</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="w-3 h-3 mr-1" />En attente</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Échoué</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-gray-100 text-gray-800"><AlertCircle className="w-3 h-3 mr-1" />Annulé</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
-  const formatAmount = (amount: number, currency: string) => {
-    // Utiliser formatPrice si la devise correspond à celle du store, sinon utiliser la devise spécifiée
-    if (currency && currency !== 'XOF') {
-      return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: currency
-      }).format(amount);
-    }
-    // Utiliser formatConvertedPrice pour la devise du store
-    return formatConvertedPrice(amount, 'XOF');
+  const toggleSecretVisibility = (providerId: string) => {
+    setShowSecrets(prev => ({
+      ...prev,
+      [providerId]: !prev[providerId]
+    }));
   };
 
   if (!currentStore) {
@@ -66,7 +59,7 @@ const Payments = () => {
             <h3 className="text-lg font-semibold mb-2">Aucune boutique sélectionnée</h3>
             <p className="text-muted-foreground mb-4">
               {stores.length > 0 
-                ? "Sélectionnez une boutique pour voir les paiements"
+                ? "Sélectionnez une boutique pour configurer les paiements"
                 : "Vous n'avez pas encore créé de boutique"
               }
             </p>
@@ -75,25 +68,18 @@ const Payments = () => {
                 Créer une boutique
               </Button>
             )}
-            {stores.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Vos boutiques :</p>
-                {stores.map((store) => (
-                  <Button 
-                    key={store.id} 
-                    variant="outline" 
-                    onClick={() => {
-                      // Ici on pourrait implémenter un système de sélection de boutique
-                      // Pour l'instant, on redirige vers le dashboard
-                      navigate('/dashboard');
-                    }}
-                  >
-                    {store.name}
-                  </Button>
-                ))}
-              </div>
-            )}
           </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Chargement des configurations...</span>
         </div>
       </DashboardLayout>
     );
@@ -101,153 +87,339 @@ const Payments = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6">
-        {/* En-tête */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Paiements</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Gérez les paiements de votre boutique {currentStore.name}
-          </p>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Moyens de Paiement</h1>
+            <p className="text-muted-foreground">
+              Configurez les méthodes de paiement pour {currentStore.name}
+            </p>
+          </div>
         </div>
 
-        {/* Statistiques */}
-        {paymentStats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <Card>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total des ventes</p>
-                    <p className="text-lg sm:text-2xl font-bold">{formatConvertedPrice(paymentStats.totalAmount, 'XOF')}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Alert d'information */}
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Approche sécurisée :</strong> Vos clés API restent dans votre base de données. 
+            Nous n'avons jamais accès à vos fonds. En cas de problème, contactez directement votre fournisseur de paiement.
+          </AlertDescription>
+        </Alert>
 
-            <Card>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Paiements réussis</p>
-                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.completed}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Statut global */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Fournisseurs configurés</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{configuredProviders.length}</div>
+              <p className="text-xs text-muted-foreground">
+                sur {providers.length} disponibles
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Fournisseurs actifs</CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{enabledProviders.length}</div>
+              <p className="text-xs text-muted-foreground">
+                prêts à accepter les paiements
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">En attente</p>
-                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.pending}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Échoués</p>
-                    <p className="text-lg sm:text-2xl font-bold">{paymentStats.failed}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Liste des paiements */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Historique des paiements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Statut</CardTitle>
+              {enabledProviders.length > 0 ? (
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-600" />
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {enabledProviders.length > 0 ? 'Actif' : 'Inactif'}
               </div>
-            ) : payments && payments.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {payments.map((payment) => (
-                  <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm sm:text-base truncate">{payment.customer_name}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">{payment.customer_email}</p>
-                        </div>
-                        <div className="text-right sm:text-left">
-                          <p className="font-bold text-base sm:text-lg">{formatAmount(payment.amount, payment.currency)}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            {format(new Date(payment.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
-                          </p>
-                        </div>
+              <p className="text-xs text-muted-foreground">
+                {enabledProviders.length > 0 
+                  ? 'Paiements acceptés' 
+                  : 'Aucun moyen de paiement configuré'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Configuration des fournisseurs */}
+        <Tabs defaultValue="all" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="all">Tous les fournisseurs</TabsTrigger>
+            <TabsTrigger value="configured">Configurés</TabsTrigger>
+            <TabsTrigger value="active">Actifs</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            {providers.map((provider) => (
+              <Card key={provider.id} className="overflow-hidden">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
+                        <span className="text-lg">{provider.icon}</span>
                       </div>
-                      {payment.description && (
-                        <p className="text-xs sm:text-sm text-muted-foreground mt-2">{payment.description}</p>
-                      )}
+                      <div>
+                        <CardTitle className="text-lg">{provider.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{provider.description}</p>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {getStatusBadge(payment.status)}
-                      {payment.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          onClick={() => verifyPayment(payment.id)}
-                          className="text-xs sm:text-sm"
-                        >
-                          Vérifier
-                        </Button>
+                      {provider.isConfigured && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Configuré
+                        </Badge>
                       )}
+                      <Switch
+                        checked={provider.isEnabled}
+                        onCheckedChange={(enabled) => toggleProvider(provider.id, enabled)}
+                        disabled={!provider.isConfigured}
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
-                <p className="text-muted-foreground">
-                  Les paiements de votre boutique apparaîtront ici.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </CardHeader>
 
-        {/* Informations importantes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-500" />
-              Informations importantes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">💡 Comment ça marche :</h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• <strong>Paiements automatiques</strong> : Tous les paiements sont gérés par Moneroo</li>
-                <li>• <strong>Paiements reçus</strong> : Les fonds sont reçus par Simpshopy</li>
-                <li>• <strong>Demande de retrait</strong> : Contactez-nous pour demander un retrait</li>
-                <li>• <strong>Statuts en temps réel</strong> : Les statuts se mettent à jour automatiquement</li>
-              </ul>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-              <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Demande de retrait :</h4>
-              <p className="text-sm text-yellow-700">
-                Pour demander un retrait de vos fonds, contactez-nous à <strong>support@simpshopy.com</strong> 
-                avec votre ID boutique et le montant souhaité.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+                <CardContent className="space-y-4">
+                  {/* Informations du fournisseur */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <Label className="font-medium">Frais</Label>
+                      <p className="text-muted-foreground">{provider.fees}</p>
+                    </div>
+                    <div>
+                      <Label className="font-medium">Devises supportées</Label>
+                      <p className="text-muted-foreground">{provider.supportedCurrencies.join(', ')}</p>
+                    </div>
+                    <div>
+                      <Label className="font-medium">Mode</Label>
+                      <p className="text-muted-foreground">
+                        {provider.isTestMode ? 'Test' : 'Production'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Configuration */}
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-medium">Configuration API</Label>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => testProvider(provider.id)}
+                          disabled={!provider.apiKey || testing === provider.id}
+                        >
+                          <TestTube className="w-4 h-4 mr-2" />
+                          {testing === provider.id ? 'Test en cours...' : 'Tester'}
+                        </Button>
+                        {provider.setupUrl && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(provider.setupUrl, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Setup
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`${provider.id}-api-key`}>
+                          Clé API {provider.isTestMode ? '(Test)' : '(Production)'}
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id={`${provider.id}-api-key`}
+                            type={showSecrets[provider.id] ? 'text' : 'password'}
+                            value={provider.apiKey}
+                            onChange={(e) => {
+                              updateProvider(provider.id, { apiKey: e.target.value });
+                            }}
+                            placeholder="pk_test_... ou pk_live_..."
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={() => toggleSecretVisibility(provider.id)}
+                          >
+                            {showSecrets[provider.id] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {provider.secretKey !== undefined && (
+                        <div className="space-y-2">
+                          <Label htmlFor={`${provider.id}-secret-key`}>
+                            Clé secrète {provider.isTestMode ? '(Test)' : '(Production)'}
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id={`${provider.id}-secret-key`}
+                              type={showSecrets[provider.id] ? 'text' : 'password'}
+                              value={provider.secretKey || ''}
+                              onChange={(e) => {
+                                updateProvider(provider.id, { secretKey: e.target.value });
+                              }}
+                              placeholder="sk_test_... ou sk_live_..."
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3"
+                              onClick={() => toggleSecretVisibility(provider.id)}
+                            >
+                              {showSecrets[provider.id] ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`${provider.id}-webhook`}>
+                        URL Webhook (optionnel)
+                      </Label>
+                      <Input
+                        id={`${provider.id}-webhook`}
+                        value={provider.webhookUrl || ''}
+                        onChange={(e) => {
+                          updateProvider(provider.id, { webhookUrl: e.target.value });
+                        }}
+                        placeholder="https://votre-domaine.com/webhook/paiement"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={provider.isTestMode}
+                          onCheckedChange={(testMode) => {
+                            updateProvider(provider.id, { isTestMode: testMode });
+                          }}
+                        />
+                        <Label>Mode test</Label>
+                      </div>
+                      
+                      <Button
+                        onClick={() => saveConfiguration(provider.id, provider)}
+                        disabled={saving || !provider.apiKey}
+                      >
+                        {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="configured" className="space-y-4">
+            {configuredProviders.length > 0 ? (
+              configuredProviders.map((provider) => (
+                <Card key={provider.id} className="overflow-hidden">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
+                          <span className="text-lg">{provider.icon}</span>
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{provider.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{provider.description}</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Configuré
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <Card>
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Aucun fournisseur configuré</h3>
+                    <p className="text-muted-foreground">
+                      Configurez au moins un fournisseur de paiement pour commencer.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="active" className="space-y-4">
+            {enabledProviders.length > 0 ? (
+              enabledProviders.map((provider) => (
+                <Card key={provider.id} className="overflow-hidden">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
+                          <span className="text-lg">{provider.icon}</span>
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{provider.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{provider.description}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">
+                        <Zap className="w-3 h-3 mr-1" />
+                        Actif
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <Card>
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <XCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Aucun fournisseur actif</h3>
+                    <p className="text-muted-foreground">
+                      Activez au moins un fournisseur de paiement pour accepter les paiements.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
