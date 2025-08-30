@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Palette, Sparkles, Zap, Grid, Star } from 'lucide-react';
+import { Palette, Sparkles, Zap, Grid, Check } from 'lucide-react';
 
 const SiteBuilderLoadingFallback: React.FC = () => {
   const [progress, setProgress] = useState(0);
@@ -99,19 +99,19 @@ const SiteBuilderLoadingFallback: React.FC = () => {
               </Badge>
             </div>
 
-            {/* Indicateurs de performance avec couleurs du SiteBuilder */}
+            {/* Indicateurs de performance avec couleurs du SiteBuilder - TROIS LIGNES COLORÉES */}
             <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="text-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <div className="font-semibold text-purple-600 dark:text-purple-400">Templates</div>
-                <div className="text-purple-500">Optimisés</div>
-              </div>
-              <div className="text-center p-2 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                <div className="font-semibold text-pink-600 dark:text-pink-400">Images</div>
-                <div className="text-pink-500">WebP</div>
+              <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="font-semibold text-green-600 dark:text-green-400">Cache</div>
+                <div className="text-green-500">Actif</div>
               </div>
               <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="font-semibold text-blue-600 dark:text-blue-400">Cache</div>
-                <div className="text-blue-500">Intelligent</div>
+                <div className="font-semibold text-blue-600 dark:text-blue-400">Images</div>
+                <div className="text-blue-500">Optimisées</div>
+              </div>
+              <div className="text-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div className="font-semibold text-purple-600 dark:text-purple-400">Bundle</div>
+                <div className="text-purple-500">Minifié</div>
               </div>
             </div>
 
