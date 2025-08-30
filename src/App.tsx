@@ -7,7 +7,7 @@ import { CartProvider } from './contexts/CartContext';
 import { useSessionOptimizer } from './hooks/useSessionOptimizer';
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
-import ConditionalPreloading from './components/ConditionalPreloading';
+import OptimizedPreloader from './components/OptimizedPreloader';
 import LoadingFallback from './components/LoadingFallback';
 import SiteBuilderLoadingFallback from './components/SiteBuilderLoadingFallback';
 import ConditionalCookieConsent from './components/ConditionalCookieConsent';
@@ -108,7 +108,7 @@ function App() {
             <StorageInitializer>
               <Router>
                 <GlobalOptimizations />
-                <ConditionalPreloading />
+                <OptimizedPreloader />
                 
                 {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
                 <Routes>

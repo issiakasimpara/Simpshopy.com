@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Palette } from 'lucide-react';
+import { Settings, Palette, Loader2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import CreateStoreDialog from '@/components/CreateStoreDialog';
@@ -12,11 +12,13 @@ import StoreHeader from '@/components/store-config/StoreHeader';
 import StoreActions from '@/components/store-config/StoreActions';
 import StoreStatusCard from '@/components/store-config/StoreStatusCard';
 import StoreConfigForm from '@/components/store-config/StoreConfigForm';
-import StorePreview from '@/components/store-config/StorePreview';
 import NoStoreSelectedState from '@/components/store-config/NoStoreSelectedState';
 import DomainManager from '@/components/store-config/domain/DomainManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Template } from '@/types/template';
+
+// Lazy load StorePreview pour améliorer les performances
+const StorePreview = lazy(() => import('@/components/store-config/StorePreview'));
 
 const StoreConfig = () => {
   const [showCreateStore, setShowCreateStore] = useState(false);
@@ -73,23 +75,19 @@ const StoreConfig = () => {
     }
   };
 
-  // Rafraîchir les données quand l'utilisateur change ou quand on arrive sur la page
+  // ✅ OPTIMISATION : Re-fetch seulement si (!store)
   useEffect(() => {
-    if (user && !authLoading) {
-      // Log seulement en développement et très rarement
-      if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('User changed or page loaded, refreshing stores...');
-      }
+    if (user && !authLoading && !store) {
       refetchStores();
     }
-  }, [user, authLoading, refetchStores]);
+  }, [user, authLoading, refetchStores, store]);
 
-  // Récupérer le template quand la boutique change
+  // ✅ OPTIMISATION : Template chargé seulement si (!storeTemplate)
   useEffect(() => {
-    if (store?.id) {
+    if (store?.id && !storeTemplate) {
       fetchCurrentTemplate(store.id);
     }
-  }, [store?.id]);
+  }, [store?.id, storeTemplate]);
 
   // Update form data when store changes
   useEffect(() => {
@@ -145,13 +143,24 @@ const StoreConfig = () => {
     }, 1000);
   };
 
-  // Afficher un état de chargement pendant que l'authentification se charge
-  if (authLoading || isLoading || templateLoading) {
+  // ✅ OPTIMISATION : Chargement progressif et non-bloquant
+  if (authLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Chargement de vos données...</span>
+          <span className="ml-2 text-gray-600">Connexion en cours...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Chargement de votre boutique...</span>
         </div>
       </DashboardLayout>
     );
@@ -182,14 +191,36 @@ const StoreConfig = () => {
                 storeTemplateId={storeTemplate?.id}
               />
 
-              {viewMode === 'template' && storeTemplate ? (
-                <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
-                  <StorePreview 
-                    selectedStore={store}
-                    onViewModeChange={setViewMode}
-                  />
-                </div>
-              ) : (
+              {viewMode === 'template' && (
+                templateLoading ? (
+                  <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+                        <p className="text-gray-600">Chargement du template...</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : storeTemplate ? (
+                  <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center">
+                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+                          <p className="text-gray-600">Chargement de l'aperçu...</p>
+                        </div>
+                      </div>
+                    }>
+                      <StorePreview 
+                        selectedStore={store}
+                        onViewModeChange={setViewMode}
+                      />
+                    </Suspense>
+                  </div>
+                ) : null
+              )}
+              
+              {viewMode === 'config' && (
                 <div className="bg-gradient-to-br from-background/95 via-background to-muted/5 backdrop-blur-sm rounded-3xl border border-border/50 shadow-xl p-4 sm:p-6 lg:p-8">
                   <Tabs value={currentTab} className="space-y-4 sm:space-y-6 lg:space-y-8">
                     {!isInSiteBuilder && (
@@ -244,10 +275,19 @@ const StoreConfig = () => {
                           </TabsContent>
 
                           <TabsContent value="preview" className="space-y-4 sm:space-y-6">
-                            <StorePreview 
-                              selectedStore={store}
-                              onViewModeChange={setViewMode}
-                            />
+                            <Suspense fallback={
+                              <div className="flex items-center justify-center py-8">
+                                <div className="text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3 text-blue-600" />
+                                  <p className="text-sm text-gray-600">Chargement de l'aperçu...</p>
+                                </div>
+                              </div>
+                            }>
+                              <StorePreview 
+                                selectedStore={store}
+                                onViewModeChange={setViewMode}
+                              />
+                            </Suspense>
                           </TabsContent>
                         </Tabs>
                       </div>
