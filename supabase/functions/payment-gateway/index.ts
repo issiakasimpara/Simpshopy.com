@@ -160,6 +160,7 @@ async function handleInitializePayment(req: Request, supabaseClient: any) {
   try {
     const body: InitializePaymentRequest = await req.json()
     console.log('Request body parsed:', { provider: body.provider, storeId: body.storeId })
+    console.log('Payment data received:', JSON.stringify(body.paymentData, null, 2))
     
     const { provider, storeId, paymentData } = body
 
