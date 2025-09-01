@@ -201,10 +201,15 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
 
   // Sauvegarder la configuration
   const saveConfiguration = useCallback(async (providerId: string, config: Partial<PaymentProviderConfig>) => {
-    if (!storeId) return;
+    if (!storeId) {
+      console.error('❌ saveConfiguration: storeId manquant');
+      return;
+    }
 
     setSaving(true);
     try {
+      console.log('💾 Sauvegarde configuration:', { providerId, storeId, config });
+
       const updateData: any = {
         store_id: storeId,
         [`${providerId}_enabled`]: config.isEnabled,
@@ -219,11 +224,42 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
         updateData[`${providerId}_secret_key`] = config.secretKey;
       }
 
-      const { error } = await supabase
-        .from('payment_configurations')
-        .upsert(updateData);
+      console.log('📤 Données à envoyer:', updateData);
 
-      if (error) throw error;
+      // Vérifier d'abord si une configuration existe déjà
+      const { data: existingConfig, error: checkError } = await supabase
+        .from('payment_configurations')
+        .select('id')
+        .eq('store_id', storeId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ Erreur vérification config existante:', checkError);
+        throw checkError;
+      }
+
+      let result;
+      if (existingConfig) {
+        // Mise à jour
+        console.log('🔄 Mise à jour configuration existante');
+        result = await supabase
+          .from('payment_configurations')
+          .update(updateData)
+          .eq('store_id', storeId);
+      } else {
+        // Insertion
+        console.log('➕ Création nouvelle configuration');
+        result = await supabase
+          .from('payment_configurations')
+          .insert(updateData);
+      }
+
+      if (result.error) {
+        console.error('❌ Erreur sauvegarde:', result.error);
+        throw result.error;
+      }
+
+      console.log('✅ Configuration sauvegardée avec succès');
 
       toast({
         title: "Configuration sauvegardée",
@@ -233,11 +269,23 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
       // Recharger la configuration
       await loadConfiguration();
 
-    } catch (error) {
-      console.error('Erreur sauvegarde config:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur sauvegarde config:', error);
+      
+      // Gestion spécifique des erreurs
+      let errorMessage = "Impossible de sauvegarder la configuration.";
+      
+      if (error.code === '409') {
+        errorMessage = "Une configuration existe déjà pour cette boutique. Veuillez réessayer.";
+      } else if (error.code === '42501') {
+        errorMessage = "Permission refusée. Vérifiez vos droits d'accès.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder la configuration.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
