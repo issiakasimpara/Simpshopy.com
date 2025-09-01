@@ -452,6 +452,7 @@ const Checkout = () => {
         currency: currency || 'XOF',
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
+        storeId: finalStoreId, // Ajouter le storeId ici
         customer: {
           email: customerInfo.email,
           first_name: customerInfo.firstName,
