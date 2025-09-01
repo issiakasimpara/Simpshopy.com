@@ -41,10 +41,13 @@ serve(async (req) => {
   try {
     // Create Supabase client with service role key for admin operations
     // This allows the Edge Function to access the database without user authentication
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    
+    console.log('Supabase URL available:', !!supabaseUrl)
+    console.log('Service Role Key available:', !!serviceRoleKey)
+    
+    const supabaseClient = createClient(supabaseUrl, serviceRoleKey)
 
     const { method, url } = req
     const urlObj = new URL(url)
@@ -367,11 +370,21 @@ async function handleMonerooPayment(paymentData: any, config: any) {
 
     // Check for 201 status (success according to Moneroo docs)
     if (response.status !== 201) {
+      console.log('❌ Moneroo API Error Details:')
+      console.log('Status:', response.status)
+      console.log('Response Data:', JSON.stringify(data, null, 2))
+      console.log('Request Data Sent:', JSON.stringify(monerooData, null, 2))
+      
       return new Response(
         JSON.stringify({ 
           error: 'Moneroo API error',
           details: data.message || 'Failed to initialize payment',
-          status: response.status
+          status: response.status,
+          debug: {
+            monerooData: monerooData,
+            apiResponse: data,
+            authKeyAvailable: !!authKey
+          }
         }),
         { 
           status: response.status, 
@@ -416,16 +429,23 @@ function transformToMonerooFormat(paymentData: any) {
   
   try {
     // Parse customer info from JSON string
-    const customerInfo = JSON.parse(paymentData.customer_info || '{}')
-    const items = JSON.parse(paymentData.items || '[]')
-    const shippingMethod = JSON.parse(paymentData.shipping_method || '{}')
+    const customerInfo = JSON.parse(paymentData.customer_info || paymentData.metadata?.customer_info || '{}')
+    const items = JSON.parse(paymentData.items || paymentData.metadata?.items || '[]')
+    const shippingMethod = JSON.parse(paymentData.shipping_method || paymentData.metadata?.shipping_method || '{}')
     
     console.log('Parsed data:', { customerInfo, items, shippingMethod })
     
     // Calculate total amount (items + shipping)
-    const itemsTotal = parseFloat(paymentData.total_amount || '0')
-    const shippingCost = parseFloat(paymentData.shipping_cost || '0')
-    const totalAmount = Math.round((itemsTotal + shippingCost) * 100) // Convert to cents
+    // Try to get amount from different possible locations
+    const totalAmountStr = paymentData.total_amount || 
+                          paymentData.metadata?.total_amount || 
+                          paymentData.amount?.toString() || '0'
+    const shippingCostStr = paymentData.shipping_cost || 
+                           paymentData.metadata?.shipping_cost || '0'
+    
+    const itemsTotal = parseFloat(totalAmountStr)
+    const shippingCost = parseFloat(shippingCostStr)
+    const totalAmount = itemsTotal + shippingCost // Keep as decimal for Moneroo
     
     console.log('Amount calculation:', { itemsTotal, shippingCost, totalAmount })
     
