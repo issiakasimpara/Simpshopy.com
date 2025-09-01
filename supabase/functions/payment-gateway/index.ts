@@ -324,21 +324,20 @@ async function handleVerifyPayment(req: Request, supabaseClient: any) {
 async function handleMonerooPayment(paymentData: any, config: any) {
   const MONEROO_API_URL = 'https://api.moneroo.io'
   
-  console.log('Moneroo payment data:', JSON.stringify(paymentData, null, 2))
+  console.log('Original payment data:', JSON.stringify(paymentData, null, 2))
   console.log('Moneroo config:', { 
     enabled: config.moneroo_enabled, 
-    hasApiKey: !!config.moneroo_api_key,
-    hasSecretKey: !!config.moneroo_secret_key 
+    hasApiKey: !!config.moneroo_api_key
   })
   
   try {
-    // Use secret key for authentication (not API key)
-    const authKey = config.moneroo_secret_key || config.moneroo_api_key
+    // Use API key for authentication (Moneroo calls it secret key)
+    const authKey = config.moneroo_api_key
     
     if (!authKey) {
       return new Response(
         JSON.stringify({ 
-          error: 'Moneroo secret key not configured'
+          error: 'Moneroo API key not configured'
         }),
         { 
           status: 400, 
@@ -347,6 +346,10 @@ async function handleMonerooPayment(paymentData: any, config: any) {
       )
     }
 
+    // Transform checkout data to Moneroo format
+    const monerooData = transformToMonerooFormat(paymentData)
+    console.log('Transformed Moneroo data:', JSON.stringify(monerooData, null, 2))
+
     const response = await fetch(`${MONEROO_API_URL}/v1/payments/initialize`, {
       method: 'POST',
       headers: {
@@ -354,7 +357,7 @@ async function handleMonerooPayment(paymentData: any, config: any) {
         'Authorization': `Bearer ${authKey}`,
         'Accept': 'application/json'
       },
-      body: JSON.stringify(paymentData)
+      body: JSON.stringify(monerooData)
     })
 
     console.log('Moneroo API response status:', response.status)
@@ -407,14 +410,80 @@ async function handleMonerooPayment(paymentData: any, config: any) {
   }
 }
 
+// Transform checkout data to Moneroo format
+function transformToMonerooFormat(paymentData: any) {
+  console.log('Transforming payment data to Moneroo format...')
+  
+  try {
+    // Parse customer info from JSON string
+    const customerInfo = JSON.parse(paymentData.customer_info || '{}')
+    const items = JSON.parse(paymentData.items || '[]')
+    const shippingMethod = JSON.parse(paymentData.shipping_method || '{}')
+    
+    console.log('Parsed data:', { customerInfo, items, shippingMethod })
+    
+    // Calculate total amount (items + shipping)
+    const itemsTotal = parseFloat(paymentData.total_amount || '0')
+    const shippingCost = parseFloat(paymentData.shipping_cost || '0')
+    const totalAmount = Math.round((itemsTotal + shippingCost) * 100) // Convert to cents
+    
+    console.log('Amount calculation:', { itemsTotal, shippingCost, totalAmount })
+    
+    // Create description from items
+    const itemDescriptions = items.map((item: any) => 
+      `${item.quantity}x ${item.name}`
+    ).join(', ')
+    const description = `Commande: ${itemDescriptions}${shippingCost > 0 ? ` + Livraison: ${shippingMethod.name || 'Standard'}` : ''}`
+    
+    // Build Moneroo payment data
+    const monerooData = {
+      amount: totalAmount,
+      currency: paymentData.currency || 'XOF',
+      description: description,
+      return_url: 'https://simpshopy.com/payment-success', // Fixed URL
+      customer: {
+        email: customerInfo.email || 'customer@example.com',
+        first_name: customerInfo.firstName || customerInfo.first_name || 'Client',
+        last_name: customerInfo.lastName || customerInfo.last_name || 'Anonyme',
+        phone: customerInfo.phone || undefined,
+        address: customerInfo.address || undefined,
+        city: customerInfo.city || undefined,
+        state: customerInfo.state || undefined,
+        country: customerInfo.country || undefined,
+        zip: customerInfo.zipCode || customerInfo.zip || undefined
+      },
+      metadata: {
+        order_id: paymentData.orderNumber || 'unknown',
+        store_id: paymentData.storeId || 'unknown',
+        items_count: items.length.toString(),
+        shipping_method: shippingMethod.name || 'standard'
+      }
+    }
+    
+    // Remove undefined values
+    Object.keys(monerooData.customer).forEach(key => {
+      if (monerooData.customer[key] === undefined) {
+        delete monerooData.customer[key]
+      }
+    })
+    
+    console.log('Transformation completed:', monerooData)
+    return monerooData
+    
+  } catch (error) {
+    console.error('Error transforming payment data:', error)
+    throw new Error('Failed to transform payment data to Moneroo format')
+  }
+}
+
 async function handleMonerooVerification(paymentId: string, config: any) {
   const MONEROO_API_URL = 'https://api.moneroo.io'
   
   console.log('Moneroo verification for payment ID:', paymentId)
   
   try {
-    // Use secret key for authentication (not API key)
-    const authKey = config.moneroo_secret_key || config.moneroo_api_key
+    // Use API key for authentication (Moneroo calls it secret key)
+    const authKey = config.moneroo_api_key
     
     if (!authKey) {
       return new Response(
