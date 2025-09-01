@@ -1,10 +1,10 @@
-# Test de l'initialisation de paiement Moneroo
+# Test avec les données exactes du checkout
 $supabaseUrl = "https://grutldacuowplosarucp.supabase.co"
 $anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdydXRsZGFjdW93cGxvc2FydWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwOTAxNjEsImV4cCI6MjA2NDY2NjE2MX0.cqKxbFdqF589dQBSH3IKNL6kXdRNtS9dpkrYNOHk0Ac"
 
 $storeId = "d6d0e01a-0283-4a87-8da0-b248c36e37d5"
 
-Write-Host "=== TEST INITIALISATION PAIEMENT MONEROO ===" -ForegroundColor Cyan
+Write-Host "=== TEST AVEC DONNÉES EXACTES DU CHECKOUT ===" -ForegroundColor Cyan
 Write-Host "Store ID: $storeId" -ForegroundColor Yellow
 
 $headers = @{
@@ -13,17 +13,18 @@ $headers = @{
     "Authorization" = "Bearer $anonKey"
 }
 
-# Test avec les données exactes du checkout
-Write-Host "`n=== TEST: Initialisation paiement avec données checkout ===" -ForegroundColor Green
+# Test avec les données exactes du checkout (après modification)
+Write-Host "`n=== TEST: Données exactes du checkout ===" -ForegroundColor Green
 
 try {
     $paymentData = @{
         provider = "moneroo"
         storeId = $storeId
         paymentData = @{
-            currency = "XOF"
-            description = "Commande ORD-123456789 - maman"
-            return_url = "http://localhost:5173/payment-success?temp_order=ORD-123456789"
+            amount = 10.50  # Montant décimal (pas en centimes)
+            currency = "GBP"  # Devise du checkout
+            description = "Commande TEMP-1756700000000 - maman"
+            return_url = "http://localhost:5173/payment-success?temp_order=TEMP-1756700000000"
             storeId = $storeId
             customer = @{
                 email = "test@example.com"
@@ -36,7 +37,7 @@ try {
                 zip = "12345"
             }
             metadata = @{
-                temp_order_number = "ORD-123456789"
+                temp_order_number = "TEMP-1756700000000"
                 store_id = $storeId
                 store_name = "maman"
                 customer_info = '{"email":"test@example.com","firstName":"John","lastName":"Doe","phone":"+1234567890","address":"123 Test Street","city":"Test City","country":"ML","postalCode":"12345"}'

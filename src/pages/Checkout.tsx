@@ -445,10 +445,9 @@ const Checkout = () => {
 
       const tempOrderNumber = `TEMP-${Date.now()}`;
       const totalAmount = getTotalWithShipping();
-      const totalAmountCentimes = convertToMonerooAmount(totalAmount);
 
       const paymentData = {
-        amount: totalAmountCentimes,
+        amount: totalAmount, // Utiliser le montant décimal directement
         currency: currency || 'XOF',
         description: `Commande ${tempOrderNumber} - ${storeInfo.name}`,
         return_url: `${window.location.origin}/payment-success?temp_order=${tempOrderNumber}`,
