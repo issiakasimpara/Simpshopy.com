@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
 import { Trash2, CreditCard, Loader2, Truck, Clock } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
@@ -19,16 +19,15 @@ import { useCartSessions } from '@/hooks/useCartSessions';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
 const Checkout = () => {
-  const { items, updateQuantity, removeItem, getTotalPrice, clearCart, storeId: cartStoreId, isLoading: cartLoading } = useCart();
+  const { items, updateQuantity, removeItem, getTotalPrice, storeId: cartStoreId, isLoading: cartLoading } = useCart();
   const { saveCartSession, getCartSession } = useCartSessions();
   const navigate = useNavigate();
-  const location = useLocation();
   const { storeSlug } = useParams();
   const { toast } = useToast();
   
   // États pour les méthodes de livraison
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<any>(null);
-  const [shippingCost, setShippingCost] = useState(0);
+  const [shippingCost] = useState(0);
   const [detectedCountry, setDetectedCountry] = useState<string>('');
   const [detectedCountryCode, setDetectedCountryCode] = useState<CountryCode>('ML');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
