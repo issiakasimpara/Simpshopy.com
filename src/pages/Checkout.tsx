@@ -5,17 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
-import { Trash2, CreditCard, Loader2, Truck, Clock, DollarSign } from 'lucide-react';
+import { Trash2, CreditCard, Loader2, Truck, Clock } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { detectUserCountry, SUPPORTED_COUNTRIES, type CountryCode } from '@/utils/countryDetection';
 import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
-import { MonerooService, convertToMonerooAmount, formatMonerooAmount } from '@/services/monerooService';
+import { MonerooService } from '@/services/monerooService';
 import { useCartSessions } from '@/hooks/useCartSessions';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
@@ -34,15 +33,12 @@ const Checkout = () => {
   const [detectedCountryCode, setDetectedCountryCode] = useState<CountryCode>('ML');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [currentStoreId, setCurrentStoreId] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
   const [isCheckingCart, setIsCheckingCart] = useState(true);
   
   // Utiliser le storeId du panier en priorité, sinon celui récupéré par getStoreInfo
   const effectiveStoreId = cartStoreId || currentStoreId;
   const { formatPrice, currency } = useStoreCurrency(effectiveStoreId);
 
-  // Détecter si nous sommes dans l'aperçu
-  const isInPreview = window.self !== window.top;
   const [customerInfo, setCustomerInfo] = useState({
     email: '',
     firstName: '',
@@ -324,75 +320,7 @@ const Checkout = () => {
     }));
   };
 
-  // Charger les méthodes de livraison pour un pays spécifique
-  const loadShippingMethods = async (storeId: string, userCountryCode: CountryCode) => {
-    try {
-      console.log('🔍 Test requêtes simples...');
 
-      // 1. Test zones
-      const { data: zones, error: zonesError } = await supabase
-        .from('shipping_zones' as any)
-        .select('*')
-        .eq('store_id', storeId);
-
-      if (zonesError) {
-        console.error('❌ Erreur zones:', zonesError);
-        return;
-      }
-      console.log('🌍 ZONES:', zones);
-
-      // 2. Test méthodes sans JOIN
-      const { data: methods, error: methodsError } = await supabase
-        .from('shipping_methods' as any)
-        .select('*')
-        .eq('store_id', storeId)
-        .eq('is_active', true);
-
-      if (methodsError) {
-        console.error('❌ Erreur méthodes:', methodsError);
-        return;
-      }
-      console.log('📦 MÉTHODES:', methods);
-
-      // 3. Filtrer les méthodes par pays de l'utilisateur
-      console.log('🎯 Filtrage intelligent pour le pays:', userCountryCode);
-
-      const availableMethods: any[] = [];
-
-      if (methods && methods.length > 0) {
-        for (const method of methods as any[]) {
-          // Si la méthode n'a pas de zone (globale), elle est disponible partout
-          if (!method.shipping_zone_id) {
-            console.log(`🌍 ${method.name} - Méthode GLOBALE (disponible partout)`);
-            availableMethods.push(method);
-            continue;
-          }
-
-          // Sinon, vérifier si le pays de l'utilisateur est dans la zone
-          const zone = (zones as any[])?.find((z: any) => z.id === method.shipping_zone_id);
-          if (zone && zone.countries && zone.countries.includes(userCountryCode)) {
-            console.log(`✅ ${method.name} - Disponible pour ${userCountryCode} (Zone: ${zone.name})`);
-            availableMethods.push(method);
-          } else {
-            console.log(`❌ ${method.name} - NON disponible pour ${userCountryCode}`);
-          }
-        }
-      }
-
-      console.log('\n🎯 RÉSULTAT FINAL:', availableMethods.length, 'méthodes disponibles pour', userCountryCode);
-
-      // Sélectionner automatiquement la première méthode si disponible
-      if (availableMethods.length > 0) {
-        setSelectedShippingMethod(availableMethods[0]);
-        setShippingCost(availableMethods[0].price || 0);
-      } else {
-        setSelectedShippingMethod(null);
-        setShippingCost(0);
-      }
-    } catch (error) {
-      console.error('❌ Erreur chargement méthodes:', error);
-    }
-  };
 
   // Calculer le total avec livraison
   const getTotalWithShipping = () => {
