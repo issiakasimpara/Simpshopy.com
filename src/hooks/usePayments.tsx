@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { MonerooService, MonerooPaymentData } from '@/services/monerooService';
 import { useToast } from '@/hooks/use-toast';
+import { MonerooService, isMonerooConfigured } from '@/services/monerooService';
+import { MonerooPaymentData } from '@/services/monerooService';
 
 export interface Payment {
   id: string;
@@ -46,6 +47,12 @@ export const usePayments = (storeId?: string) => {
   // Initialiser un nouveau paiement
   const initializePayment = useMutation({
     mutationFn: async (paymentData: MonerooPaymentData & { storeId: string; orderId?: string }) => {
+      // Vérifier si Moneroo est configuré pour cette boutique
+      const isConfigured = await isMonerooConfigured(paymentData.storeId);
+      if (!isConfigured) {
+        throw new Error('Moneroo n\'est pas configuré pour cette boutique. Veuillez configurer Moneroo dans les paramètres de paiement.');
+      }
+
       // 1. Initialiser le paiement avec Moneroo
       const monerooResponse = await MonerooService.initializePayment({
         ...paymentData,
@@ -100,8 +107,8 @@ export const usePayments = (storeId?: string) => {
 
   // Vérifier le statut d'un paiement
   const verifyPayment = useMutation({
-    mutationFn: async (paymentId: string) => {
-      const result = await MonerooService.verifyPayment(paymentId);
+    mutationFn: async ({ paymentId, storeId }: { paymentId: string; storeId: string }) => {
+      const result = await MonerooService.verifyPayment(paymentId, storeId);
       
       // Mettre à jour le statut dans la base de données
       const { error } = await supabase

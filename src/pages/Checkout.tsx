@@ -244,14 +244,15 @@ const Checkout = () => {
 
   // Vérifier la session de panier une seule fois après l'initialisation
   useEffect(() => {
-    if (effectiveStoreId && !isCheckingCart) {
+    if (effectiveStoreId && isCheckingCart) {
       const timer = setTimeout(() => {
-        checkCartSession();
+        // Supprimer la référence à checkCartSession qui n'existe pas
+        setIsCheckingCart(false);
       }, 1000); // Attendre 1 seconde après l'initialisation
 
       return () => clearTimeout(timer);
     }
-  }, [effectiveStoreId, isCheckingCart, checkCartSession]);
+  }, [effectiveStoreId, isCheckingCart]);
 
   // Timeout de sécurité pour éviter le blocage infini
   useEffect(() => {

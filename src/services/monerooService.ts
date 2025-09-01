@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { supabase } from '@/integrations/supabase/client';
 
-const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
+// Supprimer la clé API hardcodée
+// const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
 const MONEROO_API_URL = 'https://api.moneroo.io/v1';
 
 // Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
@@ -14,6 +16,54 @@ export const convertToMonerooAmount = (amountInCFA: number): number => {
 export const formatMonerooAmount = (amountInCFA: number): string => {
   // Pour XOF, le montant est déjà en CFA
   return `${Math.round(amountInCFA)} CFA`;
+};
+
+// Fonction pour vérifier si Moneroo est configuré pour une boutique
+export const isMonerooConfigured = async (storeId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('payment_configurations')
+      .select('moneroo_enabled, moneroo_api_key')
+      .eq('store_id', storeId)
+      .single();
+
+    if (error || !data) {
+      return false;
+    }
+
+    return data.moneroo_enabled && !!data.moneroo_api_key;
+  } catch (error) {
+    console.error('Erreur vérification config Moneroo:', error);
+    return false;
+  }
+};
+
+// Fonction pour récupérer la configuration Moneroo d'une boutique
+export const getMonerooConfig = async (storeId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('payment_configurations')
+      .select('moneroo_enabled, moneroo_test_mode, moneroo_api_key, moneroo_secret_key')
+      .eq('store_id', storeId)
+      .single();
+
+    if (error || !data) {
+      throw new Error('Configuration Moneroo non trouvée');
+    }
+
+    if (!data.moneroo_enabled || !data.moneroo_api_key) {
+      throw new Error('Moneroo n\'est pas configuré pour cette boutique');
+    }
+
+    return {
+      apiKey: data.moneroo_api_key,
+      secretKey: data.moneroo_secret_key,
+      testMode: data.moneroo_test_mode
+    };
+  } catch (error) {
+    console.error('Erreur récupération config Moneroo:', error);
+    throw error;
+  }
 };
 
 export interface MonerooPaymentData {
@@ -49,7 +99,7 @@ export interface MonerooPaymentResponse {
 export class MonerooService {
   private static isInitializing = false;
 
-  static async initializePayment(paymentData: MonerooPaymentData): Promise<MonerooPaymentResponse> {
+  static async initializePayment(paymentData: MonerooPaymentData & { storeId: string }): Promise<MonerooPaymentResponse> {
     // Éviter les appels multiples
     if (this.isInitializing) {
       console.log('⏳ Paiement Moneroo déjà en cours d\'initialisation...');
@@ -59,12 +109,21 @@ export class MonerooService {
     this.isInitializing = true;
 
     try {
+      // Vérifier que Moneroo est configuré pour cette boutique
+      const isConfigured = await isMonerooConfigured(paymentData.storeId);
+      if (!isConfigured) {
+        throw new Error('Moneroo n\'est pas configuré pour cette boutique');
+      }
+
+      // Récupérer la configuration Moneroo
+      const config = await getMonerooConfig(paymentData.storeId);
+
       console.log('🚀 Initialisation paiement Moneroo...');
       
       const response = await axios.post(`${MONEROO_API_URL}/payments/initialize`, paymentData, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${MONEROO_API_KEY}`,
+          'Authorization': `Bearer ${config.apiKey}`,
           'Accept': 'application/json'
         },
         timeout: 30000 // Timeout de 30 secondes
@@ -115,11 +174,20 @@ export class MonerooService {
     }
   }
 
-  static async verifyPayment(paymentId: string): Promise<any> {
+  static async verifyPayment(paymentId: string, storeId: string): Promise<any> {
     try {
+      // Vérifier que Moneroo est configuré pour cette boutique
+      const isConfigured = await isMonerooConfigured(storeId);
+      if (!isConfigured) {
+        throw new Error('Moneroo n\'est pas configuré pour cette boutique');
+      }
+
+      // Récupérer la configuration Moneroo
+      const config = await getMonerooConfig(storeId);
+
       const response = await axios.get(`${MONEROO_API_URL}/payments/${paymentId}`, {
         headers: {
-          'Authorization': `Bearer ${MONEROO_API_KEY}`,
+          'Authorization': `Bearer ${config.apiKey}`,
           'Accept': 'application/json'
         }
       });

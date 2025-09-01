@@ -114,7 +114,22 @@ export const PAYMENT_PROVIDERS: Omit<PaymentProviderConfig, 'isEnabled' | 'isCon
   }
 ];
 
-export const usePaymentConfigurations = (storeId: string | undefined) => {
+interface UsePaymentConfigurationsReturn {
+  configuration: PaymentConfiguration | null;
+  providers: PaymentProviderConfig[];
+  loading: boolean;
+  saving: boolean;
+  testing: string | null;
+  configuredProviders: PaymentProviderConfig[];
+  enabledProviders: PaymentProviderConfig[];
+  loadConfiguration: () => Promise<void>;
+  saveConfiguration: (providerId: string, config: Partial<PaymentProviderConfig>) => Promise<void>;
+  testProvider: (providerId: string) => Promise<void>;
+  toggleProvider: (providerId: string, enabled: boolean) => Promise<void>;
+  updateProvider: (providerId: string, updates: Partial<PaymentProviderConfig>) => void;
+}
+
+export const usePaymentConfigurations = (storeId: string | undefined): UsePaymentConfigurationsReturn => {
   const [configuration, setConfiguration] = useState<PaymentConfiguration | null>(null);
   const [providers, setProviders] = useState<PaymentProviderConfig[]>([]);
   const [loading, setLoading] = useState(false);
@@ -285,8 +300,8 @@ export const usePaymentConfigurations = (storeId: string | undefined) => {
   }, [loadConfiguration]);
 
   // Calculer les statistiques
-  const configuredProviders = providers.filter(p => p.isConfigured);
-  const enabledProviders = providers.filter(p => p.isEnabled);
+  const configuredProviders: PaymentProviderConfig[] = providers.filter(p => p.isConfigured);
+  const enabledProviders: PaymentProviderConfig[] = providers.filter(p => p.isEnabled);
 
   return {
     configuration,

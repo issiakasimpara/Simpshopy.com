@@ -1,0 +1,8 @@
+warning: in the working copy of 'src/hooks/usePaymentConfigurations.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/Checkout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/Payments.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/StoreConfig.tsx', LF will be replaced by CRLF the next time Git touches it
+src/hooks/usePaymentConfigurations.tsx
+src/pages/Checkout.tsx
+src/pages/Payments.tsx
+src/pages/StoreConfig.tsx

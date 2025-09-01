@@ -61,7 +61,7 @@ const StoreConfig = () => {
 
       if (templateData) {
         console.log('✅ Template actuel trouvé:', templateData.template_id);
-        setStoreTemplate(templateData.template_data as Template);
+        setStoreTemplate(templateData.template_data as unknown as Template);
       } else {
         console.log('⚠️ Aucun template publié trouvé, utilisation du template par défaut');
         setStoreTemplate(preBuiltTemplates[0]);
@@ -113,17 +113,7 @@ const StoreConfig = () => {
     });
   };
 
-  const handleDomainSubmit = (domainData: any) => {
-    if (!store) return;
-    
-    updateStore({
-      id: store.id,
-      name: store.name,
-      description: store.description || null,
-      domain: domainData.domain || null,
-      status: store.status,
-    });
-  };
+
 
   // Determine current tab from URL
   const getCurrentTab = () => {
@@ -250,8 +240,9 @@ const StoreConfig = () => {
 
                           <TabsContent value="config" className="space-y-4 sm:space-y-6">
                             <StoreConfigForm
+                              selectedStore={store}
                               formData={formData}
-                              setFormData={setFormData}
+                              onFormDataChange={setFormData}
                               onSubmit={handleSubmit}
                               isUpdating={isUpdating}
                             />
@@ -259,8 +250,8 @@ const StoreConfig = () => {
 
                           <TabsContent value="domains" className="space-y-4 sm:space-y-6">
                             <DomainManager 
-                              selectedStore={store}
-                              onSubmit={handleDomainSubmit}
+                              storeId={store.id}
+                              storeSlug={store.slug || ''}
                             />
                           </TabsContent>
 
