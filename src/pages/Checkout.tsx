@@ -125,10 +125,6 @@ const Checkout = () => {
         }
         
         // Fallback: rechercher la première boutique disponible
-        // Log seulement en développement et rarement
-        if (import.meta.env.DEV && Math.random() < 0.05) {
-          console.log('🔄 Fallback: recherche première boutique');
-        }
         const { data: fallbackStore, error: fallbackError } = await supabase
           .from('stores')
           .select('*')
@@ -244,30 +240,10 @@ const Checkout = () => {
   useEffect(() => {
     if (shippingMethods.length > 0 && !selectedShippingMethod) {
       setSelectedShippingMethod(shippingMethods[0]);
-      // Log seulement en développement et rarement
-      if (import.meta.env.DEV && Math.random() < 0.05) {
-        console.log('✅ Première méthode sélectionnée automatiquement:', shippingMethods[0].name);
-      }
     }
   }, [shippingMethods, selectedShippingMethod]);
 
-  // DEBUG: Afficher les informations de debug (seulement en développement et rarement)
-  useEffect(() => {
-    if (import.meta.env.DEV && Math.random() < 0.1) {
-      console.log('🔍 DEBUG CHECKOUT:', {
-        storeSlug,
-        cartStoreId,
-        currentStoreId,
-        effectiveStoreId,
-        currency,
-        detectedCountry,
-        detectedCountryCode,
-        shippingMethodsCount: shippingMethods.length,
-        isLoadingShipping,
-        selectedMethod: selectedShippingMethod?.name
-      });
-    }
-  }, [storeSlug, cartStoreId, currentStoreId, effectiveStoreId, currency, detectedCountry, detectedCountryCode, shippingMethods.length, isLoadingShipping, selectedShippingMethod]);
+
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCustomerInfoChange = (field: string, value: string) => {
@@ -370,7 +346,7 @@ const Checkout = () => {
           totalAmount
         }));
         
-        console.log('✅ Paiement initialisé avec succès, redirection...');
+
         
         // Afficher un message de succès avant la redirection
         toast({
@@ -590,7 +566,6 @@ const Checkout = () => {
                       }`}
                       onClick={() => {
                         setSelectedShippingMethod(method);
-                        console.log('🚚 Méthode sélectionnée:', method.name, method.price);
                       }}
                     >
                       <div className="flex items-center justify-between">

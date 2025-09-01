@@ -170,12 +170,7 @@ export const useCartSessions = () => {
     try {
       setIsLoading(true);
       const currentSessionId = getOrCreateSessionId();
-      console.log('💾 Sauvegarde session de panier:', {
-        sessionId: currentSessionId,
-        storeId,
-        itemsCount: items.length,
-        customerInfo
-      });
+
 
       // First, try to fetch an existing session
       const existingSession = await getCartSession(storeId);
@@ -221,7 +216,7 @@ export const useCartSessions = () => {
         throw error;
       }
 
-      console.log('✅ Session sauvegardée avec succès:', data);
+
       return data && data[0] ? data[0] : null;
 
     } catch (error: any) {

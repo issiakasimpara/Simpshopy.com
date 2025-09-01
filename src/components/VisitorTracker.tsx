@@ -29,7 +29,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
     // Tracker le visiteur initial
     const trackInitialVisit = async () => {
       await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
-      console.log('✅ Visiteur initial tracké');
+      
     };
 
     trackInitialVisit();

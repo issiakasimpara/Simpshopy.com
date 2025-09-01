@@ -73,7 +73,7 @@ errorRecoveryManager.registerRecoveryAction('Auth_signIn_Error', {
   delay: 0
 });
 
-console.log('✅ Système de récupération d\'erreurs initialisé');
+
 
 // 🗄️ Vérifier et appliquer les migrations de base de données
 // NOTE: Migration désactivée - exécutez manuellement CREATE_MARKET_SETTINGS_MANUAL.sql

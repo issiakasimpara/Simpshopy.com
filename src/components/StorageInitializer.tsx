@@ -10,7 +10,7 @@ const StorageInitializer: React.FC<StorageInitializerProps> = ({ children }) => 
     // Migrer les données existantes vers le stockage isolé
     try {
       migrateExistingData();
-      console.log('✅ Stockage isolé initialisé');
+  
     } catch (error) {
       console.warn('⚠️ Erreur lors de l\'initialisation du stockage isolé:', error);
     }
