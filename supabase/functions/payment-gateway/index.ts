@@ -155,20 +155,27 @@ async function handleCheckConfiguration(req: Request, supabaseClient: any) {
 
 // Handler for initializing payments
 async function handleInitializePayment(req: Request, supabaseClient: any) {
-  const body: InitializePaymentRequest = await req.json()
-  const { provider, storeId, paymentData } = body
-
-  if (!provider || !storeId || !paymentData) {
-    return new Response(
-      JSON.stringify({ error: 'Provider, storeId, and paymentData are required' }),
-      { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
-  }
-
+  console.log('=== handleInitializePayment started ===')
+  
   try {
+    const body: InitializePaymentRequest = await req.json()
+    console.log('Request body parsed:', { provider: body.provider, storeId: body.storeId })
+    
+    const { provider, storeId, paymentData } = body
+
+    if (!provider || !storeId || !paymentData) {
+      console.log('Missing required fields:', { provider, storeId, hasPaymentData: !!paymentData })
+      return new Response(
+        JSON.stringify({ error: 'Provider, storeId, and paymentData are required' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('Getting payment configuration for store:', storeId)
+    
     // Get provider configuration
     const { data: config, error: configError } = await supabaseClient
       .from('payment_configurations')
@@ -176,7 +183,10 @@ async function handleInitializePayment(req: Request, supabaseClient: any) {
       .eq('store_id', storeId)
       .single()
 
+    console.log('Config query result:', { config, error: configError })
+
     if (configError || !config) {
+      console.log('Payment configuration not found')
       return new Response(
         JSON.stringify({ error: 'Payment configuration not found' }),
         { 
@@ -186,7 +196,15 @@ async function handleInitializePayment(req: Request, supabaseClient: any) {
       )
     }
 
-    if (!config[`${provider}_enabled`] || !config[`${provider}_api_key`]) {
+    console.log('Payment configuration found:', {
+      enabled: config[`${provider}_enabled`],
+      hasApiKey: !!config[`${provider}_api_key`],
+      hasSecretKey: !!config[`${provider}_secret_key`]
+    })
+
+    // Check if provider is enabled and has either API key or secret key
+    if (!config[`${provider}_enabled`] || (!config[`${provider}_api_key`] && !config[`${provider}_secret_key`])) {
+      console.log('Provider not properly configured')
       return new Response(
         JSON.stringify({ error: `${provider} is not configured for this store` }),
         { 
@@ -303,26 +321,53 @@ async function handleVerifyPayment(req: Request, supabaseClient: any) {
 
 // Moneroo specific handlers
 async function handleMonerooPayment(paymentData: any, config: any) {
-  const MONEROO_API_URL = 'https://api.moneroo.com/v1'
+  const MONEROO_API_URL = 'https://api.moneroo.io'
+  
+  console.log('Moneroo payment data:', JSON.stringify(paymentData, null, 2))
+  console.log('Moneroo config:', { 
+    enabled: config.moneroo_enabled, 
+    hasApiKey: !!config.moneroo_api_key,
+    hasSecretKey: !!config.moneroo_secret_key 
+  })
   
   try {
-    const response = await fetch(`${MONEROO_API_URL}/payments/initialize`, {
+    // Use secret key for authentication (not API key)
+    const authKey = config.moneroo_secret_key || config.moneroo_api_key
+    
+    if (!authKey) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Moneroo secret key not configured'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const response = await fetch(`${MONEROO_API_URL}/v1/payments/initialize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.moneroo_api_key}`,
+        'Authorization': `Bearer ${authKey}`,
         'Accept': 'application/json'
       },
       body: JSON.stringify(paymentData)
     })
 
+    console.log('Moneroo API response status:', response.status)
+    
     const data = await response.json()
+    console.log('Moneroo API response:', JSON.stringify(data, null, 2))
 
-    if (!response.ok) {
+    // Check for 201 status (success according to Moneroo docs)
+    if (response.status !== 201) {
       return new Response(
         JSON.stringify({ 
           error: 'Moneroo API error',
-          details: data.message || 'Failed to initialize payment'
+          details: data.message || 'Failed to initialize payment',
+          status: response.status
         }),
         { 
           status: response.status, 
@@ -331,11 +376,14 @@ async function handleMonerooPayment(paymentData: any, config: any) {
       )
     }
 
+    // Return the checkout URL according to Moneroo docs structure
     return new Response(
       JSON.stringify({
         success: true,
         message: 'Payment initialized successfully',
-        data: data.data || data
+        checkout_url: data.data?.checkout_url,
+        payment_id: data.data?.id,
+        data: data.data
       }),
       { 
         status: 200, 
@@ -359,24 +407,45 @@ async function handleMonerooPayment(paymentData: any, config: any) {
 }
 
 async function handleMonerooVerification(paymentId: string, config: any) {
-  const MONEROO_API_URL = 'https://api.moneroo.com/v1'
+  const MONEROO_API_URL = 'https://api.moneroo.io'
+  
+  console.log('Moneroo verification for payment ID:', paymentId)
   
   try {
-    const response = await fetch(`${MONEROO_API_URL}/payments/${paymentId}`, {
+    // Use secret key for authentication (not API key)
+    const authKey = config.moneroo_secret_key || config.moneroo_api_key
+    
+    if (!authKey) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Moneroo secret key not configured'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const response = await fetch(`${MONEROO_API_URL}/v1/payments/${paymentId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${config.moneroo_api_key}`,
+        'Authorization': `Bearer ${authKey}`,
         'Accept': 'application/json'
       }
     })
 
+    console.log('Moneroo verification response status:', response.status)
+    
     const data = await response.json()
+    console.log('Moneroo verification response:', JSON.stringify(data, null, 2))
 
     if (!response.ok) {
       return new Response(
         JSON.stringify({ 
           error: 'Moneroo API error',
-          details: data.message || 'Failed to verify payment'
+          details: data.message || 'Failed to verify payment',
+          status: response.status
         }),
         { 
           status: response.status, 
