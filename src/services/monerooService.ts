@@ -80,7 +80,7 @@ export class MonerooService {
   }
 
   // Initialiser un paiement Moneroo (via Edge Function)
-  static async initializePayment(paymentData: MonerooPaymentData & { storeId: string }): Promise<MonerooPaymentResponse> {
+  static async initializePayment(paymentData: any): Promise<MonerooPaymentResponse> {
     // Éviter les appels multiples
     if (this.isInitializing) {
       console.log('⏳ Paiement Moneroo déjà en cours d\'initialisation...');
@@ -102,15 +102,7 @@ export class MonerooService {
         body: JSON.stringify({
           provider: 'moneroo',
           storeId: paymentData.storeId,
-          paymentData: {
-            amount: paymentData.amount,
-            currency: paymentData.currency,
-            description: paymentData.description,
-            return_url: paymentData.return_url,
-            customer: paymentData.customer,
-            metadata: paymentData.metadata,
-            methods: paymentData.methods
-          }
+          paymentData: paymentData
         })
       });
 
