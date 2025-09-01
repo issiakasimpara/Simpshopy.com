@@ -39,23 +39,24 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    // Create Supabase client with service role key for admin operations
+    // This allows the Edge Function to access the database without user authentication
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     const { method, url } = req
     const urlObj = new URL(url)
-    const path = urlObj.pathname.split('/').pop() // Get the last part of the path
+    const pathSegments = urlObj.pathname.split('/')
+    const endpoint = pathSegments[pathSegments.length - 1] // Get the last part of the path
+
+    console.log('Request URL:', url)
+    console.log('Path segments:', pathSegments)
+    console.log('Endpoint:', endpoint)
 
     // Route handling
-    switch (path) {
+    switch (endpoint) {
       case 'check-configuration':
         return await handleCheckConfiguration(req, supabaseClient)
       
@@ -66,8 +67,9 @@ serve(async (req) => {
         return await handleVerifyPayment(req, supabaseClient)
       
       default:
+        console.log('Endpoint not found:', endpoint)
         return new Response(
-          JSON.stringify({ error: 'Endpoint not found' }),
+          JSON.stringify({ error: 'Endpoint not found', endpoint: endpoint }),
           { 
             status: 404, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
