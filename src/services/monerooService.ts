@@ -109,7 +109,24 @@ export class MonerooService {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erreur lors de l\'initialisation du paiement');
+        // Récupérer les détails d'erreur de l'Edge Function
+        const errorMessage = result.details || result.error || 'Erreur lors de l\'initialisation du paiement';
+        
+        // Messages d'erreur spécifiques et informatifs
+        if (errorMessage.includes('No payment methods enabled for this currency')) {
+          throw new Error(`La devise ${paymentData.currency} n'est pas activée dans votre configuration Moneroo. Veuillez activer cette devise dans votre dashboard Moneroo ou changer la devise de votre boutique.`);
+        }
+        
+        if (errorMessage.includes('Invalid API key') || errorMessage.includes('Unauthorized')) {
+          throw new Error('Clé API Moneroo invalide ou manquante. Veuillez vérifier votre configuration dans l\'onglet Paiements.');
+        }
+        
+        if (errorMessage.includes('amount must be at least')) {
+          throw new Error('Le montant minimum pour un paiement Moneroo est de 0.01. Veuillez vérifier le montant de votre commande.');
+        }
+        
+        // Message générique avec détails si disponibles
+        throw new Error(`Erreur Moneroo: ${errorMessage}`);
       }
 
       console.log('✅ Paiement Moneroo initialisé avec succès via Edge Function');

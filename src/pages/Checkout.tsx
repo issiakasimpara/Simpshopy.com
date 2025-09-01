@@ -506,10 +506,28 @@ const Checkout = () => {
       }
     } catch (error: any) {
       console.error('❌ Erreur lors du checkout:', error);
+      
+      // Messages d'erreur plus détaillés et informatifs
+      let errorTitle = "Erreur de paiement";
+      let errorDescription = error.message || "Une erreur est survenue lors du traitement de votre commande.";
+      
+      // Détecter les types d'erreurs spécifiques
+      if (error.message?.includes('devise') || error.message?.includes('currency')) {
+        errorTitle = "Problème de devise";
+        errorDescription = error.message;
+      } else if (error.message?.includes('API key') || error.message?.includes('configuration')) {
+        errorTitle = "Problème de configuration";
+        errorDescription = error.message;
+      } else if (error.message?.includes('montant minimum')) {
+        errorTitle = "Montant insuffisant";
+        errorDescription = error.message;
+      }
+      
       toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors du traitement de votre commande.",
-        variant: "destructive"
+        title: errorTitle,
+        description: errorDescription,
+        variant: "destructive",
+        duration: 8000, // Afficher plus longtemps pour les erreurs importantes
       });
     } finally {
       setIsProcessing(false);

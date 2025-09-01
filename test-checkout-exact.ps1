@@ -14,7 +14,7 @@ $headers = @{
 }
 
 # Test avec les données exactes du checkout (après modification)
-Write-Host "`n=== TEST: Données exactes du checkout ===" -ForegroundColor Green
+Write-Host "`n=== TEST: Données exactes du checkout avec GBP ===" -ForegroundColor Green
 
 try {
     $paymentData = @{
@@ -22,7 +22,7 @@ try {
         storeId = $storeId
         paymentData = @{
             amount = 10.50  # Montant décimal (pas en centimes)
-            currency = "GBP"  # Devise du checkout
+            currency = "GBP"  # Devise du checkout (comme dans la DB)
             description = "Commande TEMP-1756700000000 - maman"
             return_url = "http://localhost:5173/payment-success?temp_order=TEMP-1756700000000"
             storeId = $storeId
