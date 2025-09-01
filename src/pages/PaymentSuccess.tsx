@@ -65,15 +65,15 @@ const PaymentSuccess = () => {
           return;
         }
 
-        // Vérifier le statut du paiement avec Moneroo
-        const paymentResult = await MonerooService.verifyPayment(monerooPaymentId);
+        // Vérifier le statut du paiement avec Moneroo via Edge Function
+        const paymentResult = await MonerooService.verifyPayment(monerooPaymentId, storeId);
         console.log('📡 Résultat vérification Moneroo:', paymentResult);
 
         // Mettre à jour le statut dans la base de données
         const { error: updateError } = await supabase
           .from('payments')
           .update({ 
-            status: paymentResult.data.status,
+            status: paymentResult.status,
             updated_at: new Date().toISOString()
           })
           .eq('moneroo_payment_id', monerooPaymentId);
@@ -86,7 +86,7 @@ const PaymentSuccess = () => {
         let status: PaymentStatus['status'];
         let message: string;
 
-        switch (paymentResult.data.status) {
+        switch (paymentResult.status) {
           case 'completed':
             status = 'success';
             message = 'Paiement effectué avec succès !';
@@ -116,9 +116,9 @@ const PaymentSuccess = () => {
         setPaymentStatus({
           status,
           message,
-          orderNumber: orderNumber || paymentResult.data.metadata?.order_number,
-          amount: paymentResult.data.amount,
-          currency: paymentResult.data.currency
+          orderNumber: orderNumber || paymentResult.metadata?.order_number,
+          amount: paymentResult.amount,
+          currency: paymentResult.currency
         });
 
         // Afficher une notification

@@ -475,7 +475,7 @@ const Checkout = () => {
         }
       };
 
-      console.log('💳 Initialisation paiement Moneroo...');
+      console.log('💳 Initialisation paiement Moneroo via Edge Function...');
       const paymentResult = await MonerooService.initializePayment(paymentData);
       
       if (paymentResult.success && paymentResult.data?.checkout_url) {

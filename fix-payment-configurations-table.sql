@@ -59,8 +59,13 @@ ALTER TABLE payment_configurations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view their own payment configurations" ON payment_configurations;
 DROP POLICY IF EXISTS "Users can update their own payment configurations" ON payment_configurations;
 DROP POLICY IF EXISTS "Users can insert their own payment configurations" ON payment_configurations;
+DROP POLICY IF EXISTS "Public can view payment configurations" ON payment_configurations;
 
--- 7. Créer les nouvelles politiques RLS (utilise la structure correcte avec merchant_id)
+-- 7. Créer une politique pour l'accès public en lecture seule (pour le checkout)
+CREATE POLICY "Public can view payment configurations" ON payment_configurations
+    FOR SELECT USING (true);
+
+-- 8. Créer les politiques RLS pour les propriétaires de boutique (utilise la structure correcte avec merchant_id)
 CREATE POLICY "Users can view their own payment configurations" ON payment_configurations
     FOR SELECT USING (
         store_id IN (
@@ -94,7 +99,7 @@ CREATE POLICY "Users can insert their own payment configurations" ON payment_con
         )
     );
 
--- 8. Créer la fonction pour updated_at
+-- 9. Créer la fonction pour updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -103,13 +108,50 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- 9. Créer le trigger
+-- 10. Créer le trigger
 DROP TRIGGER IF EXISTS update_payment_configurations_updated_at ON payment_configurations;
 CREATE TRIGGER update_payment_configurations_updated_at 
     BEFORE UPDATE ON payment_configurations 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 10. Afficher le statut final
+-- 11. CORRIGER LES POLITIQUES RLS POUR active_sessions
+-- Supprimer les anciennes politiques
+DROP POLICY IF EXISTS "Allow read for store owners" ON active_sessions;
+DROP POLICY IF EXISTS "Allow delete for store owners" ON active_sessions;
+
+-- Créer une politique pour l'accès public en lecture seule
+CREATE POLICY "Public can view active sessions" ON active_sessions
+    FOR SELECT USING (true);
+
+-- Créer une politique pour permettre l'insertion/mise à jour par tous (nécessaire pour le tracking)
+CREATE POLICY "Allow insert for tracking" ON active_sessions
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow update for tracking" ON active_sessions
+    FOR UPDATE USING (true);
+
+-- 12. CORRIGER LES POLITIQUES RLS POUR cart_sessions (si la table existe)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_tables 
+        WHERE schemaname = 'public' 
+        AND tablename = 'cart_sessions'
+    ) THEN
+        -- Supprimer les anciennes politiques
+        DROP POLICY IF EXISTS "Users can view their store cart sessions" ON cart_sessions;
+        DROP POLICY IF EXISTS "Anyone can insert cart sessions" ON cart_sessions;
+        DROP POLICY IF EXISTS "Users can update their store cart sessions" ON cart_sessions;
+        DROP POLICY IF EXISTS "Users can delete their store cart sessions" ON cart_sessions;
+        
+        -- Créer une politique pour permettre à TOUT LE MONDE de gérer les sessions de panier
+        CREATE POLICY "Anyone can manage cart sessions" ON cart_sessions
+            FOR ALL 
+            USING (true);
+    END IF;
+END $$;
+
+-- 13. Afficher le statut final
 SELECT 
     'payment_configurations' as table_name,
     'Table créée avec succès' as status,

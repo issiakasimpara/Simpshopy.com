@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MonerooService, isMonerooConfigured } from '@/services/monerooService';
+import { MonerooService } from '@/services/monerooService';
 import { MonerooPaymentData } from '@/services/monerooService';
 
 export interface Payment {
@@ -48,7 +48,7 @@ export const usePayments = (storeId?: string) => {
   const initializePayment = useMutation({
     mutationFn: async (paymentData: MonerooPaymentData & { storeId: string; orderId?: string }) => {
       // Vérifier si Moneroo est configuré pour cette boutique
-      const isConfigured = await isMonerooConfigured(paymentData.storeId);
+      const isConfigured = await MonerooService.isConfigured(paymentData.storeId);
       if (!isConfigured) {
         throw new Error('Moneroo n\'est pas configuré pour cette boutique. Veuillez configurer Moneroo dans les paramètres de paiement.');
       }
@@ -84,7 +84,7 @@ export const usePayments = (storeId?: string) => {
 
       return {
         payment: data,
-        checkoutUrl: monerooResponse.data.checkout_url
+        monerooResponse
       };
     },
     onSuccess: (data) => {
@@ -93,19 +93,20 @@ export const usePayments = (storeId?: string) => {
         description: "Redirection vers la page de paiement...",
       });
       
-      // Rediriger vers la page de paiement
-      window.location.href = data.checkoutUrl;
+      // Invalider le cache des paiements
+      queryClient.invalidateQueries(['payments', storeId]);
     },
     onError: (error: any) => {
+      console.error('Erreur initialisation paiement:', error);
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de l'initialisation du paiement",
+        description: error.message || "Une erreur est survenue lors de l'initialisation du paiement.",
         variant: "destructive"
       });
     }
   });
 
-  // Vérifier le statut d'un paiement
+  // Vérifier un paiement
   const verifyPayment = useMutation({
     mutationFn: async ({ paymentId, storeId }: { paymentId: string; storeId: string }) => {
       const result = await MonerooService.verifyPayment(paymentId, storeId);
@@ -114,50 +115,36 @@ export const usePayments = (storeId?: string) => {
       const { error } = await supabase
         .from('payments')
         .update({ 
-          status: result.data.status,
+          status: result.status,
           updated_at: new Date().toISOString()
         })
         .eq('moneroo_payment_id', paymentId);
 
       if (error) throw error;
+
       return result;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-    }
-  });
-
-  // Récupérer les statistiques des paiements
-  const { data: paymentStats } = useQuery({
-    queryKey: ['paymentStats', storeId],
-    queryFn: async () => {
-      if (!storeId) return null;
-
-      const { data, error } = await supabase
-        .from('payments')
-        .select('status, amount')
-        .eq('store_id', storeId);
-
-      if (error) throw error;
-
-      const stats = {
-        total: data.length,
-        completed: data.filter(p => p.status === 'completed').length,
-        pending: data.filter(p => p.status === 'pending').length,
-        failed: data.filter(p => p.status === 'failed').length,
-        totalAmount: data
-          .filter(p => p.status === 'completed')
-          .reduce((sum, p) => sum + parseFloat(p.amount), 0)
-      };
-
-      return stats;
+    onSuccess: (data) => {
+      toast({
+        title: "Paiement vérifié",
+        description: `Statut: ${data.status}`,
+      });
+      
+      // Invalider le cache des paiements
+      queryClient.invalidateQueries(['payments', storeId]);
     },
-    enabled: !!storeId
+    onError: (error: any) => {
+      console.error('Erreur vérification paiement:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la vérification du paiement.",
+        variant: "destructive"
+      });
+    }
   });
 
   return {
     payments,
-    paymentStats,
     isLoading,
     error,
     initializePayment,

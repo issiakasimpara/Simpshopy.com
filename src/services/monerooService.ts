@@ -1,73 +1,21 @@
-import axios from 'axios';
 import { supabase } from '@/integrations/supabase/client';
 
-// Supprimer la clé API hardcodée
-// const MONEROO_API_KEY = 'pvk_z5adga|01K1BFNPNF7NN3K364C05V03M8';
-const MONEROO_API_URL = 'https://api.moneroo.io/v1';
+// Constantes
+const MONEROO_API_URL = 'https://api.moneroo.com/v1';
 
-// Fonction utilitaire pour convertir les montants CFA vers le format Moneroo
-export const convertToMonerooAmount = (amountInCFA: number): number => {
-  // Selon la documentation Moneroo, pour XOF, le montant est envoyé tel quel
-  // Ex: 1500 CFA → 1500 (pas de conversion nécessaire)
-  return Math.round(amountInCFA);
+// Fonction pour convertir un montant en centimes (format Moneroo)
+export const convertToMonerooAmount = (amount: number): number => {
+  return Math.round(amount * 100);
 };
 
-// Fonction utilitaire pour afficher le montant correctement
-export const formatMonerooAmount = (amountInCFA: number): string => {
-  // Pour XOF, le montant est déjà en CFA
-  return `${Math.round(amountInCFA)} CFA`;
+// Fonction pour formater un montant Moneroo
+export const formatMonerooAmount = (amount: number): string => {
+  return (amount / 100).toFixed(2);
 };
 
-// Fonction pour vérifier si Moneroo est configuré pour une boutique
-export const isMonerooConfigured = async (storeId: string): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase
-      .from('payment_configurations')
-      .select('moneroo_enabled, moneroo_api_key')
-      .eq('store_id', storeId)
-      .single();
-
-    if (error || !data) {
-      return false;
-    }
-
-    return data.moneroo_enabled && !!data.moneroo_api_key;
-  } catch (error) {
-    console.error('Erreur vérification config Moneroo:', error);
-    return false;
-  }
-};
-
-// Fonction pour récupérer la configuration Moneroo d'une boutique
-export const getMonerooConfig = async (storeId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('payment_configurations')
-      .select('moneroo_enabled, moneroo_test_mode, moneroo_api_key, moneroo_secret_key')
-      .eq('store_id', storeId)
-      .single();
-
-    if (error || !data) {
-      throw new Error('Configuration Moneroo non trouvée');
-    }
-
-    if (!data.moneroo_enabled || !data.moneroo_api_key) {
-      throw new Error('Moneroo n\'est pas configuré pour cette boutique');
-    }
-
-    return {
-      apiKey: data.moneroo_api_key,
-      secretKey: data.moneroo_secret_key,
-      testMode: data.moneroo_test_mode
-    };
-  } catch (error) {
-    console.error('Erreur récupération config Moneroo:', error);
-    throw error;
-  }
-};
-
+// Interface pour les données de paiement Moneroo
 export interface MonerooPaymentData {
-  amount: number; // Montant en CFA selon documentation Moneroo
+  amount: number;
   currency: string; // Devise XOF selon documentation Moneroo
   description: string;
   return_url: string;
@@ -84,9 +32,9 @@ export interface MonerooPaymentData {
   };
   metadata?: Record<string, string>;
   methods?: string[];
-  restrict_country_code?: string;
 }
 
+// Interface pour la réponse de paiement Moneroo
 export interface MonerooPaymentResponse {
   success: boolean;
   message: string;
@@ -96,9 +44,42 @@ export interface MonerooPaymentResponse {
   };
 }
 
+// Nouveau service Moneroo utilisant l'Edge Function
 export class MonerooService {
   private static isInitializing = false;
 
+  // Vérifier si Moneroo est configuré pour une boutique (via Edge Function)
+  static async isConfigured(storeId: string): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/payment-gateway/check-configuration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'apikey': supabase.supabaseKey
+        },
+        body: JSON.stringify({
+          provider: 'moneroo',
+          storeId: storeId
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Error checking Moneroo configuration:', response.status);
+        return false;
+      }
+
+      const result = await response.json();
+      return result.isConfigured === true;
+    } catch (error) {
+      console.error('Error checking Moneroo configuration:', error);
+      return false;
+    }
+  }
+
+  // Initialiser un paiement Moneroo (via Edge Function)
   static async initializePayment(paymentData: MonerooPaymentData & { storeId: string }): Promise<MonerooPaymentResponse> {
     // Éviter les appels multiples
     if (this.isInitializing) {
@@ -109,105 +90,93 @@ export class MonerooService {
     this.isInitializing = true;
 
     try {
-      // Vérifier que Moneroo est configuré pour cette boutique
-      const isConfigured = await isMonerooConfigured(paymentData.storeId);
-      if (!isConfigured) {
-        throw new Error('Moneroo n\'est pas configuré pour cette boutique');
-      }
-
-      // Récupérer la configuration Moneroo
-      const config = await getMonerooConfig(paymentData.storeId);
-
-      console.log('🚀 Initialisation paiement Moneroo...');
+      console.log('🚀 Initialisation paiement Moneroo via Edge Function...');
       
-      const response = await axios.post(`${MONEROO_API_URL}/payments/initialize`, paymentData, {
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/payment-gateway/initialize-payment`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`,
-          'Accept': 'application/json'
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'apikey': supabase.supabaseKey
         },
-        timeout: 30000 // Timeout de 30 secondes
+        body: JSON.stringify({
+          provider: 'moneroo',
+          storeId: paymentData.storeId,
+          paymentData: {
+            amount: paymentData.amount,
+            currency: paymentData.currency,
+            description: paymentData.description,
+            return_url: paymentData.return_url,
+            customer: paymentData.customer,
+            metadata: paymentData.metadata,
+            methods: paymentData.methods
+          }
+        })
       });
 
-      console.log('📡 Réponse Moneroo:', response.data);
+      const result = await response.json();
 
-      // Vérifier si la réponse contient une erreur
-      if (response.data && response.data.success === false) {
-        throw new Error(response.data.message || 'Erreur lors de l\'initialisation du paiement');
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'initialisation du paiement');
       }
 
-      // Si la réponse contient un message de succès, c'est normal
-      if (response.data && response.data.message && response.data.message.includes('successfully')) {
-        console.log('✅ Paiement Moneroo initialisé avec succès');
-        return {
-          success: true,
-          message: response.data.message,
-          data: response.data.data || response.data
-        };
-      }
-
-      // Vérifier le statut HTTP
-      if (response.status !== 201 && response.status !== 200) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      console.log('✅ Paiement Moneroo initialisé avec succès');
+      console.log('✅ Paiement Moneroo initialisé avec succès via Edge Function');
       return {
         success: true,
-        message: 'Paiement initialisé avec succès',
-        data: response.data.data || response.data
+        message: result.message || 'Paiement initialisé avec succès',
+        data: result.data
       };
+
     } catch (error: any) {
-      console.error('❌ Erreur Moneroo:', error);
+      console.error('❌ Erreur Moneroo via Edge Function:', error);
       
       // Gestion spécifique de l'erreur 429 (limite API dépassée)
-      if (error.response?.status === 429) {
+      if (error.message?.includes('429')) {
         throw new Error('Limite de requêtes API dépassée. Veuillez attendre 10-15 minutes avant de réessayer.');
       }
       
-      if (error.response) {
-        throw new Error(error.response.data?.message || 'Erreur lors de l\'initialisation du paiement');
-      }
       throw error;
     } finally {
       this.isInitializing = false;
     }
   }
 
+  // Vérifier un paiement Moneroo (via Edge Function)
   static async verifyPayment(paymentId: string, storeId: string): Promise<any> {
     try {
-      // Vérifier que Moneroo est configuré pour cette boutique
-      const isConfigured = await isMonerooConfigured(storeId);
-      if (!isConfigured) {
-        throw new Error('Moneroo n\'est pas configuré pour cette boutique');
-      }
-
-      // Récupérer la configuration Moneroo
-      const config = await getMonerooConfig(storeId);
-
-      const response = await axios.get(`${MONEROO_API_URL}/payments/${paymentId}`, {
+      console.log('🔍 Vérification paiement Moneroo via Edge Function...');
+      
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/payment-gateway/verify-payment`, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${config.apiKey}`,
-          'Accept': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'apikey': supabase.supabaseKey
+        },
+        body: JSON.stringify({
+          provider: 'moneroo',
+          storeId: storeId,
+          paymentId: paymentId
+        })
       });
 
-      if (response.status !== 200) {
-        throw new Error(`Request failed with status ${response.status}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de la vérification du paiement');
       }
 
-      return response.data;
+      console.log('✅ Paiement Moneroo vérifié avec succès via Edge Function');
+      return result.data;
+
     } catch (error: any) {
-      console.error('Erreur vérification Moneroo:', error);
+      console.error('Erreur vérification Moneroo via Edge Function:', error);
       
       // Gestion spécifique de l'erreur 429 (limite API dépassée)
-      if (error.response?.status === 429) {
+      if (error.message?.includes('429')) {
         throw new Error('Limite de requêtes API dépassée. Veuillez attendre 10-15 minutes avant de réessayer.');
       }
       
-      if (error.response) {
-        throw new Error(error.response.data?.message || 'Erreur lors de la vérification du paiement');
-      }
       throw error;
     }
   }
