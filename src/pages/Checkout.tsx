@@ -62,7 +62,7 @@ const Checkout = () => {
       const countryCode = await detectUserCountry();
       const countryName = SUPPORTED_COUNTRIES[countryCode]?.name || 'Mali';
 
-      console.log('🌍 Pays détecté:', countryName, `(${countryCode})`);
+
 
       setDetectedCountry(countryName);
       setDetectedCountryCode(countryCode);
@@ -91,15 +91,10 @@ const Checkout = () => {
   // Fonction pour récupérer les infos de la boutique
   const getStoreInfo = useCallback(async () => {
     if (!storeSlug) {
-      console.log('❌ Pas de storeSlug fourni');
       return null;
     }
 
     try {
-      // Log seulement en développement et rarement
-      if (import.meta.env.DEV && Math.random() < 0.05) {
-        console.log('🔍 Récupération infos boutique pour slug:', storeSlug);
-      }
       
       // Essayer d'abord avec le slug exact
       const { data: store, error } = await supabase
@@ -109,17 +104,8 @@ const Checkout = () => {
         .single();
 
       if (error) {
-        // Log seulement en développement et rarement
-        if (import.meta.env.DEV && Math.random() < 0.05) {
-          console.error('❌ Erreur récupération boutique par slug:', error);
-        }
-        
         // Si erreur 406, essayer avec une recherche par nom
         if (error.code === '406') {
-          // Log seulement en développement et rarement
-          if (import.meta.env.DEV && Math.random() < 0.05) {
-            console.log('🔄 Tentative avec recherche par nom...');
-          }
           const cleanSlug = storeSlug.replace(/-/g, ' ').replace(/---/g, ' ');
           
           const { data: storesByName, error: nameError } = await supabase
@@ -134,10 +120,6 @@ const Checkout = () => {
               console.error('❌ Erreur recherche par nom:', nameError);
             }
           } else if (storesByName && storesByName.length > 0) {
-            // Log seulement en développement et rarement
-            if (import.meta.env.DEV && Math.random() < 0.05) {
-              console.log('✅ Boutique trouvée par nom:', storesByName[0]);
-            }
             return storesByName[0];
           }
         }
@@ -158,17 +140,11 @@ const Checkout = () => {
           throw new Error('Aucune boutique disponible');
         }
 
-        // Log seulement en développement et rarement
-        if (import.meta.env.DEV && Math.random() < 0.05) {
-          console.log('✅ Boutique fallback:', fallbackStore);
-        }
+
         return fallbackStore;
       }
 
-      // Log seulement en développement et rarement
-      if (import.meta.env.DEV && Math.random() < 0.05) {
-        console.log('✅ Boutique trouvée:', store);
-      }
+
       return store;
     } catch (error) {
       console.error('❌ Erreur récupération boutique:', error);
@@ -188,15 +164,9 @@ const Checkout = () => {
       const session = await getCartSession(effectiveStoreId);
       
       if (session && session.items && session.items.length > 0) {
-        // Log seulement en développement et rarement
-        if (import.meta.env.DEV && Math.random() < 0.05) {
-          console.log('✅ Session de panier trouvée avec', session.items.length, 'articles');
-        }
+        // Session trouvée
       } else {
-        // Log seulement en développement et rarement
-        if (import.meta.env.DEV && Math.random() < 0.05) {
-          console.log('❌ Aucune session de panier valide trouvée');
-        }
+        // Aucune session valide
       }
     } catch (error) {
       console.error('Erreur lors de la vérification de la session:', error);
@@ -216,18 +186,6 @@ const Checkout = () => {
         const storeInfo = await getStoreInfo();
         if (storeInfo) {
           setCurrentStoreId(storeInfo.id);
-          // Log seulement en développement et rarement
-          if (import.meta.env.DEV && Math.random() < 0.05) {
-            console.log('🏪 Store configuré:', storeInfo.id);
-          }
-        }
-        
-        // Si on n'a pas de storeId dans le panier, utiliser celui récupéré
-        if (!cartStoreId && storeInfo) {
-          // Log seulement en développement et rarement
-          if (import.meta.env.DEV && Math.random() < 0.05) {
-            console.log('🔄 Utilisation du storeId récupéré car pas de storeId dans le panier');
-          }
         }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation:', error);
@@ -278,7 +236,7 @@ const Checkout = () => {
   // Debug: Afficher les états de chargement
   useEffect(() => {
     if (import.meta.env.DEV && (isCheckingCart || cartLoading)) {
-      console.log('🔍 États de chargement:', { isCheckingCart, cartLoading, effectiveStoreId });
+  
     }
   }, [isCheckingCart, cartLoading, effectiveStoreId]);
 
@@ -329,7 +287,6 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     if (isProcessing) {
-      console.log('⏳ Checkout déjà en cours, ignoré');
       return;
     }
     
@@ -346,7 +303,7 @@ const Checkout = () => {
         return;
       }
 
-      console.log('🚀 Début du processus de checkout...');
+
 
       const storeInfo = await getStoreInfo();
       if (!storeInfo) {
@@ -367,7 +324,6 @@ const Checkout = () => {
         postal_code: customerInfo.postalCode
       };
 
-      console.log('💾 Sauvegarde session avec infos client...');
       await saveCartSession(finalStoreId, items, customerInfoForSession);
 
       const tempOrderNumber = `TEMP-${Date.now()}`;
@@ -401,7 +357,6 @@ const Checkout = () => {
         }
       };
 
-      console.log('💳 Initialisation paiement Moneroo via Edge Function...');
       const paymentResult = await MonerooService.initializePayment(paymentData);
       
       if (paymentResult.success && paymentResult.data?.checkout_url) {
