@@ -125,7 +125,7 @@ async function handleCheckConfiguration(req: Request, supabaseClient: any) {
       )
     }
 
-    const isConfigured = data[`${provider}_enabled`] && data[`${provider}_api_key`]
+    const isConfigured = data[`${provider}_enabled`] && !!data[`${provider}_api_key`]
 
     return new Response(
       JSON.stringify({ 
