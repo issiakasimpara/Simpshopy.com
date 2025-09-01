@@ -385,9 +385,9 @@ async function handleMonerooPayment(paymentData: any, config: any) {
       JSON.stringify({
         success: true,
         message: 'Payment initialized successfully',
-        checkout_url: data.data?.checkout_url,
-        payment_id: data.data?.id,
-        data: data.data
+        checkout_url: data.data?.checkout_url || data.checkout_url,
+        payment_id: data.data?.id || data.id,
+        data: data.data || data
       }),
       { 
         status: 200, 
@@ -410,7 +410,7 @@ async function handleMonerooPayment(paymentData: any, config: any) {
   }
 }
 
-// Transform checkout data to Moneroo format
+// Transform checkout data to Moneroo format according to Moneroo documentation
 function transformToMonerooFormat(paymentData: any) {
   console.log('Transforming payment data to Moneroo format...')
   
@@ -435,13 +435,13 @@ function transformToMonerooFormat(paymentData: any) {
     ).join(', ')
     const description = `Commande: ${itemDescriptions}${shippingCost > 0 ? ` + Livraison: ${shippingMethod.name || 'Standard'}` : ''}`
     
-    // Build Moneroo payment data
+    // Build Moneroo payment data according to exact documentation format
     const monerooData = {
       amount: totalAmount,
-      currency: paymentData.currency || 'XOF',
+      currency: paymentData.currency, // Use the exact currency from checkout
       description: description,
-      return_url: 'https://simpshopy.com/payment-success', // Fixed URL
-      customer: {
+      return_url: paymentData.return_url || 'https://simpshopy.com/payment-success',
+      customer: paymentData.customer || {
         email: customerInfo.email || 'customer@example.com',
         first_name: customerInfo.firstName || customerInfo.first_name || 'Client',
         last_name: customerInfo.lastName || customerInfo.last_name || 'Anonyme',
@@ -452,6 +452,7 @@ function transformToMonerooFormat(paymentData: any) {
         country: customerInfo.country || undefined,
         zip: customerInfo.zipCode || customerInfo.zip || undefined
       },
+      // Metadata as object according to documentation
       metadata: {
         order_id: paymentData.orderNumber || 'unknown',
         store_id: paymentData.storeId || 'unknown',
@@ -460,7 +461,7 @@ function transformToMonerooFormat(paymentData: any) {
       }
     }
     
-    // Remove undefined values
+    // Remove undefined values from customer object
     Object.keys(monerooData.customer).forEach(key => {
       if (monerooData.customer[key] === undefined) {
         delete monerooData.customer[key]
