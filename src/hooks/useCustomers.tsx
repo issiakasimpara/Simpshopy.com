@@ -31,12 +31,29 @@ export const useCustomers = () => {
     refetch: refetchStats
   } = useQuery({
     queryKey: ['customer-stats', store?.id],
-    queryFn: () => store?.id ? customerService.getCustomerStats(store.id) : Promise.resolve({
-      totalCustomers: 0,
-      newCustomersThisMonth: 0,
-      activeCustomers: 0,
-      averageOrderValue: 0
-    }),
+    queryFn: async () => {
+      if (!store?.id) {
+        return {
+          totalCustomers: 0,
+          newCustomersThisMonth: 0,
+          activeCustomers: 0,
+          averageOrderValue: 0
+        };
+      }
+      
+      try {
+        return await customerService.getCustomerStats(store.id);
+      } catch (error) {
+        console.error('Erreur récupération stats clients:', error);
+        // Retourner des valeurs par défaut en cas d'erreur
+        return {
+          totalCustomers: 0,
+          newCustomersThisMonth: 0,
+          activeCustomers: 0,
+          averageOrderValue: 0
+        };
+      }
+    },
     enabled: !!store?.id,
     // ⚡ OPTIMISATION: Stats moins critiques, polling plus lent
     refetchInterval: 10 * 60 * 1000, // 10 minutes pour les stats
@@ -46,9 +63,17 @@ export const useCustomers = () => {
     refetchOnMount: false,
   });
 
+  // S'assurer que stats n'est jamais undefined
+  const safeStats = stats || {
+    totalCustomers: 0,
+    newCustomersThisMonth: 0,
+    activeCustomers: 0,
+    averageOrderValue: 0
+  };
+
   return {
     customers,
-    stats,
+    stats: safeStats,
     isLoading,
     isLoadingStats,
     error,
