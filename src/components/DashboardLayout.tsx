@@ -303,29 +303,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 w-full">
         {/* Top bar */}
-        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between flex-shrink-0 w-full">
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200"
+            className="lg:hidden hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 p-2"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           
-          <div className="flex items-center space-x-4 ml-auto">
-            <Button variant="ghost" size="sm" className="relative group hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full shadow-lg animate-pulse"></span>
+          <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
+            <Button variant="ghost" size="sm" className="relative group hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 p-2">
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-red-500 rounded-full shadow-lg animate-pulse"></span>
             </Button>
             <OptimizedViewStoreButton />
           </div>
         </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto w-full px-3 sm:px-4 lg:px-6">
           {children}
         </main>
       </div>
