@@ -19,7 +19,7 @@ const DomainConfig = ({ selectedStore }: DomainConfigProps) => {
   const defaultDomain = generateSimpshopySubdomain(selectedStore?.name || 'Ma Boutique');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full">
       {/* URL actuelle de la boutique */}
       <StoreUrlDisplay storeName={selectedStore?.name || 'Ma Boutique'} isTemporary={true} />
 
@@ -27,23 +27,25 @@ const DomainConfig = ({ selectedStore }: DomainConfigProps) => {
       <DefaultDomainCard defaultDomain={defaultDomain} />
 
       {/* Configuration avec Cloudflare */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-purple-600" />
-            Domaines personnalisés
-            <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50">
+      <Card className="w-full">
+        <CardHeader className="px-3 sm:px-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-lg sm:text-xl">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+              Domaines personnalisés
+            </div>
+            <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50 w-fit">
               Système automatique
             </Badge>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Connectez votre propre nom de domaine avec configuration automatique complète
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Alert className="mb-6">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+        <CardContent className="px-3 sm:px-6">
+          <Alert className="mb-4 sm:mb-6">
+            <Info className="h-3 w-3 sm:h-4 sm:w-4" />
+            <AlertDescription className="text-xs sm:text-sm">
               <strong>Système professionnel :</strong> Utilise Cloudflare pour gérer automatiquement 
               DNS, SSL, CDN et proxy vers votre site. Configuration en quelques clics.
             </AlertDescription>

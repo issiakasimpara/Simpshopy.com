@@ -32,10 +32,10 @@ const Domains = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6 xl:space-y-8 w-full px-3 sm:px-4 lg:px-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Configuration des domaines</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Gérez les domaines de votre boutique</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Configuration des domaines</h1>
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-2">Gérez les domaines de votre boutique</p>
         </div>
         
         <DomainConfig selectedStore={store} />
