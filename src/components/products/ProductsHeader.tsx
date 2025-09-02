@@ -66,8 +66,7 @@ const ProductsHeader = ({
               className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950/20 w-full sm:w-auto text-xs sm:text-sm"
             >
               <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Importer CSV</span>
-              <span className="sm:hidden">CSV</span>
+              Importer CSV
             </Button>
             <Button 
               onClick={onAddProduct} 
@@ -75,8 +74,7 @@ const ProductsHeader = ({
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 group w-full sm:w-auto text-xs sm:text-sm"
             >
               <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Ajouter un produit</span>
-              <span className="sm:hidden">Ajouter</span>
+              Ajouter un produit
             </Button>
           </div>
         </div>
