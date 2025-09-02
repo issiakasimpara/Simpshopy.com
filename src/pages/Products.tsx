@@ -74,11 +74,11 @@ const Products = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Header avec gradient moderne */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-blue-600/5 to-indigo-600/5 rounded-3xl" />
-          <div className="relative p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/20 rounded-3xl border border-border/50 shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-blue-600/5 to-indigo-600/5 rounded-2xl sm:rounded-3xl" />
+          <div className="relative p-3 sm:p-4 lg:p-6 xl:p-8 bg-gradient-to-br from-background via-background to-muted/20 rounded-2xl sm:rounded-3xl border border-border/50 shadow-lg">
             <ProductsHeader
               selectedStoreId={selectedStoreId}
               onStoreSelect={setSelectedStoreId}
@@ -93,7 +93,7 @@ const Products = () => {
         {/* Content Area */}
         <div className="relative">
           {selectedStoreId ? (
-            <div className="bg-gradient-to-br from-background via-background to-muted/10 rounded-2xl border border-border/50 shadow-lg p-3 sm:p-4 lg:p-6">
+            <div className="bg-gradient-to-br from-background via-background to-muted/10 rounded-xl sm:rounded-2xl border border-border/50 shadow-lg p-3 sm:p-4 lg:p-6">
               <ProductList
                 products={products}
                 isLoading={isLoading}
@@ -103,7 +103,7 @@ const Products = () => {
               />
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-background via-background to-muted/20 rounded-3xl border border-border/50 shadow-lg p-4 sm:p-6 lg:p-8">
+            <div className="bg-gradient-to-br from-background via-background to-muted/20 rounded-xl sm:rounded-3xl border border-border/50 shadow-lg p-3 sm:p-4 lg:p-6 xl:p-8">
               <NoStoreSelected />
             </div>
           )}

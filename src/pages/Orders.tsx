@@ -99,52 +99,52 @@ const Orders = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="p-2 sm:p-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">
+        <div className="p-2 sm:p-3 lg:p-4">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-200">
             Gestion des commandes
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">
             Visualisez et gérez les commandes et paniers abandonnés de votre boutique
           </p>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 h-10 sm:h-12">
             <TabsTrigger value="orders" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Commandes</span>
               <span className="sm:hidden">Cmd</span>
-              ({orders.length})
+              <span className="hidden xs:inline">({orders.length})</span>
             </TabsTrigger>
             <TabsTrigger value="abandoned" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
               <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Paniers abandonnés</span>
               <span className="sm:hidden">Paniers</span>
-              ({abandonedCarts.length})
+              <span className="hidden xs:inline">({abandonedCarts.length})</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Onglet Commandes */}
-          <TabsContent value="orders" className="space-y-4 sm:space-y-6">
+          <TabsContent value="orders" className="space-y-3 sm:space-y-4 lg:space-y-6">
             {/* Filters */}
             <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="p-3 sm:p-4 lg:p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Input
                       type="text"
                       placeholder="Rechercher une commande..."
                       value={searchTerm}
                       onChange={handleSearchChange}
-                      className="bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                      className="bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
                     <Select onValueChange={handleStatusFilterChange}>
-                      <SelectTrigger className="w-full bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500">
+                      <SelectTrigger className="w-full bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
                         <SelectValue placeholder="Filtrer par statut" />
                       </SelectTrigger>
                       <SelectContent>
@@ -164,45 +164,45 @@ const Orders = () => {
 
             {/* Orders List */}
             {isLoading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement des commandes...</p>
+              <div className="text-center py-8 sm:py-12">
+                <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-600 dark:text-gray-400">Chargement des commandes...</p>
               </div>
             ) : filteredOrders.length === 0 ? (
               <Card className="shadow-lg border-0">
-                <CardContent className="text-center py-16">
-                  <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-2xl w-fit mx-auto mb-6">
-                    <Package className="h-12 w-12 mx-auto text-blue-600" />
+                <CardContent className="text-center py-12 sm:py-16">
+                  <div className="p-3 sm:p-4 bg-blue-100 dark:bg-blue-900/20 rounded-2xl w-fit mx-auto mb-4 sm:mb-6">
+                    <Package className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-blue-600" />
                   </div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">
                     Aucune commande trouvée
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg max-w-md mx-auto">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 text-center max-w-md mx-auto">
                     Il n'y a aucune commande correspondant à vos critères de recherche.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-3 sm:space-y-4 lg:space-y-6">
                 {filteredOrders.map(order => (
                   <Card key={order.id} className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                     <CardContent className="p-3 sm:p-4 lg:p-6">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
-                        <div className="flex-1 space-y-2">
-                          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                        <div className="flex-1 space-y-2 min-w-0">
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 truncate">
                             Commande #{order.order_number}
                           </h3>
-                          <p className="text-gray-600 dark:text-gray-400">
-                            <Calendar className="inline-block h-4 w-4 mr-1" />
+                          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                            <Calendar className="inline-block h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             {new Date(order.created_at).toLocaleDateString()}
                           </p>
-                          <p className="text-gray-600 dark:text-gray-400">
+                          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
                             Client: {order.customer_name || order.customer_email}
                           </p>
                         </div>
                         <div className="text-right">
                           {getOrderStatusBadge(order.status)}
-                          <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                          <p className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200">
                             {formatCurrency(order.total_amount, order.currency)}
                           </p>
                         </div>
