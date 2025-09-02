@@ -3,7 +3,7 @@ import { useAppConfig } from "@/hooks/useAppConfig";
 import { cn } from "@/lib/utils";
 
 interface AppLogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
   className?: string;
   textClassName?: string;
@@ -22,29 +22,45 @@ const AppLogo = ({
   const { appName } = useAppConfig();
 
   const sizeClasses = {
+    xs: {
+      container: "flex items-center space-x-1.5",
+      icon: "h-3 w-3",
+      logo: "h-4 w-4",
+      iconContainer: "p-1 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md",
+      logoContainer: "p-0.5 bg-white rounded-md shadow-sm",
+      text: "text-sm font-bold"
+    },
     sm: {
       container: "flex items-center space-x-2",
       icon: "h-4 w-4",
       logo: "h-6 w-6",
       iconContainer: "p-1.5 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg",
       logoContainer: "p-1 bg-white rounded-lg shadow-md",
-      text: "text-lg font-bold"
+      text: "text-base sm:text-lg font-bold"
     },
     md: {
-      container: "flex items-center space-x-3",
-      icon: "h-6 w-6",
-      logo: "h-8 w-8",
-      iconContainer: "p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl",
-      logoContainer: "p-1.5 bg-white rounded-xl shadow-lg",
-      text: "text-2xl font-bold"
+      container: "flex items-center space-x-2 sm:space-x-3",
+      icon: "h-5 w-5 sm:h-6 sm:w-6",
+      logo: "h-6 w-6 sm:h-8 sm:w-8",
+      iconContainer: "p-1.5 sm:p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg sm:rounded-xl",
+      logoContainer: "p-1 sm:p-1.5 bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg",
+      text: "text-lg sm:text-xl lg:text-2xl font-bold"
     },
     lg: {
-      container: "flex items-center space-x-4",
-      icon: "h-8 w-8",
-      logo: "h-10 w-10",
-      iconContainer: "p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl",
-      logoContainer: "p-2 bg-white rounded-2xl shadow-xl",
-      text: "text-3xl font-bold"
+      container: "flex items-center space-x-3 sm:space-x-4",
+      icon: "h-6 w-6 sm:h-8 sm:w-8",
+      logo: "h-8 w-8 sm:h-10 sm:w-10",
+      iconContainer: "p-2 sm:p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl sm:rounded-2xl",
+      logoContainer: "p-1.5 sm:p-2 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl",
+      text: "text-xl sm:text-2xl lg:text-3xl font-bold"
+    },
+    xl: {
+      container: "flex items-center space-x-4 sm:space-x-6",
+      icon: "h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12",
+      logo: "h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16",
+      iconContainer: "p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl lg:rounded-3xl",
+      logoContainer: "p-2 sm:p-3 lg:p-4 bg-white rounded-2xl lg:rounded-3xl shadow-xl lg:shadow-2xl",
+      text: "text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold"
     }
   };
 

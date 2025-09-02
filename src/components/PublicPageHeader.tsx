@@ -25,7 +25,7 @@ const PublicPageHeader: React.FC<PublicPageHeaderProps> = ({ activePage = "home"
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <AppLogo />
+          <AppLogo size="sm" />
           
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">

@@ -613,8 +613,8 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
             <div>
-              <AppLogo />
-              <p className="text-gray-400 mt-4 sm:mt-6 leading-relaxed text-sm sm:text-lg">
+              <AppLogo size="sm" />
+              <p className="text-gray-400 mt-4 sm:mt-6 leading-relaxed text-sm sm:text-base lg:text-lg">
                 La plateforme tout en un pour vendre vos produits digitaux.
               </p>
             </div>
