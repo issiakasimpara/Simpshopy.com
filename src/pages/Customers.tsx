@@ -84,28 +84,48 @@ const Customers = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {Object.entries(stats).map(([key, value]) => (
-            <Card key={key} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-4">
-                <CardTitle className="text-xs sm:text-sm font-medium capitalize">
-                  {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                </CardTitle>
-                <div className="h-4 w-4 text-muted-foreground">
-                  {key === 'totalCustomers' && <Users className="h-4 w-4" />}
-                  {key === 'activeCustomers' && <TrendingUp className="h-4 w-4" />}
-                  {key === 'totalRevenue' && <DollarSign className="h-4 w-4" />}
-                  {key === 'averageOrderValue' && <ShoppingCart className="h-4 w-4" />}
-                </div>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-4">
-                <div className="text-lg sm:text-2xl font-bold">
-                  {key.includes('Revenue') || key.includes('Value') 
-                    ? formatCurrency(value) 
-                    : value.toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {isLoadingStats ? (
+            // Loading state pour les stats
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-4">
+                  <div className="h-4 w-4 bg-muted animate-pulse rounded"></div>
+                  <div className="h-4 w-4 bg-muted animate-pulse rounded"></div>
+                </CardHeader>
+                <CardContent className="px-3 sm:px-4">
+                  <div className="h-6 bg-muted animate-pulse rounded"></div>
+                </CardContent>
+              </Card>
+            ))
+          ) : stats && Object.entries(stats).length > 0 ? (
+            Object.entries(stats).map(([key, value]) => (
+              <Card key={key} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium capitalize">
+                    {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                  </CardTitle>
+                  <div className="h-4 w-4 text-muted-foreground">
+                    {key === 'totalCustomers' && <Users className="h-4 w-4" />}
+                    {key === 'activeCustomers' && <TrendingUp className="h-4 w-4" />}
+                    {key === 'totalRevenue' && <DollarSign className="h-4 w-4" />}
+                    {key === 'averageOrderValue' && <ShoppingCart className="h-4 w-4" />}
+                  </div>
+                </CardHeader>
+                <CardContent className="px-3 sm:px-4">
+                  <div className="text-lg sm:text-2xl font-bold">
+                    {key.includes('Revenue') || key.includes('Value') 
+                      ? formatCurrency(value) 
+                      : value.toLocaleString()}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            // Fallback si pas de stats
+            <div className="col-span-full text-center py-8 text-muted-foreground">
+              Aucune statistique disponible
+            </div>
+          )}
         </div>
 
         {/* Main Content Grid */}
