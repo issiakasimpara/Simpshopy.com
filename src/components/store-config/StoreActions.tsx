@@ -67,7 +67,7 @@ const StoreActions = ({
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button 
               variant={viewMode === 'template' ? 'default' : 'outline'} 
               size="sm"
