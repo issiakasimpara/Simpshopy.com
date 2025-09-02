@@ -111,20 +111,20 @@ const DashboardStats = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Cartes principales - 5 cartes sur une ligne */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="space-y-3 sm:space-y-4 w-full">
+      {/* Cartes principales - Responsive sur mobile */}
+      <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 w-full">
         {mainCards.map((card) => (
-          <Card key={card.title} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">{card.title}</CardTitle>
-              <card.icon className="h-4 w-4 text-muted-foreground" />
+          <Card key={card.title} className="hover:shadow-lg transition-shadow w-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-2 sm:px-3 lg:px-6">
+              <CardTitle className="text-xs sm:text-sm font-medium truncate">{card.title}</CardTitle>
+              <card.icon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <div className="text-xl sm:text-2xl font-bold">{card.value}</div>
+            <CardContent className="px-2 sm:px-3 lg:px-6">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold truncate">{card.value}</div>
               <div className="flex items-center text-xs text-muted-foreground">
-                {card.trend === "up" && <TrendingUp className="h-3 w-3 mr-1 text-green-500" />}
-                {card.trend === "down" && <TrendingDown className="h-3 w-3 mr-1 text-red-500" />}
+                {card.trend === "up" && <TrendingUp className="h-2 w-2 sm:h-3 sm:w-3 mr-1 text-green-500 flex-shrink-0" />}
+                {card.trend === "down" && <TrendingDown className="h-2 w-2 sm:h-3 sm:w-3 mr-1 text-red-500 flex-shrink-0" />}
                 <span className="truncate">{card.change}</span>
               </div>
             </CardContent>
@@ -134,31 +134,29 @@ const DashboardStats = () => {
 
       {/* Carte visiteurs en ligne - Pleine largeur */}
       <div className="w-full">
-        <Card className="hover:shadow-lg transition-shadow relative">
+        <Card className="hover:shadow-lg transition-shadow relative w-full">
           {/* Indicateur en ligne animé avec état du tracking */}
-          <div className="absolute top-3 right-3 flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${visitorCard.status.indicatorClass}`}></div>
-            <span className={`text-xs font-medium ${visitorCard.status.statusClass}`}>
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center space-x-1 sm:space-x-2">
+            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${visitorCard.status.indicatorClass}`}></div>
+            <span className={`text-xs font-medium ${visitorCard.status.statusClass} hidden sm:inline`}>
               {visitorCard.status.statusText}
             </span>
           </div>
           
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-8">
-            <CardTitle className="text-sm sm:text-base font-medium">{visitorCard.title}</CardTitle>
-            <visitorCard.icon className="h-5 w-5 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-2 sm:px-3 lg:px-6 pt-6 sm:pt-8">
+            <CardTitle className="text-xs sm:text-sm lg:text-base font-medium truncate">{visitorCard.title}</CardTitle>
+            <visitorCard.icon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-2xl sm:text-3xl font-bold">{visitorCard.value}</div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              {visitorCard.trend === "up" && <TrendingUp className="h-4 w-4 mr-1 text-green-500" />}
-              {visitorCard.trend === "down" && <TrendingDown className="h-4 w-4 mr-1 text-red-500" />}
+          <CardContent className="px-2 sm:px-3 lg:px-6">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{visitorCard.value}</div>
+            <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+              {visitorCard.trend === "up" && <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-green-500 flex-shrink-0" />}
+              {visitorCard.trend === "down" && <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-red-500 flex-shrink-0" />}
               <span className="truncate">{visitorCard.change}</span>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      
     </div>
   );
 };
