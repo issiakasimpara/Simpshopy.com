@@ -22,15 +22,13 @@ const DashboardHeader = () => {
           <Button variant="outline" size="sm" asChild className="group border-2 hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-300 hover:scale-105 text-xs sm:text-sm w-full sm:w-auto">
             <Link to="/store-config">
               <Store className="mr-1 sm:mr-2 lg:mr-3 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 group-hover:text-blue-600 transition-colors" />
-              <span className="hidden sm:inline">Configurer ma boutique</span>
-              <span className="sm:hidden">Configurer boutique</span>
+              Configurer ma boutique
             </Link>
           </Button>
           <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-105 text-xs sm:text-sm w-full sm:w-auto">
             <Link to="/products">
               <Plus className="mr-1 sm:mr-2 lg:mr-3 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Ajouter un produit</span>
-              <span className="sm:hidden">Ajouter produit</span>
+              Ajouter un produit
             </Link>
           </Button>
         </div>
