@@ -15,38 +15,40 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 
 ### 1. **Page dédiée Moneroo** (`/payments/moneroo`)
 - **Logo affiché** : Dans l'en-tête de la page de configuration
-- **Taille** : 32x32px (w-8 h-8)
-- **Style** : Fond blanc avec bordure grise, coins arrondis
+- **Taille** : 40x40px (w-10 h-10)
+- **Style** : Fond blanc avec bordure verte (border-2 border-green-500), coins arrondis
 - **Position** : À gauche du titre "Configuration Moneroo"
 
 ### 2. **Carte de paiement** (Page principale `/payments`)
 - **Logo affiché** : Dans la carte PaymentProviderCard
-- **Taille** : 28x28px (w-7 h-7)
-- **Style** : Intégré dans le cercle coloré vert (bg-green-500)
+- **Taille** : 40x40px (w-10 h-10)
+- **Style** : Fond blanc avec bordure verte (border-2 border-green-500)
 - **Logique** : Affichage conditionnel uniquement pour Moneroo
 
 ## 🎯 Code implémenté
 
 ### PaymentProviderCard.tsx
 ```tsx
-{provider.id === 'moneroo' ? (
-  <img 
-    src="/logomoneroo.png" 
-    alt="Moneroo Logo" 
-    className="w-7 h-7 object-contain"
-  />
-) : (
-  <span>{provider.icon}</span>
-)}
+<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? 'bg-white border-2 border-green-500' : provider.color}`}>
+  {provider.id === 'moneroo' ? (
+    <img 
+      src="/logomoneroo.png" 
+      alt="Moneroo Logo" 
+      className="w-10 h-10 object-contain"
+    />
+  ) : (
+    <span>{provider.icon}</span>
+  )}
+</div>
 ```
 
 ### MonerooPayment.tsx
 ```tsx
-<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
+<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border-2 border-green-500 overflow-hidden">
   <img 
     src="/logomoneroo.png" 
     alt="Moneroo Logo" 
-    className="w-8 h-8 object-contain"
+    className="w-10 h-10 object-contain"
   />
 </div>
 ```
@@ -54,13 +56,13 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 ## 🎨 Design et style
 
 ### Carte de paiement
-- **Fond** : Cercle vert (bg-green-500)
-- **Logo** : Blanc avec object-contain pour préserver les proportions
+- **Fond** : Cercle blanc avec bordure verte (border-2 border-green-500)
+- **Logo** : Taille 40x40px avec object-contain pour préserver les proportions
 - **Taille** : 48x48px (w-12 h-12)
 
 ### Page dédiée
-- **Fond** : Cercle blanc avec bordure grise
-- **Logo** : Taille 32x32px centré
+- **Fond** : Cercle blanc avec bordure verte (border-2 border-green-500)
+- **Logo** : Taille 40x40px centré
 - **Style** : Coins arrondis et overflow hidden
 
 ## 🚀 Avantages de cette approche
@@ -70,6 +72,8 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 3. **Flexibilité** : Affichage conditionnel selon le fournisseur
 4. **Performance** : Image statique dans le dossier public
 5. **Maintenance** : Facile de remplacer le logo si nécessaire
+6. **Visibilité optimale** : Logo plus grand (40x40px) pour un meilleur rendu
+7. **Couleur officielle** : Bordure verte qui correspond à l'identité Moneroo
 
 ## 🔄 Évolutions futures
 
@@ -91,3 +95,5 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 - ✅ Responsive sur tous les écrans
 - ✅ Pas d'erreurs de lint
 - ✅ Application fonctionne correctement
+- ✅ Logo remplit bien le contour (40x40px dans un conteneur 48x48px)
+- ✅ Bordure verte officielle Moneroo

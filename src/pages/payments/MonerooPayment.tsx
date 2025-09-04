@@ -131,11 +131,11 @@ const MonerooPayment = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border-2 border-green-500 overflow-hidden">
                 <img 
                   src="/logomoneroo.png" 
                   alt="Moneroo Logo" 
-                  className="w-8 h-8 object-contain"
+                  className="w-10 h-10 object-contain"
                 />
               </div>
               <div>
