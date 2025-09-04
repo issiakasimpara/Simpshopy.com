@@ -131,11 +131,15 @@ const PayPalPayment = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                🔵
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center">
+                <img 
+                  src="/PayPal.svg.webp" 
+                  alt="PayPal Logo" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div>
-                <CardTitle className="text-xl">PayPal</CardTitle>
+                <CardTitle className="text-xl">Configuration</CardTitle>
                 <p className="text-muted-foreground">Paiements sécurisés via PayPal</p>
               </div>
               <div className="ml-auto">
