@@ -55,7 +55,15 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
     >
       <div className="flex items-center gap-3 mb-3 w-full">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl ${provider.color}`}>
-          <span>{provider.icon}</span>
+          {provider.id === 'moneroo' ? (
+            <img 
+              src="/logomoneroo.png" 
+              alt="Moneroo Logo" 
+              className="w-7 h-7 object-contain"
+            />
+          ) : (
+            <span>{provider.icon}</span>
+          )}
         </div>
         <div className="ml-auto">
           {getStatusBadge()}

@@ -131,8 +131,12 @@ const MonerooPayment = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white text-2xl">
-                📱
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
+                <img 
+                  src="/logomoneroo.png" 
+                  alt="Moneroo Logo" 
+                  className="w-8 h-8 object-contain"
+                />
               </div>
               <div>
                 <CardTitle className="text-xl">Moneroo</CardTitle>
