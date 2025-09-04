@@ -56,12 +56,12 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 ## 🎨 Design et style
 
 ### Carte de paiement
-- **Fond** : Cercle blanc avec bordure verte (border-2 border-green-500)
+- **Fond** : Cercle blanc avec bordure jaune (border-2 border-yellow-500)
 - **Logo** : Taille 40x40px avec object-contain pour préserver les proportions
 - **Taille** : 48x48px (w-12 h-12)
 
 ### Page dédiée
-- **Fond** : Cercle blanc avec bordure verte (border-2 border-green-500)
+- **Fond** : Cercle blanc avec bordure jaune (border-2 border-yellow-500)
 - **Logo** : Taille 40x40px centré
 - **Style** : Coins arrondis et overflow hidden
 
@@ -73,7 +73,7 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 4. **Performance** : Image statique dans le dossier public
 5. **Maintenance** : Facile de remplacer le logo si nécessaire
 6. **Visibilité optimale** : Logo plus grand (40x40px) pour un meilleur rendu
-7. **Couleur officielle** : Bordure verte qui correspond à l'identité Moneroo
+7. **Couleur harmonieuse** : Bordure jaune qui s'harmonise avec le logo Moneroo
 
 ## 🔄 Évolutions futures
 
@@ -96,4 +96,4 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 - ✅ Pas d'erreurs de lint
 - ✅ Application fonctionne correctement
 - ✅ Logo remplit bien le contour (40x40px dans un conteneur 48x48px)
-- ✅ Bordure verte officielle Moneroo
+- ✅ Bordure jaune harmonieuse avec le logo Moneroo
