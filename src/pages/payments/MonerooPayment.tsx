@@ -131,13 +131,11 @@ const MonerooPayment = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border-2 border-yellow-500 overflow-hidden">
-                <img 
-                  src="/moneroo-logo.svg" 
-                  alt="Moneroo Logo" 
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
+              <img 
+                src="/moneroo-logo.svg" 
+                alt="Moneroo Logo" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
                 <CardTitle className="text-xl">Moneroo</CardTitle>
                 <p className="text-muted-foreground">Paiements mobiles en Afrique de l'Ouest</p>

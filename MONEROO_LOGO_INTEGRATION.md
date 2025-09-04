@@ -15,14 +15,14 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 
 ### 1. **Page dédiée Moneroo** (`/payments/moneroo`)
 - **Logo affiché** : Dans l'en-tête de la page de configuration
-- **Taille** : 40x40px (w-10 h-10)
-- **Style** : Fond blanc avec bordure verte (border-2 border-green-500), coins arrondis
+- **Taille** : 48x48px (w-12 h-12)
+- **Style** : Logo SVG affiché directement, sans conteneur ni bordure
 - **Position** : À gauche du titre "Configuration Moneroo"
 
 ### 2. **Carte de paiement** (Page principale `/payments`)
 - **Logo affiché** : Dans la carte PaymentProviderCard
-- **Taille** : 40x40px (w-10 h-10)
-- **Style** : Fond blanc avec bordure verte (border-2 border-green-500)
+- **Taille** : 48x48px (w-12 h-12)
+- **Style** : Logo SVG affiché directement, sans conteneur ni bordure
 - **Logique** : Affichage conditionnel uniquement pour Moneroo
 
 ## 🎯 Code implémenté
