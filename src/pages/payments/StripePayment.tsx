@@ -134,11 +134,15 @@ const StripePayment = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                💳
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center">
+                <img 
+                  src="/Stripe_Logo,_revised_2016.svg.png" 
+                  alt="Stripe Logo" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div>
-                <CardTitle className="text-xl">Stripe</CardTitle>
+                <CardTitle className="text-xl">Configuration</CardTitle>
                 <p className="text-muted-foreground">Paiements par carte bancaire, Apple Pay, Google Pay</p>
               </div>
               <div className="ml-auto">
