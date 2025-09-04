@@ -134,7 +134,7 @@ const MonerooPayment = () => {
               <img 
                 src="/moneroo-logo.svg" 
                 alt="Moneroo Logo" 
-                className="w-20 h-20 object-contain"
+                className="w-24 h-24 object-contain"
               />
               <div>
                 <CardTitle className="text-xl">Configuration</CardTitle>

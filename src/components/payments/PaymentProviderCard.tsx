@@ -54,12 +54,12 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
       style={{ minHeight: '220px' }}
     >
       <div className="flex items-center gap-3 mb-3 w-full">
-        <div className={`w-20 h-20 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? '' : provider.color}`}>
+        <div className={`w-24 h-24 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? '' : provider.color}`}>
           {provider.id === 'moneroo' ? (
             <img 
               src="/moneroo-logo.svg" 
               alt="Moneroo Logo" 
-              className="w-20 h-20 object-contain"
+              className="w-24 h-24 object-contain"
             />
           ) : (
             <span>{provider.icon}</span>
@@ -71,7 +71,7 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
       </div>
       
       <div className="font-semibold text-lg sm:text-xl mb-2 group-hover:text-blue-700 transition-colors">
-        {provider.name}
+        {provider.id === 'moneroo' ? '' : provider.name}
       </div>
       
       <div className="text-sm text-muted-foreground mb-4 line-clamp-2">
