@@ -83,7 +83,7 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
       </div>
       
       <div className="font-semibold text-lg sm:text-xl mb-2 group-hover:text-blue-700 transition-colors">
-        {provider.id === 'moneroo' || provider.id === 'paypal' ? '' : provider.name}
+        {provider.id === 'moneroo' || provider.id === 'paypal' || provider.id === 'stripe' ? '' : provider.name}
       </div>
       
       <div className="text-sm text-muted-foreground mb-4 line-clamp-2">
