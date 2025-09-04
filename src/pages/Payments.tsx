@@ -5,50 +5,30 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useStores } from '@/hooks/useStores';
 import { usePaymentConfigurations } from '@/hooks/usePaymentConfigurations';
+import PaymentProviderCard from '@/components/payments/PaymentProviderCard';
 import { 
   CreditCard, 
   Settings,
   CheckCircle, 
   XCircle,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  TestTube,
-  Shield,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 
 const Payments = () => {
   const navigate = useNavigate();
   const { stores, store: currentStore } = useStores();
-  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   
   const {
     providers,
     loading,
-    saving,
-    testing,
     configuredProviders,
-    enabledProviders,
-    saveConfiguration,
-    testProvider,
-    toggleProvider,
-    updateProvider
+    enabledProviders
   } = usePaymentConfigurations(currentStore?.id);
-
-  const toggleSecretVisibility = (providerId: string) => {
-    setShowSecrets(prev => ({
-      ...prev,
-      [providerId]: !prev[providerId]
-    }));
-  };
 
   if (!currentStore) {
     return (
@@ -107,7 +87,7 @@ const Payments = () => {
           </AlertDescription>
         </Alert>
 
-        {/* Statut global */}
+        {/* Statut global - GARDÉ INTACT */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -158,7 +138,7 @@ const Payments = () => {
           </Card>
         </div>
 
-        {/* Configuration des fournisseurs */}
+        {/* Configuration des fournisseurs - REMPLACÉ PAR DES CARTES */}
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList>
             <TabsTrigger value="all">Tous les fournisseurs</TabsTrigger>
@@ -167,206 +147,30 @@ const Payments = () => {
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">
-            {providers.map((provider) => (
-              <Card key={provider.id} className="overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
-                        <span className="text-lg">{provider.icon}</span>
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{provider.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{provider.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {provider.isConfigured && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Configuré
-                        </Badge>
-                      )}
-                      <Switch
-                        checked={provider.isEnabled}
-                        onCheckedChange={(enabled) => toggleProvider(provider.id, enabled)}
-                        disabled={!provider.isConfigured}
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* Informations du fournisseur */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <Label className="font-medium">Frais</Label>
-                      <p className="text-muted-foreground">{provider.fees}</p>
-                    </div>
-                    <div>
-                      <Label className="font-medium">Devises supportées</Label>
-                      <p className="text-muted-foreground">{provider.supportedCurrencies.join(', ')}</p>
-                    </div>
-                    <div>
-                      <Label className="font-medium">Mode</Label>
-                      <p className="text-muted-foreground">
-                        {provider.isTestMode ? 'Test' : 'Production'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Configuration */}
-                  <div className="space-y-4 border-t pt-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="font-medium">Configuration API</Label>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => testProvider(provider.id)}
-                          disabled={!provider.apiKey || testing === provider.id}
-                        >
-                          <TestTube className="w-4 h-4 mr-2" />
-                          {testing === provider.id ? 'Test en cours...' : 'Tester'}
-                        </Button>
-                        {provider.setupUrl && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(provider.setupUrl, '_blank')}
-                          >
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Setup
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor={`${provider.id}-api-key`}>
-                          Clé API {provider.isTestMode ? '(Test)' : '(Production)'}
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id={`${provider.id}-api-key`}
-                            type={showSecrets[provider.id] ? 'text' : 'password'}
-                            value={provider.apiKey}
-                            onChange={(e) => {
-                              updateProvider(provider.id, { apiKey: e.target.value });
-                            }}
-                            placeholder="pk_test_... ou pk_live_..."
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3"
-                            onClick={() => toggleSecretVisibility(provider.id)}
-                          >
-                            {showSecrets[provider.id] ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-
-                      {provider.secretKey !== undefined && (
-                        <div className="space-y-2">
-                          <Label htmlFor={`${provider.id}-secret-key`}>
-                            Clé secrète {provider.isTestMode ? '(Test)' : '(Production)'}
-                          </Label>
-                          <div className="relative">
-                            <Input
-                              id={`${provider.id}-secret-key`}
-                              type={showSecrets[provider.id] ? 'text' : 'password'}
-                              value={provider.secretKey || ''}
-                              onChange={(e) => {
-                                updateProvider(provider.id, { secretKey: e.target.value });
-                              }}
-                              placeholder="sk_test_... ou sk_live_..."
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="absolute right-0 top-0 h-full px-3"
-                              onClick={() => toggleSecretVisibility(provider.id)}
-                            >
-                              {showSecrets[provider.id] ? (
-                                <EyeOff className="h-4 w-4" />
-                              ) : (
-                                <Eye className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`${provider.id}-webhook`}>
-                        URL Webhook (optionnel)
-                      </Label>
-                      <Input
-                        id={`${provider.id}-webhook`}
-                        value={provider.webhookUrl || ''}
-                        onChange={(e) => {
-                          updateProvider(provider.id, { webhookUrl: e.target.value });
-                        }}
-                        placeholder="https://votre-domaine.com/webhook/paiement"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={provider.isTestMode}
-                          onCheckedChange={(testMode) => {
-                            updateProvider(provider.id, { isTestMode: testMode });
-                          }}
-                        />
-                        <Label>Mode test</Label>
-                      </div>
-                      
-                      <Button
-                        onClick={() => saveConfiguration(provider.id, provider)}
-                        disabled={saving || !provider.apiKey}
-                      >
-                        {saving ? 'Sauvegarde...' : 'Sauvegarder'}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {providers.map((provider) => (
+                <PaymentProviderCard
+                  key={provider.id}
+                  provider={provider}
+                  isConfigured={provider.isConfigured}
+                  isEnabled={provider.isEnabled}
+                />
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="configured" className="space-y-4">
             {configuredProviders.length > 0 ? (
-              configuredProviders.map((provider) => (
-                <Card key={provider.id} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
-                          <span className="text-lg">{provider.icon}</span>
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{provider.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">{provider.description}</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Configuré
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {configuredProviders.map((provider) => (
+                  <PaymentProviderCard
+                    key={provider.id}
+                    provider={provider}
+                    isConfigured={true}
+                    isEnabled={provider.isEnabled}
+                  />
+                ))}
+              </div>
             ) : (
               <Card>
                 <CardContent className="flex items-center justify-center py-8">
@@ -384,27 +188,16 @@ const Payments = () => {
 
           <TabsContent value="active" className="space-y-4">
             {enabledProviders.length > 0 ? (
-              enabledProviders.map((provider) => (
-                <Card key={provider.id} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${provider.color}`}>
-                          <span className="text-lg">{provider.icon}</span>
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{provider.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">{provider.description}</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">
-                        <Zap className="w-3 h-3 mr-1" />
-                        Actif
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {enabledProviders.map((provider) => (
+                  <PaymentProviderCard
+                    key={provider.id}
+                    provider={provider}
+                    isConfigured={provider.isConfigured}
+                    isEnabled={true}
+                  />
+                ))}
+              </div>
             ) : (
               <Card>
                 <CardContent className="flex items-center justify-center py-8">

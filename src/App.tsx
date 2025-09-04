@@ -35,6 +35,9 @@ import Categories from './pages/Categories';
 import StoreConfig from './pages/StoreConfig';
 import Shipping from './pages/MarketsShipping';
 import Payments from './pages/Payments';
+import StripePayment from './pages/payments/StripePayment';
+import PayPalPayment from './pages/payments/PayPalPayment';
+import MonerooPayment from './pages/payments/MonerooPayment';
 import Themes from './pages/Themes';
 import Domains from './pages/Domains';
 import PopupsReductions from './pages/PopupsReductions';
@@ -248,6 +251,21 @@ function App() {
                   <Route path="/payments" element={
                     <ProtectedRoute>
                       <Payments />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/payments/stripe" element={
+                    <ProtectedRoute>
+                      <StripePayment />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/payments/paypal" element={
+                    <ProtectedRoute>
+                      <PayPalPayment />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/payments/moneroo" element={
+                    <ProtectedRoute>
+                      <MonerooPayment />
                     </ProtectedRoute>
                   } />
                   <Route path="/popups-reductions" element={
