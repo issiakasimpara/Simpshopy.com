@@ -54,7 +54,7 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
       style={{ minHeight: '220px' }}
     >
       <div className="flex items-center gap-3 mb-3 w-full">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? 'bg-white border-2 border-green-500' : provider.color}`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? 'bg-white border-2 border-yellow-500' : provider.color}`}>
           {provider.id === 'moneroo' ? (
             <img 
               src="/logomoneroo.png" 

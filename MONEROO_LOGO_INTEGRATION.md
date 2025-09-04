@@ -29,7 +29,7 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 
 ### PaymentProviderCard.tsx
 ```tsx
-<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? 'bg-white border-2 border-green-500' : provider.color}`}>
+<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' ? 'bg-white border-2 border-yellow-500' : provider.color}`}>
   {provider.id === 'moneroo' ? (
     <img 
       src="/logomoneroo.png" 
@@ -44,7 +44,7 @@ Le logo officiel de Moneroo a été intégré dans l'application pour remplacer 
 
 ### MonerooPayment.tsx
 ```tsx
-<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border-2 border-green-500 overflow-hidden">
+<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border-2 border-yellow-500 overflow-hidden">
   <img 
     src="/logomoneroo.png" 
     alt="Moneroo Logo" 
