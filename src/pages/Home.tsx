@@ -160,12 +160,12 @@ const Home = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-gray-900 mb-6 sm:mb-8 leading-tight px-4">
               La plateforme tout en un pour{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600">
-                vendre vos produits digitaux
+                vendre vos produits
               </span>
             </h1>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed font-light px-4">
-              Créez et vendez vos produits digitaux partout dans le monde sans stress. 
+              Créez et vendez vos produits partout dans le monde sans stress. 
               De la mise en ligne au reversement de vos gains, nous gérons tout.
             </p>
             
@@ -594,7 +594,7 @@ const Home = () => {
         </div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white mb-6 sm:mb-8 px-4">
-            Commencez à vendre des produits digitaux dès aujourd'hui !
+            Commencez à vendre des produits dès aujourd'hui !
           </h2>
           <p className="text-lg sm:text-xl text-white/90 mb-8 sm:mb-12 leading-relaxed px-4">
             Rejoignez des milliers d'entrepreneurs qui font confiance à Simpshopy
@@ -615,7 +615,7 @@ const Home = () => {
             <div>
               <AppLogo size="sm" />
               <p className="text-gray-400 mt-4 sm:mt-6 leading-relaxed text-sm sm:text-base lg:text-lg">
-                La plateforme tout en un pour vendre vos produits digitaux.
+                La plateforme tout en un pour vendre vos produits.
               </p>
             </div>
             <div>
@@ -708,7 +708,7 @@ const BoutiqueIllustration = () => (
           <div className="flex items-center space-x-2 sm:space-x-3 p-1 sm:p-2 bg-gray-50 rounded-lg">
             <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded"></div>
             <div className="flex-1">
-              <div className="text-xs font-medium text-gray-800">Produit Digital #1</div>
+              <div className="text-xs font-medium text-gray-800">Produit #1</div>
               <div className="text-xs text-gray-500">€29.99</div>
             </div>
             <div className="text-xs text-green-600 font-medium">+12</div>
