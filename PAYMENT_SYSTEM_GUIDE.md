@@ -51,17 +51,6 @@ Le script crée :
 - **Devises** : XOF, XAF, NGN
 - **Setup** : https://dashboard.moneroo.com/
 
-### 4. **Google Pay** 🤖
-- **Description** : Paiements rapides via Google Pay
-- **Frais** : Intégré avec Stripe
-- **Devises** : EUR, USD, GBP
-- **Prérequis** : Stripe configuré
-
-### 5. **Apple Pay** 🍎
-- **Description** : Paiements sécurisés via Apple Pay
-- **Frais** : Intégré avec Stripe
-- **Devises** : EUR, USD, GBP
-- **Prérequis** : Stripe configuré
 
 ## 🔧 Configuration
 

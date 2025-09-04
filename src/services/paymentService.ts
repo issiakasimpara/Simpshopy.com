@@ -96,31 +96,6 @@ export class PaymentService {
       });
     }
 
-    // Google Pay (nécessite Stripe)
-    if (config.googlepay_enabled && config.stripe_enabled && config.stripe_api_key) {
-      providers.push({
-        id: 'googlepay',
-        name: 'Google Pay',
-        description: 'Paiement rapide via Google Pay',
-        icon: '🤖',
-        color: 'bg-gray-800',
-        isEnabled: true,
-        isConfigured: true
-      });
-    }
-
-    // Apple Pay (nécessite Stripe)
-    if (config.applepay_enabled && config.stripe_enabled && config.stripe_api_key) {
-      providers.push({
-        id: 'applepay',
-        name: 'Apple Pay',
-        description: 'Paiement sécurisé via Apple Pay',
-        icon: '🍎',
-        color: 'bg-black',
-        isEnabled: true,
-        isConfigured: true
-      });
-    }
 
     return providers;
   }

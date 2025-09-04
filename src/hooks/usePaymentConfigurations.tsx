@@ -28,17 +28,6 @@ export interface PaymentConfiguration {
   moneroo_secret_key: string | null;
   moneroo_webhook_url: string | null;
   
-  // Google Pay
-  googlepay_enabled: boolean;
-  googlepay_test_mode: boolean;
-  googlepay_api_key: string | null;
-  googlepay_webhook_url: string | null;
-  
-  // Apple Pay
-  applepay_enabled: boolean;
-  applepay_test_mode: boolean;
-  applepay_api_key: string | null;
-  applepay_webhook_url: string | null;
   
   created_at: string;
   updated_at: string;
@@ -92,26 +81,6 @@ export const PAYMENT_PROVIDERS: Omit<PaymentProviderConfig, 'isEnabled' | 'isCon
     fees: '1.5% par transaction',
     setupUrl: 'https://dashboard.moneroo.com/'
   },
-  {
-    id: 'googlepay',
-    name: 'Google Pay',
-    description: 'Paiements rapides via Google Pay',
-    icon: '🤖',
-    color: 'bg-gray-800',
-    supportedCurrencies: ['EUR', 'USD', 'GBP'],
-    fees: 'Intégré avec Stripe',
-    setupUrl: 'https://developers.google.com/pay/api'
-  },
-  {
-    id: 'applepay',
-    name: 'Apple Pay',
-    description: 'Paiements sécurisés via Apple Pay',
-    icon: '🍎',
-    color: 'bg-black',
-    supportedCurrencies: ['EUR', 'USD', 'GBP'],
-    fees: 'Intégré avec Stripe',
-    setupUrl: 'https://developer.apple.com/apple-pay/'
-  }
 ];
 
 interface UsePaymentConfigurationsReturn {

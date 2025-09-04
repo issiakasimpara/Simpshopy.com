@@ -26,17 +26,6 @@ CREATE TABLE IF NOT EXISTS payment_configurations (
     moneroo_secret_key TEXT,
     moneroo_webhook_url TEXT,
     
-    -- Google Pay Configuration
-    googlepay_enabled BOOLEAN DEFAULT false,
-    googlepay_test_mode BOOLEAN DEFAULT true,
-    googlepay_api_key TEXT,
-    googlepay_webhook_url TEXT,
-    
-    -- Apple Pay Configuration
-    applepay_enabled BOOLEAN DEFAULT false,
-    applepay_test_mode BOOLEAN DEFAULT true,
-    applepay_api_key TEXT,
-    applepay_webhook_url TEXT,
     
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
