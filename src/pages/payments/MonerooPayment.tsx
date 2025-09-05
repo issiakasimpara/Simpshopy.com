@@ -13,8 +13,6 @@ import {
   CreditCard, 
   Settings,
   ExternalLink,
-  Eye,
-  EyeOff,
   Zap,
   Info
 } from 'lucide-react';
@@ -26,7 +24,6 @@ const MonerooPayment = () => {
   const navigate = useNavigate();
   const { store: currentStore } = useStores();
   const { toast } = useToast();
-  const [showSecrets, setShowSecrets] = useState(false);
   
   const {
     providers,
@@ -39,9 +36,6 @@ const MonerooPayment = () => {
 
   const monerooProvider = providers.find(p => p.id === 'moneroo');
 
-  const toggleSecretVisibility = () => {
-    setShowSecrets(prev => !prev);
-  };
 
   const handleSave = async () => {
     if (!monerooProvider) return;
@@ -151,7 +145,7 @@ const MonerooPayment = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Clés API */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="moneroo-api-key">
                   Clé API
@@ -159,58 +153,16 @@ const MonerooPayment = () => {
                 <div className="relative">
                   <Input
                     id="moneroo-api-key"
-                    type={showSecrets ? 'text' : 'password'}
+                    type="text"
                     value={monerooProvider.apiKey}
                     onChange={(e) => {
                       updateProvider('moneroo', { apiKey: e.target.value });
                     }}
                     placeholder="Clé API Moneroo..."
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={toggleSecretVisibility}
-                  >
-                    {showSecrets ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="moneroo-secret-key">
-                  Clé secrète
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="moneroo-secret-key"
-                    type={showSecrets ? 'text' : 'password'}
-                    value={monerooProvider.secretKey || ''}
-                    onChange={(e) => {
-                      updateProvider('moneroo', { secretKey: e.target.value });
-                    }}
-                    placeholder=""
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={toggleSecretVisibility}
-                  >
-                    {showSecrets ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
             </div>
 
             {/* Webhook */}
