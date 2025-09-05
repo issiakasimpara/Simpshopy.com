@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ import {
   CreditCard, 
   Settings,
   ExternalLink,
+  Eye,
+  EyeOff,
   Zap,
   Info
 } from 'lucide-react';
@@ -23,6 +26,7 @@ const MonerooPayment = () => {
   const navigate = useNavigate();
   const { store: currentStore } = useStores();
   const { toast } = useToast();
+  const [showApiKey, setShowApiKey] = useState(false);
   
   const {
     providers,
@@ -34,6 +38,10 @@ const MonerooPayment = () => {
   } = usePaymentConfigurations(currentStore?.id);
 
   const monerooProvider = providers.find(p => p.id === 'moneroo');
+
+  const toggleApiKeyVisibility = () => {
+    setShowApiKey(prev => !prev);
+  };
 
 
   const handleSave = async () => {
@@ -152,13 +160,26 @@ const MonerooPayment = () => {
                 <div className="relative">
                   <Input
                     id="moneroo-api-key"
-                    type="text"
+                    type={showApiKey ? 'text' : 'password'}
                     value={monerooProvider.apiKey}
                     onChange={(e) => {
                       updateProvider('moneroo', { apiKey: e.target.value });
                     }}
                     placeholder="Clé API Moneroo..."
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={toggleApiKeyVisibility}
+                  >
+                    {showApiKey ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               </div>
 
