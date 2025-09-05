@@ -194,7 +194,7 @@ const MonerooPayment = () => {
                     onChange={(e) => {
                       updateProvider('moneroo', { secretKey: e.target.value });
                     }}
-                    placeholder="Clé secrète..."
+                    placeholder=""
                   />
                   <Button
                     type="button"
