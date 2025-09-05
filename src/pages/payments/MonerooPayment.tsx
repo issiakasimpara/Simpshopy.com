@@ -58,13 +58,22 @@ const MonerooPayment = () => {
     try {
       setPasswordError('');
       
-      // Vérifier le mot de passe avec Supabase Auth
+      // Récupérer l'utilisateur actuellement connecté
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+      
+      if (userError || !user) {
+        setPasswordError('Vous devez être connecté pour accéder à cette fonctionnalité');
+        return;
+      }
+
+      // Vérifier le mot de passe avec l'email de l'utilisateur connecté
       const { error } = await supabaseClient.auth.signInWithPassword({
-        email: currentStore?.owner_email || '',
+        email: user.email || '',
         password: password
       });
 
       if (error) {
+        console.error('Erreur de connexion:', error);
         setPasswordError('Mot de passe incorrect');
         return;
       }
@@ -79,6 +88,7 @@ const MonerooPayment = () => {
         description: "Clé API affichée avec succès",
       });
     } catch (error) {
+      console.error('Erreur de vérification:', error);
       setPasswordError('Erreur de vérification');
     }
   };
