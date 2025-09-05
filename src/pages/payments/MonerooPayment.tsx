@@ -192,7 +192,7 @@ const MonerooPayment = () => {
               </div>
               <div>
                 <Label className="font-medium">Devises supportées</Label>
-                <p className="text-muted-foreground">XOF, XAF, NGN</p>
+                <p className="text-muted-foreground">XOF, XAF, NGN , USD , EUR , GBP , etc..</p>
               </div>
             </div>
           </CardContent>
