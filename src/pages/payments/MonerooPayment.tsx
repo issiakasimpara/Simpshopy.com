@@ -232,7 +232,7 @@ const MonerooPayment = () => {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Important :</strong> Moneroo est une plateforme d’orchestration de paiements qui permet aux entreprises d’accepter et d’envoyer de l’argent en Afrique via une intégration unique, sécurisée et simple.. 
+            <strong>Important :</strong> Moneroo est une plateforme d’orchestration de paiements qui permet aux entreprises d’accepter et d’envoyer de l’argen via une intégration unique, sécurisée et simple. 
             Assurez-vous que vos clés API sont correctes avant d'activer le service.
           </AlertDescription>
         </Alert>
