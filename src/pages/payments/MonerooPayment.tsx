@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,12 +22,16 @@ import {
 import { useStores } from '@/hooks/useStores';
 import { usePaymentConfigurations } from '@/hooks/usePaymentConfigurations';
 import { useToast } from '@/hooks/use-toast';
+import { supabase as supabaseClient } from '@/utils/connectSupabase';
 
 const MonerooPayment = () => {
   const navigate = useNavigate();
   const { store: currentStore } = useStores();
   const { toast } = useToast();
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   
   const {
     providers,
@@ -40,7 +45,48 @@ const MonerooPayment = () => {
   const monerooProvider = providers.find(p => p.id === 'moneroo');
 
   const toggleApiKeyVisibility = () => {
-    setShowApiKey(prev => !prev);
+    if (!showApiKey) {
+      // Si on veut afficher la clé API, demander le mot de passe
+      setShowPasswordPrompt(true);
+    } else {
+      // Si on veut masquer, le faire directement
+      setShowApiKey(false);
+    }
+  };
+
+  const verifyPassword = async () => {
+    try {
+      setPasswordError('');
+      
+      // Vérifier le mot de passe avec Supabase Auth
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email: currentStore?.owner_email || '',
+        password: password
+      });
+
+      if (error) {
+        setPasswordError('Mot de passe incorrect');
+        return;
+      }
+
+      // Mot de passe correct, afficher la clé API
+      setShowApiKey(true);
+      setShowPasswordPrompt(false);
+      setPassword('');
+      
+      toast({
+        title: "Accès autorisé",
+        description: "Clé API affichée avec succès",
+      });
+    } catch (error) {
+      setPasswordError('Erreur de vérification');
+    }
+  };
+
+  const cancelPasswordPrompt = () => {
+    setShowPasswordPrompt(false);
+    setPassword('');
+    setPasswordError('');
   };
 
 
@@ -258,6 +304,51 @@ const MonerooPayment = () => {
           </AlertDescription>
         </Alert>
       </div>
+
+      {/* Dialog de vérification du mot de passe */}
+      <Dialog open={showPasswordPrompt} onOpenChange={setShowPasswordPrompt}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Vérification de sécurité</DialogTitle>
+            <DialogDescription>
+              Veuillez entrer votre mot de passe pour afficher la clé API Moneroo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Mot de passe
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="col-span-3"
+                placeholder="Votre mot de passe"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    verifyPassword();
+                  }
+                }}
+              />
+            </div>
+            {passwordError && (
+              <div className="text-sm text-red-600 col-span-4">
+                {passwordError}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelPasswordPrompt}>
+              Annuler
+            </Button>
+            <Button onClick={verifyPassword} disabled={!password}>
+              Vérifier
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
