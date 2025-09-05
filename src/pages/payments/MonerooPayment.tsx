@@ -22,7 +22,7 @@ import {
 import { useStores } from '@/hooks/useStores';
 import { usePaymentConfigurations } from '@/hooks/usePaymentConfigurations';
 import { useToast } from '@/hooks/use-toast';
-import { supabase as supabaseClient } from '@/utils/connectSupabase';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
 const MonerooPayment = () => {
   const navigate = useNavigate();
