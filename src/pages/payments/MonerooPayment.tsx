@@ -190,7 +190,7 @@ const MonerooPayment = () => {
                   onClick={() => window.open('https://moneroo.io/', '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Dashboard Moneroo
+                  Moneroo
                 </Button>
               </div>
               
