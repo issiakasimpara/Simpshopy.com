@@ -15,7 +15,6 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
-  TestTube,
   Zap,
   Info
 } from 'lucide-react';
@@ -33,9 +32,7 @@ const MonerooPayment = () => {
     providers,
     loading,
     saving,
-    testing,
     saveConfiguration,
-    testProvider,
     toggleProvider,
     updateProvider
   } = usePaymentConfigurations(currentStore?.id);
@@ -64,23 +61,6 @@ const MonerooPayment = () => {
     }
   };
 
-  const handleTest = async () => {
-    if (!monerooProvider) return;
-    
-    try {
-      await testProvider('moneroo');
-      toast({
-        title: "Test réussi",
-        description: "Configuration Moneroo testée avec succès",
-      });
-    } catch (error) {
-      toast({
-        title: "Test échoué",
-        description: "Erreur lors du test de la configuration",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (!currentStore) {
     return (
@@ -148,7 +128,7 @@ const MonerooPayment = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <Label className="font-medium">Frais</Label>
                 <p className="text-muted-foreground">1.5% par transaction</p>
@@ -156,12 +136,6 @@ const MonerooPayment = () => {
               <div>
                 <Label className="font-medium">Devises supportées</Label>
                 <p className="text-muted-foreground">XOF, XAF, NGN</p>
-              </div>
-              <div>
-                <Label className="font-medium">Mode</Label>
-                <p className="text-muted-foreground">
-                  {monerooProvider.isTestMode ? 'Test' : 'Production'}
-                </p>
               </div>
             </div>
           </CardContent>
@@ -180,7 +154,7 @@ const MonerooPayment = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="moneroo-api-key">
-                  Clé API {monerooProvider.isTestMode ? '(Test)' : '(Production)'}
+                  Clé API
                 </Label>
                 <div className="relative">
                   <Input
@@ -210,7 +184,7 @@ const MonerooPayment = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="moneroo-secret-key">
-                  Clé secrète {monerooProvider.isTestMode ? '(Test)' : '(Production)'}
+                  Clé secrète
                 </Label>
                 <div className="relative">
                   <Input
@@ -220,7 +194,7 @@ const MonerooPayment = () => {
                     onChange={(e) => {
                       updateProvider('moneroo', { secretKey: e.target.value });
                     }}
-                    placeholder="Clé secrète Moneroo..."
+                    placeholder="Clé secrète..."
                   />
                   <Button
                     type="button"
@@ -254,31 +228,10 @@ const MonerooPayment = () => {
               />
             </div>
 
-            {/* Mode test */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={monerooProvider.isTestMode}
-                  onCheckedChange={(testMode) => {
-                    updateProvider('moneroo', { isTestMode: testMode });
-                  }}
-                />
-                <Label>Mode test</Label>
-              </div>
-            </div>
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleTest}
-                  disabled={!monerooProvider.apiKey || testing === 'moneroo'}
-                >
-                  <TestTube className="w-4 h-4 mr-2" />
-                  {testing === 'moneroo' ? 'Test en cours...' : 'Tester'}
-                </Button>
                 <Button
                   variant="outline"
                   size="sm"
