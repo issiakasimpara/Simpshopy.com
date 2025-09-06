@@ -80,19 +80,24 @@ serve(async (req) => {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        sender: {
-          email: fromEmail,
-          name: fromName
-        },
-        recipients: [{
-          email: fromEmail, // Envoyer à soi-même pour le test
-          name: 'Test'
-        }],
-        subject: '✅ Test Mailzeet - Configuration Simpshopy',
-        html: testEmailHtml,
-        server: serverName
-      }),
+    body: JSON.stringify({
+      sender: {
+        email: fromEmail,
+        name: fromName
+      },
+      recipients: [{
+        email: fromEmail, // Envoyer à soi-même pour le test
+        name: 'Test'
+      }],
+      subject: '✅ Test Mailzeet - Configuration {{company}}',
+      html: testEmailHtml,
+      params: {
+        company: 'Simpshopy',
+        test_date: new Date().toLocaleString('fr-FR'),
+        server_name: serverName
+      },
+      server: serverName
+    }),
     });
 
     if (!response.ok) {

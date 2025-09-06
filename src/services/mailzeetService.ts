@@ -33,30 +33,20 @@ class MailzeetService {
   private config: MailzeetConfig | null = null;
 
   /**
-   * Initialiser la configuration Mailzeet
+   * Initialiser la configuration Mailzeet globale
+   * Plus besoin de configuration par boutique - configuration globale Simpshopy
    */
-  async initializeConfig(storeId: string): Promise<boolean> {
+  async initializeConfig(): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .from('mailzeet_configurations')
-        .select('*')
-        .eq('store_id', storeId)
-        .eq('enabled', true)
-        .single();
-
-      if (error || !data) {
-        console.error('❌ Configuration Mailzeet non trouvée:', error);
-        return false;
-      }
-
+      // Configuration globale Mailzeet pour toutes les boutiques
       this.config = {
-        apiKey: data.api_key,
-        serverName: data.server_name,
-        fromEmail: data.from_email,
-        fromName: data.from_name
+        apiKey: '5eelaz32hdbl:efyg6m7n0937bmp1y0sr5j2fn', // Clé API globale Simpshopy
+        serverName: 'SimpShopy', // Serveur global Simpshopy
+        fromEmail: 'mail@simpshopy.com',
+        fromName: 'Simpshopy'
       };
 
-      console.log('✅ Configuration Mailzeet initialisée');
+      console.log('✅ Configuration Mailzeet globale initialisée');
       return true;
     } catch (error) {
       console.error('❌ Erreur initialisation Mailzeet:', error);
@@ -90,6 +80,7 @@ class MailzeetService {
           }],
           subject: emailData.subject,
           html: emailData.html,
+          params: emailData.variables || {},
           server: this.config.serverName
         })
       });
@@ -122,30 +113,45 @@ class MailzeetService {
   }
 
   /**
-   * Envoyer un email de confirmation de commande
+   * Envoyer un email de confirmation de commande avec template Mailzeet
    */
   async sendOrderConfirmationEmail(orderData: any, storeData: any): Promise<EmailResponse> {
-    const template = this.generateOrderConfirmationTemplate(orderData, storeData);
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
     
-    return this.sendEmail({
-      to: orderData.customer_email,
-      toName: orderData.customer_name,
-      subject: `✅ Confirmation de commande #${orderData.id.slice(-6)} - ${storeData.name}`,
-      html: template,
-      variables: {
-        orderId: orderData.id,
-        customerName: orderData.customer_name,
-        storeName: storeData.name,
-        totalAmount: orderData.total_amount,
-        orderDate: new Date(orderData.created_at).toLocaleDateString('fr-FR')
+    // Utiliser le template Mailzeet pour confirmation de commande
+    return this.sendEmailWithTemplate(
+      orderData.customer_email,
+      orderData.customer_name,
+      'ffyypgq3toe2', // Template ID pour confirmation de commande
+      {
+        order_id: orderData.id.slice(-6),
+        store_name: storeData.name,
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
+        total_amount: orderData.total_amount,
+        order_date: new Date(orderData.created_at).toLocaleDateString('fr-FR'),
+        payment_method: orderData.payment_method || 'Non spécifiée',
+        order_items: orderData.order_items?.map((item: any) => ({
+          name: item.products?.name || 'Produit',
+          quantity: item.quantity,
+          price: item.price
+        })) || []
       }
-    });
+    );
   }
 
   /**
    * Envoyer un email de notification admin
    */
   async sendAdminNotificationEmail(orderData: any, storeData: any, adminEmail: string): Promise<EmailResponse> {
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
+    
     const template = this.generateAdminNotificationTemplate(orderData, storeData);
     
     return this.sendEmail({
@@ -166,6 +172,11 @@ class MailzeetService {
    * Envoyer un email de changement de statut
    */
   async sendStatusUpdateEmail(orderData: any, storeData: any, newStatus: string): Promise<EmailResponse> {
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
+    
     const template = this.generateStatusUpdateTemplate(orderData, storeData, newStatus);
     
     return this.sendEmail({
@@ -187,6 +198,11 @@ class MailzeetService {
    * Envoyer un email de newsletter
    */
   async sendNewsletterEmail(recipients: string[], subject: string, content: string, storeData: any): Promise<EmailResponse[]> {
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
+    
     const results: EmailResponse[] = [];
     
     for (const recipient of recipients) {
@@ -203,6 +219,81 @@ class MailzeetService {
     }
     
     return results;
+  }
+
+  /**
+   * Envoyer un email avec template Mailzeet
+   */
+  async sendEmailWithTemplate(
+    to: string, 
+    toName: string, 
+    templateId: string, 
+    variables: Record<string, any>
+  ): Promise<EmailResponse> {
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
+    
+    if (!this.config) {
+      return { success: false, error: 'Configuration non initialisée' };
+    }
+
+    try {
+      const response = await fetch('https://api.mailzeet.com/v1/mails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: {
+            email: this.config.fromEmail,
+            name: this.config.fromName
+          },
+          recipients: [{
+            email: to,
+            name: toName
+          }],
+          template_id: templateId,
+          params: variables,
+          server: this.config.serverName
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Mailzeet API Error: ${errorData.message || response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      // Logger l'envoi d'email
+      await this.logEmailSent({
+        to: to,
+        subject: `Template: ${templateId}`,
+        html: ''
+      }, result.data?.id, true);
+      
+      return {
+        success: true,
+        messageId: result.data?.id
+      };
+    } catch (error) {
+      console.error('❌ Erreur envoi email template Mailzeet:', error);
+      
+      // Logger l'erreur
+      await this.logEmailSent({
+        to: to,
+        subject: `Template: ${templateId}`,
+        html: ''
+      }, null, false, error instanceof Error ? error.message : 'Erreur inconnue');
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
+      };
+    }
   }
 
   /**
@@ -394,6 +485,11 @@ class MailzeetService {
    * Tester la configuration Mailzeet
    */
   async testConfiguration(): Promise<{ success: boolean; error?: string }> {
+    // Initialiser la configuration si pas encore fait
+    if (!this.config) {
+      await this.initializeConfig();
+    }
+    
     if (!this.config) {
       return { success: false, error: 'Configuration non initialisée' };
     }
@@ -402,7 +498,7 @@ class MailzeetService {
       const testEmail = {
         to: this.config.fromEmail, // Envoyer à soi-même pour le test
         subject: 'Test Mailzeet - Simpshopy',
-        html: '<p>Ceci est un email de test pour vérifier la configuration Mailzeet.</p>'
+        html: '<p>Ceci est un email de test pour vérifier la configuration Mailzeet globale.</p>'
       };
 
       const result = await this.sendEmail(testEmail);

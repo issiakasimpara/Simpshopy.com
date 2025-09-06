@@ -183,16 +183,24 @@ async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminE
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sender: {
-        email: 'noreply@simpshopy.com',
-        name: 'Simpshopy'
-      },
+    sender: {
+      email: 'mail@simpshopy.com',
+      name: 'Simpshopy'
+    },
       recipients: [{
         email: adminEmail,
         name: 'Admin'
       }],
-      subject: `🎉 Nouvelle commande #${orderData.id.slice(-6)} - ${storeData.name}`,
+      subject: `🎉 Nouvelle commande #{{order_id}} - {{store_name}}`,
       html: adminTemplate,
+      params: {
+        order_id: orderData.id.slice(-6),
+        store_name: storeData.name,
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
+        total_amount: orderData.total_amount,
+        order_date: new Date(orderData.created_at).toLocaleDateString('fr-FR')
+      },
       server: mailzeetServerName
     }),
   })
@@ -223,15 +231,28 @@ async function sendCustomerEmail(orderData: OrderData, storeData: StoreData) {
     },
     body: JSON.stringify({
       sender: {
-        email: 'noreply@simpshopy.com',
+        email: 'mail@simpshopy.com',
         name: storeData.name
       },
       recipients: [{
         email: orderData.customer_email,
         name: orderData.customer_name
       }],
-      subject: `✅ Confirmation de commande #${orderData.id.slice(-6)} - ${storeData.name}`,
-      html: customerTemplate,
+      template_id: 'ffyypgq3toe2', // Template Mailzeet pour confirmation de commande
+      params: {
+        order_id: orderData.id.slice(-6),
+        store_name: storeData.name,
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
+        total_amount: orderData.total_amount,
+        order_date: new Date(orderData.created_at).toLocaleDateString('fr-FR'),
+        payment_method: orderData.payment_method || 'Non spécifiée',
+        order_items: orderData.order_items?.map((item: any) => ({
+          name: item.products?.name || 'Produit',
+          quantity: item.quantity,
+          price: item.price
+        })) || []
+      },
       server: mailzeetServerName
     }),
   })
