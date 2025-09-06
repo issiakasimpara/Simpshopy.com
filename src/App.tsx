@@ -38,6 +38,7 @@ import Payments from './pages/Payments';
 import StripePayment from './pages/payments/StripePayment';
 import PayPalPayment from './pages/payments/PayPalPayment';
 import MonerooPayment from './pages/payments/MonerooPayment';
+import MailzeetConfig from './pages/emails/MailzeetConfig';
 import Themes from './pages/Themes';
 import Domains from './pages/Domains';
 import PopupsReductions from './pages/PopupsReductions';
@@ -266,6 +267,13 @@ function App() {
                   <Route path="/payments/moneroo" element={
                     <ProtectedRoute>
                       <MonerooPayment />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* 📧 EMAILS */}
+                  <Route path="/emails/mailzeet" element={
+                    <ProtectedRoute>
+                      <MailzeetConfig />
                     </ProtectedRoute>
                   } />
                   <Route path="/popups-reductions" element={

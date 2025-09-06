@@ -167,24 +167,33 @@ serve(async (req) => {
 })
 
 async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminEmail: string) {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendApiKey) {
-    throw new Error('RESEND_API_KEY not configured')
+  const mailzeetApiKey = Deno.env.get('MAILZEET_API_KEY')
+  const mailzeetServerName = Deno.env.get('MAILZEET_SERVER_NAME')
+  
+  if (!mailzeetApiKey || !mailzeetServerName) {
+    throw new Error('MAILZEET_API_KEY or MAILZEET_SERVER_NAME not configured')
   }
 
   const adminTemplate = generateAdminEmailTemplate(orderData, storeData)
   
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.mailzeet.com/v1/mails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      'Authorization': `Bearer ${mailzeetApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Simpshopy <noreply@simpshopy.com>',
-      to: adminEmail,
+      sender: {
+        email: 'noreply@simpshopy.com',
+        name: 'Simpshopy'
+      },
+      recipients: [{
+        email: adminEmail,
+        name: 'Admin'
+      }],
       subject: `🎉 Nouvelle commande #${orderData.id.slice(-6)} - ${storeData.name}`,
       html: adminTemplate,
+      server: mailzeetServerName
     }),
   })
 
@@ -197,24 +206,33 @@ async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminE
 }
 
 async function sendCustomerEmail(orderData: OrderData, storeData: StoreData) {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendApiKey) {
-    throw new Error('RESEND_API_KEY not configured')
+  const mailzeetApiKey = Deno.env.get('MAILZEET_API_KEY')
+  const mailzeetServerName = Deno.env.get('MAILZEET_SERVER_NAME')
+  
+  if (!mailzeetApiKey || !mailzeetServerName) {
+    throw new Error('MAILZEET_API_KEY or MAILZEET_SERVER_NAME not configured')
   }
 
   const customerTemplate = generateCustomerEmailTemplate(orderData, storeData)
   
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.mailzeet.com/v1/mails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      'Authorization': `Bearer ${mailzeetApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: `${storeData.name} <noreply@simpshopy.com>`,
-      to: orderData.customer_email,
+      sender: {
+        email: 'noreply@simpshopy.com',
+        name: storeData.name
+      },
+      recipients: [{
+        email: orderData.customer_email,
+        name: orderData.customer_name
+      }],
       subject: `✅ Confirmation de commande #${orderData.id.slice(-6)} - ${storeData.name}`,
       html: customerTemplate,
+      server: mailzeetServerName
     }),
   })
 
