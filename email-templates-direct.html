@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prévisualisation des Templates d'Emails SimpShopy</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .template-section {
+            margin-bottom: 50px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .template-title {
+            color: #1f2937;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .email-preview {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .email-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        /* Styles pour les emails */
+        .email-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
+        .email-container { max-width: 600px; margin: 0 auto; background: white; }
+        .email-header-style { background: #6366f1; padding: 30px; text-align: center; }
+        .email-logo { max-width: 120px; height: auto; }
+        .email-content { padding: 40px 30px; }
+        .order-number { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .order-number h2 { margin: 0; color: #0c4a6e; font-size: 24px; }
+        .status { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .status h3 { margin: 0; color: #166534; font-size: 18px; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .total { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .total h3 { margin: 0; color: #166534; font-size: 20px; }
+        .button { display: inline-block; background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+        .info-box { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .customer-info { background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #1f2937; margin-bottom: 40px;">
+            📧 Templates d'Emails SimpShopy - Prévisualisation
+        </h1>
+
+        <!-- EMAIL CLIENT -->
+        <div class="template-section">
+            <h2 class="template-title">📧 Email Client - Confirmation de Commande</h2>
+            <div class="email-header">Destinataire : Client (acheteur)</div>
+            <div class="email-preview">
+                <div class="email-body">
+                    <div class="email-container">
+                        <div class="email-header-style">
+                            <h1 style="color: white; margin: 0; font-size: 28px;">Ma Boutique</h1>
+                        </div>
+                        
+                        <div class="email-content">
+                            <h1 style="color: #1f2937; margin-bottom: 30px;">✅ Confirmation de votre commande</h1>
+                            
+                            <div class="status">
+                                <h3>🎉 Commande confirmée !</h3>
+                                <p style="margin: 10px 0 0 0; color: #166534;">Votre commande a été reçue et est en cours de traitement</p>
+                            </div>
+                            
+                            <div class="order-number">
+                                <h2>Commande #ABC123</h2>
+                                <p style="margin: 10px 0 0 0; color: #6b7280;">7 septembre 2025 à 04:58</p>
+                            </div>
+                            
+                            <h3 style="color: #374151;">🛒 Résumé de votre commande</h3>
+                            <table class="items-table">
+                                <thead>
+                                    <tr style="background: #f8fafc;">
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Produit</th>
+                                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #e5e7eb;">Prix</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div style="width: 50px; height: 50px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #333;">Produit Test ZeptoMail</div>
+                                                    <div style="color: #666; font-size: 14px;">Quantité: 2</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">
+                                            25,000 CFA
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="total">
+                                <h3>💰 Montant total : 25,000 CFA</h3>
+                            </div>
+                            
+                            <div class="info-box">
+                                <h4 style="margin-top: 0; color: #92400e;">📦 Informations de livraison</h4>
+                                <p style="margin: 5px 0; color: #92400e;"><strong>Statut :</strong> En préparation</p>
+                                <p style="margin: 5px 0; color: #92400e;"><strong>Délai estimé :</strong> 3-5 jours ouvrables</p>
+                                <p style="margin: 5px 0; color: #92400e;"><strong>Méthode de paiement :</strong> Moneroo</p>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="#" class="button">Voir ma commande</a>
+                            </div>
+                            
+                            <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                                <h4 style="margin-top: 0; color: #374151;">💡 Besoin d'aide ?</h4>
+                                <p style="margin: 5px 0; color: #6b7280;">Si vous avez des questions concernant votre commande, n'hésitez pas à nous contacter :</p>
+                                <p style="margin: 5px 0; color: #6b7280;"><strong>Email :</strong> contact@simpshopy.com</p>
+                                <p style="margin: 5px 0; color: #6b7280;"><strong>Numéro de commande :</strong> #ABC123</p>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>Merci de votre confiance !</p>
+                            <p>Ma Boutique - contact@simpshopy.com</p>
+                            <p>Cet email a été envoyé automatiquement par Simpshopy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMAIL ADMIN -->
+        <div class="template-section">
+            <h2 class="template-title">📧 Email Admin - Notification de Nouvelle Commande</h2>
+            <div class="email-header">Destinataire : Propriétaire de la boutique</div>
+            <div class="email-preview">
+                <div class="email-body">
+                    <div class="email-container">
+                        <div class="email-header-style">
+                            <h1 style="color: white; margin: 0; font-size: 28px;">Ma Boutique</h1>
+                        </div>
+                        
+                        <div class="email-content">
+                            <h1 style="color: #1f2937; margin-bottom: 30px;">🎉 Nouvelle commande reçue !</h1>
+                            
+                            <div class="order-number">
+                                <h2>Commande #ABC123</h2>
+                                <p style="margin: 10px 0 0 0; color: #6b7280;">7 septembre 2025 à 04:58</p>
+                            </div>
+                            
+                            <div class="customer-info">
+                                <h3 style="margin-top: 0; color: #374151;">👤 Informations client</h3>
+                                <p><strong>Nom :</strong> Test Customer</p>
+                                <p><strong>Email :</strong> sirikisuv@gmail.com</p>
+                                <p><strong>Adresse :</strong> 123 Rue Test, Abidjan, Côte d'Ivoire</p>
+                                <p><strong>Méthode de paiement :</strong> Moneroo</p>
+                            </div>
+                            
+                            <h3 style="color: #374151;">🛒 Produits commandés</h3>
+                            <table class="items-table">
+                                <thead>
+                                    <tr style="background: #f8fafc;">
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Produit</th>
+                                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #e5e7eb;">Prix</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div style="width: 50px; height: 50px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #333;">Produit Test ZeptoMail</div>
+                                                    <div style="color: #666; font-size: 14px;">Quantité: 2</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">
+                                            25,000 CFA
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="total">
+                                <h3>💰 Montant total : 25,000 CFA</h3>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="#" class="button">Voir la commande</a>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>Cet email a été envoyé automatiquement par Simpshopy</p>
+                            <p>Ma Boutique - contact@simpshopy.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARACTÉRISTIQUES -->
+        <div class="template-section">
+            <h2 class="template-title">✨ Caractéristiques des Templates</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #0c4a6e; margin-top: 0;">🎨 Design Professionnel</h3>
+                    <ul style="color: #0c4a6e;">
+                        <li>Design moderne et épuré</li>
+                        <li>Couleurs cohérentes avec la marque</li>
+                        <li>Typographie professionnelle</li>
+                        <li>Espacement harmonieux</li>
+                    </ul>
+                </div>
+                <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #166534; margin-top: 0;">📱 Responsive</h3>
+                    <ul style="color: #166534;">
+                        <li>Compatible mobile et desktop</li>
+                        <li>Adaptation automatique des tailles</li>
+                        <li>Lisibilité optimisée</li>
+                        <li>Boutons tactiles</li>
+                    </ul>
+                </div>
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #92400e; margin-top: 0;">📋 Informations Complètes</h3>
+                    <ul style="color: #92400e;">
+                        <li>Détails de la commande</li>
+                        <li>Informations client</li>
+                        <li>Adresse de livraison</li>
+                        <li>Méthode de paiement</li>
+                    </ul>
+                </div>
+                <div style="background: #f3e8ff; border: 1px solid #8b5cf6; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #6b21a8; margin-top: 0;">🔧 Personnalisable</h3>
+                    <ul style="color: #6b21a8;">
+                        <li>Couleurs de la boutique</li>
+                        <li>Logo personnalisé</li>
+                        <li>Nom de la boutique</li>
+                        <li>Contact personnalisé</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

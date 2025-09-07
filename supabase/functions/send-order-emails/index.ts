@@ -167,24 +167,30 @@ serve(async (req) => {
 })
 
 async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminEmail: string) {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendApiKey) {
-    throw new Error('RESEND_API_KEY not configured')
-  }
-
+  const zeptoMailToken = "Zoho-enczapikey wSsVR61/rx72DvwulDf4c+cwmggEUln0R0h0jlbwvyD9T6yWosc5kRGdUQf1FaIdE2FrFTFHoO8pnxgE1TQNjol7nAoAXSiF9mqRe1U4J3x17qnvhDzOX2lakxuAKYsAwwxvnWZgE84r+g==";
+  
   const adminTemplate = generateAdminEmailTemplate(orderData, storeData)
   
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.zeptomail.com/v1.1/email', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      'Accept': 'application/json',
       'Content-Type': 'application/json',
+      'Authorization': zeptoMailToken,
     },
     body: JSON.stringify({
-      from: 'Simpshopy <noreply@simpshopy.com>',
-      to: adminEmail,
+      from: {
+        address: "mail@simpshopy.com",
+        name: storeData.name || "SimpShopy"
+      },
+      to: [{
+        email_address: {
+          address: adminEmail,
+          name: "Administrateur"
+        }
+      }],
       subject: `🎉 Nouvelle commande #${orderData.id.slice(-6)} - ${storeData.name}`,
-      html: adminTemplate,
+      htmlbody: adminTemplate,
     }),
   })
 
@@ -197,24 +203,30 @@ async function sendAdminEmail(orderData: OrderData, storeData: StoreData, adminE
 }
 
 async function sendCustomerEmail(orderData: OrderData, storeData: StoreData) {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendApiKey) {
-    throw new Error('RESEND_API_KEY not configured')
-  }
-
+  const zeptoMailToken = "Zoho-enczapikey wSsVR61/rx72DvwulDf4c+cwmggEUln0R0h0jlbwvyD9T6yWosc5kRGdUQf1FaIdE2FrFTFHoO8pnxgE1TQNjol7nAoAXSiF9mqRe1U4J3x17qnvhDzOX2lakxuAKYsAwwxvnWZgE84r+g==";
+  
   const customerTemplate = generateCustomerEmailTemplate(orderData, storeData)
   
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.zeptomail.com/v1.1/email', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      'Accept': 'application/json',
       'Content-Type': 'application/json',
+      'Authorization': zeptoMailToken,
     },
     body: JSON.stringify({
-      from: `${storeData.name} <noreply@simpshopy.com>`,
-      to: orderData.customer_email,
+      from: {
+        address: "mail@simpshopy.com",
+        name: storeData.name || "SimpShopy"
+      },
+      to: [{
+        email_address: {
+          address: orderData.customer_email,
+          name: orderData.customer_name
+        }
+      }],
       subject: `✅ Confirmation de commande #${orderData.id.slice(-6)} - ${storeData.name}`,
-      html: customerTemplate,
+      htmlbody: customerTemplate,
     }),
   })
 
