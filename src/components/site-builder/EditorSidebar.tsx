@@ -363,10 +363,10 @@ const EditorSidebar = ({
                                       )}
                                     </div>
                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 ml-1">
-                                      {/* Pages ultra-système (checkout, cart, product-detail) : aucun bouton */}
+                                      {/* Pages ultra-système (home, checkout, cart, product-detail) : seulement édition pour home */}
                                       {!['checkout', 'cart', 'product-detail'].includes(pageId) && (
                                         <>
-                                          {/* Boutons pour les autres pages (système et personnalisées) */}
+                                          {/* Bouton d'édition pour toutes les pages sauf les ultra-système */}
                                           <Button 
                                             size="sm" 
                                             variant="ghost" 
@@ -378,17 +378,20 @@ const EditorSidebar = ({
                                           >
                                             <Edit className="h-3 w-3" />
                                           </Button>
-                                          <Button 
-                                            size="sm" 
-                                            variant="ghost" 
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              onPageVisibility(pageId, !metadata.isVisible);
-                                            }}
-                                            className="h-5 w-5 p-0"
-                                          >
-                                            {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                                          </Button>
+                                          {/* Bouton de visibilité uniquement pour les pages non-ultra-système */}
+                                          {!['home', 'checkout', 'cart', 'product-detail'].includes(pageId) && (
+                                            <Button 
+                                              size="sm" 
+                                              variant="ghost" 
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                onPageVisibility(pageId, !metadata.isVisible);
+                                              }}
+                                              className="h-5 w-5 p-0"
+                                            >
+                                              {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                                            </Button>
+                                          )}
                                           {/* Bouton de suppression pour les pages personnalisées et certaines pages système */}
                                           {(!metadata.isSystem || (metadata.isSystem && !['home', 'checkout', 'cart', 'product-detail'].includes(pageId))) && (
                                             <Button 
