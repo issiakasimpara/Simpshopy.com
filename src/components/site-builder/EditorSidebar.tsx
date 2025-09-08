@@ -133,9 +133,20 @@ const EditorSidebar = ({
     }
   });
 
-  // Combiner les métadonnées par défaut avec celles du template
+  // Métadonnées par défaut
+  const defaultPageMetadata = getDefaultPageMetadata();
+  
+  // Filtrer les pages supprimées des métadonnées par défaut
+  const filteredDefaultMetadata = Object.fromEntries(
+    Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+      const customMetadata = template.pageMetadata?.[id];
+      return !customMetadata?.isDeleted;
+    })
+  );
+
+  // Combiner les métadonnées par défaut filtrées avec celles du template
   const allPageMetadata = {
-    ...getDefaultPageMetadata(),
+    ...filteredDefaultMetadata,
     ...template.pageMetadata
   };
 

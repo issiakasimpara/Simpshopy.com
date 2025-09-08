@@ -342,9 +342,17 @@ const Storefront = () => {
       checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
     };
     
-    // Combiner les métadonnées par défaut avec celles du template
+    // Filtrer les pages supprimées des métadonnées par défaut
+    const filteredDefaultMetadata = Object.fromEntries(
+      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+        const customMetadata = template.pageMetadata?.[id];
+        return !customMetadata?.isDeleted;
+      })
+    );
+    
+    // Combiner les métadonnées par défaut filtrées avec celles du template
     const pageMetadata = {
-      ...defaultPageMetadata,
+      ...filteredDefaultMetadata,
       ...template.pageMetadata
     };
     
@@ -375,9 +383,17 @@ const Storefront = () => {
       checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
     };
 
-    // Combiner les métadonnées par défaut avec celles du template
+    // Filtrer les pages supprimées des métadonnées par défaut
+    const filteredDefaultMetadata = Object.fromEntries(
+      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+        const customMetadata = template.pageMetadata?.[id];
+        return !customMetadata?.isDeleted;
+      })
+    );
+
+    // Combiner les métadonnées par défaut filtrées avec celles du template
     const pageMetadata = {
-      ...defaultPageMetadata,
+      ...filteredDefaultMetadata,
       ...template.pageMetadata
     };
     

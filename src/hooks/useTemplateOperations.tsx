@@ -118,10 +118,22 @@ export const useTemplateOperations = ({
     const { [pageId]: deletedPage, ...remainingPages } = templateData.pages;
     const { [pageId]: deletedMetadata, ...remainingMetadata } = templateData.pageMetadata || {};
     
+    // Pour les pages système supprimées, on doit aussi les retirer des métadonnées par défaut
+    // en créant une entrée explicite dans pageMetadata avec isVisible: false
+    const updatedPageMetadata = { ...remainingMetadata };
+    if (pageMetadata?.isSystem) {
+      // Marquer la page système comme supprimée (invisible et sans contenu)
+      updatedPageMetadata[pageId] = {
+        ...pageMetadata,
+        isVisible: false,
+        isDeleted: true // Marquer comme supprimée
+      };
+    }
+    
     const updatedTemplate = {
       ...templateData,
       pages: remainingPages,
-      pageMetadata: remainingMetadata
+      pageMetadata: updatedPageMetadata
     };
     
     onTemplateUpdate(updatedTemplate);
@@ -145,9 +157,17 @@ export const useTemplateOperations = ({
       checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
     };
 
-    // Combiner les métadonnées par défaut avec celles du template
+    // Filtrer les pages supprimées des métadonnées par défaut
+    const filteredDefaultMetadata = Object.fromEntries(
+      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+        const customMetadata = templateData.pageMetadata?.[id];
+        return !customMetadata?.isDeleted;
+      })
+    );
+
+    // Combiner les métadonnées par défaut filtrées avec celles du template
     const currentMetadata = {
-      ...defaultPageMetadata,
+      ...filteredDefaultMetadata,
       ...templateData.pageMetadata
     };
     
@@ -182,9 +202,17 @@ export const useTemplateOperations = ({
       checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
     };
 
-    // Combiner les métadonnées par défaut avec celles du template
+    // Filtrer les pages supprimées des métadonnées par défaut
+    const filteredDefaultMetadata = Object.fromEntries(
+      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+        const customMetadata = templateData.pageMetadata?.[id];
+        return !customMetadata?.isDeleted;
+      })
+    );
+
+    // Combiner les métadonnées par défaut filtrées avec celles du template
     const currentMetadata = {
-      ...defaultPageMetadata,
+      ...filteredDefaultMetadata,
       ...templateData.pageMetadata
     };
 
@@ -214,9 +242,17 @@ export const useTemplateOperations = ({
       checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
     };
 
-    // Combiner les métadonnées par défaut avec celles du template
+    // Filtrer les pages supprimées des métadonnées par défaut
+    const filteredDefaultMetadata = Object.fromEntries(
+      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+        const customMetadata = templateData.pageMetadata?.[id];
+        return !customMetadata?.isDeleted;
+      })
+    );
+
+    // Combiner les métadonnées par défaut filtrées avec celles du template
     const currentMetadata = {
-      ...defaultPageMetadata,
+      ...filteredDefaultMetadata,
       ...templateData.pageMetadata
     };
 
