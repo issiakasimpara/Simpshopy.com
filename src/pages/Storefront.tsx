@@ -261,13 +261,15 @@ const Storefront = () => {
 
     console.log('Storefront: URL params changed', { page, productId, productsLoaded: products.length > 0, loading });
 
+    // Toujours définir la page immédiatement pour éviter le "flash" de la page d'accueil
+    setCurrentPage(page);
+    setSelectedProductId(productId);
+
     // Si on est sur une page produit-detail avec un productId
     if (page === 'product-detail' && productId) {
-      // Si les produits ne sont pas encore chargés, attendre
+      // Si les produits ne sont pas encore chargés, on garde la page mais on attend
       if (loading || products.length === 0) {
-        console.log('Storefront: Products not loaded yet, waiting...');
-        // Ne pas changer la page, attendre le chargement
-        setSelectedProductId(productId);
+        console.log('Storefront: Products not loaded yet, keeping page but waiting...');
         return;
       }
 
@@ -279,9 +281,6 @@ const Storefront = () => {
         return;
       }
     }
-
-    setCurrentPage(page);
-    setSelectedProductId(productId);
   }, [searchParams, products, navigate, loading]);
 
   // Écouter les changements d'historique (bouton retour du navigateur)
