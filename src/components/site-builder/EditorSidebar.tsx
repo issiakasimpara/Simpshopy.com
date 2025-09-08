@@ -348,7 +348,7 @@ const EditorSidebar = ({
                                       )}
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-0.5">
                                     <div className="flex flex-col items-end gap-1">
                                       <Badge 
                                         variant={blockCount > 0 ? 'default' : 'secondary'}
@@ -362,7 +362,7 @@ const EditorSidebar = ({
                                         </Badge>
                                       )}
                                     </div>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-2">
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 ml-1">
                                       {/* Pages ultra-système (checkout, cart, product-detail) : aucun bouton */}
                                       {!['checkout', 'cart', 'product-detail'].includes(pageId) && (
                                         <>
@@ -374,7 +374,7 @@ const EditorSidebar = ({
                                               e.stopPropagation();
                                               handleStartEdit(pageId, metadata.name);
                                             }}
-                                            className="h-6 w-6 p-0"
+                                            className="h-5 w-5 p-0"
                                           >
                                             <Edit className="h-3 w-3" />
                                           </Button>
@@ -385,7 +385,7 @@ const EditorSidebar = ({
                                               e.stopPropagation();
                                               onPageVisibility(pageId, !metadata.isVisible);
                                             }}
-                                            className="h-6 w-6 p-0"
+                                            className="h-5 w-5 p-0"
                                           >
                                             {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                                           </Button>
@@ -398,7 +398,7 @@ const EditorSidebar = ({
                                                 e.stopPropagation();
                                                 onPageDelete(pageId);
                                               }}
-                                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                              className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
                                             >
                                               <Trash2 className="h-3 w-3" />
                                             </Button>
