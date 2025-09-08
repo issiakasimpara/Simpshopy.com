@@ -378,8 +378,8 @@ const EditorSidebar = ({
                                           >
                                             {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                                           </Button>
-                                          {/* Bouton de suppression uniquement pour les pages personnalisées */}
-                                          {!metadata.isSystem && (
+                                          {/* Bouton de suppression pour les pages personnalisées et certaines pages système */}
+                                          {(!metadata.isSystem || (metadata.isSystem && !['home', 'checkout', 'cart', 'product-detail'].includes(pageId))) && (
                                             <Button 
                                               size="sm" 
                                               variant="ghost" 
