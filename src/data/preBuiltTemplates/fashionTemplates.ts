@@ -33,6 +33,7 @@ export const fashionTemplates: Template[] = [
       cart: [...fashionCartBlocks, fashionFooterBlock],
       checkout: [...fashionCheckoutBlocks, fashionFooterBlock]
     },
+    colorGroups: {},
     pageMetadata: {
       home: {
         id: 'home',

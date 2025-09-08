@@ -1,3 +1,15 @@
+export interface ColorGroup {
+  id: string;
+  name: string;
+  styles: {
+    backgroundColor?: string;
+    textColor?: string;
+    padding?: string;
+    margin?: string;
+  };
+  createdAt: string;
+}
+
 export interface TemplateBlock {
   id: string;
   type: 'hero' | 'products' | 'product-detail' | 'text-image' | 'text-video' | 'video' | 'testimonials' | 'newsletter' | 'contact' | 'gallery' | 'features' | 'team' | 'faq' | 'before-after' | 'footer' | 'cart' | 'checkout' | 'comparison' | 'guarantees' | 'announcement' | 'branding';
@@ -8,6 +20,7 @@ export interface TemplateBlock {
     padding?: string;
     margin?: string;
   };
+  colorGroupId?: string; // Référence au groupe de couleurs utilisé
   order: number;
 }
 
@@ -38,6 +51,9 @@ export interface Template {
   };
   pageMetadata?: {
     [key: string]: PageMetadata;
+  };
+  colorGroups?: {
+    [key: string]: ColorGroup;
   };
 }
 

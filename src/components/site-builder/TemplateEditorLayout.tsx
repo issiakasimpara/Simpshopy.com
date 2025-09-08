@@ -155,6 +155,8 @@ const TemplateEditorLayout = ({
           onBlockUpdate={onBlockUpdate}
           onClose={onClosePropertiesPanel}
           selectedStore={selectedStore}
+          template={templateData}
+          onTemplateUpdate={onTemplateUpdate}
         />
       )}
 

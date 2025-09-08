@@ -4,8 +4,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Template } from '@/types/template';
+import { Template, TemplateBlock } from '@/types/template';
 import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 
 interface SiteSettingsProps {
   template: Template;
@@ -26,6 +27,32 @@ const SiteSettings = ({ template, onUpdate }: SiteSettingsProps) => {
       ...localTemplate,
       styles: { ...localTemplate.styles, ...styleUpdates }
     };
+    setLocalTemplate(updatedTemplate);
+    onUpdate(updatedTemplate);
+  };
+
+  const resetAllBlocksToGlobalColors = () => {
+    const updatedPages = { ...localTemplate.pages };
+    
+    // Parcourir toutes les pages et tous les blocs
+    Object.keys(updatedPages).forEach(pageKey => {
+      updatedPages[pageKey] = updatedPages[pageKey].map(block => ({
+        ...block,
+        styles: {
+          backgroundColor: localTemplate.styles.primaryColor,
+          textColor: localTemplate.styles.secondaryColor,
+          padding: block.styles.padding, // Garder le padding/margin existant
+          margin: block.styles.margin
+        },
+        colorGroupId: undefined // Supprimer la référence au groupe de couleurs
+      }));
+    });
+
+    const updatedTemplate = {
+      ...localTemplate,
+      pages: updatedPages
+    };
+    
     setLocalTemplate(updatedTemplate);
     onUpdate(updatedTemplate);
   };
@@ -83,6 +110,17 @@ const SiteSettings = ({ template, onUpdate }: SiteSettingsProps) => {
               onChange={(e) => updateStyles({ secondaryColor: e.target.value })}
               className="text-xs sm:text-sm"
             />
+          </div>
+          <div className="pt-2">
+            <Button
+              onClick={resetAllBlocksToGlobalColors}
+              variant="outline"
+              size="sm"
+              className="w-full text-xs sm:text-sm"
+            >
+              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+              Réinitialiser tous les blocs aux couleurs globales
+            </Button>
           </div>
         </CardContent>
       </Card>

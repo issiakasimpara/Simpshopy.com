@@ -31,6 +31,8 @@ interface EditorPropertiesPanelProps {
   onBlockUpdate: (block: TemplateBlock) => void;
   onClose?: () => void;
   selectedStore?: Store | null;
+  template?: Template;
+  onTemplateUpdate?: (template: Template) => void;
 }
 
 const EditorPropertiesPanel = ({
@@ -39,7 +41,9 @@ const EditorPropertiesPanel = ({
   onToggleStylePanel,
   onBlockUpdate,
   onClose,
-  selectedStore
+  selectedStore,
+  template,
+  onTemplateUpdate
 }: EditorPropertiesPanelProps) => {
   const handleUpdate = (key: string, value: any) => {
     const updatedBlock = {
@@ -139,6 +143,8 @@ const EditorPropertiesPanel = ({
           <StylePanel
             block={selectedBlock}
             onUpdate={onBlockUpdate}
+            template={template}
+            onTemplateUpdate={onTemplateUpdate}
           />
         ) : (
           <div className="p-3 sm:p-4">
