@@ -1,11 +1,14 @@
 
 import { useState } from 'react';
-import { Template, TemplateBlock } from '@/types/template';
+import { Template, TemplateBlock, PageMetadata } from '@/types/template';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Plus, 
   Home, 
@@ -17,7 +20,11 @@ import {
   FileText,
   Layout,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit,
+  Trash2,
+  EyeOff,
+  GripVertical
 } from 'lucide-react';
 import BlockLibrary from './BlockLibrary';
 import SiteSettings from './SiteSettings';
@@ -27,6 +34,10 @@ interface EditorSidebarProps {
   currentPage: string;
   onPageChange: (page: string) => void;
   onBlockAdd: (block: TemplateBlock) => void;
+  onPageCreate: (pageData: { name: string; description?: string }) => void;
+  onPageDelete: (pageId: string) => void;
+  onPageRename: (pageId: string, newName: string) => void;
+  onPageVisibility: (pageId: string, isVisible: boolean) => void;
   showSettings: boolean;
   onToggleSettings: () => void;
 }
@@ -36,14 +47,126 @@ const EditorSidebar = ({
   currentPage,
   onPageChange,
   onBlockAdd,
+  onPageCreate,
+  onPageDelete,
+  onPageRename,
+  onPageVisibility,
   showSettings,
   onToggleSettings
 }: EditorSidebarProps) => {
   const [activeTab, setActiveTab] = useState('pages');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showCreatePageDialog, setShowCreatePageDialog] = useState(false);
+  const [newPageName, setNewPageName] = useState('');
+  const [newPageDescription, setNewPageDescription] = useState('');
+  const [editingPageId, setEditingPageId] = useState<string | null>(null);
+  const [editingPageName, setEditingPageName] = useState('');
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
+  };
+
+  // Métadonnées par défaut pour les pages système
+  const getDefaultPageMetadata = (): { [key: string]: PageMetadata } => ({
+    home: {
+      id: 'home',
+      name: 'Accueil',
+      slug: 'home',
+      description: 'Page d\'accueil principale',
+      isSystem: true,
+      isVisible: true,
+      order: 1
+    },
+    product: {
+      id: 'product',
+      name: 'Produits',
+      slug: 'product',
+      description: 'Catalogue des produits',
+      isSystem: true,
+      isVisible: true,
+      order: 2
+    },
+    'product-detail': {
+      id: 'product-detail',
+      name: 'Détail produit',
+      slug: 'product-detail',
+      description: 'Page de détail d\'un produit',
+      isSystem: true,
+      isVisible: false,
+      order: 3
+    },
+    category: {
+      id: 'category',
+      name: 'Catégories',
+      slug: 'category',
+      description: 'Pages de catégories',
+      isSystem: true,
+      isVisible: true,
+      order: 4
+    },
+    contact: {
+      id: 'contact',
+      name: 'Contact',
+      slug: 'contact',
+      description: 'Informations de contact',
+      isSystem: true,
+      isVisible: true,
+      order: 5
+    },
+    cart: {
+      id: 'cart',
+      name: 'Panier',
+      slug: 'cart',
+      description: 'Panier d\'achat',
+      isSystem: true,
+      isVisible: false,
+      order: 6
+    },
+    checkout: {
+      id: 'checkout',
+      name: 'Checkout',
+      slug: 'checkout',
+      description: 'Page de commande',
+      isSystem: true,
+      isVisible: false,
+      order: 7
+    }
+  });
+
+  // Combiner les métadonnées par défaut avec celles du template
+  const allPageMetadata = {
+    ...getDefaultPageMetadata(),
+    ...template.pageMetadata
+  };
+
+  const handleCreatePage = () => {
+    if (newPageName.trim()) {
+      onPageCreate({
+        name: newPageName.trim(),
+        description: newPageDescription.trim() || undefined
+      });
+      setNewPageName('');
+      setNewPageDescription('');
+      setShowCreatePageDialog(false);
+    }
+  };
+
+  const handleStartEdit = (pageId: string, currentName: string) => {
+    setEditingPageId(pageId);
+    setEditingPageName(currentName);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingPageId && editingPageName.trim()) {
+      onPageRename(editingPageId, editingPageName.trim());
+      setEditingPageId(null);
+      setEditingPageName('');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPageId(null);
+    setEditingPageName('');
   };
 
   const getPageIcon = (pageName: string) => {
@@ -76,8 +199,8 @@ const EditorSidebar = ({
     return descriptions[pageName] || '';
   };
 
-  const getPageBlockCount = (pageName: string) => {
-    return template.pages[pageName]?.length || 0;
+  const getPageBlockCount = (pageId: string) => {
+    return template.pages[pageId]?.length || 0;
   };
 
   return (
@@ -157,53 +280,122 @@ const EditorSidebar = ({
                       Pages du site
                     </h3>
                     <div className="space-y-2">
-                      {Object.keys(template.pages).map((pageName) => {
-                        const blockCount = getPageBlockCount(pageName);
-                        const isActive = currentPage === pageName;
-                        
-                        return (
-                          <Card 
-                            key={pageName}
-                            className={`cursor-pointer transition-all hover:shadow-md ${
-                              isActive ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                            }`}
-                            onClick={() => onPageChange(pageName)}
-                          >
-                            <CardContent className="p-3 sm:p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                  <div className={`p-1.5 sm:p-2 rounded-lg ${
-                                    isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-                                  }`}>
-                                    {getPageIcon(pageName)}
+                      {Object.entries(allPageMetadata)
+                        .sort(([,a], [,b]) => a.order - b.order)
+                        .map(([pageId, metadata]) => {
+                          const blockCount = getPageBlockCount(pageId);
+                          const isActive = currentPage === pageId;
+                          const isEditing = editingPageId === pageId;
+                          
+                          return (
+                            <Card 
+                              key={pageId}
+                              className={`cursor-pointer transition-all hover:shadow-md group ${
+                                isActive ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                              }`}
+                              onClick={() => !isEditing && onPageChange(pageId)}
+                            >
+                              <CardContent className="p-3 sm:p-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                                    <div className={`p-1.5 sm:p-2 rounded-lg ${
+                                      isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                                    }`}>
+                                      {getPageIcon(pageId)}
+                                    </div>
+                                    <div className="flex-1">
+                                      {isEditing ? (
+                                        <div className="space-y-1">
+                                          <Input
+                                            value={editingPageName}
+                                            onChange={(e) => setEditingPageName(e.target.value)}
+                                            className="h-6 text-xs"
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') handleSaveEdit();
+                                              if (e.key === 'Escape') handleCancelEdit();
+                                            }}
+                                            autoFocus
+                                          />
+                                          <div className="flex gap-1">
+                                            <Button size="sm" variant="ghost" onClick={handleSaveEdit} className="h-5 px-2 text-xs">
+                                              ✓
+                                            </Button>
+                                            <Button size="sm" variant="ghost" onClick={handleCancelEdit} className="h-5 px-2 text-xs">
+                                              ✕
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <h4 className="font-medium text-xs sm:text-sm">
+                                            {metadata.name}
+                                          </h4>
+                                          <p className="text-xs text-gray-500">
+                                            {metadata.description}
+                                          </p>
+                                        </>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h4 className="font-medium text-xs sm:text-sm">
-                                      {getPageDisplayName(pageName)}
-                                    </h4>
-                                    <p className="text-xs text-gray-500">
-                                      {getPageDescription(pageName)}
-                                    </p>
+                                  <div className="flex items-center gap-1">
+                                    <div className="flex flex-col items-end gap-1">
+                                      <Badge 
+                                        variant={blockCount > 0 ? 'default' : 'secondary'}
+                                        className="text-xs"
+                                      >
+                                        {blockCount} bloc{blockCount !== 1 ? 's' : ''}
+                                      </Badge>
+                                      {isActive && (
+                                        <Badge variant="outline" className="text-xs">
+                                          Actuelle
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-2">
+                                      {!metadata.isSystem && (
+                                        <>
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleStartEdit(pageId, metadata.name);
+                                            }}
+                                            className="h-6 w-6 p-0"
+                                          >
+                                            <Edit className="h-3 w-3" />
+                                          </Button>
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onPageVisibility(pageId, !metadata.isVisible);
+                                            }}
+                                            className="h-6 w-6 p-0"
+                                          >
+                                            {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                                          </Button>
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onPageDelete(pageId);
+                                            }}
+                                            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-1">
-                                  <Badge 
-                                    variant={blockCount > 0 ? 'default' : 'secondary'}
-                                    className="text-xs"
-                                  >
-                                    {blockCount} bloc{blockCount !== 1 ? 's' : ''}
-                                  </Badge>
-                                  {isActive && (
-                                    <Badge variant="outline" className="text-xs">
-                                      Actuelle
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                     </div>
                   </div>
 
@@ -214,6 +406,55 @@ const EditorSidebar = ({
                       Actions rapides
                     </h3>
                     <div className="space-y-2">
+                      <Dialog open={showCreatePageDialog} onOpenChange={setShowCreatePageDialog}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start text-xs sm:text-sm h-8 sm:h-9"
+                          >
+                            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Créer une page</span>
+                            <span className="sm:hidden">Nouvelle page</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Créer une nouvelle page</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="pageName">Nom de la page</Label>
+                              <Input
+                                id="pageName"
+                                value={newPageName}
+                                onChange={(e) => setNewPageName(e.target.value)}
+                                placeholder="Ex: À propos, Blog, FAQ..."
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleCreatePage();
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="pageDescription">Description (optionnel)</Label>
+                              <Input
+                                id="pageDescription"
+                                value={newPageDescription}
+                                onChange={(e) => setNewPageDescription(e.target.value)}
+                                placeholder="Description de la page..."
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" onClick={() => setShowCreatePageDialog(false)}>
+                                Annuler
+                              </Button>
+                              <Button onClick={handleCreatePage} disabled={!newPageName.trim()}>
+                                Créer la page
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                       <Button
                         variant="outline"
                         size="sm"

@@ -11,6 +11,16 @@ export interface TemplateBlock {
   order: number;
 }
 
+export interface PageMetadata {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  isSystem: boolean; // true pour home, product, etc.
+  isVisible: boolean; // visible dans la navigation
+  order: number; // ordre d'affichage
+}
+
 export interface Template {
   id: string;
   name: string;
@@ -24,13 +34,10 @@ export interface Template {
     fontFamily: string;
   };
   pages: {
-    home: TemplateBlock[];
-    product: TemplateBlock[];
-    'product-detail'?: TemplateBlock[];
-    category: TemplateBlock[];
-    contact: TemplateBlock[];
-    cart?: TemplateBlock[];
-    checkout?: TemplateBlock[];
+    [key: string]: TemplateBlock[];
+  };
+  pageMetadata?: {
+    [key: string]: PageMetadata;
   };
 }
 

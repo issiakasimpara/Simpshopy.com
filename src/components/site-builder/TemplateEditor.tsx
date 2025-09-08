@@ -77,6 +77,11 @@ const TemplateEditor = ({ template, onBack }: TemplateEditorProps) => {
   const {
     pageBlocks,
     handlePageChange,
+    handlePageCreate,
+    handlePageDelete,
+    handlePageRename,
+    handlePageReorder,
+    handlePageVisibility,
     handleBlockSelect,
     handleBlockUpdate,
     handleBlockAdd,
@@ -118,6 +123,10 @@ const TemplateEditor = ({ template, onBack }: TemplateEditorProps) => {
       onPreview={handlePreview}
       onPublish={handlePublish}
       onPageChange={wrappedPageChange}
+      onPageCreate={handlePageCreate}
+      onPageDelete={handlePageDelete}
+      onPageRename={handlePageRename}
+      onPageVisibility={handlePageVisibility}
       onBlockAdd={handleBlockAdd}
       onBlockSelect={handleBlockSelect}
       onBlockUpdate={handleBlockUpdate}

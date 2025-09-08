@@ -36,6 +36,10 @@ interface TemplateEditorLayoutProps {
   onPreview: () => void;
   onPublish: () => void;
   onPageChange: (page: string) => void;
+  onPageCreate: (pageData: { name: string; description?: string }) => void;
+  onPageDelete: (pageId: string) => void;
+  onPageRename: (pageId: string, newName: string) => void;
+  onPageVisibility: (pageId: string, isVisible: boolean) => void;
   onBlockAdd: (block: TemplateBlock) => void;
   onBlockSelect: (block: TemplateBlock) => void;
   onBlockUpdate: (block: TemplateBlock) => void;
@@ -72,6 +76,10 @@ const TemplateEditorLayout = ({
   onPreview,
   onPublish,
   onPageChange,
+  onPageCreate,
+  onPageDelete,
+  onPageRename,
+  onPageVisibility,
   onBlockAdd,
   onBlockSelect,
   onBlockUpdate,
@@ -111,6 +119,10 @@ const TemplateEditorLayout = ({
         currentPage={currentPage}
         onPageChange={onPageChange}
         onBlockAdd={onBlockAdd}
+        onPageCreate={onPageCreate}
+        onPageDelete={onPageDelete}
+        onPageRename={onPageRename}
+        onPageVisibility={onPageVisibility}
         showSettings={showSettings}
         onToggleSettings={onToggleSettings}
       />

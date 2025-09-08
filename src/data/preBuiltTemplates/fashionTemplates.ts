@@ -32,6 +32,71 @@ export const fashionTemplates: Template[] = [
       contact: [...fashionContactBlocks, fashionFooterBlock],
       cart: [...fashionCartBlocks, fashionFooterBlock],
       checkout: [...fashionCheckoutBlocks, fashionFooterBlock]
+    },
+    pageMetadata: {
+      home: {
+        id: 'home',
+        name: 'Accueil',
+        slug: 'home',
+        description: 'Page d\'accueil principale',
+        isSystem: true,
+        isVisible: true,
+        order: 1
+      },
+      product: {
+        id: 'product',
+        name: 'Produits',
+        slug: 'product',
+        description: 'Catalogue des produits',
+        isSystem: true,
+        isVisible: true,
+        order: 2
+      },
+      'product-detail': {
+        id: 'product-detail',
+        name: 'Détail produit',
+        slug: 'product-detail',
+        description: 'Page de détail d\'un produit',
+        isSystem: true,
+        isVisible: false,
+        order: 3
+      },
+      category: {
+        id: 'category',
+        name: 'Catégories',
+        slug: 'category',
+        description: 'Pages de catégories',
+        isSystem: true,
+        isVisible: true,
+        order: 4
+      },
+      contact: {
+        id: 'contact',
+        name: 'Contact',
+        slug: 'contact',
+        description: 'Informations de contact',
+        isSystem: true,
+        isVisible: true,
+        order: 5
+      },
+      cart: {
+        id: 'cart',
+        name: 'Panier',
+        slug: 'cart',
+        description: 'Panier d\'achat',
+        isSystem: true,
+        isVisible: false,
+        order: 6
+      },
+      checkout: {
+        id: 'checkout',
+        name: 'Checkout',
+        slug: 'checkout',
+        description: 'Page de commande',
+        isSystem: true,
+        isVisible: false,
+        order: 7
+      }
     }
   },
   {

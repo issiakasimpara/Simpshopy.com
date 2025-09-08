@@ -330,13 +330,30 @@ const Storefront = () => {
 
   const getPageBlocks = (pageName: string) => {
     if (!template) return [];
+    
+    // Chercher par slug ou par ID dans les métadonnées
+    const pageMetadata = template.pageMetadata || {};
+    const pageId = Object.keys(pageMetadata).find(id => 
+      pageMetadata[id].slug === pageName || id === pageName
+    );
+    
+    if (pageId) {
+      return template.pages[pageId] ? template.pages[pageId].sort((a, b) => a.order - b.order) : [];
+    }
+    
+    // Fallback pour les pages sans métadonnées
     return template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
   };
 
   const renderNavigation = () => {
     if (!template) return null;
 
-    const mainPages = ['home', 'product', 'category', 'contact'];
+    // Récupérer les pages visibles depuis les métadonnées
+    const pageMetadata = template.pageMetadata || {};
+    const visiblePages = Object.entries(pageMetadata)
+      .filter(([, metadata]) => metadata.isVisible)
+      .sort(([,a], [,b]) => a.order - b.order);
+    
     const logoPosition = brandingData.logoPosition || 'left';
 
     // Composant Logo réutilisable
@@ -382,20 +399,18 @@ const Storefront = () => {
 
             {/* Navigation principale */}
             <div className={`hidden md:flex items-center space-x-8 ${logoPosition === 'center' ? 'ml-auto' : ''}`}>
-              {mainPages.map((page) => (
+              {visiblePages.map(([pageId, metadata]) => (
                 <button
-                  key={page}
-                  onClick={() => handlePageNavigation(page)}
+                  key={pageId}
+                  onClick={() => handlePageNavigation(metadata.slug)}
                   className={`text-gray-700 hover:text-gray-900 transition-colors font-medium ${
-                    currentPage === page ? 'border-b-2 pb-1' : ''
+                    currentPage === metadata.slug ? 'border-b-2 pb-1' : ''
                   }`}
                   style={{
-                    borderColor: currentPage === page ? template.styles.primaryColor : 'transparent'
+                    borderColor: currentPage === metadata.slug ? template.styles.primaryColor : 'transparent'
                   }}
                 >
-                  {page === 'home' ? 'Accueil' :
-                   page === 'product' ? 'Boutique' :
-                   page === 'category' ? 'Catégories' : 'Contact'}
+                  {metadata.name}
                 </button>
               ))}
             </div>
@@ -430,25 +445,23 @@ const Storefront = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t bg-white">
               <div className="px-4 py-2 space-y-1">
-                {mainPages.map((page) => (
+                {visiblePages.map(([pageId, metadata]) => (
                   <button
-                    key={page}
+                    key={pageId}
                     onClick={() => {
-                      handlePageNavigation(page);
+                      handlePageNavigation(metadata.slug);
                       setMobileMenuOpen(false);
                     }}
                     className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                      currentPage === page
+                      currentPage === metadata.slug
                         ? 'text-white'
                         : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                     style={{
-                      backgroundColor: currentPage === page ? template.styles.primaryColor : 'transparent'
+                      backgroundColor: currentPage === metadata.slug ? template.styles.primaryColor : 'transparent'
                     }}
                   >
-                    {page === 'home' ? 'Accueil' :
-                     page === 'product' ? 'Boutique' :
-                     page === 'category' ? 'Catégories' : 'Contact'}
+                    {metadata.name}
                   </button>
                 ))}
               </div>

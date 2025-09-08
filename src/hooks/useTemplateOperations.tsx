@@ -1,5 +1,5 @@
 
-import { TemplateBlock, Template } from '@/types/template';
+import { TemplateBlock, Template, PageMetadata } from '@/types/template';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseTemplateOperationsProps {
@@ -35,6 +35,122 @@ export const useTemplateOperations = ({
     }
     
     setSelectedBlock(null);
+  };
+
+  // Gestion des pages personnalisées
+  const handlePageCreate = (pageData: { name: string; description?: string }) => {
+    const pageId = `custom-${Date.now()}`;
+    const slug = pageData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    
+    const currentPageMetadata = templateData.pageMetadata || {};
+    const maxOrder = Math.max(...Object.values(currentPageMetadata).map(p => p.order), 0);
+    
+    const updatedTemplate = {
+      ...templateData,
+      pages: {
+        ...templateData.pages,
+        [pageId]: [] // Page vide
+      },
+      pageMetadata: {
+        ...currentPageMetadata,
+        [pageId]: {
+          id: pageId,
+          name: pageData.name,
+          slug,
+          description: pageData.description,
+          isSystem: false,
+          isVisible: true,
+          order: maxOrder + 1
+        }
+      }
+    };
+    
+    onTemplateUpdate(updatedTemplate);
+    toast({
+      title: "Page créée",
+      description: `La page "${pageData.name}" a été créée avec succès.`,
+    });
+  };
+
+  const handlePageDelete = (pageId: string) => {
+    const pageMetadata = templateData.pageMetadata?.[pageId];
+    
+    // Empêcher la suppression des pages système
+    if (pageMetadata?.isSystem) {
+      toast({
+        title: "Impossible de supprimer",
+        description: "Cette page est requise par le système.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const { [pageId]: deletedPage, ...remainingPages } = templateData.pages;
+    const { [pageId]: deletedMetadata, ...remainingMetadata } = templateData.pageMetadata || {};
+    
+    const updatedTemplate = {
+      ...templateData,
+      pages: remainingPages,
+      pageMetadata: remainingMetadata
+    };
+    
+    onTemplateUpdate(updatedTemplate);
+    toast({
+      title: "Page supprimée",
+      description: `La page "${pageMetadata?.name}" a été supprimée.`,
+    });
+  };
+
+  const handlePageRename = (pageId: string, newName: string) => {
+    const newSlug = newName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    
+    const updatedTemplate = {
+      ...templateData,
+      pageMetadata: {
+        ...templateData.pageMetadata,
+        [pageId]: {
+          ...templateData.pageMetadata?.[pageId],
+          name: newName,
+          slug: newSlug
+        }
+      }
+    };
+    
+    onTemplateUpdate(updatedTemplate);
+    toast({
+      title: "Page renommée",
+      description: `La page a été renommée en "${newName}".`,
+    });
+  };
+
+  const handlePageReorder = (pageId: string, newOrder: number) => {
+    const updatedTemplate = {
+      ...templateData,
+      pageMetadata: {
+        ...templateData.pageMetadata,
+        [pageId]: {
+          ...templateData.pageMetadata?.[pageId],
+          order: newOrder
+        }
+      }
+    };
+    
+    onTemplateUpdate(updatedTemplate);
+  };
+
+  const handlePageVisibility = (pageId: string, isVisible: boolean) => {
+    const updatedTemplate = {
+      ...templateData,
+      pageMetadata: {
+        ...templateData.pageMetadata,
+        [pageId]: {
+          ...templateData.pageMetadata?.[pageId],
+          isVisible
+        }
+      }
+    };
+    
+    onTemplateUpdate(updatedTemplate);
   };
 
   const handleBlockSelect = (block: TemplateBlock) => {
@@ -120,6 +236,11 @@ export const useTemplateOperations = ({
   return {
     pageBlocks,
     handlePageChange,
+    handlePageCreate,
+    handlePageDelete,
+    handlePageRename,
+    handlePageReorder,
+    handlePageVisibility,
     handleBlockSelect,
     handleBlockUpdate,
     handleBlockAdd,
