@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Command, CommandGroup, CommandItem, CommandList, CommandInput, CommandEmpty } from '@/components/ui/command';
 import { useStores } from '@/hooks/useStores';
 import { useProducts } from '@/hooks/useProducts';
+import type { Tables } from '@/integrations/supabase/types';
 
 // Composant LinkAutocomplete adapté UNIQUEMENT pour la boutique publique
 // Génère des liens compatibles avec la navigation de la boutique publique (?page=...)
@@ -14,7 +15,8 @@ interface LinkAutocompleteProps {
 
 const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pages }) => {
   const { stores } = useStores();
-  const storeId = stores && stores[0]?.id;
+  const storesArray = stores as Tables<'stores'>[];
+  const storeId = storesArray.length > 0 ? storesArray[0]?.id : undefined;
   const { products = [] } = useProducts(storeId, 'active');
 
   // Suggestions de pages pour la boutique publique uniquement
