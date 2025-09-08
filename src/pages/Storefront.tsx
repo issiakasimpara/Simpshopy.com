@@ -654,7 +654,7 @@ const Storefront = () => {
         ))}
       </div>
 
-      <CartWidget />
+      <CartWidget currentStoreId={store?.id} />
     </div>
   );
 };

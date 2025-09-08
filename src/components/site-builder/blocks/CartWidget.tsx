@@ -7,7 +7,11 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 
-const CartWidget = () => {
+interface CartWidgetProps {
+  currentStoreId?: string;
+}
+
+const CartWidget = ({ currentStoreId }: CartWidgetProps) => {
   const {
     items,
     getTotalItems,
@@ -21,7 +25,10 @@ const CartWidget = () => {
   const { storeSlug } = useParams();
   const location = useLocation();
   const { stores } = useStores();
-  const { formatPrice } = useStoreCurrency(stores[0]?.id);
+  
+  // Utiliser le storeId de la boutique actuelle si fourni, sinon fallback sur la première boutique
+  const storeIdToUse = currentStoreId || stores[0]?.id;
+  const { formatPrice } = useStoreCurrency(storeIdToUse);
 
   const getStoreBasedUrl = (path: string) => {
     // Si nous sommes dans une boutique spécifique
