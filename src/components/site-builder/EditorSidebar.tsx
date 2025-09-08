@@ -352,42 +352,47 @@ const EditorSidebar = ({
                                       )}
                                     </div>
                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-2">
-                                      {/* Boutons pour toutes les pages (système et personnalisées) */}
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleStartEdit(pageId, metadata.name);
-                                        }}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onPageVisibility(pageId, !metadata.isVisible);
-                                        }}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                                      </Button>
-                                      {/* Bouton de suppression uniquement pour les pages personnalisées */}
-                                      {!metadata.isSystem && (
-                                        <Button 
-                                          size="sm" 
-                                          variant="ghost" 
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            onPageDelete(pageId);
-                                          }}
-                                          className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </Button>
+                                      {/* Pages ultra-système (checkout, cart, product-detail) : aucun bouton */}
+                                      {!['checkout', 'cart', 'product-detail'].includes(pageId) && (
+                                        <>
+                                          {/* Boutons pour les autres pages (système et personnalisées) */}
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleStartEdit(pageId, metadata.name);
+                                            }}
+                                            className="h-6 w-6 p-0"
+                                          >
+                                            <Edit className="h-3 w-3" />
+                                          </Button>
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onPageVisibility(pageId, !metadata.isVisible);
+                                            }}
+                                            className="h-6 w-6 p-0"
+                                          >
+                                            {metadata.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                                          </Button>
+                                          {/* Bouton de suppression uniquement pour les pages personnalisées */}
+                                          {!metadata.isSystem && (
+                                            <Button 
+                                              size="sm" 
+                                              variant="ghost" 
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                onPageDelete(pageId);
+                                              }}
+                                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                          )}
+                                        </>
                                       )}
                                     </div>
                                   </div>
