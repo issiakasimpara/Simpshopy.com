@@ -37,7 +37,7 @@ const ShippingMethodsList = ({
   onAdd
 }: ShippingMethodsListProps) => {
   const { store } = useStores();
-  const { formatPrice } = useStoreCurrency(store?.id);
+  const { formatConvertedPrice } = useStoreCurrency(store?.id);
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const filteredMethods = methods.filter(method => {
@@ -140,11 +140,11 @@ const ShippingMethodsList = ({
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-lg font-semibold">
                       <DollarSign className="h-4 w-4" />
-                      {method.price === 0 ? 'Gratuit' : formatPrice(method.price)}
+                      {method.price === 0 ? 'Gratuit' : formatConvertedPrice(method.price, 'XOF')}
                     </div>
                     {method.free_shipping_threshold && (
                       <p className="text-xs text-muted-foreground">
-                        Gratuit à partir de {formatPrice(method.free_shipping_threshold)}
+                        Gratuit à partir de {formatConvertedPrice(method.free_shipping_threshold, 'XOF')}
                       </p>
                     )}
                   </div>

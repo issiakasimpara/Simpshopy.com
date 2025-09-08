@@ -36,7 +36,7 @@ const Checkout = () => {
   
   // Utiliser le storeId du panier en priorité, sinon celui récupéré par getStoreInfo
   const effectiveStoreId = cartStoreId || currentStoreId;
-  const { formatPrice, currency } = useStoreCurrency(effectiveStoreId);
+  const { formatPrice, formatConvertedPrice, currency } = useStoreCurrency(effectiveStoreId);
 
   const [customerInfo, setCustomerInfo] = useState({
     email: '',
@@ -597,7 +597,7 @@ const Checkout = () => {
                             {method.price === 0 ? (
                               <span className="text-green-600">Gratuit</span>
                             ) : (
-                              <span>{formatPrice(method.price)}</span>
+                              <span>{formatConvertedPrice(method.price, 'XOF')}</span>
                             )}
                           </div>
                         </div>
@@ -677,7 +677,7 @@ const Checkout = () => {
                         selectedShippingMethod.price === 0 ? (
                           <span className="text-green-600">Gratuit</span>
                         ) : (
-                          formatPrice(selectedShippingMethod.price)
+                          formatConvertedPrice(selectedShippingMethod.price, 'XOF')
                         )
                       ) : (
                         <span className="text-gray-500">Non sélectionnée</span>

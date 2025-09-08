@@ -6,6 +6,7 @@ import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useStores } from '@/hooks/useStores';
 import { useMarkets } from '@/hooks/useMarkets';
+import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,7 @@ const MarketsShipping = () => {
 
   // Sélectionner automatiquement la première boutique
   const currentStore = stores.length > 0 ? stores[0] : null;
+  const { formatConvertedPrice } = useStoreCurrency(currentStore?.id);
   const storeId = currentStore?.id || '';
 
   const {
@@ -381,7 +383,7 @@ const MarketsShipping = () => {
                           <div>
                             <h3 className="font-medium">{method.name}</h3>
                             <p className="text-sm text-gray-600">
-                              {method.market?.name} • {method.price} CFA • {
+                              {method.market?.name} • {formatConvertedPrice(method.price, 'XOF')} • {
                                 method.conditions?.display_text ||
                                 (method.estimated_min_days === 0 && method.estimated_max_days === 0
                                   ? 'Instantané'
