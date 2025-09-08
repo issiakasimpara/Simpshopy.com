@@ -331,8 +331,24 @@ const Storefront = () => {
   const getPageBlocks = (pageName: string) => {
     if (!template) return [];
     
+    // Métadonnées par défaut pour les pages système
+    const defaultPageMetadata = {
+      home: { id: 'home', name: 'Accueil', slug: 'home', description: 'Page d\'accueil principale', isSystem: true, isVisible: true, order: 1 },
+      product: { id: 'product', name: 'Produits', slug: 'product', description: 'Catalogue des produits', isSystem: true, isVisible: true, order: 2 },
+      'product-detail': { id: 'product-detail', name: 'Détail produit', slug: 'product-detail', description: 'Page de détail d\'un produit', isSystem: true, isVisible: false, order: 3 },
+      category: { id: 'category', name: 'Catégories', slug: 'category', description: 'Pages de catégories', isSystem: true, isVisible: true, order: 4 },
+      contact: { id: 'contact', name: 'Contact', slug: 'contact', description: 'Informations de contact', isSystem: true, isVisible: true, order: 5 },
+      cart: { id: 'cart', name: 'Panier', slug: 'cart', description: 'Panier d\'achat', isSystem: true, isVisible: false, order: 6 },
+      checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
+    };
+    
+    // Combiner les métadonnées par défaut avec celles du template
+    const pageMetadata = {
+      ...defaultPageMetadata,
+      ...template.pageMetadata
+    };
+    
     // Chercher par slug ou par ID dans les métadonnées
-    const pageMetadata = template.pageMetadata || {};
     const pageId = Object.keys(pageMetadata).find(id => 
       pageMetadata[id].slug === pageName || id === pageName
     );
@@ -348,8 +364,23 @@ const Storefront = () => {
   const renderNavigation = () => {
     if (!template) return null;
 
-    // Récupérer les pages visibles depuis les métadonnées
-    const pageMetadata = template.pageMetadata || {};
+    // Métadonnées par défaut pour les pages système
+    const defaultPageMetadata = {
+      home: { id: 'home', name: 'Accueil', slug: 'home', description: 'Page d\'accueil principale', isSystem: true, isVisible: true, order: 1 },
+      product: { id: 'product', name: 'Produits', slug: 'product', description: 'Catalogue des produits', isSystem: true, isVisible: true, order: 2 },
+      'product-detail': { id: 'product-detail', name: 'Détail produit', slug: 'product-detail', description: 'Page de détail d\'un produit', isSystem: true, isVisible: false, order: 3 },
+      category: { id: 'category', name: 'Catégories', slug: 'category', description: 'Pages de catégories', isSystem: true, isVisible: true, order: 4 },
+      contact: { id: 'contact', name: 'Contact', slug: 'contact', description: 'Informations de contact', isSystem: true, isVisible: true, order: 5 },
+      cart: { id: 'cart', name: 'Panier', slug: 'cart', description: 'Panier d\'achat', isSystem: true, isVisible: false, order: 6 },
+      checkout: { id: 'checkout', name: 'Checkout', slug: 'checkout', description: 'Page de commande', isSystem: true, isVisible: false, order: 7 }
+    };
+
+    // Combiner les métadonnées par défaut avec celles du template
+    const pageMetadata = {
+      ...defaultPageMetadata,
+      ...template.pageMetadata
+    };
+    
     const visiblePages = Object.entries(pageMetadata)
       .filter(([, metadata]) => metadata.isVisible)
       .sort(([,a], [,b]) => a.order - b.order);
