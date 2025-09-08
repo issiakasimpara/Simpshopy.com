@@ -70,10 +70,17 @@ const HeroContent = ({ block, isEditing, viewMode, onContentUpdate }: HeroConten
           target={block.content.buttonLink.startsWith('http') ? '_blank' : undefined} 
           rel={block.content.buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}
           onClick={(e) => {
-            // Si c'est un lien interne de la boutique publique (commence par ?page=), 
-            // on laisse le navigateur gérer la navigation normalement
+            // Si c'est un lien interne de la boutique publique (commence par ?page=)
             if (block.content.buttonLink?.startsWith('?page=')) {
-              // Navigation normale - pas besoin de preventDefault
+              e.preventDefault();
+              
+              // Construire l'URL complète en préservant l'URL de base de la boutique
+              const currentUrl = window.location.href;
+              const baseUrl = currentUrl.split('?')[0]; // Enlever les paramètres existants
+              const newUrl = baseUrl + block.content.buttonLink;
+              
+              // Naviguer vers la nouvelle URL
+              window.location.href = newUrl;
               return;
             }
             // Pour les liens externes, comportement par défaut
