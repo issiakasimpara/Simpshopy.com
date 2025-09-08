@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { useEffect } from 'react';
+import { getStoreHomeUrl } from '@/utils/storeNavigation';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart, setStoreId, storeId } = useCart();
@@ -39,7 +40,7 @@ const Cart = () => {
   };
 
   const handleContinueShopping = () => {
-    navigate('/');
+    navigate(getStoreHomeUrl(window.location.pathname));
   };
 
   return (

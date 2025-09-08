@@ -17,6 +17,7 @@ import { useShippingWithAutoSetup } from '@/hooks/useAutoShipping';
 import { MonerooService } from '@/services/monerooService';
 import { useCartSessions } from '@/hooks/useCartSessions';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
+import { getStoreHomeUrl } from '@/utils/storeNavigation';
 
 const Checkout = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, storeId: cartStoreId, isLoading: cartLoading } = useCart();
@@ -482,7 +483,7 @@ const Checkout = () => {
             <CardContent className="text-center py-12">
               <h3 className="text-xl font-medium mb-2">Votre panier est vide</h3>
               <p className="text-gray-600 mb-6">Ajoutez des produits avant de procéder au paiement</p>
-              <Button onClick={() => navigate('/')}>
+              <Button onClick={() => navigate(getStoreHomeUrl(window.location.pathname))}>
                 Retour à la boutique
               </Button>
             </CardContent>
