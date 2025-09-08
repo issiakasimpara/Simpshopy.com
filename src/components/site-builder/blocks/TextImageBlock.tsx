@@ -124,7 +124,19 @@ const TextImageBlock = ({ block, isEditing, viewMode, onUpdate }: TextImageBlock
                   {block.content.text || 'Votre texte descriptif ici...'}
                 </p>
                 {block.content.buttonLink ? (
-                  <a href={block.content.buttonLink} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" target={block.content.buttonLink.startsWith('http') ? '_blank' : undefined} rel={block.content.buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}>
+                  <a 
+                    href={block.content.buttonLink} 
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" 
+                    target={block.content.buttonLink.startsWith('http') ? '_blank' : undefined} 
+                    rel={block.content.buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    onClick={(e) => {
+                      // Si c'est un lien interne de la boutique publique (commence par ?page=), 
+                      // on laisse le navigateur gérer la navigation normalement
+                      if (block.content.buttonLink?.startsWith('?page=')) {
+                        return;
+                      }
+                    }}
+                  >
                     {block.content.buttonText || 'En savoir plus'}
                   </a>
                 ) : (

@@ -3,6 +3,9 @@ import { Command, CommandGroup, CommandItem, CommandList, CommandInput, CommandE
 import { useStores } from '@/hooks/useStores';
 import { useProducts } from '@/hooks/useProducts';
 
+// Composant LinkAutocomplete adapté UNIQUEMENT pour la boutique publique
+// Génère des liens compatibles avec la navigation de la boutique publique (?page=...)
+
 interface LinkAutocompleteProps {
   value: string;
   onChange: (val: string) => void;
@@ -14,15 +17,16 @@ const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pa
   const storeId = stores && stores[0]?.id;
   const { products = [] } = useProducts(storeId, 'active');
 
-  // Suggestions de pages : soit via prop, soit fallback
+  // Suggestions de pages pour la boutique publique uniquement
   const pageSuggestions = useMemo(() => {
     if (pages && pages.length > 0) return pages;
     return [
-      { label: 'Accueil', value: '/' },
-      { label: 'Produits', value: '/products' },
-      { label: 'Contact', value: '/contact' },
-      { label: 'Panier', value: '/cart' },
-      { label: 'Checkout', value: '/checkout' },
+      { label: 'Accueil', value: '?page=home' },
+      { label: 'Produits', value: '?page=product' },
+      { label: 'Catégories', value: '?page=category' },
+      { label: 'Contact', value: '?page=contact' },
+      { label: 'Panier', value: '?page=cart' },
+      { label: 'Checkout', value: '?page=checkout' },
     ];
   }, [pages]);
 
@@ -30,7 +34,7 @@ const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pa
     Array.isArray(products)
       ? products.map((p: any) => ({
           label: p.name,
-          value: `/product/${p.id}`
+          value: `?page=product-detail&product=${p.id}`
         }))
       : [],
     [products]
@@ -46,7 +50,7 @@ const LinkAutocomplete: React.FC<LinkAutocompleteProps> = ({ value, onChange, pa
   return (
     <Command className="text-xs sm:text-sm">
       <CommandInput
-        placeholder="/page-ou-url"
+        placeholder="?page=product ou URL externe"
         value={input}
         onValueChange={(val) => {
           setInput(val);
