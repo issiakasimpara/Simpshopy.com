@@ -393,7 +393,7 @@ const EditorSidebar = ({
                                             </Button>
                                           )}
                                           {/* Bouton de suppression pour les pages personnalisées et certaines pages système */}
-                                          {(!metadata.isSystem || (metadata.isSystem && !['home', 'checkout', 'cart', 'product-detail'].includes(pageId))) && (
+                                          {!['home', 'checkout', 'cart', 'product-detail'].includes(pageId) && (
                                             <Button 
                                               size="sm" 
                                               variant="ghost" 
