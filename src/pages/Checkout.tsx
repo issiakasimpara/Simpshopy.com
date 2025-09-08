@@ -258,7 +258,58 @@ const Checkout = () => {
   // Calculer le total avec livraison
   const getTotalWithShipping = () => {
     const shippingPrice = selectedShippingMethod?.price || 0;
-    return getTotalPrice() + shippingPrice;
+    
+    // Si pas de méthode de livraison sélectionnée, retourner juste le total des produits
+    if (!selectedShippingMethod || shippingPrice === 0) {
+      return getTotalPrice();
+    }
+    
+    // Convertir le prix de livraison de XOF vers la devise actuelle
+    // Utiliser les taux de change approximatifs du hook useStoreCurrency
+    const currentCurrency = currency || 'XOF';
+    
+    // Si la devise actuelle est XOF, pas de conversion nécessaire
+    if (currentCurrency === 'XOF') {
+      return getTotalPrice() + shippingPrice;
+    }
+    
+    // Taux de change approximatifs (même que dans useStoreCurrency)
+    const rates: Record<string, number> = {
+      XOF: 1,        // Base: Franc CFA BCEAO
+      XAF: 1,        // Parité avec XOF
+      EUR: 0.00152,  // 1 EUR ≈ 655 XOF
+      USD: 0.00166,  // 1 USD ≈ 620 XOF
+      GBP: 0.00130,  // 1 GBP ≈ 500 XOF
+      GHS: 0.0095,   // 1 GHS ≈ 105 XOF
+      NGN: 0.0013,   // 1 NGN ≈ 770 XOF
+      ZAR: 0.0085,   // 1 ZAR ≈ 118 XOF
+      EGP: 0.052,    // 1 EGP ≈ 19 XOF
+      KES: 0.0095,   // 1 KES ≈ 105 XOF
+      UGX: 0.00042,  // 1 UGX ≈ 2380 XOF
+      TZS: 0.00068,  // 1 TZS ≈ 1470 XOF
+      MAD: 0.0095,   // 1 MAD ≈ 105 XOF
+      DZD: 0.0095,   // 1 DZD ≈ 105 XOF
+      TND: 0.0095,   // 1 TND ≈ 105 XOF
+      LYD: 0.0095,   // 1 LYD ≈ 105 XOF
+      SDG: 0.0095,   // 1 SDG ≈ 105 XOF
+      ETB: 0.0095,   // 1 ETB ≈ 105 XOF
+      SOS: 0.0095,   // 1 SOS ≈ 105 XOF
+      DJF: 0.0095,   // 1 DJF ≈ 105 XOF
+      KMF: 0.0095,   // 1 KMF ≈ 105 XOF
+      MUR: 0.0095,   // 1 MUR ≈ 105 XOF
+      SCR: 0.0095,   // 1 SCR ≈ 105 XOF
+      BIF: 0.0095,   // 1 BIF ≈ 105 XOF
+      RWF: 0.0095,   // 1 RWF ≈ 105 XOF
+      CDF: 0.0095,   // 1 CDF ≈ 105 XOF
+      GMD: 0.0095,   // 1 GMD ≈ 105 XOF
+      SLL: 0.0095,   // 1 SLL ≈ 105 XOF
+    };
+    
+    // Convertir le prix de livraison de XOF vers la devise actuelle
+    const rate = rates[currentCurrency] || 1;
+    const convertedShippingPrice = shippingPrice * rate;
+    
+    return getTotalPrice() + convertedShippingPrice;
   };
 
   const handleCheckout = async () => {
@@ -696,7 +747,7 @@ const Checkout = () => {
 
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>{formatPrice(getTotalWithShipping())}</span>
+                    <span>{formatConvertedPrice(getTotalWithShipping(), 'XOF')}</span>
                   </div>
                 </div>
                 
