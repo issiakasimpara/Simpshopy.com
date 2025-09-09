@@ -170,8 +170,8 @@ export const CustomerReviewStats: React.FC<CustomerReviewStatsProps> = ({
             </div>
             <div className="flex-1 bg-gray-200 rounded-full h-3">
               <div
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${ratingPercentages[rating as keyof typeof ratingPercentages]}%` }}
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-500 ease-out rating-bar"
+                style={{ '--rating-width': `${ratingPercentages[rating as keyof typeof ratingPercentages]}%` } as React.CSSProperties}
               />
             </div>
             <div className="text-sm text-gray-600 w-12 text-right font-medium">

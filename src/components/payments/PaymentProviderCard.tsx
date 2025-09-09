@@ -49,9 +49,9 @@ const PaymentProviderCard: React.FC<PaymentProviderCardProps> = ({
 
   return (
     <div
-      className="bg-white dark:bg-card rounded-xl shadow hover:shadow-lg transition p-4 sm:p-5 lg:p-6 flex flex-col items-start border border-muted/30 cursor-pointer group"
+      className="bg-white dark:bg-card rounded-xl shadow hover:shadow-lg transition p-4 sm:p-5 lg:p-6 flex flex-col items-start border border-muted/30 cursor-pointer group payment-card"
       onClick={() => navigate(`/payments/${provider.id}`)}
-      style={{ minHeight: '220px' }}
+      style={{ '--min-height': '220px' } as React.CSSProperties}
     >
       <div className="flex items-center gap-3 mb-3 w-full">
         <div className={`w-36 h-36 rounded-xl flex items-center justify-center ${provider.id === 'moneroo' || provider.id === 'paypal' || provider.id === 'stripe' ? '' : provider.color}`}>

@@ -74,8 +74,8 @@ const VariantCard = ({ variant, onEdit, onDelete }: VariantCardProps) => {
               <Badge key={index} variant="outline" className="text-xs">
                 {vav.attribute_values?.hex_color && (
                   <div 
-                    className="w-2 h-2 rounded-full border mr-1"
-                    style={{ backgroundColor: vav.attribute_values.hex_color }}
+                    className="w-2 h-2 rounded-full border mr-1 color-preview"
+                    style={{ '--color-preview': vav.attribute_values.hex_color } as React.CSSProperties}
                   />
                 )}
                 {vav.attribute_values?.value}

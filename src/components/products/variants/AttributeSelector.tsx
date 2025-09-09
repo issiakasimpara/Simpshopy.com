@@ -55,8 +55,8 @@ const AttributeSelector = ({
                     className="flex items-center gap-2 cursor-pointer flex-1"
                   >
                     <div 
-                      className="w-5 h-5 rounded-full border-2 border-gray-300 shadow-sm"
-                      style={{ backgroundColor: value.hex_color }}
+                      className="w-5 h-5 rounded-full border-2 border-gray-300 shadow-sm color-preview"
+                      style={{ '--color-preview': value.hex_color } as React.CSSProperties}
                     />
                     <span className="text-sm font-medium">{value.value}</span>
                   </Label>

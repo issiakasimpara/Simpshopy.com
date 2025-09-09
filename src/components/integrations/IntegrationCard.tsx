@@ -15,9 +15,9 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({ integration, installe
 
   return (
     <div
-      className="bg-white dark:bg-card rounded-xl shadow hover:shadow-lg transition p-3 sm:p-4 lg:p-5 flex flex-col items-start border border-muted/30 cursor-pointer group"
+      className="bg-white dark:bg-card rounded-xl shadow hover:shadow-lg transition p-3 sm:p-4 lg:p-5 flex flex-col items-start border border-muted/30 cursor-pointer group integration-card"
       onClick={() => navigate(`/integrations/${integration.id}`)}
-      style={{ minHeight: '200px' }}
+      style={{ '--min-height': '200px' } as React.CSSProperties}
     >
       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full">
         <img

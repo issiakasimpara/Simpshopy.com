@@ -136,7 +136,8 @@ const ColorAttributeManager = ({ onColorAttributeCreated }: ColorAttributeManage
               >
                 <div 
                   className="w-4 h-4 rounded-full border border-gray-300"
-                  style={{ backgroundColor: color.hex }}
+                  className="color-preview"
+                  style={{ '--color-preview': color.hex } as React.CSSProperties}
                 />
                 <span className="text-xs">{color.name}</span>
               </Button>
@@ -181,8 +182,8 @@ const ColorAttributeManager = ({ onColorAttributeCreated }: ColorAttributeManage
                   className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg"
                 >
                   <div 
-                    className="w-4 h-4 rounded-full border border-gray-300"
-                    style={{ backgroundColor: color.hex_color }}
+                    className="w-4 h-4 rounded-full border border-gray-300 color-preview"
+                    style={{ '--color-preview': color.hex_color } as React.CSSProperties}
                   />
                   <span className="text-sm">{color.value}</span>
                   <Button

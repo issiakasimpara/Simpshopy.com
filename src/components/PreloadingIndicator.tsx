@@ -53,8 +53,8 @@ export const PreloadingIndicator: React.FC<PreloadingIndicatorProps> = ({
             </div>
             <div className="w-full bg-secondary rounded-full h-2">
               <div 
-                className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
+                className="bg-primary h-2 rounded-full transition-all duration-300 ease-out preloading-progress"
+                style={{ '--progress-width': `${progress}%` } as React.CSSProperties}
               />
             </div>
           </div>
@@ -90,11 +90,11 @@ export const PreloadingIndicator: React.FC<PreloadingIndicatorProps> = ({
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="w-2 h-2 bg-primary rounded-full animate-pulse"
+                className="w-2 h-2 bg-primary rounded-full animate-pulse preloading-dot"
                 style={{
-                  animationDelay: `${i * 0.2}s`,
-                  animationDuration: '1s'
-                }}
+                  '--animation-delay': `${i * 0.2}s`,
+                  '--animation-duration': '1s'
+                } as React.CSSProperties}
               />
             ))}
           </div>

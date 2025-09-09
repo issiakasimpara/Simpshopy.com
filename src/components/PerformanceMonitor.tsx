@@ -106,7 +106,7 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({ isVisible, onClose }
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div 
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-2 rounded-full transition-all duration-300 performance-bar ${
                   metrics.queryCount < 15 && metrics.averageQueryTime < 800 
                     ? 'bg-green-500' 
                     : metrics.queryCount < 25 && metrics.averageQueryTime < 1500
@@ -114,8 +114,8 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({ isVisible, onClose }
                     : 'bg-red-500'
                 }`}
                 style={{ 
-                  width: `${Math.min(100, Math.max(20, 100 - (metrics.queryCount * 2 + metrics.averageQueryTime / 20)))}%` 
-                }}
+                  '--performance-width': `${Math.min(100, Math.max(20, 100 - (metrics.queryCount * 2 + metrics.averageQueryTime / 20)))}%` 
+                } as React.CSSProperties}
               />
             </div>
             <span className="text-xs font-medium">

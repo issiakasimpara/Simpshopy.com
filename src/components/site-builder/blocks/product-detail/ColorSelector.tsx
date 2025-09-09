@@ -23,12 +23,12 @@ const ColorSelector = ({ colors, selectedColor, onColorSelect }: ColorSelectorPr
         {colors.map((color) => (
           <button
             key={color.id}
-            className={`relative w-10 h-10 rounded-full border-2 transition-all ${
+            className={`relative w-10 h-10 rounded-full border-2 transition-all color-preview ${
               selectedColor === color.id
                 ? 'border-gray-900 shadow-lg'
                 : 'border-gray-300 hover:border-gray-400'
             }`}
-            style={{ backgroundColor: color.hex }}
+            style={{ '--color-preview': color.hex } as React.CSSProperties}
             onClick={() => onColorSelect(color.id)}
             title={color.name}
           >
