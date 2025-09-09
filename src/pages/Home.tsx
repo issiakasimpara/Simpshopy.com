@@ -317,7 +317,7 @@ const Home = () => {
                           if (fallback) fallback.style.display = 'flex';
                         }}
                       />
-                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>AK</span>
+                      <span className="text-white font-bold text-lg sm:text-xl hidden-text">AK</span>
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
@@ -357,7 +357,7 @@ const Home = () => {
                           if (fallback) fallback.style.display = 'flex';
                         }}
                       />
-                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>BD</span>
+                      <span className="text-white font-bold text-lg sm:text-xl hidden-text">BD</span>
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-blue-500 rounded-full border-2 border-white"></div>
                   </div>
@@ -397,7 +397,7 @@ const Home = () => {
                           if (fallback) fallback.style.display = 'flex';
                         }}
                       />
-                      <span className="text-white font-bold text-lg sm:text-xl" style={{display: 'none'}}>FT</span>
+                      <span className="text-white font-bold text-lg sm:text-xl hidden-text">FT</span>
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500 rounded-full border-2 border-white"></div>
                   </div>
@@ -848,13 +848,13 @@ const AnalyticsIllustration = () => (
         {/* Chart */}
         <div className="mb-3 sm:mb-4 lg:mb-6">
           <div className="flex items-end justify-between h-12 sm:h-16 lg:h-20 space-x-1">
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '60%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '80%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '45%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '90%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '70%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '85%'}}></div>
-            <div className="w-3 sm:w-4 bg-blue-500 rounded-t" style={{height: '95%'}}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '60%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '80%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '45%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '90%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '70%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '85%'} as React.CSSProperties}></div>
+            <div className="w-3 sm:w-4 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '95%'} as React.CSSProperties}></div>
           </div>
           <div className="flex justify-between text-xs text-gray-500 mt-1 sm:mt-2">
             <span>Lun</span>

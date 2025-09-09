@@ -105,8 +105,8 @@ const StylePanel = ({ block, onUpdate, template, onTemplateUpdate }: StylePanelP
                       className="w-full justify-start text-xs h-8"
                     >
                       <div 
-                        className="w-4 h-4 rounded mr-2 border"
-                        style={{ backgroundColor: group.styles.backgroundColor }}
+                        className="w-4 h-4 rounded mr-2 border style-preview"
+                        style={{ '--preview-color': group.styles.backgroundColor } as React.CSSProperties}
                       />
                       {group.name}
                     </Button>

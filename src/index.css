@@ -195,6 +195,59 @@
   }
 }
 
+/* Additional Home optimizations */
+.hidden-text {
+  display: none;
+}
+
+/* UI Components optimizations */
+.shimmer-animation {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.progress-indicator {
+  transform: translateX(calc(-1 * var(--progress-value, 100%)));
+}
+
+/* Storefront additional optimizations */
+.animate-scale-in {
+  animation: scaleIn 0.6s ease-out var(--animation-delay, 0ms) both;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Site builder optimizations */
+.style-preview {
+  background-color: var(--preview-color);
+}
+
+.loading-progress {
+  width: var(--progress-width, 0%);
+}
+
+.announcement-preview {
+  background-color: var(--preview-bg-color);
+  color: var(--preview-text-color);
+}
+
 /* Reset complet pour full screen */
 html, body, #root {
   margin: 0;

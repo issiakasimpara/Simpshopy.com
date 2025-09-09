@@ -90,8 +90,8 @@ const EditorLoadingState: React.FC<EditorLoadingStateProps> = ({ currentStep, pr
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
+                  className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full transition-all duration-500 ease-out loading-progress"
+                  style={{ '--progress-width': `${progress}%` } as React.CSSProperties}
                 />
               </div>
             </div>

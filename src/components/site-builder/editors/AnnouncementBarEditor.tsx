@@ -220,11 +220,11 @@ const AnnouncementBarEditor = ({ block, onUpdate }: AnnouncementBarEditorProps) 
       <div className="border-t pt-4">
         <Label className="text-base font-medium">Aperçu</Label>
         <div 
-          className="mt-2 p-3 rounded overflow-hidden whitespace-nowrap text-sm"
+          className="mt-2 p-3 rounded overflow-hidden whitespace-nowrap text-sm announcement-preview"
           style={{
-            backgroundColor: config.backgroundColor,
-            color: config.textColor
-          }}
+            '--preview-bg-color': config.backgroundColor,
+            '--preview-text-color': config.textColor
+          } as React.CSSProperties}
         >
           {config.announcements.length > 0 ? (
             config.announcements.map((announcement: AnnouncementItem, index: number) => (

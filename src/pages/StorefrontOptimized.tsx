@@ -275,7 +275,7 @@ const StorefrontOptimized = () => {
             <div
               key={`${block.id}-${block.order}`}
               className="animate-scale-in"
-              style={{ animationDelay: `${index * 50}ms` }} // Réduit de 100ms à 50ms
+              style={{ '--animation-delay': `${index * 50}ms` } as React.CSSProperties} // Réduit de 100ms à 50ms
             >
               <BlockRenderer
                 block={block}
