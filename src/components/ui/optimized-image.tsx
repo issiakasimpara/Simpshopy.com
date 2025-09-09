@@ -24,9 +24,12 @@ const OptimizedImage = React.memo(({
   const [isInView, setIsInView] = useState(priority);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Intersection Observer pour lazy loading
+  // Intersection Observer pour lazy loading - OPTIMISÉ
   useEffect(() => {
-    if (priority) return;
+    if (priority) {
+      setIsInView(true);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -35,7 +38,10 @@ const OptimizedImage = React.memo(({
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '50px' }
+      { 
+        threshold: 0.1, 
+        rootMargin: priority ? '200px' : '100px' // Zone plus large pour les images critiques
+      }
     );
 
     if (imgRef.current) {
@@ -98,6 +104,7 @@ const OptimizedImage = React.memo(({
             className
           )}
           loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           decoding="async"
           {...props}
         />

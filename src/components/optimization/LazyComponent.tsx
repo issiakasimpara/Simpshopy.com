@@ -123,6 +123,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           height={height}
           className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
+          fetchPriority="auto"
         />
       )}
     </div>

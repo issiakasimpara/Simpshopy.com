@@ -99,10 +99,16 @@ export const useOptimizedImageLoader = (
     });
   }, [retries, timeout]);
 
-  // Intersection Observer pour le lazy loading
+  // Intersection Observer pour le lazy loading - OPTIMISÉ
   useEffect(() => {
     if (cachedState?.isLoaded) {
       setLoadState(cachedState);
+      return;
+    }
+
+    // Chargement immédiat pour les images prioritaires
+    if (priority === 'high') {
+      setIsInView(true);
       return;
     }
 
@@ -113,7 +119,10 @@ export const useOptimizedImageLoader = (
           observer.disconnect();
         }
       },
-      { threshold, rootMargin }
+      { 
+        threshold, 
+        rootMargin: priority === 'high' ? '200px' : rootMargin 
+      }
     );
 
     // Observer l'élément parent (sera attaché via ref)
