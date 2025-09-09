@@ -79,7 +79,7 @@ const ProductsBlock = ({
 
   if (isLoading) {
     return (
-      <section className="py-16" style={{ backgroundColor: block.styles.backgroundColor || '#ffffff' }}>
+      <section className="products-block py-16" style={{ '--bg-color': block.styles.backgroundColor || '#ffffff' } as React.CSSProperties}>
         <div className="container mx-auto px-4">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
@@ -98,11 +98,11 @@ const ProductsBlock = ({
   const displayProducts = products.slice(0, block.content.productsToShow || 8);
 
   return (
-    <section className="py-16" style={{ backgroundColor: block.styles.backgroundColor || '#ffffff' }}>
+    <section className="products-block py-16" style={{ '--bg-color': block.styles.backgroundColor || '#ffffff', '--text-color': block.styles.textColor || '#000000' } as React.CSSProperties}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4" style={{ color: block.styles.textColor || '#000000' }}>
+          <h2 className="products-title text-3xl font-bold mb-4">
             {block.content.title || 'Nos Produits'}
           </h2>
           {block.content.subtitle && (

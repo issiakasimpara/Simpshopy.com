@@ -33,8 +33,8 @@ const BrandingBlock = ({
   if (isEditing) {
     return (
       <section 
-        className={`${getResponsiveClasses()}`}
-        style={{ backgroundColor: block.styles?.backgroundColor || '#f8fafc' }}
+        className={`branding-block ${getResponsiveClasses()}`}
+        style={{ '--bg-color': block.styles?.backgroundColor || '#f8fafc' } as React.CSSProperties}
       >
         <div className="container mx-auto">
           <Card className="border-2 border-dashed border-blue-300 bg-blue-50/50">

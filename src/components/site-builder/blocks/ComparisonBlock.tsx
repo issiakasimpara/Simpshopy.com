@@ -24,12 +24,12 @@ const ComparisonBlock = ({ block, isEditing = false, viewMode = 'desktop' }: Com
 
   return (
     <section 
-      className={`${getResponsiveClasses()}`}
+      className={`comparison-block ${getResponsiveClasses()}`}
       style={{
-        backgroundColor: block.styles.backgroundColor,
-        color: block.styles.textColor,
-        padding: block.styles.padding
-      }}
+        '--bg-color': block.styles.backgroundColor || '#ffffff',
+        '--text-color': block.styles.textColor || '#000000',
+        '--padding': block.styles.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}

@@ -22,12 +22,12 @@ const DefaultBlock = ({ block, isEditing, viewMode, onUpdate }: DefaultBlockProp
 
   return (
     <div 
-      className={`py-16 bg-gray-100 ${getResponsiveClasses()}`}
-      style={{ 
-        backgroundColor: block.styles.backgroundColor,
-        color: block.styles.textColor,
-        padding: block.styles.padding
-      }}
+      className={`default-block ${getResponsiveClasses()}`}
+      style={{
+        '--bg-color': block.styles.backgroundColor || '#F3F4F6',
+        '--text-color': block.styles.textColor || '#000000',
+        '--padding': block.styles.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto text-center">
         <h3 className="text-xl font-semibold mb-4">Bloc {block.type}</h3>

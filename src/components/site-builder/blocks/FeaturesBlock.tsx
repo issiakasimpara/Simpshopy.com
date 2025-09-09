@@ -41,12 +41,12 @@ const FeaturesBlock = ({ block, isEditing, viewMode, onUpdate }: FeaturesBlockPr
 
   return (
     <div 
-      className={`py-20 ${getResponsiveClasses()}`}
-      style={{ 
-        backgroundColor: block.styles?.backgroundColor || '#FAFBFC',
-        color: block.styles?.textColor || '#1F2937',
-        padding: block.styles?.padding
-      }}
+      className={`features-block ${getResponsiveClasses()}`}
+      style={{
+        '--bg-color': block.styles?.backgroundColor || '#FAFBFC',
+        '--text-color': block.styles?.textColor || '#1F2937',
+        '--padding': block.styles?.padding || '5rem 2rem'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto max-w-6xl">
         {isEditing ? (

@@ -94,12 +94,12 @@ const BeforeAfterBlock = ({ block, isEditing = false, viewMode = 'desktop' }: Be
 
   return (
     <section
-      className={`py-16 ${getResponsiveClasses()}`}
+      className={`before-after-block py-16 ${getResponsiveClasses()}`}
       style={{
-        backgroundColor: block.styles.backgroundColor,
-        color: block.styles.textColor,
-        padding: block.styles.padding
-      }}
+        '--bg-color': block.styles.backgroundColor || '#ffffff',
+        '--text-color': block.styles.textColor || '#000000',
+        '--padding': block.styles.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className={`container mx-auto ${getContainerClasses()}`}>
         {title && (

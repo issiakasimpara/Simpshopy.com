@@ -36,12 +36,12 @@ const FAQBlock = ({ block, isEditing = false, viewMode = 'desktop' }: FAQBlockPr
 
   return (
     <section
-      className={`py-16 ${getResponsiveClasses()}`}
+      className={`faq-block py-16 ${getResponsiveClasses()}`}
       style={{
-        backgroundColor: block.styles.backgroundColor,
-        color: block.styles.textColor,
-        padding: block.styles.padding
-      }}
+        '--bg-color': block.styles.backgroundColor || '#F8F9FA',
+        '--text-color': block.styles.textColor || '#000000',
+        '--padding': block.styles.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className={`container mx-auto ${getContainerClasses()}`}>
         {title && (

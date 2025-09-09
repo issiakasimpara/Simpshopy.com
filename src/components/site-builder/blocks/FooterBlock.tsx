@@ -73,12 +73,12 @@ const FooterBlock = ({ block, isEditing, viewMode, onUpdate }: FooterBlockProps)
   
   return (
     <footer 
-      className={`py-12 ${getResponsiveClasses()}`}
-      style={{ 
-        backgroundColor: block.styles?.backgroundColor || '#1F2937',
-        color: block.styles?.textColor || '#FFFFFF',
-        padding: block.styles?.padding
-      }}
+      className={`footer-block py-12 ${getResponsiveClasses()}`}
+      style={{
+        '--bg-color': block.styles?.backgroundColor || '#1F2937',
+        '--text-color': block.styles?.textColor || '#FFFFFF',
+        '--padding': block.styles?.padding || '3rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto">
         {/* Newsletter Section */}

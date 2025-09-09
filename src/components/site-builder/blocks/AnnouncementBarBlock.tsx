@@ -58,16 +58,16 @@ const AnnouncementBarBlock = ({ block, isEditing, viewMode, onUpdate }: Announce
           ${getResponsiveClasses()}
         `}
         style={{
-          backgroundColor: config.backgroundColor,
-          color: config.textColor
-        }}
+          '--bg-color': config.backgroundColor,
+          '--text-color': config.textColor
+        } as React.CSSProperties}
       >
         {/* Animation de défilement */}
         <div
           className="inline-block animate-scroll"
           style={{
-            animationDuration: `${config.announcements.length * (100 / config.speed)}s`
-          }}
+            '--animation-duration': `${config.announcements.length * (100 / config.speed)}s`
+          } as React.CSSProperties}
         >
           {config.announcements.map((announcement: AnnouncementItem, index: number) => (
             <span key={`${announcement.id}-${index}`} className="inline-block mx-8">

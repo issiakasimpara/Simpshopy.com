@@ -54,12 +54,12 @@ const CartBlock = ({ block, isEditing = false, onNavigate }: CartBlockProps) => 
 
   return (
     <div 
-      className="py-12 px-4"
+      className="cart-block py-12 px-4"
       style={{
-        backgroundColor: block.styles.backgroundColor || '#ffffff',
-        color: block.styles.textColor || '#000000',
-        padding: block.styles.padding || '60px 0'
-      }}
+        '--bg-color': block.styles.backgroundColor || '#ffffff',
+        '--text-color': block.styles.textColor || '#000000',
+        '--padding': block.styles.padding || '60px 0'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto max-w-4xl">
         <h2 className="text-3xl font-bold mb-8 text-center">

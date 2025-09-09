@@ -3,6 +3,134 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables pour les blocs du site builder */
+.default-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.contact-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.text-image-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.text-video-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.hero-background {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+  background-image: var(--bg-image);
+}
+
+.features-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.products-block {
+  background-color: var(--bg-color);
+}
+
+.products-title {
+  color: var(--text-color);
+}
+
+.gallery-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.footer-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.faq-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.announcement-bar-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.branding-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.guarantees-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.comparison-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.before-after-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.video-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.cart-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: var(--padding);
+}
+
+.announcement-bar-block {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.branding-block {
+  background-color: var(--bg-color);
+}
+
+.animate-scroll {
+  animation: scroll var(--animation-duration, 20s) linear infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 /* Reset complet pour full screen */
 html, body, #root {
   margin: 0;

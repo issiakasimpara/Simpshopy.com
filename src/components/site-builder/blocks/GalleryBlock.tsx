@@ -52,12 +52,12 @@ const GalleryBlock = ({ block, isEditing, viewMode, onUpdate }: GalleryBlockProp
 
   return (
     <div 
-      className={`py-16 ${getResponsiveClasses()}`}
-      style={{ 
-        backgroundColor: block.styles?.backgroundColor || '#FFFFFF',
-        color: block.styles?.textColor || '#000000',
-        padding: block.styles?.padding
-      }}
+      className={`gallery-block ${getResponsiveClasses()}`}
+      style={{
+        '--bg-color': block.styles?.backgroundColor || '#FFFFFF',
+        '--text-color': block.styles?.textColor || '#000000',
+        '--padding': block.styles?.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto">
         {isEditing ? (

@@ -42,11 +42,12 @@ const GuaranteesBlock = ({
 
   return (
     <div 
-      className={getContainerClasses()}
+      className={`guarantees-block ${getContainerClasses()}`}
       style={{
-        backgroundColor: block.styles.backgroundColor || '#ffffff',
-        color: block.styles.textColor || '#374151',
-      }}
+        '--bg-color': block.styles.backgroundColor || '#ffffff',
+        '--text-color': block.styles.textColor || '#374151',
+        '--padding': block.styles.padding || '4rem 1.5rem'
+      } as React.CSSProperties}
     >
       <div className="container mx-auto">
         {block.content.title && (
