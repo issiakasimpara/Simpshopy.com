@@ -201,11 +201,11 @@ const Home = () => {
                      
                      {/* Graphique animé */}
                      <div className="mt-3 sm:mt-4 flex items-end justify-center space-x-1 h-8 sm:h-12">
-                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '60%', animationDelay: '0s'}}></div>
-                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '80%', animationDelay: '0.2s'}}></div>
-                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '45%', animationDelay: '0.4s'}}></div>
-                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t animate-pulse" style={{height: '90%', animationDelay: '0.6s'}}></div>
-                       <div className="w-2 sm:w-3 bg-purple-500 rounded-t animate-pulse" style={{height: '100%', animationDelay: '0.8s'}}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '60%', '--animation-delay': '0s'} as React.CSSProperties}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '80%', '--animation-delay': '0.2s'} as React.CSSProperties}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '45%', '--animation-delay': '0.4s'} as React.CSSProperties}></div>
+                       <div className="w-2 sm:w-3 bg-blue-500 rounded-t chart-bar" style={{'--bar-height': '90%', '--animation-delay': '0.6s'} as React.CSSProperties}></div>
+                       <div className="w-2 sm:w-3 bg-purple-500 rounded-t chart-bar" style={{'--bar-height': '100%', '--animation-delay': '0.8s'} as React.CSSProperties}></div>
                      </div>
                    </div>
                  </div>
@@ -239,7 +239,7 @@ const Home = () => {
                      {/* Graphique circulaire animé */}
                      <div className="mt-3 sm:mt-4 relative w-8 h-8 sm:w-12 sm:h-12 mx-auto">
                        <div className="absolute inset-0 rounded-full border-2 border-gray-200"></div>
-                       <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" style={{animationDuration: '2s'}}></div>
+                       <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent chart-spinner" style={{'--animation-duration': '2s'} as React.CSSProperties}></div>
                      </div>
                    </div>
                  </div>
@@ -259,7 +259,7 @@ const Home = () => {
                          <Star 
                            key={star} 
                            className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current animate-pulse" 
-                           style={{animationDelay: `${star * 0.1}s`}}
+                           style={{'--animation-delay': `${star * 0.1}s`} as React.CSSProperties}
                          />
                        ))}
                      </div>
@@ -269,15 +269,15 @@ const Home = () => {
 
                {/* Indicateurs de succès animés */}
                <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm sm:text-base">
-                 <div className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}>
+                 <div className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-full bounce-card" style={{'--animation-delay': '0.5s'} as React.CSSProperties}>
                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                    <span className="font-medium">+300% croissance moyenne</span>
                  </div>
-                 <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '1s'}}>
+                 <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full bounce-card" style={{'--animation-delay': '1s'} as React.CSSProperties}>
                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
                    <span className="font-medium">Support 24/7 disponible</span>
                  </div>
-                 <div className="flex items-center bg-purple-100 text-purple-700 px-3 py-2 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}>
+                 <div className="flex items-center bg-purple-100 text-purple-700 px-3 py-2 rounded-full bounce-card" style={{'--animation-delay': '1.5s'} as React.CSSProperties}>
                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
                    <span className="font-medium">Configuration en 2 minutes</span>
                  </div>

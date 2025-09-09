@@ -418,7 +418,7 @@ const Storefront = () => {
             className="h-10 w-10 rounded-lg object-cover"
           />
         ) : (
-          <div className="p-2 rounded-lg" style={{ backgroundColor: template.styles.primaryColor }}>
+          <div className="p-2 rounded-lg storefront-brand-icon" style={{ '--primary-color': template.styles.primaryColor } as React.CSSProperties}>
             <ShoppingBag className="h-5 w-5 text-white" />
           </div>
         )}
@@ -453,8 +453,9 @@ const Storefront = () => {
                     currentPage === metadata.slug ? 'border-b-2 pb-1' : ''
                   }`}
                   style={{
-                    borderColor: currentPage === metadata.slug ? template.styles.primaryColor : 'transparent'
-                  }}
+                    '--primary-color': template.styles.primaryColor,
+                    '--border-color': currentPage === metadata.slug ? 'var(--primary-color)' : 'transparent'
+                  } as React.CSSProperties}
                 >
                   {metadata.name}
                 </button>
@@ -504,8 +505,9 @@ const Storefront = () => {
                         : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                     style={{
-                      backgroundColor: currentPage === metadata.slug ? template.styles.primaryColor : 'transparent'
-                    }}
+                      '--primary-color': template.styles.primaryColor,
+                      '--bg-color': currentPage === metadata.slug ? 'var(--primary-color)' : 'transparent'
+                    } as React.CSSProperties}
                   >
                     {metadata.name}
                   </button>
@@ -639,7 +641,7 @@ const Storefront = () => {
           <div
             key={`${block.id}-${block.order}`}
             className="animate-fade-in"
-            style={{ animationDelay: `${index * 20}ms` }} // Réduit de 100ms à 20ms
+            style={{ '--animation-delay': `${index * 20}ms` } as React.CSSProperties} // Réduit de 100ms à 20ms
           >
             <BlockRenderer
               block={block}
