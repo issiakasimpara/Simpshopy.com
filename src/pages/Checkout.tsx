@@ -748,7 +748,7 @@ const Checkout = () => {
 
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>{formatConvertedPrice(getTotalWithShipping(), 'XOF')}</span>
+                    <span>{formatPrice(getTotalWithShipping())}</span>
                   </div>
                 </div>
                 
