@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo, useMemo, Suspense, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Store, ShoppingBag, ArrowLeft, Home, Loader2, Menu, X } from 'lucide-react';
+import { Store, ShoppingBag, ArrowLeft, Home, Menu, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import BlockRenderer from '@/components/site-builder/BlockRenderer';
 import CartWidget from '@/components/site-builder/blocks/CartWidget';
@@ -12,24 +12,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { useBranding } from '@/hooks/useBranding';
 
 
-// Composant de chargement optimisé
-const StorefrontLoader = memo(() => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-    <div className="text-center animate-fade-in-up">
-      <div className="relative mb-6">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-lg opacity-30 animate-pulse"></div>
-        <div className="relative p-4 bg-white rounded-full shadow-lg">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Chargement de votre boutique</h2>
-      <p className="text-gray-600">Préparation de l'expérience shopping...</p>
-      <div className="mt-4 w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-shimmer"></div>
-      </div>
-    </div>
-  </div>
-));
+// Composant de chargement supprimé - chargement immédiat
 
 type StoreType = Tables<'stores'>;
 type ProductType = Tables<'products'>;
@@ -259,17 +242,32 @@ const StorefrontOptimized = () => {
     );
   }
 
-  // État de chargement
+  // Chargement immédiat - affichage progressif
   if (isLoading || !store) {
-    return <StorefrontLoader />;
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Affichage immédiat du contenu avec skeleton */}
+        <div className="animate-pulse">
+          <div className="h-16 bg-gray-200"></div>
+          <div className="container mx-auto p-4">
+            <div className="h-64 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {renderNavigation}
 
-      {/* Contenu principal avec Suspense pour le lazy loading */}
-      <Suspense fallback={<StorefrontLoader />}>
+      {/* Contenu principal - chargement immédiat */}
+      <Suspense fallback={null}>
         <div className="min-h-screen animate-fade-in-up">
           {currentPageBlocks.map((block, index) => (
             <div
