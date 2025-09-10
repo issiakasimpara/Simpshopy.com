@@ -34,6 +34,7 @@ export interface StorefrontData {
     images: string[] | null;
     status: string;
     category_id: string | null;
+    store_id: string;  // 🚀 AJOUT DU store_id !
     created_at: string;
     updated_at: string;
     category: {
