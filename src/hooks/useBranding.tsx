@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Template } from '@/types/template';
 
 interface BrandingData {
@@ -13,43 +13,53 @@ interface BrandingData {
 export const useBranding = (template: Template | null) => {
   const [brandingData, setBrandingData] = useState<BrandingData>({});
 
-  useEffect(() => {
+  // 🚀 OPTIMISATION: Mémoriser l'extraction du bloc branding
+  const brandingBlock = useMemo(() => {
     if (!template) {
       console.log('🔍 useBranding: Pas de template');
-      return;
+      return null;
     }
 
     console.log('🔍 useBranding: Recherche bloc branding dans template:', template.id);
 
     // Chercher le bloc branding dans toutes les pages du template
-    let brandingBlock = null;
+    let foundBlock = null;
 
     // Chercher dans toutes les pages
     Object.entries(template.pages).forEach(([pageName, pageBlocks]) => {
-      const foundBlock = pageBlocks.find(block => block.type === 'branding');
-      if (foundBlock) {
-        console.log(`✅ Bloc branding trouvé dans la page: ${pageName}`, foundBlock.content);
-        brandingBlock = foundBlock;
+      const block = pageBlocks.find(block => block.type === 'branding');
+      if (block) {
+        console.log(`✅ Bloc branding trouvé dans la page: ${pageName}`, block.content);
+        foundBlock = block;
       }
     });
 
-    if (brandingBlock) {
-      const newBrandingData = {
-        logo: brandingBlock.content.logo || '',
-        favicon: brandingBlock.content.favicon || '',
-        brandName: brandingBlock.content.brandName || '',
-        tagline: brandingBlock.content.tagline || '',
-        description: brandingBlock.content.description || '',
-        logoPosition: brandingBlock.content.logoPosition || 'left'
-      };
+    return foundBlock;
+  }, [template?.id, template?.pages]);
 
-      console.log('🎨 Données branding extraites:', newBrandingData);
-      setBrandingData(newBrandingData);
-    } else {
+  // 🚀 OPTIMISATION: Mémoriser les données branding extraites
+  const extractedBrandingData = useMemo(() => {
+    if (!brandingBlock) {
       console.log('⚠️ Aucun bloc branding trouvé dans le template');
-      setBrandingData({});
+      return {};
     }
-  }, [template]);
+
+    const newBrandingData = {
+      logo: brandingBlock.content.logo || '',
+      favicon: brandingBlock.content.favicon || '',
+      brandName: brandingBlock.content.brandName || '',
+      tagline: brandingBlock.content.tagline || '',
+      description: brandingBlock.content.description || '',
+      logoPosition: brandingBlock.content.logoPosition || 'left'
+    };
+
+    console.log('🎨 Données branding extraites:', newBrandingData);
+    return newBrandingData;
+  }, [brandingBlock]);
+
+  useEffect(() => {
+    setBrandingData(extractedBrandingData);
+  }, [extractedBrandingData]);
 
   return brandingData;
 };
