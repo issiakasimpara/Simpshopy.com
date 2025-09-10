@@ -87,10 +87,18 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
     try {
       const cached = localStorage.getItem(`${CACHE_KEY_PREFIX}${id}`);
       if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
+        const { data, timestamp, version } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_DURATION) {
-          // Précompiler le template mis en cache
-          return precompileTemplate(data);
+          // Vérifier si le template est déjà précompilé
+          if (version === 'precompiled') {
+            return data;
+          } else {
+            // Précompiler le template mis en cache
+            const precompiled = precompileTemplate(data);
+            // Mettre à jour le cache avec la version précompilée
+            setCachedTemplate(id, precompiled);
+            return precompiled;
+          }
         }
         localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
       }
@@ -102,9 +110,12 @@ export const useOptimizedTemplateLoader = (templateId: string) => {
 
   const setCachedTemplate = useCallback((id: string, data: Template) => {
     try {
+      // Vérifier si le template est déjà précompilé
+      const isPrecompiled = templateCompilationCache.has(id);
       localStorage.setItem(`${CACHE_KEY_PREFIX}${id}`, JSON.stringify({
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        version: isPrecompiled ? 'precompiled' : 'raw'
       }));
     } catch (error) {
       console.warn('Cache write error:', error);

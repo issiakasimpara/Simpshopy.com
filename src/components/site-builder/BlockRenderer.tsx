@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { TemplateBlock } from '@/types/template';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -57,7 +57,8 @@ const BlockRenderer = memo(({
     console.log('BlockRenderer - Rendering block:', block.type, 'with productId:', productId);
   }
 
-  const blockProps = {
+  // 🚀 OPTIMISATION: Mémoriser les props pour éviter les re-renders
+  const blockProps = useMemo(() => ({
     block,
     isEditing,
     viewMode,
@@ -66,11 +67,11 @@ const BlockRenderer = memo(({
     productId,
     onProductClick,
     onNavigate
-  };
+  }), [block, isEditing, viewMode, onUpdate, selectedStore, productId, onProductClick, onNavigate]);
 
-  const renderBlock = () => {
-
-  switch (block.type) {
+  // 🚀 OPTIMISATION: Mémoriser la fonction de rendu
+  const renderBlock = useMemo(() => {
+    switch (block.type) {
     case 'announcement':
       return <AnnouncementBarBlock {...blockProps} />;
     case 'branding':
@@ -117,9 +118,9 @@ const BlockRenderer = memo(({
     default:
       return <DefaultBlock {...blockProps} />;
     }
-  };
+  }, [block.type, blockProps]);
 
-  return renderBlock();
+  return renderBlock;
 });
 
 BlockRenderer.displayName = 'BlockRenderer';
