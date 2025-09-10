@@ -50,10 +50,10 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           
           // Redirection automatique pour les routes de boutiques
           const currentPath = window.location.pathname;
-          if (currentPath.startsWith('/store/')) {
-            const storeSlug = currentPath.replace('/store/', '');
+          if (currentPath.match(/^\/[^\/]+\//) && !currentPath.startsWith('/admin')) {
+            const storeSlug = currentPath.split('/')[1];
             console.log('🔍 Redirecting store route from admin to main domain:', storeSlug);
-            window.location.href = `https://simpshopy.com/store/${storeSlug}`;
+            window.location.href = `https://simpshopy.com/${storeSlug}`;
             return;
           }
           

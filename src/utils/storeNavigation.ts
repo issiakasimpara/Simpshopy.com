@@ -9,8 +9,8 @@
  * @returns Le slug de la boutique ou null si on n'est pas dans une boutique
  */
 export const getStoreSlugFromUrl = (pathname: string): string | null => {
-  // Pattern: /store/{storeSlug}/...
-  const storeMatch = pathname.match(/^\/store\/([^\/]+)/);
+  // Pattern: /{storeSlug}/...
+  const storeMatch = pathname.match(/^\/([^\/]+)/);
   return storeMatch ? storeMatch[1] : null;
 };
 
@@ -21,7 +21,7 @@ export const getStoreSlugFromUrl = (pathname: string): string | null => {
  */
 export const getStoreHomeUrl = (pathname: string): string => {
   const storeSlug = getStoreSlugFromUrl(pathname);
-  return storeSlug ? `/store/${storeSlug}` : '/';
+  return storeSlug ? `/${storeSlug}` : '/';
 };
 
 /**
@@ -35,7 +35,7 @@ export const getStoreBasedUrl = (pathname: string, path: string): string => {
   
   if (storeSlug) {
     // On est dans une boutique, construire l'URL relative à la boutique
-    return `/store/${storeSlug}${path}`;
+    return `/${storeSlug}${path}`;
   } else {
     // On est sur le site principal, utiliser le chemin tel quel
     return path;

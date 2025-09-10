@@ -117,10 +117,10 @@ function App() {
                   {/* 🏠 PAGE D'ACCUEIL */}
                   <Route path="/" element={<Home />} />
                   
-                  {/* 🛍️ BOUTIQUE PUBLIQUE */}
-                  <Route path="/store/:storeSlug" element={<Storefront />} />
-                  <Route path="/store/:storeSlug/cart" element={<Cart />} />
-                  <Route path="/store/:storeSlug/checkout" element={<Checkout />} />
+                  {/* 🛍️ BOUTIQUE PUBLIQUE - ROUTAGE DIRECT PAR SLUG */}
+                  <Route path="/:storeSlug" element={<Storefront />} />
+                  <Route path="/:storeSlug/cart" element={<Cart />} />
+                  <Route path="/:storeSlug/checkout" element={<Checkout />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/payment-success" element={<PaymentSuccess />} />

@@ -6,17 +6,9 @@ import { useCart } from '@/contexts/CartContext';
 import BlockRenderer from '@/components/site-builder/BlockRenderer';
 import CartWidget from '@/components/site-builder/blocks/CartWidget';
 import { Template } from '@/types/template';
-import { supabase } from '@/integrations/supabase/client';
-import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
-import type { Tables } from '@/integrations/supabase/types';
+import { useOptimizedStorefront } from '@/hooks/useOptimizedStorefront';
 import VisitorTracker from '@/components/VisitorTracker';
-
 import { useBranding } from '@/hooks/useBranding';
-
-// Composant de chargement supprimé - chargement immédiat
-
-type StoreType = Tables<'stores'>;
-type ProductType = Tables<'products'>;
 
 const Storefront = () => {
   const { storeSlug } = useParams();
@@ -24,181 +16,33 @@ const Storefront = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [template, setTemplate] = useState<Template | null>(null);
-  const [store, setStore] = useState<StoreType | null>(null);
-  const [products, setProducts] = useState<ProductType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { setStoreId } = useCart();
 
+  // 🚀 UTILISATION DU NOUVEAU SYSTÈME OPTIMISÉ
+  const { data: storefrontData, isLoading, isError, error } = useOptimizedStorefront();
+
+  // Extraire les données du storefront
+  const store = storefrontData?.store || null;
+  const template = storefrontData?.template?.template_data || null;
+  const products = storefrontData?.products || [];
+
   // Récupérer les données de branding
   const brandingData = useBranding(template);
 
-  console.log('Storefront: Loading store:', storeSlug);
+  console.log('🚀 Storefront optimisé: Loading store:', storeSlug);
 
-  // Fonction pour récupérer les données de la boutique publique
-  const fetchStoreData = async () => {
-    if (!storeSlug) {
-      setError('Slug de boutique manquant');
-      setLoading(false);
-      return;
-    }
+  // 🚀 SYSTÈME OPTIMISÉ - Plus besoin de fetchStoreData !
+  // Le hook useOptimizedStorefront gère tout automatiquement
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log('🔍 Recherche de la boutique:', storeSlug);
-
-      // Domain-router removed, use fallback directly
-      console.log('🔍 Domain-router removed, using fallback method');
-      await fetchStoreDataFallback();
-      return;
-
-    } catch (err) {
-      console.error('Erreur domain-router, fallback...', err);
-      await fetchStoreDataFallback();
-    }
-  };
-
-  // Fallback: recherche directe dans la base de données
-  const fetchStoreDataFallback = async () => {
-    try {
-      console.log('🔄 Fallback: recherche directe en base');
-
-      // 1. Récupérer toutes les boutiques actives et trouver celle qui correspond au slug
-      const { data: storesData, error: storesError } = await supabase
-        .from('stores')
-        .select('*')
-        .eq('status', 'active');
-
-      if (storesError) throw storesError;
-
-      console.log('Boutiques trouvées:', storesData?.length || 0);
-
-      // Trouver la boutique qui correspond au slug
-      const foundStore = storesData?.find(s => {
-        const generatedSlug = s.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        console.log(`Boutique "${s.name}" -> slug: "${generatedSlug}"`);
-        return generatedSlug === storeSlug;
-      });
-
-      if (!foundStore) {
-        setError(`Boutique "${storeSlug}" non trouvée ou non active`);
-        setLoading(false);
-        return;
-      }
-
-      console.log('✅ Boutique trouvée:', foundStore.name);
-      setStore(foundStore);
-      setStoreId(foundStore.id);
-
-      // 2. Récupérer le template publié (toujours chercher la dernière version publiée)
-      console.log('🔍 Recherche de templates pour store_id:', foundStore.id);
-
-      // D'abord voir tous les templates pour ce store
-      const { data: allTemplates, error: allError } = await supabase
-        .from('site_templates')
-        .select('id, template_id, is_published, updated_at')
-        .eq('store_id', foundStore.id)
-        .order('updated_at', { ascending: false });
-
-      console.log('📋 Tous les templates trouvés:', allTemplates);
-
-      // Maintenant chercher spécifiquement les templates publiés
-      const { data: templateData, error: templateError } = await supabase
-        .from('site_templates')
-        .select('template_data, is_published, updated_at')
-        .eq('store_id', foundStore.id)
-        .eq('is_published', true)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (templateError && templateError.code !== 'PGRST116') {
-        console.error('❌ Erreur template:', templateError);
-      }
-
-      console.log('🎯 Template publié trouvé:', templateData);
-
-      if (templateData) {
-        console.log('✅ Template publié trouvé (dernière version publiée)');
-        setTemplate(templateData.template_data as Template);
-      } else {
-        console.log('⚠️ Aucun template publié trouvé - utilisation du template par défaut');
-        
-        // Utiliser un template par défaut au lieu de bloquer l'accès
-        const defaultTemplate: Template = {
-          id: 'default',
-          name: 'Template par défaut',
-          category: 'default',
-          pages: {
-            home: [
-              {
-                id: 'welcome',
-                type: 'hero',
-                order: 1,
-                data: {
-                  title: `Bienvenue sur ${foundStore.name}`,
-                  subtitle: 'Votre boutique en ligne',
-                  ctaText: 'Voir les produits',
-                  ctaLink: '?page=product'
-                }
-              }
-            ],
-            product: [
-              {
-                id: 'products-list',
-                type: 'product-grid',
-                order: 1,
-                data: {
-                  title: 'Nos produits',
-                  products: productsData || []
-                }
-              }
-            ]
-          }
-        };
-        
-        setTemplate(defaultTemplate);
-      }
-
-      // 3. Récupérer les produits
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select(`
-          *,
-          categories(name)
-        `)
-        .eq('store_id', foundStore.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (productsError) {
-        console.error('Erreur produits:', productsError);
-      } else {
-        console.log('✅ Produits trouvés:', productsData?.length || 0);
-        setProducts(productsData || []);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.error('Erreur fallback:', err);
-      setError('Erreur lors du chargement de la boutique');
-      setLoading(false);
-    }
-  };
-
+  // Mettre à jour le storeId dans le contexte du panier
   useEffect(() => {
-    fetchStoreData();
-
-    // Debug info
-    if (storeSlug) {
-      console.log('🔧 Debug: Storefront chargé pour le slug:', storeSlug);
+    if (store?.id) {
+      setStoreId(store.id);
+      console.log('✅ Store ID mis à jour dans le contexte:', store.id);
     }
-  }, [storeSlug]);
+  }, [store?.id, setStoreId]);
 
   // Effet pour mettre à jour le favicon et le titre de la page
   useEffect(() => {
@@ -242,7 +86,7 @@ const Storefront = () => {
     const page = searchParams.get('page') || 'home';
     const productId = searchParams.get('product');
 
-    console.log('Storefront: URL params changed', { page, productId, productsLoaded: products.length > 0, loading });
+    console.log('Storefront: URL params changed', { page, productId, productsLoaded: products.length > 0, isLoading });
 
     // Toujours définir la page immédiatement pour éviter le "flash" de la page d'accueil
     setCurrentPage(page);
@@ -251,7 +95,7 @@ const Storefront = () => {
     // Si on est sur une page produit-detail avec un productId
     if (page === 'product-detail' && productId) {
       // Si les produits ne sont pas encore chargés, on garde la page mais on attend
-      if (loading || products.length === 0) {
+      if (isLoading || products.length === 0) {
         console.log('Storefront: Products not loaded yet, keeping page but waiting...');
         return;
       }
@@ -264,7 +108,7 @@ const Storefront = () => {
         return;
       }
     }
-  }, [searchParams, products, navigate, loading]);
+  }, [searchParams, products, navigate, isLoading]);
 
   // Écouter les changements d'historique (bouton retour du navigateur)
   useEffect(() => {
@@ -552,8 +396,8 @@ const Storefront = () => {
     );
   };
 
-  // Chargement immédiat - affichage progressif
-  if (loading) {
+  // 🚀 CHARGEMENT OPTIMISÉ - Une seule requête !
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
         {/* Affichage immédiat du contenu avec skeleton */}
@@ -572,13 +416,13 @@ const Storefront = () => {
     );
   }
 
-  if (error || !store) {
+  if (isError || !store) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Boutique non trouvée</h1>
           <p className="text-gray-600 mb-6">
-            {error || 'Cette boutique n\'existe pas ou n\'est pas encore publiée.'}
+            {error?.message || 'Cette boutique n\'existe pas ou n\'est pas encore publiée.'}
           </p>
           <Button onClick={() => navigate('/')}>
             Retour à l'accueil

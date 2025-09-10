@@ -15,11 +15,11 @@ const getTempBaseDomain = () => {
  * Génère un path de boutique à partir du nom
  * TEMPORAIRE: Utilise un système de paths en attendant l'achat du domaine
  * @param storeName - Nom de la boutique
- * @returns Path au format /store/[nom-boutique]
+ * @returns Path au format /[nom-boutique]
  */
 export function generateStorePath(storeName: string): string {
   if (!storeName) {
-    return '/store/ma-boutique';
+    return '/ma-boutique';
   }
 
   // Nettoyer le nom de la boutique pour créer une URL valide
@@ -34,7 +34,7 @@ export function generateStorePath(storeName: string): string {
   // S'assurer que le nom n'est pas vide après nettoyage
   const finalName = cleanName || 'ma-boutique';
 
-  return `/store/${finalName}`;
+  return `/${finalName}`;
 }
 
 /**
@@ -51,7 +51,7 @@ export function generateSimpshopySubdomain(storeName: string): string {
  * Génère l'URL complète pour une boutique
  * TEMPORAIRE: Utilise un système de paths
  * @param storeName - Nom de la boutique
- * @returns URL complète au format http://localhost:8081/store/[nom-boutique]
+ * @returns URL complète au format http://localhost:8081/[nom-boutique]
  */
 export function generateSimpshopyUrl(storeName: string): string {
   const storePath = generateStorePath(storeName);

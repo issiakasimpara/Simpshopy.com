@@ -23,8 +23,8 @@ const ConditionalCookieConsent: React.FC<ConditionalCookieConsentProps> = ({ chi
 
     // Si on est sur simpshopy.com, afficher les cookies
     if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-      // Vérifier si c'est une boutique publique (/store/...)
-      if (pathname.startsWith('/store/')) {
+      // Vérifier si c'est une boutique publique (/{storeSlug}/...)
+      if (pathname.match(/^\/[^\/]+\//) && !pathname.startsWith('/admin')) {
         return true; // Ne pas afficher les cookies sur les boutiques publiques
       }
       return false; // Afficher les cookies sur les pages Simpshopy

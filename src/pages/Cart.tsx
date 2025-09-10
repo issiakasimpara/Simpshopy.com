@@ -27,12 +27,12 @@ const Cart = () => {
   const handleCheckout = () => {
     // Si nous sommes dans une boutique spécifique, naviguer vers son checkout
     if (storeSlug) {
-      navigate(`/store/${storeSlug}/checkout`);
+      navigate(`/${storeSlug}/checkout`);
     } else {
       // Sinon, utiliser la première boutique disponible
       if (stores.length > 0) {
         const firstStore = stores[0];
-        navigate(`/store/${firstStore.slug || firstStore.id}/checkout`);
+        navigate(`/${firstStore.slug || firstStore.id}/checkout`);
       } else {
         navigate('/checkout'); // Fallback
       }

@@ -140,7 +140,7 @@ const TestStoreUrls = () => {
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-2">Système Actuel</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Format: <code>/store/[nom-boutique]</code></li>
+                  <li>• Format: <code>/[nom-boutique]</code></li>
                   <li>• Fonctionne immédiatement</li>
                   <li>• Pas besoin d'acheter de domaine</li>
                   <li>• Routes déjà configurées dans l'app</li>

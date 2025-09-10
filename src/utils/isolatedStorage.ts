@@ -25,8 +25,8 @@ export const isUserStorefront = (): boolean => {
 
   // Si on est sur simpshopy.com, vérifier le path
   if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-    // Si c'est une boutique publique (/store/...), c'est une boutique utilisateur
-    if (pathname.startsWith('/store/')) {
+    // Si c'est une boutique publique (/{storeSlug}/...), c'est une boutique utilisateur
+    if (pathname.match(/^\/[^\/]+\//) && !pathname.startsWith('/admin')) {
       return true;
     }
     return false; // Pages Simpshopy

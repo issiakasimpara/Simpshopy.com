@@ -538,13 +538,13 @@ const SitePreviewContent = ({
                   
                   if (currentHostname === 'localhost' || currentHostname.includes('localhost')) {
                     // En développement, rester sur localhost
-                    storeUrl = `http://localhost:8080/store/${storeSlug}`;
+                    storeUrl = `http://localhost:8080/${storeSlug}`;
                   } else if (currentHostname === 'admin.simpshopy.com') {
                     // En production, rediriger vers simpshopy.com
-                    storeUrl = `https://simpshopy.com/store/${storeSlug}`;
+                    storeUrl = `https://simpshopy.com/${storeSlug}`;
                   } else {
                     // Fallback pour autres cas
-                    storeUrl = `/store/${storeSlug}`;
+                    storeUrl = `/${storeSlug}`;
                   }
                   
                   window.open(storeUrl, '_blank');

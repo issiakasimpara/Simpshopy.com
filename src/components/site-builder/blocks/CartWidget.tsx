@@ -33,23 +33,22 @@ const CartWidget = ({ currentStoreId }: CartWidgetProps) => {
   const getStoreBasedUrl = (path: string) => {
     // Si nous sommes dans une boutique spécifique
     if (storeSlug) {
-      return `/store/${storeSlug}${path}`;
+      return `/${storeSlug}${path}`;
     }
 
     // Si nous sommes sur une page de boutique mais sans slug dans l'URL
-    if (location.pathname.includes('/store/')) {
+    if (location.pathname.includes('/')) {
       const pathParts = location.pathname.split('/');
-      const slugIndex = pathParts.indexOf('store') + 1;
-      if (slugIndex < pathParts.length) {
-        const currentSlug = pathParts[slugIndex];
-        return `/store/${currentSlug}${path}`;
+      if (pathParts.length > 1 && pathParts[1]) {
+        const currentSlug = pathParts[1];
+        return `/${currentSlug}${path}`;
       }
     }
 
     // Sinon, utiliser la première boutique disponible
     if (stores.length > 0) {
       const firstStore = stores[0];
-      return `/store/${firstStore.slug || firstStore.id}${path}`;
+      return `/${firstStore.slug || firstStore.id}${path}`;
     }
 
     // Fallback vers l'URL simple
