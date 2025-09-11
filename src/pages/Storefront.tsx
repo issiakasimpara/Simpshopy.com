@@ -397,11 +397,10 @@ const Storefront = () => {
     );
   };
 
-  // 🚀 CACHE AGRESSIF - PAS DE LOADING !
-  // L'HTML statique s'affiche déjà, pas besoin de loading supplémentaire
-  // On affiche directement le contenu, même si en cours de chargement
-
-  if (isError || !store) {
+  // 🚀 AFFICHAGE CONDITIONNEL INTELLIGENT
+  // Ne jamais afficher "boutique non trouvée" pendant le chargement
+  
+  if (isError && !isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -415,6 +414,11 @@ const Storefront = () => {
         </div>
       </div>
     );
+  }
+
+  // Si on charge encore, ne rien afficher (l'HTML statique est déjà là)
+  if (isLoading && !store) {
+    return null; // L'HTML statique d'InstantStorefront reste affiché
   }
 
   // Si pas de template, utiliser un template par défaut

@@ -105,7 +105,7 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
 
   return {
     data: finalData || null,
-    isLoading: !hasInitialData && isLoading && !data, // Pas de loading si on a des données initiales
+    isLoading: !hasInitialData && isLoading && !finalData, // Pas de loading si on a des données (initiales ou finales)
     isError,
     error: error as Error | null,
     refetch,
