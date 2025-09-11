@@ -6,9 +6,10 @@ import { useCart } from '@/contexts/CartContext';
 import BlockRenderer from '@/components/site-builder/BlockRenderer';
 import CartWidget from '@/components/site-builder/blocks/CartWidget';
 import { Template } from '@/types/template';
-import { useOptimizedStorefront } from '@/hooks/useOptimizedStorefront';
+import { useAggressiveStorefront } from '@/hooks/useAggressiveStorefront';
 import VisitorTracker from '@/components/VisitorTracker';
 import { useBranding } from '@/hooks/useBranding';
+import InstantStorefront from '@/components/InstantStorefront';
 
 const Storefront = () => {
   const { storeSlug } = useParams();
@@ -20,8 +21,8 @@ const Storefront = () => {
 
   const { setStoreId } = useCart();
 
-  // 🚀 UTILISATION DU NOUVEAU SYSTÈME OPTIMISÉ
-  const { data: storefrontData, isLoading, isError, error } = useOptimizedStorefront();
+  // 🚀 UTILISATION DU CACHE AGRESSIF (PAS DE SKELETON)
+  const { data: storefrontData, isLoading, isError, error, isFromCache } = useAggressiveStorefront();
 
   // Extraire les données du storefront
   const store = storefrontData?.store || null;
@@ -396,25 +397,9 @@ const Storefront = () => {
     );
   };
 
-  // 🚀 CHARGEMENT OPTIMISÉ - Une seule requête !
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Affichage immédiat du contenu avec skeleton */}
-        <div className="animate-pulse">
-          <div className="h-16 bg-gray-200"></div>
-          <div className="container mx-auto p-4">
-            <div className="h-64 bg-gray-200 rounded-lg mb-4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="h-32 bg-gray-200 rounded"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 🚀 CACHE AGRESSIF - PAS DE LOADING !
+  // L'HTML statique s'affiche déjà, pas besoin de loading supplémentaire
+  // On affiche directement le contenu, même si en cours de chargement
 
   if (isError || !store) {
     return (
@@ -471,36 +456,45 @@ const Storefront = () => {
   const currentPageBlocks = getPageBlocks(currentPage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Tracker les visiteurs en temps réel */}
-      {store && <VisitorTracker storeId={store.id} storeSlug={storeSlug} />}
-      
-      {renderNavigation()}
-      {renderBreadcrumb()}
-
-      {/* Contenu principal - RENDU SYNCHRONE (rapide comme Shopify) */}
-      <div className="min-h-screen">
-        {currentPageBlocks.map((block, index) => (
-          <div
-            key={`${block.id}-${block.order}`}
-            className="animate-fade-in"
-            style={{ '--animation-delay': `${index * 20}ms` } as React.CSSProperties} // Réduit de 100ms à 20ms
-          >
-            <BlockRenderer
-              block={block}
-              isEditing={false}
-              viewMode="desktop"
-              selectedStore={store}
-              productId={selectedProductId}
-              onProductClick={handleProductClick}
-              products={products}
-            />
+    <InstantStorefront>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        {/* Tracker les visiteurs en temps réel */}
+        {store && <VisitorTracker storeId={store.id} storeSlug={storeSlug} />}
+        
+        {/* Indicateur de cache discret */}
+        {isFromCache && (
+          <div className="fixed top-4 right-4 z-50 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+            ⚡ Cache
           </div>
-        ))}
-      </div>
+        )}
+        
+        {renderNavigation()}
+        {renderBreadcrumb()}
 
-      <CartWidget currentStoreId={store?.id} />
-    </div>
+        {/* Contenu principal - RENDU SYNCHRONE (rapide comme Shopify) */}
+        <div className="min-h-screen">
+          {currentPageBlocks.map((block, index) => (
+            <div
+              key={`${block.id}-${block.order}`}
+              className="animate-fade-in"
+              style={{ '--animation-delay': `${index * 20}ms` } as React.CSSProperties} // Réduit de 100ms à 20ms
+            >
+              <BlockRenderer
+                block={block}
+                isEditing={false}
+                viewMode="desktop"
+                selectedStore={store}
+                productId={selectedProductId}
+                onProductClick={handleProductClick}
+                products={products}
+              />
+            </div>
+          ))}
+        </div>
+
+        <CartWidget currentStoreId={store?.id} />
+      </div>
+    </InstantStorefront>
   );
 };
 
