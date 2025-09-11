@@ -76,14 +76,6 @@ const Legal = () => {
               </div>
             </section>
 
-            {/* Cookies */}
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Cookies</h2>
-              <div className="space-y-2 text-gray-700">
-                <p>Le site peut-être amené à vous demander l'acceptation des cookies pour des besoins de statistiques et d'affichage. Si vous n'acceptez pas les cookies, il se peut que certaines fonctionnalités soient limitées.</p>
-                <p>Pour plus d'informations, consultez notre <Link to="/privacy" className="text-blue-600 hover:underline">Politique de confidentialité</Link>.</p>
-              </div>
-            </section>
 
             {/* Droit applicable */}
             <section>

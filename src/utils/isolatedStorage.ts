@@ -173,8 +173,6 @@ export const migrateExistingData = (): void => {
       'cart_session_id',
       'cart_store_id',
       'user_country',
-      'cookie_consent',
-      'cookie_consent_date'
     ];
 
     keysToMigrate.forEach(key => {

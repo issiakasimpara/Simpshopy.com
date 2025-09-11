@@ -9,7 +9,6 @@ import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
 import OptimizedPreloader from './components/OptimizedPreloader';
 import LoadingFallback from './components/LoadingFallback';
-import ConditionalCookieConsent from './components/ConditionalCookieConsent';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useGlobalMarketSettingsCleanup } from './hooks/useGlobalMarketSettings';
@@ -333,7 +332,6 @@ function App() {
                 </Routes>
                 
                 <Toaster />
-                <ConditionalCookieConsent />
               </Router>
             </StorageInitializer>
           </CartProvider>

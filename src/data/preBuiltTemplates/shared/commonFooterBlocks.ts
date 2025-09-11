@@ -113,7 +113,6 @@ export const createFooterBlock = (category: string): TemplateBlock => {
         { text: 'Mentions légales', url: '/mentions' },
         { text: 'CGV', url: '/cgv' },
         { text: 'Confidentialité', url: '/confidentialite' },
-        { text: 'Cookies', url: '/cookies' }
       ],
       contactInfo: {
         address: '123 Rue Example\n75001 Paris, France',

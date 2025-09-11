@@ -74,7 +74,6 @@ const Privacy = () => {
                   <ul className="list-disc list-inside ml-4 space-y-1">
                     <li>Adresse IP</li>
                     <li>Données de navigation</li>
-                    <li>Cookies et technologies similaires</li>
                     <li>Historique des connexions</li>
                   </ul>
                 </div>
@@ -143,7 +142,6 @@ const Privacy = () => {
                   <li><strong>Données de compte :</strong> Pendant la durée de votre compte + 3 ans</li>
                   <li><strong>Données de transaction :</strong> 10 ans (obligation comptable)</li>
                   <li><strong>Données de connexion :</strong> 12 mois</li>
-                  <li><strong>Cookies :</strong> Selon les durées définies dans notre politique cookies</li>
                 </ul>
               </div>
             </section>
@@ -181,13 +179,6 @@ const Privacy = () => {
               </div>
             </section>
 
-            {/* Cookies */}
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Cookies</h2>
-              <div className="space-y-2 text-gray-700">
-                <p>Nous utilisons des cookies pour améliorer votre expérience. Consultez notre <Link to="/cookies" className="text-blue-600 hover:underline">Politique des cookies</Link> pour plus d'informations.</p>
-              </div>
-            </section>
 
             {/* Transferts internationaux */}
             <section>
