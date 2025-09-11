@@ -465,12 +465,7 @@ const Storefront = () => {
         {/* Tracker les visiteurs en temps réel */}
         {store && <VisitorTracker storeId={store.id} storeSlug={storeSlug} />}
         
-        {/* Indicateur de cache discret */}
-        {isFromCache && (
-          <div className="fixed top-4 right-4 z-50 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-            ⚡ Cache
-          </div>
-        )}
+        {/* Indicateur de cache supprimé */}
         
         {renderNavigation()}
         {renderBreadcrumb()}
