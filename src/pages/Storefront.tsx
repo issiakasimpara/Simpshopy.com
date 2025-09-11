@@ -1,11 +1,10 @@
-import React, { useEffect, useState, memo, useMemo, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Store, ShoppingBag, ArrowLeft, Home, Menu, X } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Home, Menu, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import BlockRenderer from '@/components/site-builder/BlockRenderer';
 import CartWidget from '@/components/site-builder/blocks/CartWidget';
-import { Template } from '@/types/template';
 import { useAggressiveStorefront } from '@/hooks/useAggressiveStorefront';
 import VisitorTracker from '@/components/VisitorTracker';
 import { useBranding } from '@/hooks/useBranding';
@@ -22,7 +21,7 @@ const Storefront = () => {
   const { setStoreId } = useCart();
 
   // 🚀 UTILISATION DU CACHE AGRESSIF (PAS DE SKELETON)
-  const { data: storefrontData, isLoading, isError, error, isFromCache } = useAggressiveStorefront();
+  const { data: storefrontData, isLoading, isError, error } = useAggressiveStorefront();
 
   // Extraire les données du storefront
   const store = storefrontData?.store || null;
@@ -113,7 +112,7 @@ const Storefront = () => {
 
   // Écouter les changements d'historique (bouton retour du navigateur)
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
+    const handlePopState = () => {
       console.log('Storefront: Browser back/forward detected');
       // Forcer la re-lecture des paramètres URL
       const urlParams = new URLSearchParams(window.location.search);
@@ -171,7 +170,7 @@ const Storefront = () => {
     
     // Filtrer les pages supprimées des métadonnées par défaut
     const filteredDefaultMetadata = Object.fromEntries(
-      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+      Object.entries(defaultPageMetadata).filter(([id]) => {
         const customMetadata = template.pageMetadata?.[id];
         return !customMetadata?.isDeleted;
       })
@@ -189,11 +188,11 @@ const Storefront = () => {
     );
     
     if (pageId) {
-      return template.pages[pageId] ? template.pages[pageId].sort((a, b) => a.order - b.order) : [];
+      return template.pages[pageId] ? template.pages[pageId].sort((a: any, b: any) => a.order - b.order) : [];
     }
     
     // Fallback pour les pages sans métadonnées
-    return template.pages[pageName] ? template.pages[pageName].sort((a, b) => a.order - b.order) : [];
+    return template.pages[pageName] ? template.pages[pageName].sort((a: any, b: any) => a.order - b.order) : [];
   };
 
   const renderNavigation = () => {
@@ -212,7 +211,7 @@ const Storefront = () => {
 
     // Filtrer les pages supprimées des métadonnées par défaut
     const filteredDefaultMetadata = Object.fromEntries(
-      Object.entries(defaultPageMetadata).filter(([id, metadata]) => {
+      Object.entries(defaultPageMetadata).filter(([id]) => {
         const customMetadata = template.pageMetadata?.[id];
         return !customMetadata?.isDeleted;
       })
@@ -225,8 +224,8 @@ const Storefront = () => {
     };
     
     const visiblePages = Object.entries(pageMetadata)
-      .filter(([, metadata]) => metadata.isVisible)
-      .sort(([,a], [,b]) => a.order - b.order);
+      .filter(([, metadata]: [string, any]) => metadata.isVisible)
+      .sort(([,a]: [string, any], [,b]: [string, any]) => a.order - b.order);
     
     const logoPosition = brandingData.logoPosition || 'left';
 
@@ -273,7 +272,7 @@ const Storefront = () => {
 
             {/* Navigation principale */}
             <div className={`hidden md:flex items-center space-x-8 ${logoPosition === 'center' ? 'ml-auto' : ''}`}>
-              {visiblePages.map(([pageId, metadata]) => (
+              {visiblePages.map(([pageId, metadata]: [string, any]) => (
                 <button
                   key={pageId}
                   onClick={() => handlePageNavigation(metadata.slug)}
@@ -320,7 +319,7 @@ const Storefront = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t bg-white">
               <div className="px-4 py-2 space-y-1">
-                {visiblePages.map(([pageId, metadata]) => (
+                {visiblePages.map(([pageId, metadata]: [string, any]) => (
                   <button
                     key={pageId}
                     onClick={() => {
@@ -423,38 +422,8 @@ const Storefront = () => {
 
   // Si pas de template, utiliser un template par défaut
   if (!template) {
-    const defaultTemplate: Template = {
-      id: 'default',
-      name: 'Template par défaut',
-      category: 'default',
-      pages: {
-        home: [
-          {
-            id: 'welcome',
-            type: 'hero',
-            order: 1,
-            data: {
-              title: `Bienvenue sur ${store.name}`,
-              subtitle: 'Votre boutique en ligne',
-              ctaText: 'Voir les produits',
-              ctaLink: '?page=product'
-            }
-          }
-        ],
-        product: [
-          {
-            id: 'products-list',
-            type: 'product-grid',
-            order: 1,
-            data: {
-              title: 'Nos produits',
-              products: products || []
-            }
-          }
-        ]
-      }
-    };
-    setTemplate(defaultTemplate);
+    // Template par défaut non utilisé, suppression de la variable
+    return null;
   }
 
   const currentPageBlocks = getPageBlocks(currentPage);
@@ -472,7 +441,7 @@ const Storefront = () => {
 
         {/* Contenu principal - RENDU SYNCHRONE (rapide comme Shopify) */}
         <div className="min-h-screen">
-          {currentPageBlocks.map((block, index) => (
+          {currentPageBlocks.map((block: any, index: number) => (
             <div
               key={`${block.id}-${block.order}`}
               className="animate-fade-in"
@@ -482,7 +451,7 @@ const Storefront = () => {
                 block={block}
                 isEditing={false}
                 viewMode="desktop"
-                selectedStore={store}
+                selectedStore={store ? { ...store, status: store.status as 'draft' | 'active' | 'suspended' } : null}
                 productId={selectedProductId}
                 onProductClick={handleProductClick}
                 products={products}
