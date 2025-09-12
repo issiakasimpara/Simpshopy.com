@@ -7,8 +7,6 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { OptimizedStorefrontService, StorefrontData } from '@/services/optimizedStorefrontService';
 import { AggressiveCacheService, CACHE_KEYS, CACHE_DURATIONS } from '@/services/aggressiveCacheService';
-import { PreloadService } from '@/services/preloadService';
-import { SmartCacheInvalidation } from '@/services/smartCacheInvalidation';
 
 export interface UseAggressiveStorefrontReturn {
   data: StorefrontData | null;
@@ -61,10 +59,7 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
 
     fetchInitialData();
     
-    // Enregistrer la visite pour le préchargement intelligent
-    if (storeSlug) {
-      PreloadService.recordVisit(storeSlug);
-    }
+    // 🚀 PLUS BESOIN DE PRÉCHARGEMENT COMPLEXE - Le cache agressif suffit !
   }, [storeSlug]);
 
   const {
@@ -110,29 +105,7 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
     refetchInterval: false, // Pas de refetch automatique
   });
 
-  // 🧠 ACTIVATION DU POLLING INTELLIGENT (fonction SQL créée avec succès)
-  useEffect(() => {
-    if (storeSlug) {
-      // Démarrer le polling intelligent
-      SmartCacheInvalidation.startForStore(storeSlug);
-      console.log('🧠 Polling intelligent démarré pour:', storeSlug);
-
-      // Écouter les événements d'invalidation
-      const handleCacheInvalidated = () => {
-        console.log('🔄 Cache invalidé - Rechargement des données');
-        refetch(); // Recharger les données
-      };
-
-      window.addEventListener('cache-invalidated', handleCacheInvalidated);
-
-      // Cleanup
-      return () => {
-        window.removeEventListener('cache-invalidated', handleCacheInvalidated);
-        SmartCacheInvalidation.stop();
-        console.log('🧠 Polling intelligent arrêté pour:', storeSlug);
-      };
-    }
-  }, [storeSlug, refetch]);
+  // 🚀 PLUS BESOIN D'INVALIDATION COMPLEXE - Le cache TTL s'occupe de tout !
 
   // Utiliser les données initiales si disponibles, sinon les données de la requête
   const finalData = hasInitialData && initialData ? initialData : data;
@@ -149,75 +122,5 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
   };
 }
 
-/**
- * Hook pour préchauffer le cache d'une boutique
- */
-export function usePrewarmStorefront(storeSlug: string) {
-  const prewarm = async () => {
-    if (!storeSlug) return;
-
-    try {
-      // Récupérer les données
-      const data = await OptimizedStorefrontService.getStorefrontBySlug(storeSlug);
-      
-      if (data) {
-        // Mettre en cache agressif
-        const cacheKey = CACHE_KEYS.STOREFRONT(storeSlug);
-        AggressiveCacheService.set(cacheKey, data, CACHE_DURATIONS.STOREFRONT);
-        
-        // Préchauffer aussi les sous-données
-        if (data.store) {
-          AggressiveCacheService.set(
-            CACHE_KEYS.STORE_DATA(storeSlug), 
-            data.store, 
-            CACHE_DURATIONS.STORE_DATA
-          );
-        }
-        
-        if (data.template) {
-          AggressiveCacheService.set(
-            CACHE_KEYS.TEMPLATE(data.store.id), 
-            data.template, 
-            CACHE_DURATIONS.TEMPLATE
-          );
-        }
-        
-        if (data.products) {
-          AggressiveCacheService.set(
-            CACHE_KEYS.PRODUCTS(data.store.id), 
-            data.products, 
-            CACHE_DURATIONS.PRODUCTS
-          );
-        }
-        
-        console.log('🔥 Cache préchauffé pour:', storeSlug);
-      }
-    } catch (error) {
-      console.error('Erreur préchauffage cache:', error);
-    }
-  };
-
-  return { prewarm };
-}
-
-/**
- * Hook pour invalider le cache d'une boutique
- */
-export function useInvalidateStorefrontCache() {
-  const invalidate = (storeSlug: string) => {
-    const keys = [
-      CACHE_KEYS.STOREFRONT(storeSlug),
-      CACHE_KEYS.STORE_DATA(storeSlug),
-    ];
-    
-    keys.forEach(key => AggressiveCacheService.delete(key));
-    console.log('🗑️ Cache invalidé pour:', storeSlug);
-  };
-
-  const invalidateAll = () => {
-    AggressiveCacheService.clear();
-    console.log('🧹 Tous les caches invalidés');
-  };
-
-  return { invalidate, invalidateAll };
-}
+// 🚀 FONCTIONS SUPPRIMÉES - Plus besoin de préchauffage/invalidation complexe !
+// Le cache agressif avec TTL s'occupe de tout automatiquement

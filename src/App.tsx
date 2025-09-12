@@ -12,7 +12,6 @@ import LoadingFallback from './components/LoadingFallback';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useGlobalMarketSettingsCleanup } from './hooks/useGlobalMarketSettings';
-import { PreloadService } from './services/preloadService';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -105,7 +104,7 @@ function GlobalOptimizations() {
 function PreloadInitializer() {
   React.useEffect(() => {
     // Activer le préchargement intelligent
-    PreloadService.setupSmartPreloading();
+    // 🚀 PLUS BESOIN DE PRÉCHARGEMENT COMPLEXE - Le cache agressif suffit !
     console.log('🚀 Préchargement intelligent activé');
   }, []);
 

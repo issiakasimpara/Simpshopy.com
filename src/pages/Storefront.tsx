@@ -20,9 +20,9 @@ const Storefront = () => {
 
   const { setStoreId } = useCart();
 
-  // 🚀 UTILISATION DU CACHE AGRESSIF (PAS DE SKELETON)
+  // 🚀 UTILISATION DU CACHE AGRESSIF (ULTRA-RAPIDE)
   const { data: storefrontData, isLoading, isError, error } = useAggressiveStorefront();
-
+  
   // Extraire les données du storefront
   const store = storefrontData?.store || null;
   const template = storefrontData?.template?.template_data || null;
