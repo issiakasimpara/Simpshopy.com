@@ -1,0 +1,81 @@
+{
+  "cloud_connector_config": {
+    "bucket_name": "simpshopy-assets",
+    "rules": [
+      {
+        "name": "Static Assets - High Priority",
+        "path": "/static/*",
+        "destination": "simpshopy-assets/static/",
+        "cache_control": "public, max-age=31536000",
+        "priority": 1,
+        "description": "Assets statiques (logos, favicon, etc.) - Cache 1 an"
+      },
+      {
+        "name": "Store Logos - High Priority", 
+        "path": "/store-assets/*",
+        "destination": "simpshopy-assets/stores/",
+        "cache_control": "public, max-age=2592000",
+        "priority": 2,
+        "description": "Logos de boutiques - Cache 1 mois"
+      },
+      {
+        "name": "Product Images - High Priority",
+        "path": "/product-images/*", 
+        "destination": "simpshopy-assets/products/",
+        "cache_control": "public, max-age=604800",
+        "priority": 3,
+        "description": "Images de produits - Cache 1 semaine"
+      },
+      {
+        "name": "Template Assets - Medium Priority",
+        "path": "/template-assets/*",
+        "destination": "simpshopy-assets/templates/",
+        "cache_control": "public, max-age=2592000", 
+        "priority": 4,
+        "description": "Assets des templates - Cache 1 mois"
+      },
+      {
+        "name": "Payment Provider Logos - High Priority",
+        "path": "/payment-logos/*",
+        "destination": "simpshopy-assets/static/payment-providers/",
+        "cache_control": "public, max-age=31536000",
+        "priority": 5,
+        "description": "Logos de paiement - Cache 1 an"
+      },
+      {
+        "name": "Integration Logos - Medium Priority", 
+        "path": "/integration-logos/*",
+        "destination": "simpshopy-assets/static/integrations/",
+        "cache_control": "public, max-age=2592000",
+        "priority": 6,
+        "description": "Logos d'intégrations - Cache 1 mois"
+      }
+    ],
+    "optimization_settings": {
+      "compression": true,
+      "webp_conversion": true,
+      "lazy_loading": true,
+      "preload_critical": true
+    },
+    "performance_targets": {
+      "static_assets": "< 50ms",
+      "store_assets": "< 100ms", 
+      "product_images": "< 150ms",
+      "template_assets": "< 200ms"
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Dans Cloudflare Dashboard, allez dans Règles > Cloud Connector",
+    "step_2": "Sélectionnez Cloudflare R2",
+    "step_3": "Configurez chaque règle avec les paramètres ci-dessus",
+    "step_4": "Activez la compression et l'optimisation automatique",
+    "step_5": "Testez les performances avec les URLs de test"
+  },
+  "test_urls": {
+    "static_logo": "https://simpshopy.com/static/logos/logo-simpshopy.png",
+    "payment_logo": "https://simpshopy.com/payment-logos/moneroo-logo.svg", 
+    "integration_logo": "https://simpshopy.com/integration-logos/dsers-logo.svg",
+    "store_logo": "https://simpshopy.com/store-assets/{store-id}/logo.png",
+    "product_image": "https://simpshopy.com/product-images/{store-id}/{product-id}/main.jpg"
+  }
+}
