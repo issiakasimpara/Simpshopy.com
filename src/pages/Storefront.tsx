@@ -431,7 +431,7 @@ const Storefront = () => {
   return (
     <InstantStorefront>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Tracker les visiteurs en temps réel */}
+        {/* Tracker les visiteurs réactivé */}
         {store && <VisitorTracker storeId={store.id} storeSlug={storeSlug} />}
         
         {/* Indicateur de cache supprimé */}

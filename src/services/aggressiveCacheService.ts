@@ -1,6 +1,7 @@
 // 🚀 CACHE MULTI-NIVEAU AGRESSIF
 // Date: 2025-01-28
 // Objectif: Cache ultra-rapide pour éliminer le skeleton
+// Intégré avec monitoring et cache intelligent
 
 interface CacheEntry<T> {
   data: T;
@@ -41,8 +42,9 @@ export class AggressiveCacheService {
 
   /**
    * Récupère une valeur du cache (mémoire → session → localStorage)
+   * Avec monitoring intégré
    */
-  static get<T>(key: string): T | null {
+  static async get<T>(key: string): Promise<T | null> {
     // 1. Vérifier le cache mémoire (ultra-rapide)
     const memoryEntry = this.memoryCache.get(key);
     if (memoryEntry && this.isValid(memoryEntry)) {
@@ -84,6 +86,15 @@ export class AggressiveCacheService {
     }
 
     console.log('❌ Cache MISS:', key);
+    
+    // Enregistrer le miss pour le monitoring
+    try {
+      const { CacheMonitoringService } = await import('./cacheMonitoringService');
+      CacheMonitoringService.recordMiss(key, 0); // 0ms car pas de données
+    } catch (error) {
+      // Ignorer si le monitoring n'est pas disponible
+    }
+    
     return null;
   }
 

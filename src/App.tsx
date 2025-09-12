@@ -12,6 +12,7 @@ import LoadingFallback from './components/LoadingFallback';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useGlobalMarketSettingsCleanup } from './hooks/useGlobalMarketSettings';
+import { PreloadService } from './services/preloadService';
 
 // ⚡ IMPORT SYNCHRONE pour la boutique publique (rapide comme Shopify)
 import Storefront from './pages/Storefront';
@@ -100,6 +101,17 @@ function GlobalOptimizations() {
   return null;
 }
 
+// Composant pour initialiser le préchargement
+function PreloadInitializer() {
+  React.useEffect(() => {
+    // Activer le préchargement intelligent
+    PreloadService.setupSmartPreloading();
+    console.log('🚀 Préchargement intelligent activé');
+  }, []);
+
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -110,6 +122,7 @@ function App() {
               <Router>
                 <GlobalOptimizations />
                 <OptimizedPreloader />
+                <PreloadInitializer />
                 
                 {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
                 <Routes>

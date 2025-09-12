@@ -7,6 +7,8 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { OptimizedStorefrontService, StorefrontData } from '@/services/optimizedStorefrontService';
 import { AggressiveCacheService, CACHE_KEYS, CACHE_DURATIONS } from '@/services/aggressiveCacheService';
+import { PreloadService } from '@/services/preloadService';
+import { SmartCacheInvalidation } from '@/services/smartCacheInvalidation';
 
 export interface UseAggressiveStorefrontReturn {
   data: StorefrontData | null;
@@ -28,6 +30,7 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
 
   // 🚀 RÉCUPÉRATION IMMÉDIATE DES DONNÉES INSTANTANÉES
   useEffect(() => {
+    const fetchInitialData = async () => {
     if (!storeSlug) return;
 
     // Vérifier les données instantanées
@@ -48,11 +51,19 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
 
     // Vérifier le cache agressif
     const cacheKey = CACHE_KEYS.STOREFRONT(storeSlug);
-    const cachedData = AggressiveCacheService.get<StorefrontData>(cacheKey);
+    const cachedData = await AggressiveCacheService.get<StorefrontData>(cacheKey);
     if (cachedData) {
       console.log('⚡ Données en cache trouvées, affichage immédiat');
       setInitialData(cachedData);
       setHasInitialData(true);
+    }
+    };
+
+    fetchInitialData();
+    
+    // Enregistrer la visite pour le préchargement intelligent
+    if (storeSlug) {
+      PreloadService.recordVisit(storeSlug);
     }
   }, [storeSlug]);
 
@@ -98,6 +109,30 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
     refetchOnReconnect: false, // Ne pas refetch sur reconnexion
     refetchInterval: false, // Pas de refetch automatique
   });
+
+  // 🧠 ACTIVATION DU POLLING INTELLIGENT (fonction SQL créée avec succès)
+  useEffect(() => {
+    if (storeSlug) {
+      // Démarrer le polling intelligent
+      SmartCacheInvalidation.startForStore(storeSlug);
+      console.log('🧠 Polling intelligent démarré pour:', storeSlug);
+
+      // Écouter les événements d'invalidation
+      const handleCacheInvalidated = () => {
+        console.log('🔄 Cache invalidé - Rechargement des données');
+        refetch(); // Recharger les données
+      };
+
+      window.addEventListener('cache-invalidated', handleCacheInvalidated);
+
+      // Cleanup
+      return () => {
+        window.removeEventListener('cache-invalidated', handleCacheInvalidated);
+        SmartCacheInvalidation.stop();
+        console.log('🧠 Polling intelligent arrêté pour:', storeSlug);
+      };
+    }
+  }, [storeSlug, refetch]);
 
   // Utiliser les données initiales si disponibles, sinon les données de la requête
   const finalData = hasInitialData && initialData ? initialData : data;
