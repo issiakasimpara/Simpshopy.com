@@ -121,7 +121,7 @@ class CDNService {
     originalPath: string, 
     options: any
   ): string {
-    const { storeId, productId, templateId, size, format } = options;
+    const { storeId, productId, templateId, size } = options;
     
     switch (assetType) {
       case 'static':
