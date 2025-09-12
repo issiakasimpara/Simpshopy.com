@@ -28,7 +28,7 @@ class CDNService {
   constructor() {
     this.config = {
       baseUrl: process.env.NODE_ENV === 'production' 
-        ? 'https://simpshopy.com' 
+        ? 'https://assets.simpshopy.com' 
         : 'http://localhost:8080',
       bucketName: 'simpshopy-assets',
       enableWebP: true,

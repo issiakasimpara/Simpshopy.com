@@ -29,14 +29,14 @@ export class AggressiveCacheService {
   private static config: CacheConfig = {
     memory: {
       maxSize: 100, // 100 entrées max en mémoire
-      defaultTTL: 5 * 60 * 1000, // 5 minutes
+      defaultTTL: 2 * 60 * 1000, // 2 minutes (réduit pour laisser Cloudflare travailler)
     },
     localStorage: {
-      defaultTTL: 30 * 60 * 1000, // 30 minutes
+      defaultTTL: 15 * 60 * 1000, // 15 minutes (réduit pour laisser Cloudflare travailler)
       compression: true,
     },
     sessionStorage: {
-      defaultTTL: 10 * 60 * 1000, // 10 minutes
+      defaultTTL: 5 * 60 * 1000, // 5 minutes (réduit pour laisser Cloudflare travailler)
     },
   };
 
