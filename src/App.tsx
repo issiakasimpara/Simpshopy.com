@@ -111,9 +111,8 @@ function PreloadInitializer() {
   return null;
 }
 
-// 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES
-function SubdomainDetector({ children }: { children: React.ReactNode }) {
-  // 🚀 DÉTECTION IMMÉDIATE (pas de useEffect pour éviter le flash)
+// 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES ET AFFICHER DIRECTEMENT
+function SubdomainRouter({ children }: { children: React.ReactNode }) {
   const hostname = window.location.hostname;
   let detectedStoreSlug: string | null = null;
   let isSubdomain = false;
@@ -159,8 +158,8 @@ function App() {
                 <OptimizedPreloader />
                 <PreloadInitializer />
                 
-                {/* 🚀 DÉTECTION AUTOMATIQUE DES SOUS-DOMAINES */}
-                <SubdomainDetector>
+                {/* 🚀 MODIFICATION AUTOMATIQUE DE L'URL POUR LES SOUS-DOMAINES */}
+                <SubdomainRouter>
                   {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
                   <Routes>
                     {/* 🏠 PAGE D'ACCUEIL */}
@@ -380,7 +379,7 @@ function App() {
                      </ProtectedRoute>
                    } />
                   </Routes>
-                </SubdomainDetector>
+                </SubdomainRouter>
                 
                 <Toaster />
               </Router>
