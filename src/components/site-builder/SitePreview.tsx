@@ -260,8 +260,9 @@ const SitePreviewContent = ({
       }
     }
     
-    // 🚀 UTILISER LA NOUVELLE LOGIQUE INTELLIGENTE
-    return generateSimpshopyUrl(selectedStore?.name || 'ma-boutique');
+    // 🚀 UTILISER L'URL PUBLIQUE DE LA BOUTIQUE (SOUS-DOMAINE)
+    const { generatePublicStoreUrl } = require('@/utils/domainUtils');
+    return generatePublicStoreUrl(selectedStore?.name || 'ma-boutique');
   };
 
   const renderProfessionalNavigation = () => {

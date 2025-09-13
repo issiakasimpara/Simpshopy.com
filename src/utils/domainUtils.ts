@@ -11,7 +11,7 @@ const getCurrentContext = () => {
 
   const hostname = window.location.hostname;
   
-  // 🚀 DÉTECTION SOUS-DOMAINE SIMPSHOPY.COM
+  // 🚀 DÉTECTION SOUS-DOMAINE SIMPSHOPY.COM (BOUTIQUES PUBLIQUES UNIQUEMENT)
   if (hostname.includes('simpshopy.com') && !hostname.startsWith('www.') && !hostname.startsWith('admin.')) {
     const subdomain = hostname.split('.')[0];
     if (subdomain !== 'simpshopy') {
@@ -21,6 +21,15 @@ const getCurrentContext = () => {
         storeSlug: subdomain 
       };
     }
+  }
+  
+  // 🚀 EXCLUSION EXPLICITE DU SOUS-DOMAINE ADMIN
+  if (hostname.startsWith('admin.simpshopy.com')) {
+    return { 
+      isSubdomain: false, 
+      baseDomain: hostname, 
+      storeSlug: null 
+    };
   }
   
   // 🚀 DÉTECTION SOUS-DOMAINE LOCALHOST (DÉVELOPPEMENT)
@@ -105,6 +114,23 @@ export function generateSimpshopyUrl(storeName: string): string {
     // 🚀 PATH: Utiliser l'ancien système
     const protocol = context.baseDomain.includes('localhost') ? 'http' : 'https';
     return `${protocol}://${context.baseDomain}/${storeSlug}`;
+  }
+}
+
+/**
+ * 🚀 GÉNÈRE L'URL PUBLIQUE D'UNE BOUTIQUE (SOUS-DOMAINE)
+ * @param storeName - Nom de la boutique
+ * @returns URL publique au format [nom-boutique].simpshopy.com
+ */
+export function generatePublicStoreUrl(storeName: string): string {
+  const storeSlug = generateStorePath(storeName).replace('/', '');
+  
+  if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+    // 🚀 DÉVELOPPEMENT: Utiliser localhost
+    return `http://${storeSlug}.localhost:4000`;
+  } else {
+    // 🚀 PRODUCTION: Utiliser simpshopy.com
+    return `https://${storeSlug}.simpshopy.com`;
   }
 }
 

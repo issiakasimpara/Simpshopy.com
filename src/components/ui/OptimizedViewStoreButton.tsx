@@ -43,9 +43,9 @@ const OptimizedViewStoreButton = ({
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
 
-      // 🚀 UTILISER LA NOUVELLE LOGIQUE INTELLIGENTE
-      const { generateSimpshopyUrl } = await import('@/utils/domainUtils');
-      const storeUrl = generateSimpshopyUrl(store.name);
+      // 🚀 UTILISER L'URL PUBLIQUE DE LA BOUTIQUE (SOUS-DOMAINE)
+      const { generatePublicStoreUrl } = await import('@/utils/domainUtils');
+      const storeUrl = generatePublicStoreUrl(store.name);
       
       window.open(storeUrl, '_blank');
       
