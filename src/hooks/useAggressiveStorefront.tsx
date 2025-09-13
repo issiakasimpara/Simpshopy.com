@@ -21,8 +21,11 @@ export interface UseAggressiveStorefrontReturn {
 /**
  * Hook avec cache agressif pour éliminer le skeleton
  */
-export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
-  const { storeSlug } = useParams<{ storeSlug: string }>();
+export function useAggressiveStorefront(storeSlugParam?: string): UseAggressiveStorefrontReturn {
+  const { storeSlug: paramStoreSlug } = useParams<{ storeSlug: string }>();
+  
+  // Utiliser le paramètre en priorité, sinon le paramètre d'URL
+  const storeSlug = storeSlugParam || paramStoreSlug;
   const [initialData, setInitialData] = useState<StorefrontData | null>(null);
   const [hasInitialData, setHasInitialData] = useState(false);
 

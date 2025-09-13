@@ -111,6 +111,42 @@ function PreloadInitializer() {
   return null;
 }
 
+// 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES
+function SubdomainDetector({ children }: { children: React.ReactNode }) {
+  // 🚀 DÉTECTION IMMÉDIATE (pas de useEffect pour éviter le flash)
+  const hostname = window.location.hostname;
+  let detectedStoreSlug: string | null = null;
+  let isSubdomain = false;
+  
+  // 🚀 DÉTECTION AUTOMATIQUE DU SOUS-DOMAINE
+  if (hostname.includes('simpshopy.com') && !hostname.startsWith('www.') && !hostname.startsWith('admin.')) {
+    const subdomain = hostname.split('.')[0];
+    if (subdomain !== 'simpshopy') {
+      console.log('🚀 Sous-domaine détecté:', subdomain);
+      detectedStoreSlug = subdomain;
+      isSubdomain = true;
+    }
+  }
+  
+  // 🚀 DÉTECTION LOCALHOST POUR DÉVELOPPEMENT
+  if (hostname.includes('localhost') && hostname.split('.').length > 1) {
+    const subdomain = hostname.split('.')[0];
+    if (subdomain !== 'localhost') {
+      console.log('🚀 Sous-domaine localhost détecté:', subdomain);
+      detectedStoreSlug = subdomain;
+      isSubdomain = true;
+    }
+  }
+
+  // Si c'est un sous-domaine, afficher directement le Storefront
+  if (isSubdomain && detectedStoreSlug) {
+    return <Storefront storeSlug={detectedStoreSlug} />;
+  }
+
+  // Sinon, afficher l'app normale
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -123,19 +159,21 @@ function App() {
                 <OptimizedPreloader />
                 <PreloadInitializer />
                 
-                {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
-                <Routes>
-                  {/* 🏠 PAGE D'ACCUEIL */}
-                  <Route path="/" element={<Home />} />
-                  
-                  {/* 🛍️ BOUTIQUE PUBLIQUE - ROUTAGE DIRECT PAR SLUG */}
-                  <Route path="/:storeSlug" element={<Storefront />} />
-                  <Route path="/:storeSlug/cart" element={<Cart />} />
-                  <Route path="/:storeSlug/checkout" element={<Checkout />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/payment-success" element={<PaymentSuccess />} />
-                  <Route path="/product/:productId" element={<Index />} />
+                {/* 🚀 DÉTECTION AUTOMATIQUE DES SOUS-DOMAINES */}
+                <SubdomainDetector>
+                  {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
+                  <Routes>
+                    {/* 🏠 PAGE D'ACCUEIL */}
+                    <Route path="/" element={<Home />} />
+                    
+                    {/* 🛍️ BOUTIQUE PUBLIQUE - ROUTAGE DIRECT PAR SLUG */}
+                    <Route path="/:storeSlug" element={<Storefront />} />
+                    <Route path="/:storeSlug/cart" element={<Cart />} />
+                    <Route path="/:storeSlug/checkout" element={<Checkout />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/payment-success" element={<PaymentSuccess />} />
+                    <Route path="/product/:productId" element={<Index />} />
                   
                   {/* 📄 PAGES PUBLIQUES SEO OPTIMISÉES */}
                   <Route path="/features" element={
@@ -341,7 +379,8 @@ function App() {
                        <TemplatePreview />
                      </ProtectedRoute>
                    } />
-                </Routes>
+                  </Routes>
+                </SubdomainDetector>
                 
                 <Toaster />
               </Router>

@@ -10,8 +10,15 @@ import VisitorTracker from '@/components/VisitorTracker';
 import { useBranding } from '@/hooks/useBranding';
 import InstantStorefront from '@/components/InstantStorefront';
 
-const Storefront = () => {
-  const { storeSlug } = useParams();
+interface StorefrontProps {
+  storeSlug?: string;
+}
+
+const Storefront = ({ storeSlug: propStoreSlug }: StorefrontProps = {}) => {
+  const { storeSlug: paramStoreSlug } = useParams();
+  
+  // Utiliser le prop en priorité, sinon le paramètre d'URL
+  const storeSlug = propStoreSlug || paramStoreSlug;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState('home');
@@ -21,7 +28,7 @@ const Storefront = () => {
   const { setStoreId } = useCart();
 
   // 🚀 UTILISATION DU CACHE AGRESSIF (ULTRA-RAPIDE)
-  const { data: storefrontData, isLoading, isError, error } = useAggressiveStorefront();
+  const { data: storefrontData, isLoading, isError, error } = useAggressiveStorefront(storeSlug);
   
   // Extraire les données du storefront
   const store = storefrontData?.store || null;
