@@ -1,14 +1,46 @@
 /**
  * Utilitaires pour la gestion des domaines Simpshopy
- * SYSTÈME TEMPORAIRE: Utilise des paths au lieu de sous-domaines
+ * SYSTÈME SOUS-DOMAINES: Détection automatique du contexte
  */
 
-// Configuration temporaire - à changer quand le domaine sera acheté
-const getTempBaseDomain = () => {
-  if (typeof window !== 'undefined') {
-    return window.location.host;
+// 🚀 DÉTECTION AUTOMATIQUE DU CONTEXTE (SOUS-DOMAINE OU PATH)
+const getCurrentContext = () => {
+  if (typeof window === 'undefined') {
+    return { isSubdomain: false, baseDomain: 'localhost:8081', storeSlug: null };
   }
-  return 'localhost:8081'; // Fallback pour le SSR
+
+  const hostname = window.location.hostname;
+  
+  // 🚀 DÉTECTION SOUS-DOMAINE SIMPSHOPY.COM
+  if (hostname.includes('simpshopy.com') && !hostname.startsWith('www.') && !hostname.startsWith('admin.')) {
+    const subdomain = hostname.split('.')[0];
+    if (subdomain !== 'simpshopy') {
+      return { 
+        isSubdomain: true, 
+        baseDomain: hostname, 
+        storeSlug: subdomain 
+      };
+    }
+  }
+  
+  // 🚀 DÉTECTION SOUS-DOMAINE LOCALHOST (DÉVELOPPEMENT)
+  if (hostname.includes('localhost') && hostname.split('.').length > 1) {
+    const subdomain = hostname.split('.')[0];
+    if (subdomain !== 'localhost') {
+      return { 
+        isSubdomain: true, 
+        baseDomain: hostname, 
+        storeSlug: subdomain 
+      };
+    }
+  }
+
+  // 🚀 MODE PATH (ANCIEN SYSTÈME)
+  return { 
+    isSubdomain: false, 
+    baseDomain: window.location.host, 
+    storeSlug: null 
+  };
 };
 
 /**
@@ -43,21 +75,53 @@ export function generateStorePath(storeName: string): string {
  * @returns Domaine temporaire pour l'affichage
  */
 export function generateSimpshopySubdomain(storeName: string): string {
-  const storePath = generateStorePath(storeName);
-  return `${getTempBaseDomain()}${storePath}`;
+  const context = getCurrentContext();
+  const storeSlug = generateStorePath(storeName).replace('/', '');
+  
+  if (context.isSubdomain) {
+    // 🚀 SOUS-DOMAINE: Retourner le sous-domaine actuel
+    return context.baseDomain;
+  } else {
+    // 🚀 PATH: Utiliser l'ancien système
+    return `${context.baseDomain}/${storeSlug}`;
+  }
 }
 
 /**
  * Génère l'URL complète pour une boutique
- * TEMPORAIRE: Utilise un système de paths
+ * 🚀 INTELLIGENT: Détecte automatiquement le contexte (sous-domaine ou path)
  * @param storeName - Nom de la boutique
- * @returns URL complète au format http://localhost:8081/[nom-boutique]
+ * @returns URL complète selon le contexte
  */
 export function generateSimpshopyUrl(storeName: string): string {
-  const storePath = generateStorePath(storeName);
-  const baseDomain = getTempBaseDomain();
-  const protocol = baseDomain.includes('localhost') ? 'http' : 'https';
-  return `${protocol}://${baseDomain}${storePath}`;
+  const context = getCurrentContext();
+  const storeSlug = generateStorePath(storeName).replace('/', '');
+  
+  if (context.isSubdomain) {
+    // 🚀 SOUS-DOMAINE: Utiliser le sous-domaine actuel
+    const protocol = context.baseDomain.includes('localhost') ? 'http' : 'https';
+    return `${protocol}://${context.baseDomain}`;
+  } else {
+    // 🚀 PATH: Utiliser l'ancien système
+    const protocol = context.baseDomain.includes('localhost') ? 'http' : 'https';
+    return `${protocol}://${context.baseDomain}/${storeSlug}`;
+  }
+}
+
+/**
+ * 🚀 FONCTION PRINCIPALE: Vérifie si l'application est sur un sous-domaine
+ * @returns true si l'application est sur un sous-domaine
+ */
+export function isOnSubdomain(): boolean {
+  return getCurrentContext().isSubdomain;
+}
+
+/**
+ * 🚀 FONCTION PRINCIPALE: Récupère le slug de la boutique actuelle
+ * @returns Le slug de la boutique ou null si pas sur un sous-domaine
+ */
+export function getCurrentStoreSlug(): string | null {
+  return getCurrentContext().storeSlug;
 }
 
 /**

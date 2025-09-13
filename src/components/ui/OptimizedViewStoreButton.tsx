@@ -43,20 +43,9 @@ const OptimizedViewStoreButton = ({
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
 
-      // Ouvrir la boutique dans une nouvelle fenêtre sur le bon domaine
-      const currentHostname = window.location.hostname;
-      let storeUrl;
-      
-      if (currentHostname === 'localhost' || currentHostname.includes('localhost')) {
-        // En développement, rester sur localhost
-        storeUrl = `http://localhost:8080/${storeSlug}`;
-      } else if (currentHostname === 'admin.simpshopy.com') {
-        // En production, rediriger vers simpshopy.com
-        storeUrl = `https://simpshopy.com/${storeSlug}`;
-      } else {
-        // Fallback pour autres cas
-        storeUrl = `/${storeSlug}`;
-      }
+      // 🚀 UTILISER LA NOUVELLE LOGIQUE INTELLIGENTE
+      const { generateSimpshopyUrl } = await import('@/utils/domainUtils');
+      const storeUrl = generateSimpshopyUrl(store.name);
       
       window.open(storeUrl, '_blank');
       

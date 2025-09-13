@@ -260,8 +260,8 @@ const SitePreviewContent = ({
       }
     }
     
-    const storeSlug = selectedStore?.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'ma-boutique';
-    return generateSimpshopyUrl(storeSlug);
+    // 🚀 UTILISER LA NOUVELLE LOGIQUE INTELLIGENTE
+    return generateSimpshopyUrl(selectedStore?.name || 'ma-boutique');
   };
 
   const renderProfessionalNavigation = () => {
