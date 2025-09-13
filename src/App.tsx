@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
+import { SubdomainProvider, useSubdomain } from './contexts/SubdomainContext';
 import { useSessionOptimizer } from './hooks/useSessionOptimizer';
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
@@ -113,33 +114,12 @@ function PreloadInitializer() {
 
 // 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES ET AFFICHER DIRECTEMENT LE STOREFRONT
 function SubdomainRouter({ children }: { children: React.ReactNode }) {
-  const hostname = window.location.hostname;
-  let detectedStoreSlug: string | null = null;
-  let isSubdomain = false;
-  
-  // 🚀 DÉTECTION AUTOMATIQUE DU SOUS-DOMAINE
-  if (hostname.includes('simpshopy.com') && !hostname.startsWith('www.') && !hostname.startsWith('admin.')) {
-    const subdomain = hostname.split('.')[0];
-    if (subdomain !== 'simpshopy') {
-      console.log('🚀 Sous-domaine détecté:', subdomain);
-      detectedStoreSlug = subdomain;
-      isSubdomain = true;
-    }
-  }
-  
-  // 🚀 DÉTECTION LOCALHOST POUR DÉVELOPPEMENT
-  if (hostname.includes('localhost') && hostname.split('.').length > 1) {
-    const subdomain = hostname.split('.')[0];
-    if (subdomain !== 'localhost') {
-      console.log('🚀 Sous-domaine localhost détecté:', subdomain);
-      detectedStoreSlug = subdomain;
-      isSubdomain = true;
-    }
-  }
+  const { isSubdomain, storeSlug } = useSubdomain();
 
   // Si c'est un sous-domaine, afficher directement le Storefront
-  if (isSubdomain && detectedStoreSlug) {
-    return <Storefront storeSlug={detectedStoreSlug} />;
+  if (isSubdomain && storeSlug) {
+    console.log('🚀 Affichage direct du Storefront pour le sous-domaine:', storeSlug);
+    return <Storefront storeSlug={storeSlug} />;
   }
 
   // Sinon, afficher l'app normale
@@ -152,14 +132,15 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <StorageInitializer>
-              <Router>
-                <GlobalOptimizations />
-                <OptimizedPreloader />
-                <PreloadInitializer />
-                
-                {/* 🚀 MODIFICATION AUTOMATIQUE DE L'URL POUR LES SOUS-DOMAINES */}
-                <SubdomainRouter>
+            <SubdomainProvider>
+              <StorageInitializer>
+                <Router>
+                  <GlobalOptimizations />
+                  <OptimizedPreloader />
+                  <PreloadInitializer />
+                  
+                  {/* 🚀 MODIFICATION AUTOMATIQUE DE L'URL POUR LES SOUS-DOMAINES */}
+                  <SubdomainRouter>
                   {/* 🌐 ROUTAGE SIMPLIFIÉ - Tout sur simpshopy.com */}
                   <Routes>
                     {/* 🏠 PAGE D'ACCUEIL */}
@@ -384,6 +365,7 @@ function App() {
                 <Toaster />
               </Router>
             </StorageInitializer>
+            </SubdomainProvider>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
