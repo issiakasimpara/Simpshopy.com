@@ -111,7 +111,7 @@ function PreloadInitializer() {
   return null;
 }
 
-// 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES ET AFFICHER DIRECTEMENT
+// 🚀 COMPOSANT POUR DÉTECTER LES SOUS-DOMAINES ET AFFICHER DIRECTEMENT LE STOREFRONT
 function SubdomainRouter({ children }: { children: React.ReactNode }) {
   const hostname = window.location.hostname;
   let detectedStoreSlug: string | null = null;
