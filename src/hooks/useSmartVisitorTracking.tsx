@@ -264,14 +264,14 @@ export const useSmartVisitorTracking = (storeId?: string) => {
     checkIntervalRef.current = setInterval(fetchActiveVisitors, CONFIG.CHECK_INTERVAL);
 
     setTrackingState(TrackingState.SLEEP);
-    console.log('✅ Mode veille activé');
+    logger.info('Mode veille activé', undefined, 'useSmartVisitorTracking');
   }, [fetchActiveVisitors]);
 
   // Initialisation et gestion du cycle de vie
   useEffect(() => {
     if (!storeId) return;
 
-    console.log('🎯 Initialisation du tracking intelligent pour store:', storeId);
+    logger.info('Initialisation du tracking intelligent pour store', { storeId }, 'useSmartVisitorTracking');
 
     // Récupération initiale pour déterminer l'état
     fetchActiveVisitors();
@@ -281,7 +281,7 @@ export const useSmartVisitorTracking = (storeId?: string) => {
 
     // Cleanup lors du démontage
     return () => {
-      console.log('🧹 Cleanup du tracking intelligent');
+      logger.info('Cleanup du tracking intelligent', undefined, 'useSmartVisitorTracking');
       
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);

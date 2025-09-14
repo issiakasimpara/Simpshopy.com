@@ -59,7 +59,7 @@ export const useTemplateHistory = ({ initialTemplate, onTemplateChange }: UseTem
     }
   }, [canRedo, currentIndex, history, onTemplateChange]);
 
-  console.log('État de l\'historique - Index:', currentIndex, 'Longueur:', history.length, 'canUndo:', canUndo, 'canRedo:', canRedo);
+  logger.debug('État de l\'historique', { currentIndex, historyLength: history.length, canUndo, canRedo }, 'useTemplateHistory');
 
   return {
     addToHistory,

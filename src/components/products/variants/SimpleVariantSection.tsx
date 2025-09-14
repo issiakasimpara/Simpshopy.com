@@ -141,7 +141,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
   };
 
   const removeColor = (colorToRemove: string) => {
-    console.log('SimpleVariantSection - Removing color:', colorToRemove);
+    logger.debug('SimpleVariantSection - Removing color', { color: colorToRemove }, 'SimpleVariantSection');
     setColors(colors.filter(c => c !== colorToRemove));
     const newColorImages = { ...colorImages };
     delete newColorImages[colorToRemove];
@@ -149,12 +149,12 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
   };
 
   const removeSize = (sizeToRemove: string) => {
-    console.log('SimpleVariantSection - Removing size:', sizeToRemove);
+    logger.debug('SimpleVariantSection - Removing size', { size: sizeToRemove }, 'SimpleVariantSection');
     setSizes(sizes.filter(s => s !== sizeToRemove));
   };
 
   const updateVariant = (variantId: string, field: string, value: string) => {
-    console.log('SimpleVariantSection - Updating variant:', variantId, field, value);
+    logger.debug('SimpleVariantSection - Updating variant', { variantId, field, value }, 'SimpleVariantSection');
     const updatedVariants = variants.map(variant => 
       variant.id === variantId 
         ? { ...variant, [field]: value }
@@ -170,7 +170,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
-        console.log('SimpleVariantSection - Image uploaded for color:', color);
+        logger.debug('SimpleVariantSection - Image uploaded for color', { color }, 'SimpleVariantSection');
         setColorImages(prev => ({ ...prev, [color]: imageUrl }));
       };
       reader.readAsDataURL(file);
@@ -184,12 +184,12 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
     }
   };
 
-  console.log('SimpleVariantSection - Current state:', {
+  logger.debug('SimpleVariantSection - Current state', {
     colors,
     sizes,
     variants: variants.length,
     isInitialized
-  });
+  }, 'SimpleVariantSection');
 
   if (isLoading) {
     return (

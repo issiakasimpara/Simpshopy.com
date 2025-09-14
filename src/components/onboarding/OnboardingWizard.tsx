@@ -92,27 +92,27 @@ const OnboardingWizard = () => {
         const saved = await saveStep({ experience_level: selectedExperienceLevel });
         logger.info('Sauvegarde réussie', { experienceLevel: selectedExperienceLevel }, 'OnboardingWizard');
         if (saved) {
-          console.log('➡️ Passage à l\'étape suivante');
+          logger.debug('Passage à l\'étape suivante', { fromStep: currentStep }, 'OnboardingWizard');
           const nextStepResult = await nextStep();
-          console.log('✅ nextStep résultat:', nextStepResult);
+          logger.debug('nextStep résultat', { result: nextStepResult }, 'OnboardingWizard');
         }
       } else if (currentStep === 2 && selectedBusinessType) {
         logger.info('Sauvegarde du type de business', { businessType: selectedBusinessType }, 'OnboardingWizard');
         const saved = await saveStep({ business_type: selectedBusinessType });
-        console.log('✅ Sauvegarde réussie:', saved);
+        logger.info('Sauvegarde réussie', { businessType: selectedBusinessType }, 'OnboardingWizard');
         if (saved) {
-          console.log('➡️ Passage à l\'étape suivante');
+          logger.debug('Passage à l\'étape suivante', { fromStep: currentStep }, 'OnboardingWizard');
           const nextStepResult = await nextStep();
-          console.log('✅ nextStep résultat:', nextStepResult);
+          logger.debug('nextStep résultat', { result: nextStepResult }, 'OnboardingWizard');
         }
       } else if (currentStep === 3 && selectedSector) {
         logger.info('Sauvegarde du secteur', { sector: selectedSector }, 'OnboardingWizard');
         const saved = await saveStep({ sector: selectedSector });
-        console.log('✅ Sauvegarde réussie:', saved);
+        logger.info('Sauvegarde réussie', { businessType: selectedBusinessType }, 'OnboardingWizard');
         if (saved) {
-          console.log('➡️ Passage à l\'étape suivante');
+          logger.debug('Passage à l\'étape suivante', { fromStep: currentStep }, 'OnboardingWizard');
           const nextStepResult = await nextStep();
-          console.log('✅ nextStep résultat:', nextStepResult);
+          logger.debug('nextStep résultat', { result: nextStepResult }, 'OnboardingWizard');
         }
       } else if (currentStep === 4 && selectedCountry && selectedCurrency) {
         logger.info('Sauvegarde de la localisation', { selectedCountry, selectedCurrency }, 'OnboardingWizard');
@@ -121,19 +121,19 @@ const OnboardingWizard = () => {
           currency_code: selectedCurrency 
         });
         
-        console.log('✅ Sauvegarde réussie:', saved);
+        logger.info('Sauvegarde réussie', { businessType: selectedBusinessType }, 'OnboardingWizard');
         if (saved) {
-          console.log('➡️ Passage à l\'étape suivante');
+          logger.debug('Passage à l\'étape suivante', { fromStep: currentStep }, 'OnboardingWizard');
           const nextStepResult = await nextStep();
-          console.log('✅ nextStep résultat:', nextStepResult);
+          logger.debug('nextStep résultat', { result: nextStepResult }, 'OnboardingWizard');
         }
                                       } else if (currentStep === 5) {
                   // Étape finale - Création de la boutique avec template
-                  console.log('🎉 Création de la boutique avec template basé sur le secteur');
+                  logger.info('Création de la boutique avec template basé sur le secteur', { sector: selectedSector }, 'OnboardingWizard');
                   
                   // Créer un store si l'utilisateur n'en a pas
                   if (!store) {
-                    console.log('🏪 Création d\'un nouveau store avec template');
+                    logger.info('Création d\'un nouveau store avec template', { sector: selectedSector }, 'OnboardingWizard');
                     
                     // Générer un nom de store basé sur les données d'onboarding
                     const businessTypeNames = {
@@ -167,11 +167,11 @@ const OnboardingWizard = () => {
                     );
                     
                     if (result.success) {
-                      console.log('✅ Boutique créée avec succès avec le template:', result.template?.name);
+                      logger.info('Boutique créée avec succès avec le template', { templateName: result.template?.name, storeId: result.store?.id }, 'OnboardingWizard');
                       
                       // Initialiser la devise du store
                       if (selectedCurrency) {
-                        console.log('💰 Initialisation de la devise du store avec:', selectedCurrency);
+                        logger.info('Initialisation de la devise du store', { currency: selectedCurrency, country: selectedCountry }, 'OnboardingWizard');
                         await initializeStoreCurrency(selectedCurrency, [selectedCountry]);
                       }
                     } else {
