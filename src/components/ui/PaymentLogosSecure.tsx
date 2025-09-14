@@ -8,10 +8,7 @@ interface PaymentLogoProps {
 
 // 🔐 Fonction utilitaire pour créer des fallbacks sécurisés
 const createSecureFallback = (parent: HTMLElement, text: string, colorClass: string, subtext?: string) => {
-  // Sécurisation: Nettoyer le contenu existant sans innerHTML
-  while (parent.firstChild) {
-    parent.removeChild(parent.firstChild);
-  }
+  parent.innerHTML = '';
   
   const fallbackDiv = document.createElement('div');
   fallbackDiv.className = `${colorClass} text-center`;
@@ -34,29 +31,16 @@ const createSecureFallback = (parent: HTMLElement, text: string, colorClass: str
 
 // 🔐 Fonction utilitaire pour créer des fallbacks avec icônes sécurisés
 const createSecureIconFallback = (parent: HTMLElement, iconClass: string, bgClass: string) => {
-  // Sécurisation: Nettoyer le contenu existant sans innerHTML
-  while (parent.firstChild) {
-    parent.removeChild(parent.firstChild);
-  }
+  parent.innerHTML = '';
   
   const container = document.createElement('div');
   container.className = `w-full h-full ${bgClass} flex items-center justify-center rounded-2xl`;
   
-  // Sécurisation: Créer le SVG de manière sécurisée
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.className = iconClass;
+  const icon = document.createElement('div');
+  icon.className = iconClass;
+  icon.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>';
   
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('stroke-linecap', 'round');
-  path.setAttribute('stroke-linejoin', 'round');
-  path.setAttribute('stroke-width', '2');
-  path.setAttribute('d', 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4');
-  
-  svg.appendChild(path);
-  container.appendChild(svg);
+  container.appendChild(icon);
   parent.appendChild(container);
 };
 
@@ -331,35 +315,4 @@ export const PaymentLogos = {
   Bitcoin: BitcoinLogo,
   Mastercard: MastercardLogo,
   BankTransfer: BankTransferLogo,
-};
-
-// 🔐 Composant principal pour la compatibilité - SÉCURISÉ
-interface PaymentMethodLogoProps {
-  method: 'paypal' | 'stripe' | 'visa' | 'bank' | 'crypto' | 'cash' | 'orange' | 'mtn' | 'moov' | 'moneroo' | 'wave' | 'bitcoin' | 'mastercard';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  useRealLogo?: boolean;
-}
-
-export const PaymentMethodLogo = ({ method, size = 'md', className = '', useRealLogo = false }: PaymentMethodLogoProps) => {
-  // Mapper les méthodes vers les composants sécurisés
-  const logoComponents = {
-    paypal: PayPalLogo,
-    stripe: StripeLogo,
-    moneroo: MonerooLogo,
-    visa: VisaLogo,
-    mastercard: MastercardLogo,
-    orange: OrangeMoneyLogo,
-    mtn: MTNMobileMoneyLogo,
-    moov: MoovMoneyLogo,
-    wave: WaveLogo,
-    bitcoin: BitcoinLogo,
-    bank: BankTransferLogo,
-    crypto: BitcoinLogo,
-    cash: BankTransferLogo
-  };
-
-  const LogoComponent = logoComponents[method] || BankTransferLogo;
-
-  return <LogoComponent size={size} className={className} />;
 };

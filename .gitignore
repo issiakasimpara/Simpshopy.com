@@ -48,3 +48,6 @@ credentials.json
 cloudflare-secrets.ts
 supabase-secrets.ts
 .vercel
+vercel env pull*
+*.env.development.local
+*.env.production.local

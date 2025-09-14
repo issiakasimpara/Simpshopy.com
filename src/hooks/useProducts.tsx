@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { sqlSecurity } from '@/utils/sqlSecurity';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Product = Tables<'products'>;
@@ -21,21 +22,17 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
         return [];
       }
       
-      let query = supabase
-        .from('products')
-        .select(`
-          *,
-          categories(name)
-        `)
-        .eq('store_id', storeId)
-        .order('created_at', { ascending: false });
-
-      // Si on spécifie un filtre de statut, l'appliquer
+      // Construire les filtres de manière sécurisée
+      const filters: Record<string, any> = { store_id: storeId };
       if (statusFilter === 'active') {
-        query = query.eq('status', 'active');
+        filters.status = 'active';
       }
 
-      const { data, error } = await query;
+      const { data, error } = await sqlSecurity
+        .buildSecureSelect('products', ['*', 'categories(name)'], filters, {
+          orderBy: 'created_at',
+          orderDirection: 'desc'
+        });
 
       if (error) {
         console.error('useProducts - Error fetching products:', error);

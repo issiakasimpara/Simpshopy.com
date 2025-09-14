@@ -78,13 +78,29 @@ const AppLogo = ({
               // Fallback vers l'icône si l'image ne charge pas
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
-              target.parentElement!.innerHTML = `
-                <div class="${classes.iconContainer.replace('bg-white', 'bg-gradient-to-br from-blue-600 to-purple-600')}">
-                  <svg class="${classes.icon} text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                </div>
-              `;
+              
+              // Sécurisation: Création DOM sécurisée au lieu de innerHTML
+              const parent = target.parentElement!;
+              parent.innerHTML = ''; // Nettoyer d'abord
+              
+              const iconContainer = document.createElement('div');
+              iconContainer.className = classes.iconContainer.replace('bg-white', 'bg-gradient-to-br from-blue-600 to-purple-600');
+              
+              const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+              svg.setAttribute('class', `${classes.icon} text-white`);
+              svg.setAttribute('fill', 'none');
+              svg.setAttribute('stroke', 'currentColor');
+              svg.setAttribute('viewBox', '0 0 24 24');
+              
+              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              path.setAttribute('stroke-linecap', 'round');
+              path.setAttribute('stroke-linejoin', 'round');
+              path.setAttribute('stroke-width', '2');
+              path.setAttribute('d', 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4');
+              
+              svg.appendChild(path);
+              iconContainer.appendChild(svg);
+              parent.appendChild(iconContainer);
             }}
           />
         </div>

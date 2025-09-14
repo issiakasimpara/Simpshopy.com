@@ -5,7 +5,7 @@
 Vous avez :
 - ✅ Bucket R2 créé : `simpshopy-assets`
 - ✅ URL publique activée : `https://pub-345c927832db4e89a418c5e42b39ec6a.r2.dev`
-- ✅ Token API créé : `ObRMG1YhrlU08FI-D_Z2QAJ3uVjSYVZNNhgAyBM4`
+- ✅ Token API créé : `[TOKEN_MASQUÉ]`
 - ✅ Variables d'environnement configurées
 
 ## 📁 **Fichiers à migrer (dossier public/)**

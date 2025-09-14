@@ -269,13 +269,27 @@ class ErrorRecoveryManager {
     // Créer une notification d'erreur
     const notification = document.createElement('div');
     notification.className = 'error-notification';
-    notification.innerHTML = `
-      <div class="error-content">
-        <h3>Une erreur est survenue</h3>
-        <p>Nous travaillons pour résoudre ce problème. Veuillez réessayer dans quelques instants.</p>
-        <button onclick="this.parentElement.parentElement.remove()">Fermer</button>
-      </div>
-    `;
+    
+    // Sécurisation: Création DOM sécurisée au lieu de innerHTML
+    const errorContent = document.createElement('div');
+    errorContent.className = 'error-content';
+    
+    const title = document.createElement('h3');
+    title.textContent = 'Une erreur est survenue';
+    
+    const message = document.createElement('p');
+    message.textContent = 'Nous travaillons pour résoudre ce problème. Veuillez réessayer dans quelques instants.';
+    
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Fermer';
+    closeButton.addEventListener('click', () => {
+      notification.remove();
+    });
+    
+    errorContent.appendChild(title);
+    errorContent.appendChild(message);
+    errorContent.appendChild(closeButton);
+    notification.appendChild(errorContent);
     
     document.body.appendChild(notification);
     

@@ -17,9 +17,15 @@ import { errorRecoveryManager } from './utils/errorRecovery'
 import { systemDiagnostic } from './utils/systemDiagnostic'
 // 🗄️ Migration de la base de données
 import { checkMarketSettingsTable, applyMarketSettingsMigration } from './scripts/applyMarketSettingsMigration'
+// 🔐 Nouvelles sécurités
+import { setupGlobalErrorHandler } from './utils/secureErrorHandler'
+import { initializeRateLimiting } from './utils/rateLimiter'
+import { initializeCSRF } from './utils/csrfProtection'
+import { sessionSecurity } from './utils/sessionSecurity'
+import { securityMiddleware } from './utils/securityMiddleware'
 
 // 🔍 Exécuter la validation de sécurité en développement uniquement (réduit)
-if (import.meta.env.DEV && Math.random() < 0.1) {
+if (import.meta.env.DEV && Math.random() < 0.01) {
   logSecurityReport();
 
   // ⚡ Monitoring de performance (développement uniquement - réduit)
@@ -74,6 +80,13 @@ errorRecoveryManager.registerRecoveryAction('Auth_signIn_Error', {
 });
 
 
+
+// 🔐 Initialiser les systèmes de sécurité
+setupGlobalErrorHandler();
+initializeRateLimiting();
+initializeCSRF();
+securityMiddleware.initialize();
+// sessionSecurity est déjà initialisé automatiquement
 
 // 🗄️ Vérifier et appliquer les migrations de base de données
 // NOTE: Migration désactivée - exécutez manuellement CREATE_MARKET_SETTINGS_MANUAL.sql

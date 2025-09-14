@@ -88,12 +88,18 @@ export class CSVImportService {
        
        let cleanedDescription = description.trim();
        
-       // Si c'est du HTML, extraire le texte
-       if (cleanedDescription.includes('<') && cleanedDescription.includes('>')) {
-         const tempDiv = document.createElement('div');
-         tempDiv.innerHTML = cleanedDescription;
-         cleanedDescription = tempDiv.textContent || tempDiv.innerText || '';
-       }
+      // Si c'est du HTML, extraire le texte de manière sécurisée
+      if (cleanedDescription.includes('<') && cleanedDescription.includes('>')) {
+        // Sécurisation: Utiliser DOMParser au lieu de innerHTML
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(cleanedDescription, 'text/html');
+          cleanedDescription = doc.body.textContent || doc.body.innerText || '';
+        } catch (error) {
+          // Fallback: supprimer les balises HTML manuellement
+          cleanedDescription = cleanedDescription.replace(/<[^>]*>/g, '');
+        }
+      }
        
        // Nettoyer les espaces multiples
        cleanedDescription = cleanedDescription.replace(/\s+/g, ' ').trim();
@@ -301,12 +307,16 @@ export class CSVImportService {
            return '';
          }
          
-         // Créer un élément temporaire pour extraire le texte
-         const tempDiv = document.createElement('div');
-         tempDiv.innerHTML = htmlDescription;
-         
-         // Extraire le texte brut
-         let textContent = tempDiv.textContent || tempDiv.innerText || '';
+         // Sécurisation: Utiliser DOMParser au lieu de innerHTML
+         let textContent = '';
+         try {
+           const parser = new DOMParser();
+           const doc = parser.parseFromString(htmlDescription, 'text/html');
+           textContent = doc.body.textContent || doc.body.innerText || '';
+         } catch (error) {
+           // Fallback: supprimer les balises HTML manuellement
+           textContent = htmlDescription.replace(/<[^>]*>/g, '');
+         }
          
          // Nettoyer les espaces multiples et les retours à la ligne
          textContent = textContent.replace(/\s+/g, ' ').trim();
