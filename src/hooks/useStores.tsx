@@ -5,7 +5,6 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import { OnboardingService } from '@/services/onboardingService';
 import { StoreCurrencyService } from '@/services/storeCurrencyService';
-import { sqlSecurity } from '@/utils/sqlSecurity';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Store = Tables<'stores'>;
@@ -32,8 +31,10 @@ export const useStores = () => {
 
       try {
         // D'abord récupérer le profil de l'utilisateur - SÉCURISÉ
-        const { data: profile, error: profileError } = await sqlSecurity
-          .buildSecureSelect('profiles', ['id'], { user_id: user.id })
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
           .single();
 
         if (profileError) {
@@ -43,12 +44,13 @@ export const useStores = () => {
           if (profileError.code === 'PGRST116') { // No rows returned
             console.log('🔧 Profil manquant, création automatique...');
             try {
-              const { data: newProfile, error: createError } = await sqlSecurity
-                .buildSecureInsert('profiles', {
+              const { data: newProfile, error: createError } = await supabase
+                .from('profiles')
+                .insert({
                   user_id: user.id,
-                  first_name: sqlSecurity.sanitizeString(user.user_metadata?.first_name || ''),
-                  last_name: sqlSecurity.sanitizeString(user.user_metadata?.last_name || ''),
-                  email: sqlSecurity.sanitizeString(user.email || '')
+                  first_name: user.user_metadata?.first_name || '',
+                  last_name: user.user_metadata?.last_name || '',
+                  email: user.email || ''
                 })
                 .select()
                 .single();
@@ -60,12 +62,12 @@ export const useStores = () => {
 
               console.log('✅ Profil créé automatiquement:', newProfile.id);
 
-              // Maintenant récupérer les boutiques avec le nouveau profil - SÉCURISÉ
-              const { data, error } = await sqlSecurity
-                .buildSecureSelect('stores', ['*'], { merchant_id: newProfile.id }, {
-                  orderBy: 'created_at',
-                  orderDirection: 'desc'
-                });
+              // Maintenant récupérer les boutiques avec le nouveau profil
+              const { data, error } = await supabase
+                .from('stores')
+                .select('*')
+                .eq('merchant_id', newProfile.id)
+                .order('created_at', { ascending: false });
 
               if (error) {
                 console.error('Error fetching stores after profile creation:', error);
@@ -85,12 +87,12 @@ export const useStores = () => {
           return [];
         }
 
-        // Maintenant récupérer les boutiques de ce profil - SÉCURISÉ
-        const { data, error } = await sqlSecurity
-          .buildSecureSelect('stores', ['*'], { merchant_id: profile.id }, {
-            orderBy: 'created_at',
-            orderDirection: 'desc'
-          });
+        // Maintenant récupérer les boutiques de ce profil
+        const { data, error } = await supabase
+          .from('stores')
+          .select('*')
+          .eq('merchant_id', profile.id)
+          .order('created_at', { ascending: false });
 
         if (error) {
           console.error('Error fetching stores:', error);

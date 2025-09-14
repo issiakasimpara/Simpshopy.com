@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { sqlSecurity } from '@/utils/sqlSecurity';
 
 export interface OrderItem {
   id: string;
@@ -80,31 +79,32 @@ class OrderService {
 
       console.log('📝 Création commande avec public_orders');
 
-      const { data, error } = await sqlSecurity
-        .buildSecureInsert('public_orders', {
-          order_number: sqlSecurity.sanitizeString(orderNumber),
+      const { data, error } = await supabase
+        .from('public_orders')
+        .insert({
+          order_number: orderNumber,
           store_id: orderData.storeId,
-          customer_email: sqlSecurity.sanitizeString(orderData.customerInfo.email.toLowerCase().trim()),
-          customer_name: sqlSecurity.sanitizeString(`${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`.trim()),
-          customer_phone: orderData.customerInfo.phone ? sqlSecurity.sanitizeString(orderData.customerInfo.phone) : null,
+          customer_email: orderData.customerInfo.email.toLowerCase().trim(),
+          customer_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`.trim(),
+          customer_phone: orderData.customerInfo.phone || null,
           items: orderData.items,
           total_amount: orderData.totalAmount,
-          currency: sqlSecurity.sanitizeString(orderData.currency),
+          currency: orderData.currency,
           status: 'pending',
           shipping_address: {
-            street: sqlSecurity.sanitizeString(orderData.customerInfo.address),
-            city: sqlSecurity.sanitizeString(orderData.customerInfo.city),
-            postal_code: sqlSecurity.sanitizeString(orderData.customerInfo.postalCode),
-            country: sqlSecurity.sanitizeString(orderData.customerInfo.country)
+            street: orderData.customerInfo.address,
+            city: orderData.customerInfo.city,
+            postal_code: orderData.customerInfo.postalCode,
+            country: orderData.customerInfo.country
           },
           billing_address: {
-            street: sqlSecurity.sanitizeString(orderData.customerInfo.address),
-            city: sqlSecurity.sanitizeString(orderData.customerInfo.city),
-            postal_code: sqlSecurity.sanitizeString(orderData.customerInfo.postalCode),
-            country: sqlSecurity.sanitizeString(orderData.customerInfo.country)
+            street: orderData.customerInfo.address,
+            city: orderData.customerInfo.city,
+            postal_code: orderData.customerInfo.postalCode,
+            country: orderData.customerInfo.country
           },
           shipping_method: orderData.shippingMethod || null,
-          shipping_country: sqlSecurity.sanitizeString(orderData.shippingCountry || orderData.customerInfo.country),
+          shipping_country: orderData.shippingCountry || orderData.customerInfo.country,
           shipping_cost: orderData.shippingCost || 0
         })
         .select()
