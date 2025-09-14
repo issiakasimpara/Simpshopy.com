@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Product = Tables<'products'>;
@@ -14,10 +15,10 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
   const { data: products, isLoading, error, refetch } = useQuery({
     queryKey: ['products', storeId, statusFilter],
     queryFn: async () => {
-      console.log('useProducts - Fetching products for store:', storeId, 'with status filter:', statusFilter);
+      logger.debug('Fetching products for store', { storeId, statusFilter }, 'useProducts');
       
       if (!storeId) {
-        console.log('useProducts - No storeId provided, returning empty array');
+        logger.warn('No storeId provided, returning empty array', undefined, 'useProducts');
         return [];
       }
       
@@ -42,18 +43,18 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
         throw error;
       }
 
-      console.log('useProducts - Successfully fetched products:', {
+      logger.debug('Successfully fetched products', {
         count: data?.length || 0,
         statusFilter,
         products: data?.map(p => ({ id: p.id, name: p.name, price: p.price, status: p.status })) || []
-      });
+      }, 'useProducts');
 
       return data || [];
     },
     enabled: !!storeId,
     staleTime: 30000, // Cache pendant 30 secondes
     retry: (failureCount, error) => {
-      console.log('useProducts - Query failed, retry count:', failureCount, 'Error:', error);
+      logger.error('Query failed', { retryCount: failureCount, error: error.message }, 'useProducts');
       return failureCount < 3;
     }
   });
@@ -70,7 +71,7 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
       return data;
     },
     onSuccess: (newProduct) => {
-      console.log('✅ Product creation successful, updating cache');
+      logger.info('Product creation successful, updating cache', undefined, 'useProducts');
       
       // Invalider toutes les queries de produits pour ce store
       queryClient.invalidateQueries({ queryKey: ['products', storeId] });
@@ -102,7 +103,7 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
       return data;
     },
     onSuccess: (updatedProduct) => {
-      console.log('✅ Product update successful, updating cache');
+      logger.info('Product update successful, updating cache', undefined, 'useProducts');
       
       // Mise à jour optimiste du cache pour toutes les variantes de la query
       queryClient.setQueryData(['products', storeId, 'all'], (old: any) => {
@@ -131,7 +132,7 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
 
   const deleteProduct = useMutation({
     mutationFn: async (id: string) => {
-      console.log('🗑️ Attempting to delete product:', id);
+      logger.info('Attempting to delete product', { productId: id }, 'useProducts');
       
       const { error } = await supabase
         .from('products')
@@ -143,11 +144,11 @@ export const useProducts = (storeId?: string, statusFilter?: 'active' | 'all') =
         throw error;
       }
       
-      console.log('✅ Product deleted successfully:', id);
+      logger.info('Product deleted successfully', { productId: id }, 'useProducts');
       return id;
     },
     onSuccess: (deletedId) => {
-      console.log('✅ Product deletion mutation successful, updating cache');
+      logger.info('Product deletion mutation successful, updating cache', undefined, 'useProducts');
       
       // Mise à jour optimiste du cache pour toutes les variantes de la query
       queryClient.setQueryData(['products', storeId, 'all'], (old: any) => {

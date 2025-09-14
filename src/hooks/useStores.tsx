@@ -5,6 +5,7 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import { OnboardingService } from '@/services/onboardingService';
 import { StoreCurrencyService } from '@/services/storeCurrencyService';
+import { logger } from '@/utils/logger';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Store = Tables<'stores'>;
@@ -20,13 +21,13 @@ export const useStores = () => {
     queryKey: ['stores', user?.id],
     queryFn: async () => {
       if (!user) {
-        console.log('No user found, returning empty array');
+        logger.debug('No user found, returning empty array', undefined, 'useStores');
         return [];
       }
 
       // Log seulement en développement et très rarement
       if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('Fetching stores for user:', user.email);
+        logger.debug('Fetching stores for user', { email: user.email }, 'useStores');
       }
 
       try {
@@ -42,7 +43,7 @@ export const useStores = () => {
 
           // Si le profil n'existe pas, essayer de le créer automatiquement
           if (profileError.code === 'PGRST116') { // No rows returned
-            console.log('🔧 Profil manquant, création automatique...');
+            logger.info('Profil manquant, création automatique', undefined, 'useStores');
             try {
               const { data: newProfile, error: createError } = await supabase
                 .from('profiles')
@@ -60,7 +61,7 @@ export const useStores = () => {
                 return [];
               }
 
-              console.log('✅ Profil créé automatiquement:', newProfile.id);
+              logger.info('Profil créé automatiquement', { profileId: newProfile.id }, 'useStores');
 
               // Maintenant récupérer les boutiques avec le nouveau profil
               const { data, error } = await supabase
@@ -74,7 +75,7 @@ export const useStores = () => {
                 return [];
               }
 
-              console.log('Stores fetched for new profile:', newProfile.id, 'stores:', data);
+              logger.debug('Stores fetched for new profile', { profileId: newProfile.id, storesCount: data?.length || 0 }, 'useStores');
               return data as Store[];
 
             } catch (createErr) {
@@ -83,7 +84,7 @@ export const useStores = () => {
             }
           }
 
-          console.log('No profile found, returning empty stores array');
+          logger.warn('No profile found, returning empty stores array', undefined, 'useStores');
           return [];
         }
 
@@ -101,7 +102,7 @@ export const useStores = () => {
 
         // Log seulement en développement et très rarement
         if (import.meta.env.DEV && Math.random() < 0.01) {
-          console.log('Stores fetched for profile:', profile.id, 'stores:', data);
+          logger.debug('Stores fetched for profile', { profileId: profile.id, storesCount: data?.length || 0 }, 'useStores');
         }
         return data as Store[];
       } catch (error) {
@@ -153,22 +154,22 @@ export const useStores = () => {
 
       // Initialiser automatiquement la devise du store avec celle de l'onboarding
       try {
-        console.log('💰 Vérification de la devise d\'onboarding pour le store:', data.id);
+        logger.debug('Vérification de la devise d\'onboarding pour le store', { storeId: data.id }, 'useStores');
         
         // Récupérer la devise choisie lors de l'onboarding
         const onboardingCurrency = await OnboardingService.getOnboardingCurrency(user.id);
         const onboardingCountry = await OnboardingService.getOnboardingCountry(user.id);
         
         if (onboardingCurrency) {
-          console.log('✅ Devise d\'onboarding trouvée:', onboardingCurrency);
+          logger.info('Devise d\'onboarding trouvée', { currency: onboardingCurrency }, 'useStores');
           
           // Initialiser la devise du store avec celle de l'onboarding
           const countries = onboardingCountry ? [onboardingCountry] : ['ML', 'CI', 'SN', 'BF'];
           await StoreCurrencyService.initializeStoreCurrency(data.id, onboardingCurrency, countries);
           
-          console.log('✅ Devise du store initialisée avec succès:', onboardingCurrency);
+          logger.info('Devise du store initialisée avec succès', { currency: onboardingCurrency }, 'useStores');
         } else {
-          console.log('ℹ️ Aucune devise d\'onboarding trouvée, utilisation de la devise par défaut (XOF)');
+          logger.info('Aucune devise d\'onboarding trouvée, utilisation de la devise par défaut (XOF)', undefined, 'useStores');
           // Utiliser la devise par défaut si aucune devise d'onboarding n'est trouvée
           await StoreCurrencyService.initializeStoreCurrency(data.id, 'XOF', ['ML', 'CI', 'SN', 'BF']);
         }
@@ -180,7 +181,7 @@ export const useStores = () => {
       return data;
     },
     onSuccess: async (newStore) => {
-      console.log('🎉 Store créé avec succès:', newStore);
+      logger.info('Store créé avec succès', { storeId: newStore.id, storeName: newStore.name }, 'useStores');
 
       // 1. Invalider complètement le cache
       await queryClient.invalidateQueries({ queryKey: ['stores'] });
@@ -188,7 +189,7 @@ export const useStores = () => {
 
       // 2. Forcer un rechargement immédiat avec validation
       try {
-        console.log('🔄 Validation du store créé...');
+        logger.debug('Validation du store créé', { storeId: newStore.id }, 'useStores');
 
         // Vérifier que le store existe réellement dans la DB
         const { data: verificationData, error: verificationError } = await supabase
@@ -202,7 +203,7 @@ export const useStores = () => {
           throw new Error('Store non validé après création');
         }
 
-        console.log('✅ Store validé:', verificationData);
+        logger.info('Store validé', { storeId: verificationData.id }, 'useStores');
 
         // 3. Forcer le rechargement des données
         await queryClient.refetchQueries({ queryKey: ['stores', user?.id] });

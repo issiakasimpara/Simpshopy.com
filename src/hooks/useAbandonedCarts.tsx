@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CartSession } from './useCartSessions';
+import { logger } from '@/utils/logger';
 
 export interface AbandonedCart extends CartSession {
   days_abandoned: number;
@@ -36,13 +37,13 @@ export const useAbandonedCarts = (storeId?: string) => {
   // Récupérer les statistiques des paniers abandonnés
   const fetchAbandonedCartsStats = useCallback(async () => {
     if (!storeId) {
-      console.log('❌ Pas de storeId fourni pour les stats');
+      logger.warn('Pas de storeId fourni pour les stats', undefined, 'useAbandonedCarts');
       return;
     }
 
     try {
       setIsLoading(true);
-      console.log('📊 Calcul des statistiques paniers abandonnés pour storeId:', storeId);
+      logger.debug('Calcul des statistiques paniers abandonnés', { storeId }, 'useAbandonedCarts');
 
       // Récupérer toutes les sessions de panier pour cette boutique
       const { data: cartSessions, error: cartError } = await supabase
@@ -72,7 +73,7 @@ export const useAbandonedCarts = (storeId?: string) => {
 
       // Créer un set des emails qui ont des commandes complétées
       const completedEmails = new Set(completedOrders?.map(order => order.customer_email) || []);
-      console.log('✅ Emails avec commandes complétées:', Array.from(completedEmails));
+      logger.debug('Emails avec commandes complétées', { count: completedEmails.size, storeId }, 'useAbandonedCarts');
 
       // Filtrer les sessions qui n'ont PAS de commandes complétées pour le même email
       const abandoned = (cartSessions || [])
@@ -98,9 +99,9 @@ export const useAbandonedCarts = (storeId?: string) => {
           } as AbandonedCart;
         });
 
-      console.log('🔍 Sessions totales:', cartSessions?.length || 0);
-      console.log('✅ Emails avec commandes complétées:', completedEmails.size);
-      console.log('❌ Sessions abandonnées (filtrées):', abandoned.length);
+      logger.debug('Sessions totales', { count: cartSessions?.length || 0, storeId }, 'useAbandonedCarts');
+      logger.debug('Emails avec commandes complétées', { count: completedEmails.size, storeId }, 'useAbandonedCarts');
+      logger.debug('Sessions abandonnées (filtrées)', { count: abandoned.length, storeId }, 'useAbandonedCarts');
 
       // Calculer les statistiques
       const totalAbandoned = abandoned.length;
@@ -123,7 +124,7 @@ export const useAbandonedCarts = (storeId?: string) => {
         conversionRate
       };
 
-      console.log('📊 Stats paniers abandonnés calculées:', newStats);
+      logger.debug('Stats paniers abandonnés calculées', { storeId, totalAbandoned: newStats.total_abandoned, totalValue: newStats.total_value }, 'useAbandonedCarts');
       setStats(newStats);
       setAbandonedCarts(abandoned);
     } catch (error) {

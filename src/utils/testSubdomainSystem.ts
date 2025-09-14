@@ -1,11 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 /**
  * Test du système de sous-domaines
  * Utilisez cette fonction pour vérifier que tout fonctionne
  */
 export async function testSubdomainSystem() {
-  console.log('🧪 Test du système de sous-domaines...');
+  logger.info('Test du système de sous-domaines', undefined, 'testSubdomainSystem');
 
   try {
     // 1. Récupérer toutes les boutiques actives
@@ -19,11 +20,11 @@ export async function testSubdomainSystem() {
       return false;
     }
 
-    console.log(`✅ ${stores?.length || 0} boutiques actives trouvées`);
+    logger.info('Boutiques actives trouvées', { count: stores?.length || 0 }, 'testSubdomainSystem');
 
     // 2. Vérifier les sous-domaines pour chaque boutique
     for (const store of stores || []) {
-      console.log(`\n🔍 Test de la boutique: ${store.name} (${store.slug})`);
+      logger.info('Test de la boutique', { name: store.name, slug: store.slug }, 'testSubdomainSystem');
 
       // Vérifier si le sous-domaine existe
       const { data: domain, error: domainError } = await supabase
@@ -34,7 +35,7 @@ export async function testSubdomainSystem() {
         .single();
 
       if (domainError || !domain) {
-        console.log(`❌ Sous-domaine manquant pour ${store.name}`);
+        logger.warn('Sous-domaine manquant', { storeName: store.name }, 'testSubdomainSystem');
         
         // Créer le sous-domaine manquant
         const { error: createError } = await supabase
@@ -51,15 +52,15 @@ export async function testSubdomainSystem() {
         if (createError) {
           console.error(`❌ Erreur création sous-domaine:`, createError);
         } else {
-          console.log(`✅ Sous-domaine créé: ${store.slug}.simpshopy.com`);
+          logger.info('Sous-domaine créé', { domain: `${store.slug}.simpshopy.com` }, 'testSubdomainSystem');
         }
       } else {
-        console.log(`✅ Sous-domaine existant: ${domain.domain_name}`);
+        logger.info('Sous-domaine existant', { domain: domain.domain_name }, 'testSubdomainSystem');
       }
 
       // 3. Tester l'Edge Function
       const testHostname = `${store.slug}.simpshopy.com`;
-      console.log(`🌐 Test Edge Function pour: ${testHostname}`);
+      logger.info('Test Edge Function', { hostname: testHostname }, 'testSubdomainSystem');
 
       const { data: routerData, error: routerError } = await supabase.functions.invoke('domain-router', {
         body: { hostname: testHostname },
@@ -68,14 +69,14 @@ export async function testSubdomainSystem() {
       if (routerError) {
         console.error(`❌ Erreur Edge Function:`, routerError);
       } else if (routerData?.success && routerData?.store) {
-        console.log(`✅ Edge Function OK - Boutique: ${routerData.store.name}`);
+        logger.info('Edge Function OK', { storeName: routerData.store.name }, 'testSubdomainSystem');
       } else {
-        console.log(`❌ Edge Function échoué pour ${testHostname}`);
+        logger.error('Edge Function échoué', { hostname: testHostname }, 'testSubdomainSystem');
       }
     }
 
     // 4. Test de la fonction get_store_by_domain
-    console.log('\n🔧 Test de la fonction get_store_by_domain...');
+    logger.info('Test de la fonction get_store_by_domain', undefined, 'testSubdomainSystem');
     
     if (stores && stores.length > 0) {
       const testStore = stores[0];
@@ -88,13 +89,13 @@ export async function testSubdomainSystem() {
       if (functionError) {
         console.error('❌ Erreur fonction get_store_by_domain:', functionError);
       } else if (storeId === testStore.id) {
-        console.log(`✅ Fonction get_store_by_domain OK - ID: ${storeId}`);
+        logger.info('Fonction get_store_by_domain OK', { storeId }, 'testSubdomainSystem');
       } else {
-        console.log(`❌ Fonction get_store_by_domain échoué - Attendu: ${testStore.id}, Reçu: ${storeId}`);
+        logger.error('Fonction get_store_by_domain échoué', { expected: testStore.id, received: storeId }, 'testSubdomainSystem');
       }
     }
 
-    console.log('\n🎉 Test du système de sous-domaines terminé !');
+    logger.info('Test du système de sous-domaines terminé', undefined, 'testSubdomainSystem');
     return true;
 
   } catch (error) {
@@ -107,7 +108,7 @@ export async function testSubdomainSystem() {
  * Générer un rapport des sous-domaines
  */
 export async function generateSubdomainReport() {
-  console.log('📊 Rapport des sous-domaines...');
+  logger.info('Rapport des sous-domaines', undefined, 'testSubdomainSystem');
 
   try {
     const { data: domains, error } = await supabase
@@ -132,25 +133,25 @@ export async function generateSubdomainReport() {
       return;
     }
 
-    console.log(`\n📈 Total domaines: ${domains?.length || 0}`);
+    logger.info('Total domaines', { count: domains?.length || 0 }, 'testSubdomainSystem');
     
     const subdomains = domains?.filter(d => d.domain_type === 'subdomain') || [];
     const customDomains = domains?.filter(d => d.domain_type === 'custom') || [];
     
-    console.log(`🔗 Sous-domaines: ${subdomains.length}`);
-    console.log(`🌐 Domaines personnalisés: ${customDomains.length}`);
+    logger.info('Sous-domaines', { count: subdomains.length }, 'testSubdomainSystem');
+    logger.info('Domaines personnalisés', { count: customDomains.length }, 'testSubdomainSystem');
 
-    console.log('\n📋 Liste des sous-domaines:');
+    logger.info('Liste des sous-domaines', undefined, 'testSubdomainSystem');
     subdomains.forEach(domain => {
       const status = domain.is_active && domain.verification_status === 'verified' ? '✅' : '❌';
-      console.log(`${status} ${domain.domain_name} - ${domain.stores?.name || 'Boutique inconnue'}`);
+      logger.info('Sous-domaine', { domain: domain.domain_name, store: domain.stores?.name || 'Boutique inconnue', status }, 'testSubdomainSystem');
     });
 
     if (customDomains.length > 0) {
-      console.log('\n🌐 Liste des domaines personnalisés:');
+      logger.info('Liste des domaines personnalisés', undefined, 'testSubdomainSystem');
       customDomains.forEach(domain => {
         const status = domain.is_active && domain.verification_status === 'verified' ? '✅' : '❌';
-        console.log(`${status} ${domain.domain_name} - ${domain.stores?.name || 'Boutique inconnue'}`);
+        logger.info('Sous-domaine', { domain: domain.domain_name, store: domain.stores?.name || 'Boutique inconnue', status }, 'testSubdomainSystem');
       });
     }
 
@@ -163,7 +164,7 @@ export async function generateSubdomainReport() {
  * Nettoyer les domaines orphelins
  */
 export async function cleanupOrphanedDomains() {
-  console.log('🧹 Nettoyage des domaines orphelins...');
+  logger.info('Nettoyage des domaines orphelins', undefined, 'testSubdomainSystem');
 
   try {
     const { data, error } = await supabase.rpc('cleanup_orphaned_domains');
@@ -173,7 +174,7 @@ export async function cleanupOrphanedDomains() {
       return false;
     }
 
-    console.log(`✅ ${data || 0} domaines orphelins supprimés`);
+    logger.info('Domaines orphelins supprimés', { count: data || 0 }, 'testSubdomainSystem');
     return true;
 
   } catch (error) {

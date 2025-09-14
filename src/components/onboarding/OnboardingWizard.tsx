@@ -8,6 +8,7 @@ import { useStores } from '@/hooks/useStores';
 import { useAuth } from '@/hooks/useAuth';
 import { ONBOARDING_STEPS } from '@/types/onboarding';
 import { StoreTemplateService } from '@/services/storeTemplateService';
+import { logger } from '@/utils/logger';
 import ExperienceLevelStep from './steps/ExperienceLevelStep';
 import BusinessTypeStep from './steps/BusinessTypeStep';
 import SectorStep from './steps/SectorStep';

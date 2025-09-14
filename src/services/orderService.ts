@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface OrderItem {
   id: string;
@@ -73,11 +74,11 @@ class OrderService {
   // Créer une nouvelle commande
   async createOrder(orderData: CreateOrderData): Promise<Order> {
     try {
-      console.log('🛒 Création de commande:', orderData);
+      logger.info('Création de commande', { storeId: orderData.store_id, itemsCount: orderData.items.length }, 'orderService');
 
       const orderNumber = this.generateOrderNumber();
 
-      console.log('📝 Création commande avec public_orders');
+      logger.debug('Création commande avec public_orders', undefined, 'orderService');
 
       const { data, error } = await supabase
         .from('public_orders')
@@ -115,7 +116,7 @@ class OrderService {
         throw error;
       }
 
-      console.log('✅ Commande créée:', data);
+      logger.info('Commande créée', { orderId: data.id, storeId: data.store_id }, 'orderService');
       return data as Order;
     } catch (error) {
       console.error('❌ Erreur service commande:', error);
@@ -126,7 +127,7 @@ class OrderService {
   // Récupérer les commandes d'une boutique (pour le marchand)
   async getStoreOrders(storeId: string): Promise<Order[]> {
     try {
-      console.log('📊 Récupération commandes boutique:', storeId);
+      logger.debug('Récupération commandes boutique', { storeId }, 'orderService');
 
       const { data, error } = await supabase
         .from('public_orders')
@@ -139,7 +140,7 @@ class OrderService {
         throw error;
       }
 
-      console.log('✅ Commandes récupérées:', data?.length || 0);
+      logger.debug('Commandes récupérées', { count: data?.length || 0, storeId }, 'orderService');
       return (data || []) as Order[];
     } catch (error) {
       console.error('❌ Erreur service commandes:', error);
@@ -211,7 +212,7 @@ class OrderService {
   // Statistiques pour le dashboard
   async getStoreStats(storeId: string) {
     try {
-      console.log('📈 Récupération statistiques boutique:', storeId);
+      logger.debug('Récupération statistiques boutique', { storeId }, 'orderService');
 
       const { data: orders, error } = await supabase
         .from('public_orders')
@@ -245,7 +246,7 @@ class OrderService {
         });
       }
 
-      console.log('✅ Statistiques calculées:', stats);
+      logger.debug('Statistiques calculées', { storeId, totalOrders: stats.totalOrders, totalRevenue: stats.totalRevenue }, 'orderService');
       return stats;
     } catch (error) {
       console.error('❌ Erreur statistiques:', error);

@@ -8,6 +8,7 @@ import ProductImageGallery from './product-detail/ProductImageGallery';
 import ProductDetailLoadingState from './product-detail/ProductDetailLoadingState';
 import ProductDetailEmptyState from './product-detail/ProductDetailEmptyState';
 import ProductDetailInfo from './product-detail/ProductDetailInfo';
+import { logger } from '@/utils/logger';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Store = Tables<'stores'>;
@@ -61,16 +62,16 @@ const ProductDetailBlock = ({
 
   try {
   
-  console.log('ProductDetailBlock - Debug info:');
-  console.log('- Received productId:', productId);
-  console.log('- Products available:', products?.length || 0);
-  console.log('- Store ID:', selectedStore?.id);
-  console.log('- Is editing mode:', isEditing);
-  console.log('- Using passed products:', !!passedProducts);
+  logger.debug('ProductDetailBlock - Debug info', undefined, 'ProductDetailBlock');
+  logger.debug('Received productId', { productId }, 'ProductDetailBlock');
+  logger.debug('Products available', { count: products?.length || 0 }, 'ProductDetailBlock');
+  logger.debug('Store ID', { storeId: selectedStore?.id }, 'ProductDetailBlock');
+  logger.debug('Is editing mode', { isEditing }, 'ProductDetailBlock');
+  logger.debug('Using passed products', { usingPassedProducts: !!passedProducts }, 'ProductDetailBlock');
 
   // Si on utilise les produits passés, pas de loading
   if (!passedProducts && isLoading) {
-    console.log('ProductDetailBlock - Loading products...');
+    logger.debug('Loading products', { storeId: selectedStore?.id }, 'ProductDetailBlock');
     return <ProductDetailLoadingState />;
   }
 

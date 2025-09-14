@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface StoreTemplate {
   id: string;
@@ -38,16 +39,16 @@ export class StoreTemplateService {
    */
   static async getTemplateForSector(sector: string): Promise<StoreTemplate | null> {
     try {
-      console.log('🔍 getTemplateForSector appelé avec secteur:', sector);
+      logger.debug('getTemplateForSector appelé avec secteur', { sector }, 'storeTemplateService');
       
       // Si le secteur est "other" ou vide, utiliser un template aléatoire
       if (!sector || sector === 'other') {
-        console.log('🔄 Secteur "other" ou vide, utilisation d\'un template aléatoire');
+        logger.info('Secteur "other" ou vide, utilisation d\'un template aléatoire', { sector }, 'storeTemplateService');
         return this.getRandomTemplate();
       }
 
       // Chercher un template spécifique pour le secteur
-      console.log('🔍 Recherche du template pour le secteur:', sector);
+      logger.debug('Recherche du template pour le secteur', { sector }, 'storeTemplateService');
       const { data, error } = await supabase
         .from('store_templates')
         .select('*')
@@ -57,17 +58,17 @@ export class StoreTemplateService {
 
       if (error) {
         console.error('❌ Erreur lors de la recherche du template:', error);
-        console.log('🔄 Utilisation du template par défaut');
+        logger.info('Utilisation du template par défaut', { sector }, 'storeTemplateService');
         return this.getDefaultTemplate();
       }
 
       if (!data) {
-        console.log(`⚠️ Aucun template trouvé pour le secteur: ${sector}`);
-        console.log('🔄 Utilisation du template par défaut');
+        logger.warn('Aucun template trouvé pour le secteur', { sector }, 'storeTemplateService');
+        logger.info('Utilisation du template par défaut', { sector }, 'storeTemplateService');
         return this.getDefaultTemplate();
       }
 
-      console.log('✅ Template trouvé:', data.name, 'pour le secteur:', data.sector);
+      logger.info('Template trouvé', { templateName: data.name, sector: data.sector }, 'storeTemplateService');
       return data as StoreTemplate;
     } catch (error) {
       console.error('❌ Erreur lors de la récupération du template:', error);

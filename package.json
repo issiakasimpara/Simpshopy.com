@@ -11,7 +11,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.js",
-    "security:check": "npm audit --audit-level=moderate && npm run security:audit"
+    "security:check": "npm audit --audit-level=moderate && npm run security:audit",
+    "debug:analyze": "echo \"Analyse de debug disponible dans debug_analysis_report/\"",
+    "debug:cleanup": "node scripts/cleanup-console-logs.js",
+    "debug:cleanup-dry": "node -e \"require('./scripts/cleanup-console-logs.js').main()\" --dry-run",
+    "logging:setup": "echo \"Système de logging structuré implémenté dans src/utils/logger.ts\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.887.0",

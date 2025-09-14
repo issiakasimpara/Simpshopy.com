@@ -13,6 +13,7 @@ import { useStores } from '@/hooks/useStores';
 import { useToast } from '@/hooks/use-toast';
 import { preBuiltTemplates } from '@/data/preBuiltTemplates';
 import { templateCategories } from '@/data/templateCategories';
+import { logger } from '@/utils/logger';
 import { siteTemplateService } from '@/services/siteTemplateService';
 import { useNavigate } from 'react-router-dom';
 
@@ -67,7 +68,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
     if (!selectedTemplate) return;
 
     try {
-      console.log('🏪 Création de la boutique avec template:', selectedTemplate);
+      logger.info('Création de la boutique avec template', { templateName: selectedTemplate.name, templateId: selectedTemplate.id }, 'CreateStoreDialog');
 
       // 1. Créer la boutique
       const newStore = await createStore({
@@ -77,7 +78,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
         status: 'active', // Mettre directement en actif
       });
 
-      console.log('✅ Boutique créée:', newStore);
+      logger.info('Boutique créée', { storeId: newStore.id, storeName: newStore.name }, 'CreateStoreDialog');
 
       // 2. Récupérer le template sélectionné
       const templateData = preBuiltTemplates.find(t => t.id === selectedTemplate);
@@ -85,7 +86,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
         throw new Error('Template non trouvé');
       }
 
-      console.log('📋 Sauvegarde du template:', templateData.name);
+      logger.info('Sauvegarde du template', { templateName: templateData.name, storeId: newStore.id }, 'CreateStoreDialog');
 
       // 3. Sauvegarder le template pour cette boutique et le publier directement
       await siteTemplateService.saveTemplate(
@@ -95,7 +96,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
         true // Publier directement
       );
 
-      console.log('✅ Template sauvegardé et publié');
+      logger.info('Template sauvegardé et publié', { storeId: newStore.id, templateName: templateData.name }, 'CreateStoreDialog');
 
       // Reset form and close dialog
       setFormData({ name: '', description: '', domain: '' });
@@ -104,7 +105,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
       onOpenChange(false);
 
       // Attendre la validation du store
-      console.log('⏳ Attente de la validation du store...');
+      logger.debug('Attente de la validation du store', { storeId: newStore.id }, 'CreateStoreDialog');
 
       // Vérifier que le store est validé
       let validatedStore = null;
@@ -115,7 +116,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
         await new Promise(resolve => setTimeout(resolve, 500));
         validatedStore = (window as any).validatedStore;
         attempts++;
-        console.log(`🔍 Tentative ${attempts}/${maxAttempts} - Store validé:`, !!validatedStore);
+        logger.debug('Tentative de validation du store', { attempts, maxAttempts, isValidated: !!validatedStore, storeId: newStore.id }, 'CreateStoreDialog');
       }
 
       if (!validatedStore) {
@@ -129,7 +130,7 @@ const CreateStoreDialog = ({ open, onOpenChange, onStoreCreated, hasExistingStor
         return;
       }
 
-      console.log('✅ Store validé avec succès:', validatedStore.id);
+      logger.info('Store validé avec succès', { storeId: validatedStore.id, storeName: validatedStore.name }, 'CreateStoreDialog');
 
       // Notify parent component about the new store
       if (onStoreCreated && newStore) {

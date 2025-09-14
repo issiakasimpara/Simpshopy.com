@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import type {
   ShippingZone,
   ShippingZoneInsert,
@@ -23,7 +24,7 @@ class ShippingService {
    */
   async getShippingZones(storeId: string): Promise<ShippingZone[]> {
     try {
-      console.log('📍 Récupération zones de livraison pour boutique:', storeId);
+      logger.debug('Récupération zones de livraison pour boutique', { storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_zones' as any)
@@ -36,7 +37,7 @@ class ShippingService {
         return []; // Retourner un tableau vide au lieu de planter
       }
 
-      console.log('✅ Zones récupérées:', data?.length || 0);
+      logger.debug('Zones récupérées', { count: data?.length || 0, storeId }, 'shippingService');
       return data || [];
     } catch (error) {
       console.warn('⚠️ Erreur service getShippingZones (normal si tables pas créées):', error);
@@ -49,7 +50,7 @@ class ShippingService {
    */
   async createShippingZone(zone: ShippingZoneInsert): Promise<ShippingZone> {
     try {
-      console.log('➕ Création zone de livraison:', zone.name);
+      logger.info('Création zone de livraison', { name: zone.name, storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_zones')
@@ -62,7 +63,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Zone créée:', data.id);
+      logger.info('Zone créée', { zoneId: data.id, storeId }, 'shippingService');
       return data;
     } catch (error) {
       console.error('❌ Erreur service createShippingZone:', error);
@@ -75,7 +76,7 @@ class ShippingService {
    */
   async updateShippingZone(id: string, updates: ShippingZoneUpdate): Promise<ShippingZone> {
     try {
-      console.log('✏️ Mise à jour zone:', id);
+      logger.info('Mise à jour zone', { zoneId: id, storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_zones')
@@ -89,7 +90,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Zone mise à jour:', data.id);
+      logger.info('Zone mise à jour', { zoneId: data.id, storeId }, 'shippingService');
       return data;
     } catch (error) {
       console.error('❌ Erreur service updateShippingZone:', error);
@@ -102,7 +103,7 @@ class ShippingService {
    */
   async deleteShippingZone(id: string): Promise<void> {
     try {
-      console.log('🗑️ Suppression zone:', id);
+      logger.info('Suppression zone', { zoneId: id, storeId }, 'shippingService');
 
       const { error } = await supabase
         .from('shipping_zones')
@@ -114,7 +115,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Zone supprimée:', id);
+      logger.info('Zone supprimée', { zoneId: id, storeId }, 'shippingService');
     } catch (error) {
       console.error('❌ Erreur service deleteShippingZone:', error);
       throw error;
@@ -128,7 +129,7 @@ class ShippingService {
    */
   async getShippingMethods(storeId: string): Promise<ShippingMethod[]> {
     try {
-      console.log('🚚 Récupération méthodes de livraison pour boutique:', storeId);
+      logger.debug('Récupération méthodes de livraison pour boutique', { storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_methods' as any)
@@ -144,7 +145,7 @@ class ShippingService {
         return []; // Retourner un tableau vide au lieu de planter
       }
 
-      console.log('✅ Méthodes récupérées:', data?.length || 0);
+      logger.debug('Méthodes récupérées', { count: data?.length || 0, storeId }, 'shippingService');
       return data || [];
     } catch (error) {
       console.warn('⚠️ Erreur service getShippingMethods (normal si tables pas créées):', error);
@@ -157,7 +158,7 @@ class ShippingService {
    */
   async getActiveShippingMethodsForCountry(storeId: string, country: string): Promise<ShippingMethod[]> {
     try {
-      console.log('🌍 Récupération méthodes actives pour:', { storeId, country });
+      logger.debug('Récupération méthodes actives pour', { storeId, country }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_methods')
@@ -180,7 +181,7 @@ class ShippingService {
         return method.shipping_zone.countries.includes(country);
       }) || [];
 
-      console.log('✅ Méthodes filtrées pour', country, ':', filteredMethods.length);
+      logger.debug('Méthodes filtrées pour', { country, count: filteredMethods.length, storeId }, 'shippingService');
       return filteredMethods;
     } catch (error) {
       console.error('❌ Erreur service getActiveShippingMethodsForCountry:', error);
@@ -193,7 +194,7 @@ class ShippingService {
    */
   async createShippingMethod(method: ShippingMethodInsert): Promise<ShippingMethod> {
     try {
-      console.log('➕ Création méthode de livraison:', method.name);
+      logger.info('Création méthode de livraison', { name: method.name, storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_methods')
@@ -209,7 +210,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Méthode créée:', data.id);
+      logger.info('Méthode créée', { methodId: data.id, storeId }, 'shippingService');
       return data;
     } catch (error) {
       console.error('❌ Erreur service createShippingMethod:', error);
@@ -222,7 +223,7 @@ class ShippingService {
    */
   async updateShippingMethod(id: string, updates: ShippingMethodUpdate): Promise<ShippingMethod> {
     try {
-      console.log('✏️ Mise à jour méthode:', id);
+      logger.info('Mise à jour méthode', { methodId: id, storeId }, 'shippingService');
 
       const { data, error } = await supabase
         .from('shipping_methods')
@@ -239,7 +240,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Méthode mise à jour:', data.id);
+      logger.info('Méthode mise à jour', { methodId: data.id, storeId }, 'shippingService');
       return data;
     } catch (error) {
       console.error('❌ Erreur service updateShippingMethod:', error);
@@ -252,7 +253,7 @@ class ShippingService {
    */
   async deleteShippingMethod(id: string): Promise<void> {
     try {
-      console.log('🗑️ Suppression méthode:', id);
+      logger.info('Suppression méthode', { methodId: id, storeId }, 'shippingService');
 
       const { error } = await supabase
         .from('shipping_methods')
@@ -264,7 +265,7 @@ class ShippingService {
         throw error;
       }
 
-      console.log('✅ Méthode supprimée:', id);
+      logger.info('Méthode supprimée', { methodId: id, storeId }, 'shippingService');
     } catch (error) {
       console.error('❌ Erreur service deleteShippingMethod:', error);
       throw error;
@@ -278,7 +279,7 @@ class ShippingService {
    */
   async calculateShipping(request: ShippingCalculationRequest): Promise<ShippingCalculation[]> {
     try {
-      console.log('💰 Calcul frais de livraison:', request);
+      logger.debug('Calcul frais de livraison', { storeId: request.storeId, country: request.country, weight: request.weight }, 'shippingService');
 
       const methods = await this.getActiveShippingMethodsForCountry(request.storeId, request.country);
       
@@ -309,7 +310,7 @@ class ShippingService {
         };
       });
 
-      console.log('✅ Calculs terminés:', calculations.length, 'méthodes');
+      logger.debug('Calculs terminés', { count: calculations.length, storeId: request.storeId }, 'shippingService');
       return calculations;
     } catch (error) {
       console.error('❌ Erreur service calculateShipping:', error);
@@ -324,7 +325,7 @@ class ShippingService {
    */
   async getShippingStats(storeId: string): Promise<ShippingStats> {
     try {
-      console.log('📊 Récupération statistiques livraison:', storeId);
+      logger.debug('Récupération statistiques livraison', { storeId }, 'shippingService');
 
       // Compter les méthodes et zones
       const [methodsResult, zonesResult] = await Promise.all([
@@ -356,7 +357,7 @@ class ShippingService {
         totalShippingRevenue: 0 // À calculer depuis les commandes
       };
 
-      console.log('✅ Statistiques calculées:', stats);
+      logger.debug('Statistiques calculées', { storeId, totalOrders: stats.totalOrders, totalRevenue: stats.totalRevenue }, 'shippingService');
       return stats;
     } catch (error) {
       console.error('❌ Erreur service getShippingStats:', error);

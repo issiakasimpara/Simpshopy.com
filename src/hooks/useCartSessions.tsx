@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { isolatedStorage, isUserStorefront } from '@/utils/isolatedStorage';
+import { logger } from '@/utils/logger';
 
 export interface CartSession {
   id: string;
@@ -42,12 +43,12 @@ export const useCartSessions = () => {
       isolatedStorage.setItem('cart_session_id', currentSessionId);
       // Log seulement en développement et très rarement
       if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('🆔 Nouvelle session créée:', currentSessionId);
+        logger.info('Nouvelle session créée', { sessionId: currentSessionId }, 'useCartSessions');
       }
     } else {
       // Log seulement en développement et très rarement
       if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('🆔 Session existante récupérée:', currentSessionId);
+        logger.debug('Session existante récupérée', { sessionId: currentSessionId }, 'useCartSessions');
       }
     }
     return currentSessionId;
@@ -93,7 +94,7 @@ export const useCartSessions = () => {
     if (lastStoreId === storeId && now - lastCallTime < 1000) {
       // Log seulement en développement et rarement
       if (import.meta.env.DEV && Math.random() < 0.1) {
-        console.log('getCartSession: Appel ignoré (trop récent)');
+        logger.debug('getCartSession: Appel ignoré (trop récent)', undefined, 'useCartSessions');
       }
       return null;
     }
@@ -106,7 +107,7 @@ export const useCartSessions = () => {
       
       // Log seulement en développement et rarement
       if (import.meta.env.DEV && Math.random() < 0.1) {
-        console.log('getCartSession: Recherche session', { sessionId: currentSessionId, storeId });
+        logger.debug('getCartSession: Recherche session', { sessionId: currentSessionId, storeId }, 'useCartSessions');
       }
 
       const { data, error } = await supabase
@@ -129,12 +130,12 @@ export const useCartSessions = () => {
       if (data) {
         // Log seulement en développement et rarement
         if (import.meta.env.DEV && Math.random() < 0.1) {
-          console.log('getCartSession: Session trouvée avec', data.items?.length || 0, 'articles');
+          logger.debug('getCartSession: Session trouvée avec', { itemsCount: data.items?.length || 0, sessionId: currentSessionId }, 'useCartSessions');
         }
         const cartItems = safeConvertToCartItems(data.items);
         // Log seulement en développement et rarement
         if (import.meta.env.DEV && Math.random() < 0.1) {
-          console.log('getCartSession: Articles convertis:', cartItems.length);
+          logger.debug('getCartSession: Articles convertis', { itemsCount: cartItems.length, sessionId: currentSessionId }, 'useCartSessions');
         }
         return {
           ...data,
@@ -144,7 +145,7 @@ export const useCartSessions = () => {
       
       // Log seulement en développement et rarement
       if (import.meta.env.DEV && Math.random() < 0.1) {
-        console.log('getCartSession: Aucune session trouvée');
+        logger.debug('getCartSession: Aucune session trouvée', { sessionId: currentSessionId, storeId }, 'useCartSessions');
       }
       return null;
     } catch (error) {

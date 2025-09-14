@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/utils/logger'
 
 export interface CustomerData {
   email: string
@@ -21,7 +22,7 @@ class MailchimpService {
    */
   async syncCustomer(userId: string, storeId: string, customerData: CustomerData) {
     try {
-      console.log('🔄 Synchronisation client vers Mailchimp:', customerData.email)
+      logger.info('Synchronisation client vers Mailchimp', { email: customerData.email }, 'mailchimpService')
       
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mailchimp-sync-customers`, {
         method: 'POST',
@@ -42,7 +43,7 @@ class MailchimpService {
       }
 
       const result = await response.json()
-      console.log('✅ Client synchronisé:', result)
+      logger.info('Client synchronisé', { email: customerData.email, result }, 'mailchimpService')
       return result
     } catch (error) {
       console.error('❌ Erreur synchronisation client:', error)
@@ -55,7 +56,7 @@ class MailchimpService {
    */
   async getAnalytics(userId: string, storeId: string): Promise<MailchimpAnalytics> {
     try {
-      console.log('📊 Récupération analytics Mailchimp...')
+      logger.debug('Récupération analytics Mailchimp', undefined, 'mailchimpService')
       
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mailchimp-analytics`, {
         method: 'POST',
@@ -75,7 +76,7 @@ class MailchimpService {
       }
 
       const result = await response.json()
-      console.log('✅ Analytics récupérés:', result)
+      logger.info('Analytics récupérés', { result }, 'mailchimpService')
       return result.data
     } catch (error) {
       console.error('❌ Erreur récupération analytics:', error)
@@ -123,7 +124,7 @@ class MailchimpService {
       // Vérifier si l'intégration est active
       const isActive = await this.isIntegrationActive(userId, storeId)
       if (!isActive) {
-        console.log('ℹ️ Intégration Mailchimp non active, synchronisation ignorée')
+        logger.info('Intégration Mailchimp non active, synchronisation ignorée', undefined, 'mailchimpService')
         return
       }
 
@@ -139,7 +140,7 @@ class MailchimpService {
       // Synchroniser le client
       await this.syncCustomer(userId, storeId, customerData)
       
-      console.log('✅ Client de commande synchronisé vers Mailchimp')
+      logger.info('Client de commande synchronisé vers Mailchimp', { email: customerData.email }, 'mailchimpService')
     } catch (error) {
       console.error('❌ Erreur synchronisation client de commande:', error)
       // Ne pas faire échouer la commande si la synchronisation échoue
@@ -154,7 +155,7 @@ class MailchimpService {
       // Vérifier si l'intégration est active
       const isActive = await this.isIntegrationActive(userId, storeId)
       if (!isActive) {
-        console.log('ℹ️ Intégration Mailchimp non active, synchronisation ignorée')
+        logger.info('Intégration Mailchimp non active, synchronisation ignorée', undefined, 'mailchimpService')
         return
       }
 

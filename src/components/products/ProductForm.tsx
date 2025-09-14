@@ -5,6 +5,7 @@ import ProductImageManager from './ProductImageManager';
 import ProductAdvancedForm from './forms/ProductAdvancedForm';
 import ProductBasicInfoForm from './forms/ProductBasicInfoForm';
 import SimpleVariantSection from './variants/SimpleVariantSection';
+import { logger } from '@/utils/logger';
 
 type ProductStatus = 'draft' | 'active' | 'inactive';
 
@@ -39,37 +40,37 @@ interface ProductFormProps {
 
 const ProductForm = ({ formData, onFormDataChange, productId, isEditing = false }: ProductFormProps) => {
   const updateFormData = (field: keyof FormData, value: any) => {
-    console.log('ProductForm - Updating field:', field, 'with value:', value);
+    logger.debug('Updating field', { field, value }, 'ProductForm');
     const newFormData = {
       ...formData,
       [field]: value
     };
-    console.log('ProductForm - New form data:', newFormData);
+    logger.debug('New form data', { productName: newFormData.name, price: newFormData.price }, 'ProductForm');
     onFormDataChange(newFormData);
   };
 
   const handleAdvancedDataChange = (advancedData: any) => {
-    console.log('ProductForm - Advanced data change:', advancedData);
+    logger.debug('Advanced data change', { fields: Object.keys(advancedData) }, 'ProductForm');
     const newFormData = {
       ...formData,
       ...advancedData
     };
-    console.log('ProductForm - Updated form data with advanced:', newFormData);
+    logger.debug('Updated form data with advanced', { productName: newFormData.name }, 'ProductForm');
     onFormDataChange(newFormData);
   };
 
   const handleBasicInfoChange = (basicData: any) => {
-    console.log('ProductForm - Basic info change:', basicData);
+    logger.debug('Basic info change', { fields: Object.keys(basicData) }, 'ProductForm');
     const newFormData = {
       ...formData,
       ...basicData
     };
-    console.log('ProductForm - Updated form data with basic:', newFormData);
+    logger.debug('Updated form data with basic', { productName: newFormData.name }, 'ProductForm');
     onFormDataChange(newFormData);
   };
 
   const handleVariantsChange = (variants: any[]) => {
-    console.log('ProductForm - Variants change:', variants);
+    logger.debug('Variants change', { variantsCount: variants.length }, 'ProductForm');
     const newFormData = {
       ...formData,
       variants

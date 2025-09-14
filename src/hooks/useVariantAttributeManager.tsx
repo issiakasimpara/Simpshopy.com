@@ -2,6 +2,7 @@
 import { useProductAttributes } from './useProductAttributes';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
 
 interface VariantCombination {
   id: string;
@@ -18,7 +19,7 @@ export const useVariantAttributeManager = () => {
   const { toast } = useToast();
 
   const findOrCreateAttributeValue = async (attributeName: string, value: string, hexColor?: string) => {
-    console.log('VariantAttributeManager - Finding/creating attribute value:', { attributeName, value, hexColor });
+    logger.debug('Finding/creating attribute value', { attributeName, value, hexColor }, 'useVariantAttributeManager');
     
     // Trouver l'attribut par nom
     const attribute = attributes.find(attr => attr.name === attributeName);
@@ -30,12 +31,12 @@ export const useVariantAttributeManager = () => {
     // Vérifier si la valeur existe déjà
     const existingValue = attribute.attribute_values?.find(val => val.value === value);
     if (existingValue) {
-      console.log('VariantAttributeManager - Using existing attribute value:', existingValue.id);
+      logger.debug('Using existing attribute value', { attributeValueId: existingValue.id, attributeName, value }, 'useVariantAttributeManager');
       return existingValue.id;
     }
 
     // Créer la nouvelle valeur d'attribut
-    console.log('VariantAttributeManager - Creating new attribute value');
+    logger.info('Creating new attribute value', { attributeName, value, hexColor }, 'useVariantAttributeManager');
     const { data, error } = await supabase
       .from('attribute_values')
       .insert({
@@ -52,19 +53,19 @@ export const useVariantAttributeManager = () => {
       throw error;
     }
     
-    console.log('VariantAttributeManager - Created new attribute value:', data.id);
+    logger.info('Created new attribute value', { attributeValueId: data.id, attributeName, value }, 'useVariantAttributeManager');
     return data.id;
   };
 
   const createVariantsWithAttributes = async (productId: string, variants: VariantCombination[]) => {
-    console.log('VariantAttributeManager - Creating variants for product:', productId);
-    console.log('VariantAttributeManager - Variants to create:', variants);
+    logger.info('Creating variants for product', { productId }, 'useVariantAttributeManager');
+    logger.debug('Variants to create', { productId, variantsCount: variants.length }, 'useVariantAttributeManager');
 
     try {
       const createdVariants = [];
 
       for (const variant of variants) {
-        console.log('VariantAttributeManager - Processing variant:', variant);
+        logger.debug('Processing variant', { productId, variant: variant.name || 'Unnamed' }, 'useVariantAttributeManager');
         
         try {
           // 1. Créer la variante de produit avec toutes les données

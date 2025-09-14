@@ -7,6 +7,7 @@ import { useVariantAttributeManager } from '@/hooks/useVariantAttributeManager';
 import ProductForm from './products/ProductForm';
 import type { Tables } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 type ProductStatus = 'draft' | 'active' | 'inactive';
 
@@ -66,7 +67,7 @@ const EditProductDialog = ({ open, onOpenChange, product, storeId }: EditProduct
   // Populate form when product changes
   useEffect(() => {
     if (product) {
-      console.log('EditProductDialog - Populating form with product:', product);
+      logger.debug('Populating form with product', { productId: product.id, productName: product.name }, 'EditProductDialog');
       setFormData({
         name: product.name || '',
         description: product.description || '',
@@ -91,17 +92,17 @@ const EditProductDialog = ({ open, onOpenChange, product, storeId }: EditProduct
 
   // Fonction pour mettre à jour les données du formulaire
   const handleFormDataChange = (data: FormData) => {
-    console.log('EditProductDialog - Form data change:', data);
+    logger.debug('Form data change', { productId: product?.id, field: Object.keys(data)[0] }, 'EditProductDialog');
     setFormData(data);
   };
 
   // Fonction de sauvegarde
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('EditProductDialog - Manual submit triggered');
+    logger.debug('Manual submit triggered', { productId: product?.id }, 'EditProductDialog');
     
     if (!product || !formData.name || !formData.price) {
-      console.log('EditProductDialog - Missing product or required fields');
+      logger.warn('Missing product or required fields', { productId: product?.id, hasName: !!formData.name, hasPrice: !!formData.price }, 'EditProductDialog');
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
@@ -111,8 +112,8 @@ const EditProductDialog = ({ open, onOpenChange, product, storeId }: EditProduct
     }
 
     try {
-      console.log('EditProductDialog - Updating product with data:', formData);
-      console.log('EditProductDialog - Variants to save:', formData.variants);
+      logger.info('Updating product with data', { productId: product?.id, productName: formData.name }, 'EditProductDialog');
+      logger.debug('Variants to save', { productId: product?.id, variantsCount: formData.variants?.length || 0 }, 'EditProductDialog');
 
       // 1. Mettre à jour le produit principal en utilisant mutateAsync
       const updatedProduct = await updateProduct.mutateAsync({
@@ -126,7 +127,7 @@ const EditProductDialog = ({ open, onOpenChange, product, storeId }: EditProduct
         images: formData.images
       });
 
-      console.log('EditProductDialog - Product updated successfully:', updatedProduct);
+      logger.info('Product updated successfully', { productId: updatedProduct.id, productName: updatedProduct.name }, 'EditProductDialog');
 
       // 2. Sauvegarder les nouvelles variantes
       if (formData.variants && formData.variants.length > 0) {

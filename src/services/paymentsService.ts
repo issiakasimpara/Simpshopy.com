@@ -1,4 +1,5 @@
 import { supabase } from '../integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 // Types pour les données de paiement
 export interface RevenueStats {
@@ -58,7 +59,7 @@ export const paymentsService = {
   // Récupérer les statistiques de revenus
   async getRevenueStats(storeId: string): Promise<RevenueStats> {
     try {
-      console.log('📊 Récupération des statistiques de revenus...');
+      logger.debug('Récupération des statistiques de revenus', { storeId }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_revenue_stats')
@@ -85,7 +86,7 @@ export const paymentsService = {
         };
       }
 
-      console.log('✅ Statistiques récupérées:', data);
+      logger.debug('Statistiques récupérées', { storeId, totalRevenue: data.totalRevenue, totalTransactions: data.totalTransactions }, 'paymentsService');
       return data;
     } catch (error) {
       console.error('❌ Erreur dans getRevenueStats:', error);
@@ -96,7 +97,7 @@ export const paymentsService = {
   // Récupérer les transactions
   async getTransactions(storeId: string, limit: number = 50): Promise<Transaction[]> {
     try {
-      console.log('💳 Récupération des transactions...');
+      logger.debug('Récupération des transactions', { storeId }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_transactions')
@@ -110,7 +111,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Transactions récupérées:', data?.length || 0);
+      logger.debug('Transactions récupérées', { count: data?.length || 0, storeId }, 'paymentsService');
       return data || [];
     } catch (error) {
       console.error('❌ Erreur dans getTransactions:', error);
@@ -121,7 +122,7 @@ export const paymentsService = {
   // Récupérer les demandes de retrait
   async getWithdrawals(storeId: string): Promise<WithdrawalRequest[]> {
     try {
-      console.log('💸 Récupération des demandes de retrait...');
+      logger.debug('Récupération des demandes de retrait', { storeId }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_withdrawals')
@@ -134,7 +135,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Retraits récupérés:', data?.length || 0);
+      logger.debug('Retraits récupérés', { count: data?.length || 0, storeId }, 'paymentsService');
       return data || [];
     } catch (error) {
       console.error('❌ Erreur dans getWithdrawals:', error);
@@ -145,7 +146,7 @@ export const paymentsService = {
   // Récupérer les comptes bancaires
   async getBankAccounts(storeId: string): Promise<BankAccount[]> {
     try {
-      console.log('🏦 Récupération des comptes bancaires...');
+      logger.debug('Récupération des comptes bancaires', { storeId }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_bank_accounts')
@@ -159,7 +160,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Comptes bancaires récupérés:', data?.length || 0);
+      logger.debug('Comptes bancaires récupérés', { count: data?.length || 0, storeId }, 'paymentsService');
       return data || [];
     } catch (error) {
       console.error('❌ Erreur dans getBankAccounts:', error);
@@ -176,7 +177,7 @@ export const paymentsService = {
     reason?: string;
   }): Promise<WithdrawalRequest> {
     try {
-      console.log('💸 Création d\'une demande de retrait...');
+      logger.info('Création d\'une demande de retrait', { storeId, amount: withdrawalData.amount }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_withdrawals')
@@ -196,7 +197,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Retrait créé:', data);
+      logger.info('Retrait créé', { withdrawalId: data.id, storeId, amount: data.amount }, 'paymentsService');
       return data;
     } catch (error) {
       console.error('❌ Erreur dans createWithdrawal:', error);
@@ -214,7 +215,7 @@ export const paymentsService = {
     isDefault?: boolean;
   }): Promise<BankAccount> {
     try {
-      console.log('🏦 Ajout d\'un compte bancaire...');
+      logger.info('Ajout d\'un compte bancaire', { storeId }, 'paymentsService');
       
       // Si c'est le compte par défaut, désactiver les autres
       if (bankAccountData.isDefault) {
@@ -242,7 +243,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Compte bancaire ajouté:', data);
+      logger.info('Compte bancaire ajouté', { bankAccountId: data.id, storeId }, 'paymentsService');
       return data;
     } catch (error) {
       console.error('❌ Erreur dans addBankAccount:', error);
@@ -253,7 +254,7 @@ export const paymentsService = {
   // Supprimer un compte bancaire
   async deleteBankAccount(accountId: string): Promise<boolean> {
     try {
-      console.log('🗑️ Suppression d\'un compte bancaire...');
+      logger.info('Suppression d\'un compte bancaire', { bankAccountId: id, storeId }, 'paymentsService');
       
       const { error } = await supabase
         .from('store_bank_accounts')
@@ -265,7 +266,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Compte bancaire supprimé');
+      logger.info('Compte bancaire supprimé', { bankAccountId: id, storeId }, 'paymentsService');
       return true;
     } catch (error) {
       console.error('❌ Erreur dans deleteBankAccount:', error);
@@ -276,7 +277,7 @@ export const paymentsService = {
   // Mettre à jour un compte bancaire
   async updateBankAccount(accountId: string, updates: Partial<BankAccount>): Promise<BankAccount> {
     try {
-      console.log('✏️ Mise à jour d\'un compte bancaire...');
+      logger.info('Mise à jour d\'un compte bancaire', { bankAccountId: id, storeId }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_bank_accounts')
@@ -290,7 +291,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Compte bancaire mis à jour:', data);
+      logger.info('Compte bancaire mis à jour', { bankAccountId: data.id, storeId }, 'paymentsService');
       return data;
     } catch (error) {
       console.error('❌ Erreur dans updateBankAccount:', error);
@@ -312,7 +313,7 @@ export const paymentsService = {
     productName: string;
   }): Promise<Transaction> {
     try {
-      console.log('💳 Création d\'une transaction...');
+      logger.info('Création d\'une transaction', { storeId, amount: transactionData.amount, type: transactionData.type }, 'paymentsService');
       
       const { data, error } = await supabase
         .from('store_transactions')
@@ -337,7 +338,7 @@ export const paymentsService = {
         throw error;
       }
 
-      console.log('✅ Transaction créée:', data);
+      logger.info('Transaction créée', { transactionId: data.id, storeId, amount: data.amount }, 'paymentsService');
       return data;
     } catch (error) {
       console.error('❌ Erreur dans createTransaction:', error);
@@ -348,7 +349,7 @@ export const paymentsService = {
   // Calculer les statistiques de revenus
   async calculateRevenueStats(storeId: string): Promise<RevenueStats> {
     try {
-      console.log('🧮 Calcul des statistiques de revenus...');
+      logger.debug('Calcul des statistiques de revenus', { storeId }, 'paymentsService');
       
       // Récupérer toutes les transactions
       const { data: transactions, error } = await supabase
@@ -407,7 +408,7 @@ export const paymentsService = {
         averageOrderValue
       };
 
-      console.log('✅ Statistiques calculées:', stats);
+      logger.debug('Statistiques calculées', { storeId, totalRevenue: stats.totalRevenue, totalTransactions: stats.totalTransactions }, 'paymentsService');
       return stats;
     } catch (error) {
       console.error('❌ Erreur dans calculateRevenueStats:', error);

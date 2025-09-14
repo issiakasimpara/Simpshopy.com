@@ -8,6 +8,7 @@ import { X, Plus, Image as ImageIcon } from 'lucide-react';
 import { useProductVariantsLoader } from '@/hooks/useProductVariantsLoader';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
 import { useStores } from '@/hooks/useStores';
+import { logger } from '@/utils/logger';
 
 interface VariantCombination {
   id: string;

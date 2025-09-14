@@ -2,6 +2,7 @@
 // La clé API Fixer.io est cachée côté serveur
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface ConversionResult {
   originalAmount: number;
@@ -22,7 +23,7 @@ export class SecureCurrencyService {
     toCurrency: string
   ): Promise<ConversionResult | null> {
     try {
-      console.log(`🔄 Conversion sécurisée: ${amount} ${fromCurrency} → ${toCurrency}`);
+      logger.info('Conversion sécurisée', { amount, fromCurrency, toCurrency }, 'secureCurrencyService');
 
       const { data, error } = await supabase.functions.invoke('currency-converter', {
         body: {
@@ -39,7 +40,7 @@ export class SecureCurrencyService {
       }
 
       if (data.success && data.result) {
-        console.log('✅ Conversion réussie via Edge Function');
+        logger.info('Conversion réussie via Edge Function', { amount, fromCurrency, toCurrency }, 'secureCurrencyService');
         return data.result;
       }
 
@@ -60,7 +61,7 @@ export class SecureCurrencyService {
     toCurrency: string
   ): Promise<number | null> {
     try {
-      console.log(`📊 Taux de change sécurisé: ${fromCurrency} → ${toCurrency}`);
+      logger.debug('Taux de change sécurisé', { fromCurrency, toCurrency }, 'secureCurrencyService');
 
       const { data, error } = await supabase.functions.invoke('currency-converter', {
         body: {
@@ -76,7 +77,7 @@ export class SecureCurrencyService {
       }
 
       if (data.success && data.rate !== undefined) {
-        console.log('✅ Taux récupéré via Edge Function');
+        logger.info('Taux récupéré via Edge Function', { fromCurrency, toCurrency, rate }, 'secureCurrencyService');
         return data.rate;
       }
 
@@ -98,7 +99,7 @@ export class SecureCurrencyService {
     newCurrency: string
   ): Promise<boolean> {
     try {
-      console.log(`🔄 Mise à jour sécurisée des montants du store ${storeId}: ${oldCurrency} → ${newCurrency}`);
+      logger.info('Mise à jour sécurisée des montants du store', { storeId, oldCurrency, newCurrency }, 'secureCurrencyService');
 
       // Obtenir le taux de conversion via Edge Function
       const rate = await this.getExchangeRate(oldCurrency, newCurrency);
@@ -107,7 +108,7 @@ export class SecureCurrencyService {
         return false;
       }
 
-      console.log(`📊 Taux de conversion sécurisé: ${rate}`);
+      logger.debug('Taux de conversion sécurisé', { rate, oldCurrency, newCurrency }, 'secureCurrencyService');
 
       // Mettre à jour les prix des produits
       const { data: products, error: productsFetchError } = await supabase
@@ -130,7 +131,7 @@ export class SecureCurrencyService {
             console.error(`❌ Erreur lors de la mise à jour du produit ${product.id}:`, updateError);
           }
         }
-        console.log(`✅ Prix de ${products.length} produits mis à jour`);
+        logger.info('Prix de produits mis à jour', { productsCount: products.length, storeId, oldCurrency, newCurrency }, 'secureCurrencyService');
       }
 
       // Mettre à jour les montants des commandes
