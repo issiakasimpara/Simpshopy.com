@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { Template } from '@/types/template';
+import { logger } from '@/utils/logger';
 
 interface UseTemplateHistoryProps {
   initialTemplate: Template;
@@ -15,7 +16,7 @@ export const useTemplateHistory = ({ initialTemplate, onTemplateChange }: UseTem
   const canRedo = currentIndex < history.length - 1;
 
   const addToHistory = useCallback((template: Template) => {
-    console.log('addToHistory appelé, currentIndex:', currentIndex);
+    logger.debug('addToHistory appelé', { currentIndex }, 'useTemplateHistory');
     setHistory(prev => {
       // Si on n'est pas à la fin de l'historique, on supprime tout ce qui suit
       const newHistory = prev.slice(0, currentIndex + 1);
@@ -27,32 +28,32 @@ export const useTemplateHistory = ({ initialTemplate, onTemplateChange }: UseTem
         return newHistory;
       }
       
-      console.log('Nouvel historique créé, longueur:', newHistory.length);
+      logger.debug('Nouvel historique créé', { length: newHistory.length }, 'useTemplateHistory');
       return newHistory;
     });
     
     setCurrentIndex(prev => {
       const newIndex = Math.min(prev + 1, 49);
-      console.log('Nouvel index:', newIndex);
+      logger.debug('Nouvel index', { newIndex }, 'useTemplateHistory');
       return newIndex;
     });
   }, [currentIndex]);
 
   const undo = useCallback(() => {
-    console.log('undo appelé, canUndo:', canUndo, 'currentIndex:', currentIndex);
+    logger.debug('undo appelé', { canUndo, currentIndex }, 'useTemplateHistory');
     if (canUndo) {
       const newIndex = currentIndex - 1;
-      console.log('Annulation vers index:', newIndex);
+      logger.debug('Annulation vers index', { newIndex }, 'useTemplateHistory');
       setCurrentIndex(newIndex);
       onTemplateChange(history[newIndex]);
     }
   }, [canUndo, currentIndex, history, onTemplateChange]);
 
   const redo = useCallback(() => {
-    console.log('redo appelé, canRedo:', canRedo, 'currentIndex:', currentIndex);
+    logger.debug('redo appelé', { canRedo, currentIndex }, 'useTemplateHistory');
     if (canRedo) {
       const newIndex = currentIndex + 1;
-      console.log('Rétablissement vers index:', newIndex);
+      logger.debug('Rétablissement vers index', { newIndex }, 'useTemplateHistory');
       setCurrentIndex(newIndex);
       onTemplateChange(history[newIndex]);
     }

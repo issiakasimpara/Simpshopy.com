@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreCurrency } from '@/hooks/useStoreCurrency';
+import { logger } from '@/utils/logger';
 
 interface StoreData {
   store: any;
@@ -26,11 +27,11 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
         setError(null);
 
         const hostname = window.location.hostname;
-        console.log('🔍 Domain Router - Checking hostname:', hostname);
+        logger.debug('Domain Router - Checking hostname', { hostname }, 'DomainRouter');
 
         // Skip routing for localhost during development
         if (hostname === 'localhost' || hostname.includes('localhost')) {
-          console.log('🔍 Development mode - skipping routing');
+          logger.debug('Development mode - skipping routing', { hostname }, 'DomainRouter');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
@@ -38,7 +39,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
 
         // Check if this is the main domain
         if (hostname === 'simpshopy.com' || hostname === 'www.simpshopy.com') {
-          console.log('🔍 Main domain detected');
+          logger.debug('Main domain detected', { hostname }, 'DomainRouter');
           setIsMainDomain(true);
           setIsLoading(false);
           return;
@@ -46,13 +47,13 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
 
         // Check if this is the admin subdomain - treat as main domain
         if (hostname === 'admin.simpshopy.com') {
-          console.log('🔍 Admin subdomain detected - treating as main domain');
+          logger.debug('Admin subdomain detected - treating as main domain', { hostname }, 'DomainRouter');
           
           // Redirection automatique pour les routes de boutiques
           const currentPath = window.location.pathname;
           if (currentPath.match(/^\/[^\/]+\//) && !currentPath.startsWith('/admin')) {
             const storeSlug = currentPath.split('/')[1];
-            console.log('🔍 Redirecting store route from admin to main domain:', storeSlug);
+            logger.info('Redirecting store route from admin to main domain', { storeSlug, hostname }, 'DomainRouter');
             window.location.href = `https://simpshopy.com/${storeSlug}`;
             return;
           }
@@ -62,7 +63,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           return;
         }
 
-        console.log('🔍 Checking for custom domain:', hostname);
+        logger.debug('Checking for custom domain', { hostname }, 'DomainRouter');
 
         // Check for custom domain
         const { data: customDomain, error: domainError } = await supabase
@@ -87,7 +88,7 @@ const DomainRouter: React.FC<DomainRouterProps> = ({ children }) => {
           .single();
 
         if (!domainError && customDomain) {
-          console.log('🔍 Custom domain found:', customDomain);
+          logger.info('Custom domain found', { customDomain, hostname }, 'DomainRouter');
           
           // Custom domain found - load store data
           const { data: products } = await supabase

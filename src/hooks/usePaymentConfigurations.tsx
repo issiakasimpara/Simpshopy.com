@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 // Types pour les configurations de paiement
 export interface PaymentConfiguration {
@@ -177,7 +178,7 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
 
     setSaving(true);
     try {
-      console.log('💾 Sauvegarde configuration:', { providerId, storeId, config });
+      logger.info('Sauvegarde configuration', { providerId, storeId, config }, 'usePaymentConfigurations');
 
       const updateData: any = {
         store_id: storeId,
@@ -193,7 +194,7 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
         updateData[`${providerId}_secret_key`] = config.secretKey;
       }
 
-      console.log('📤 Données à envoyer:', updateData);
+      logger.debug('Données à envoyer', { updateData }, 'usePaymentConfigurations');
 
       // Vérifier d'abord si une configuration existe déjà
       const { data: existingConfig, error: checkError } = await supabase
@@ -210,14 +211,14 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
       let result;
       if (existingConfig) {
         // Mise à jour
-        console.log('🔄 Mise à jour configuration existante');
+        logger.debug('Mise à jour configuration existante', { providerId, storeId }, 'usePaymentConfigurations');
         result = await supabase
           .from('payment_configurations')
           .update(updateData)
           .eq('store_id', storeId);
       } else {
         // Insertion
-        console.log('➕ Création nouvelle configuration');
+        logger.debug('Création nouvelle configuration', { providerId, storeId }, 'usePaymentConfigurations');
         result = await supabase
           .from('payment_configurations')
           .insert(updateData);
@@ -228,7 +229,7 @@ export const usePaymentConfigurations = (storeId: string | undefined): UsePaymen
         throw result.error;
       }
 
-      console.log('✅ Configuration sauvegardée avec succès');
+      logger.info('Configuration sauvegardée avec succès', { providerId, storeId }, 'usePaymentConfigurations');
 
       toast({
         title: "Configuration sauvegardée",

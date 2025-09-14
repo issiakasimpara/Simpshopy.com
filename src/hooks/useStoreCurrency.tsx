@@ -6,6 +6,7 @@ import { formatCurrency, type Currency } from '@/utils/formatCurrency';
 import { useToast } from './use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useGlobalMarketSettings } from './useGlobalMarketSettings';
+import { logger } from '@/utils/logger';
 
 // Canal global partagé pour éviter les souscriptions multiples
 let globalChannel: ReturnType<typeof supabase.channel> | null = null;
@@ -20,13 +21,13 @@ const setupGlobalChannel = (storeId: string) => {
 
   // Nettoyer le canal existant
   if (globalChannel) {
-    console.log('🔕 Nettoyage du canal global existant');
+    logger.debug('Nettoyage du canal global existant', undefined, 'useStoreCurrency');
     supabase.removeChannel(globalChannel);
     globalChannel = null;
     globalStoreId = null;
   }
 
-  console.log('🔔 Configuration du canal global pour le store:', storeId);
+  logger.debug('Configuration du canal global pour le store', { storeId }, 'useStoreCurrency');
 
   globalChannel = supabase
     .channel(`store-currency-${storeId}`)
@@ -39,7 +40,7 @@ const setupGlobalChannel = (storeId: string) => {
         filter: `store_id=eq.${storeId}`
       },
       (payload) => {
-        console.log('💰 Changement de devise détecté:', payload);
+        logger.info('Changement de devise détecté', { storeId: payload.store_id, newCurrency: payload.currency }, 'useStoreCurrency');
         
         // Notifier tous les abonnés
         subscribers.forEach(callback => callback());
@@ -52,7 +53,7 @@ const setupGlobalChannel = (storeId: string) => {
 
 const cleanupGlobalChannel = () => {
   if (globalChannel) {
-    console.log('🔕 Nettoyage du canal global');
+    logger.debug('Nettoyage du canal global', undefined, 'useStoreCurrency');
     supabase.removeChannel(globalChannel);
     globalChannel = null;
     globalStoreId = null;
@@ -87,7 +88,7 @@ export const useStoreCurrency = (storeId?: string) => {
     if (isValidStoreId && storeId) {
       // Log seulement la première fois
       if (import.meta.env.DEV && !(window as unknown as Record<string, unknown>).__STOREID_VALID_LOGGED__) {
-        console.log('🔄 StoreId devenu valide, refetch des données de devise:', storeId);
+        logger.debug('StoreId devenu valide, refetch des données de devise', { storeId }, 'useStoreCurrency');
         (window as unknown as Record<string, unknown>).__STOREID_VALID_LOGGED__ = true;
       }
       refetchCurrency();
@@ -101,7 +102,7 @@ export const useStoreCurrency = (storeId?: string) => {
   useEffect(() => {
     if (!isValidStoreId) {
       if (import.meta.env.DEV) {
-        console.log('🔕 Pas de storeId valide, pas de configuration temps réel');
+        logger.debug('Pas de storeId valide, pas de configuration temps réel', undefined, 'useStoreCurrency');
       }
       return;
     }
@@ -112,7 +113,7 @@ export const useStoreCurrency = (storeId?: string) => {
     // Fonction de callback pour ce composant
     const handleCurrencyChange = () => {
       if (import.meta.env.DEV) {
-        console.log('🔄 Rafraîchissement des données de devise pour le composant');
+        logger.debug('Rafraîchissement des données de devise pour le composant', { storeId }, 'useStoreCurrency');
       }
       // Forcer le refetch immédiat
       refetchCurrency();

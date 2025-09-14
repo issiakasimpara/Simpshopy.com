@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface ActiveVisitor {
   id: string;
@@ -147,10 +148,10 @@ export const useSmartVisitorTracking = (storeId?: string) => {
       const visitorCount = uniqueSessions;
       
       if (visitorCount >= CONFIG.ACTIVATION_THRESHOLD && trackingState === TrackingState.SLEEP) {
-        console.log('🟢 Activation du tracking - visiteurs détectés:', visitorCount);
+        logger.info('Activation du tracking - visiteurs détectés', { visitorCount }, 'useSmartVisitorTracking');
         activateTracking();
       } else if (visitorCount === 0 && trackingState === TrackingState.ACTIVE) {
-        console.log('🟡 Préparation désactivation - plus de visiteurs');
+        logger.info('Préparation désactivation - plus de visiteurs', undefined, 'useSmartVisitorTracking');
         scheduleDeactivation();
       }
 
@@ -180,7 +181,7 @@ export const useSmartVisitorTracking = (storeId?: string) => {
 
   // Activer le mode de tracking actif
   const activateTracking = useCallback(() => {
-    console.log('🚀 Activation du mode tracking actif');
+    logger.info('Activation du mode tracking actif', undefined, 'useSmartVisitorTracking');
     setTrackingState(TrackingState.TRANSITIONING);
 
     // Nettoyer les intervals de veille
@@ -215,19 +216,19 @@ export const useSmartVisitorTracking = (storeId?: string) => {
           filter: `store_id=eq.${storeId}`
         },
         (payload) => {
-          console.log('🔄 Changement visiteur actif (mode actif):', payload);
+          logger.debug('Changement visiteur actif (mode actif)', { payload }, 'useSmartVisitorTracking');
           fetchActiveVisitors();
         }
       )
       .subscribe();
 
     setTrackingState(TrackingState.ACTIVE);
-    console.log('✅ Mode tracking actif activé');
+    logger.info('Mode tracking actif activé', undefined, 'useSmartVisitorTracking');
   }, [storeId, fetchActiveVisitors, cleanupExpiredSessions]);
 
   // Programmer la désactivation
   const scheduleDeactivation = useCallback(() => {
-    console.log('⏰ Programmation désactivation dans', CONFIG.DEACTIVATION_DELAY, 'ms');
+    logger.debug('Programmation désactivation dans', { delay: CONFIG.DEACTIVATION_DELAY }, 'useSmartVisitorTracking');
     
     if (deactivationTimeoutRef.current) {
       clearTimeout(deactivationTimeoutRef.current);
@@ -240,7 +241,7 @@ export const useSmartVisitorTracking = (storeId?: string) => {
 
   // Désactiver le mode de tracking actif
   const deactivateTracking = useCallback(() => {
-    console.log('😴 Désactivation du mode tracking actif');
+    logger.info('Désactivation du mode tracking actif', undefined, 'useSmartVisitorTracking');
     setTrackingState(TrackingState.TRANSITIONING);
 
     // Nettoyer les intervals actifs

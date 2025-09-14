@@ -77,27 +77,27 @@ const OnboardingWizard = () => {
   }
 
   const handleNext = async () => {
-    console.log('🔄 handleNext appelé - Étape actuelle:', currentStep);
-    console.log('📊 Données sélectionnées:', {
+    logger.debug('handleNext appelé', { currentStep }, 'OnboardingWizard');
+    logger.debug('Données sélectionnées', {
       selectedExperienceLevel,
       selectedBusinessType,
       selectedSector,
       selectedCountry,
       selectedCurrency
-    });
+    }, 'OnboardingWizard');
 
     try {
       if (currentStep === 1 && selectedExperienceLevel) {
-        console.log('💾 Sauvegarde de l\'expérience:', selectedExperienceLevel);
+        logger.info('Sauvegarde de l\'expérience', { experienceLevel: selectedExperienceLevel }, 'OnboardingWizard');
         const saved = await saveStep({ experience_level: selectedExperienceLevel });
-        console.log('✅ Sauvegarde réussie:', saved);
+        logger.info('Sauvegarde réussie', { experienceLevel: selectedExperienceLevel }, 'OnboardingWizard');
         if (saved) {
           console.log('➡️ Passage à l\'étape suivante');
           const nextStepResult = await nextStep();
           console.log('✅ nextStep résultat:', nextStepResult);
         }
       } else if (currentStep === 2 && selectedBusinessType) {
-        console.log('💾 Sauvegarde du type de business:', selectedBusinessType);
+        logger.info('Sauvegarde du type de business', { businessType: selectedBusinessType }, 'OnboardingWizard');
         const saved = await saveStep({ business_type: selectedBusinessType });
         console.log('✅ Sauvegarde réussie:', saved);
         if (saved) {
@@ -106,7 +106,7 @@ const OnboardingWizard = () => {
           console.log('✅ nextStep résultat:', nextStepResult);
         }
       } else if (currentStep === 3 && selectedSector) {
-        console.log('💾 Sauvegarde du secteur:', selectedSector);
+        logger.info('Sauvegarde du secteur', { sector: selectedSector }, 'OnboardingWizard');
         const saved = await saveStep({ sector: selectedSector });
         console.log('✅ Sauvegarde réussie:', saved);
         if (saved) {
@@ -115,7 +115,7 @@ const OnboardingWizard = () => {
           console.log('✅ nextStep résultat:', nextStepResult);
         }
       } else if (currentStep === 4 && selectedCountry && selectedCurrency) {
-        console.log('💾 Sauvegarde de la localisation:', { selectedCountry, selectedCurrency });
+        logger.info('Sauvegarde de la localisation', { selectedCountry, selectedCurrency }, 'OnboardingWizard');
         const saved = await saveStep({ 
           country_code: selectedCountry, 
           currency_code: selectedCurrency 

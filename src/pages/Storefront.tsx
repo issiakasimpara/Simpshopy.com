@@ -9,6 +9,7 @@ import { useAggressiveStorefront } from '@/hooks/useAggressiveStorefront';
 import VisitorTracker from '@/components/VisitorTracker';
 import { useBranding } from '@/hooks/useBranding';
 import InstantStorefront from '@/components/InstantStorefront';
+import { logger } from '@/utils/logger';
 
 const Storefront = () => {
   const { storeSlug } = useParams();
@@ -31,7 +32,7 @@ const Storefront = () => {
   // Récupérer les données de branding
   const brandingData = useBranding(template);
 
-  console.log('🚀 Storefront optimisé: Loading store:', storeSlug);
+  logger.debug('Storefront optimisé: Loading store', { storeSlug }, 'Storefront');
 
   // 🚀 SYSTÈME OPTIMISÉ - Plus besoin de fetchStoreData !
   // Le hook useOptimizedStorefront gère tout automatiquement
@@ -40,16 +41,17 @@ const Storefront = () => {
   useEffect(() => {
     if (store?.id) {
       setStoreId(store.id);
-      console.log('✅ Store ID mis à jour dans le contexte:', store.id);
+      logger.debug('Store ID mis à jour dans le contexte', { storeId: store.id, storeSlug }, 'Storefront');
     }
   }, [store?.id, setStoreId]);
 
   // Effet pour mettre à jour le favicon et le titre de la page
   useEffect(() => {
-    console.log('🔄 Mise à jour branding:', {
+    logger.debug('Mise à jour branding', {
       favicon: brandingData.favicon ? 'Présent' : 'Absent',
-      brandName: brandingData.brandName
-    });
+      brandName: brandingData.brandName,
+      storeId: store?.id
+    }, 'Storefront');
 
     if (brandingData.favicon) {
       try {
@@ -67,7 +69,7 @@ const Storefront = () => {
         // Ajouter au head
         document.getElementsByTagName('head')[0].appendChild(link);
 
-        console.log('✅ Favicon personnalisé mis à jour:', brandingData.favicon.substring(0, 50) + '...');
+        logger.debug('Favicon personnalisé mis à jour', { storeId: store?.id, faviconLength: brandingData.favicon.length }, 'Storefront');
       } catch (error) {
         console.error('❌ Erreur mise à jour favicon personnalisé:', error);
       }
@@ -86,7 +88,7 @@ const Storefront = () => {
     const page = searchParams.get('page') || 'home';
     const productId = searchParams.get('product');
 
-    console.log('Storefront: URL params changed', { page, productId, productsLoaded: products.length > 0, isLoading });
+    logger.debug('Storefront: URL params changed', { page, productId, productsLoaded: products.length > 0, isLoading, storeId: store?.id }, 'Storefront');
 
     // Toujours définir la page immédiatement pour éviter le "flash" de la page d'accueil
     setCurrentPage(page);
@@ -96,14 +98,14 @@ const Storefront = () => {
     if (page === 'product-detail' && productId) {
       // Si les produits ne sont pas encore chargés, on garde la page mais on attend
       if (isLoading || products.length === 0) {
-        console.log('Storefront: Products not loaded yet, keeping page but waiting...');
+        logger.debug('Storefront: Products not loaded yet, keeping page but waiting', { storeId: store?.id, page }, 'Storefront');
         return;
       }
 
       // Vérifier que le produit existe maintenant que les produits sont chargés
       const productExists = products.find(p => p.id === productId);
       if (!productExists) {
-        console.log('Storefront: Product not found, redirecting to boutique');
+        logger.warn('Storefront: Product not found, redirecting to boutique', { productId, storeId: store?.id }, 'Storefront');
         navigate('?page=product', { replace: true });
         return;
       }

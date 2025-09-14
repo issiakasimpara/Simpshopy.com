@@ -47,12 +47,12 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
 
   // Initialiser depuis la base de données ou les props
   useEffect(() => {
-    console.log('SimpleVariantSection - Initializing with:', {
+    logger.debug('SimpleVariantSection - Initializing with', {
       productId,
       dbVariants: dbVariants.length,
       initialVariants: initialVariants.length,
       isInitialized
-    });
+    }, 'SimpleVariantSection');
     
     const variantsToUse = productId && dbVariants.length > 0 ? dbVariants : initialVariants;
     
@@ -67,11 +67,12 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
         }
       });
 
-      console.log('SimpleVariantSection - Setting data from:', productId ? 'database' : 'props', {
+      logger.debug('SimpleVariantSection - Setting data from', {
+        source: productId ? 'database' : 'props',
         colors: existingColors,
         sizes: existingSizes,
         colorImages: existingColorImages
-      });
+      }, 'SimpleVariantSection');
 
       setColors(existingColors);
       setSizes(existingSizes);
@@ -92,7 +93,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
   // Générer automatiquement les combinaisons
   useEffect(() => {
     if (colors.length > 0 && sizes.length > 0) {
-      console.log('SimpleVariantSection - Generating variants for:', { colors, sizes });
+      logger.debug('SimpleVariantSection - Generating variants for', { colorsCount: colors.length, sizesCount: sizes.length }, 'SimpleVariantSection');
       
       const newVariants: VariantCombination[] = [];
       
@@ -113,11 +114,11 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
         });
       });
       
-      console.log('SimpleVariantSection - Generated variants:', newVariants);
+      logger.debug('SimpleVariantSection - Generated variants', { variantsCount: newVariants.length }, 'SimpleVariantSection');
       setVariants(newVariants);
       onVariantsChange(newVariants);
     } else if (colors.length === 0 && sizes.length === 0) {
-      console.log('SimpleVariantSection - Clearing variants');
+      logger.debug('SimpleVariantSection - Clearing variants', undefined, 'SimpleVariantSection');
       setVariants([]);
       onVariantsChange([]);
     }
@@ -125,7 +126,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
 
   const addColor = () => {
     if (newColor.trim() && !colors.includes(newColor.trim())) {
-      console.log('SimpleVariantSection - Adding color:', newColor.trim());
+      logger.debug('SimpleVariantSection - Adding color', { color: newColor.trim() }, 'SimpleVariantSection');
       setColors([...colors, newColor.trim()]);
       setNewColor('');
     }
@@ -133,7 +134,7 @@ const SimpleVariantSection = ({ onVariantsChange, productName = '', initialVaria
 
   const addSize = () => {
     if (newSize.trim() && !sizes.includes(newSize.trim())) {
-      console.log('SimpleVariantSection - Adding size:', newSize.trim());
+      logger.debug('SimpleVariantSection - Adding size', { size: newSize.trim() }, 'SimpleVariantSection');
       setSizes([...sizes, newSize.trim()]);
       setNewSize('');
     }

@@ -29,10 +29,30 @@ class SecureStorage {
    */
   private async initializeEncryption(): Promise<void> {
     try {
-      const keyData = new TextEncoder().encode(this.config.encryptionKey);
+      // Générer une clé de 256 bits (32 bytes) à partir de la clé de configuration
+      const keyString = this.config.encryptionKey || 'default-key-for-development';
+      const keyData = new TextEncoder().encode(keyString);
+      
+      // S'assurer que la clé fait exactement 32 bytes (256 bits)
+      let finalKeyData: Uint8Array;
+      if (keyData.length === 32) {
+        finalKeyData = keyData;
+      } else if (keyData.length < 32) {
+        // Étendre la clé si elle est trop courte
+        finalKeyData = new Uint8Array(32);
+        finalKeyData.set(keyData);
+        // Remplir avec des zéros
+        for (let i = keyData.length; i < 32; i++) {
+          finalKeyData[i] = 0;
+        }
+      } else {
+        // Tronquer la clé si elle est trop longue
+        finalKeyData = keyData.slice(0, 32);
+      }
+      
       this.encryptionKey = await crypto.subtle.importKey(
         'raw',
-        keyData,
+        finalKeyData,
         { name: 'AES-GCM' },
         false,
         ['encrypt', 'decrypt']

@@ -1,6 +1,7 @@
 
 import { TemplateBlock, Template, PageMetadata } from '@/types/template';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface UseTemplateOperationsProps {
   templateData: Template;
@@ -282,12 +283,12 @@ export const useTemplateOperations = ({
         [currentPage]: newBlocks
       }
     };
-    console.log('updatePageBlocks - Template mis à jour:', updatedTemplate);
+    logger.debug('updatePageBlocks - Template mis à jour', { templateId: updatedTemplate.id }, 'useTemplateOperations');
     onTemplateUpdate(updatedTemplate);
   };
 
   const handleBlockUpdate = (updatedBlock: TemplateBlock) => {
-    console.log('handleBlockUpdate - Bloc mis à jour:', updatedBlock);
+    logger.debug('handleBlockUpdate - Bloc mis à jour', { blockId: updatedBlock.id, blockType: updatedBlock.type }, 'useTemplateOperations');
     const updatedBlocks = pageBlocks.map(block => 
       block.id === updatedBlock.id ? updatedBlock : block
     );
@@ -296,7 +297,7 @@ export const useTemplateOperations = ({
   };
 
   const handleBlockAdd = (newBlock: TemplateBlock) => {
-    console.log('handleBlockAdd - Nouveau bloc:', newBlock);
+    logger.debug('handleBlockAdd - Nouveau bloc', { blockId: newBlock.id, blockType: newBlock.type }, 'useTemplateOperations');
     const blockWithOrder = {
       ...newBlock,
       id: `${newBlock.type}-${Date.now()}`,
@@ -310,7 +311,7 @@ export const useTemplateOperations = ({
   };
 
   const handleBlockDelete = (blockId: string) => {
-    console.log('handleBlockDelete - Suppression du bloc:', blockId);
+    logger.debug('handleBlockDelete - Suppression du bloc', { blockId }, 'useTemplateOperations');
     const updatedBlocks = pageBlocks.filter(block => block.id !== blockId);
     // Réorganiser l'ordre
     updatedBlocks.forEach((block, index) => {
@@ -329,7 +330,7 @@ export const useTemplateOperations = ({
   };
 
   const handleBlockReorder = (draggedBlockId: string, targetBlockId: string) => {
-    console.log('handleBlockReorder - Réorganisation:', draggedBlockId, '->', targetBlockId);
+    logger.debug('handleBlockReorder - Réorganisation', { draggedBlockId, targetBlockId }, 'useTemplateOperations');
     const draggedBlock = pageBlocks.find(b => b.id === draggedBlockId);
     const targetBlock = pageBlocks.find(b => b.id === targetBlockId);
     

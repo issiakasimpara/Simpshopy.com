@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Template } from '@/types/template';
 import { useToast } from '@/hooks/use-toast';
 import { validateStoreAccess } from '@/utils/validation';
+import { logger } from '@/utils/logger';
 
 interface UseTemplateActionsProps {
   selectedStore: any;
@@ -21,11 +22,11 @@ export const useTemplateActions = ({
   const { toast } = useToast();
 
   const handleSave = useCallback(async (silent = false) => {
-    console.log('🔧 handleSave called:', {
+    logger.debug('handleSave called', {
       selectedStore: selectedStore?.id,
       templateId: templateData.id,
       silent
-    });
+    }, 'useTemplateActions');
 
     if (!selectedStore?.id) {
       console.error('❌ No selectedStore found for save');
@@ -50,11 +51,11 @@ export const useTemplateActions = ({
     }
 
     try {
-      console.log('💾 Saving template...', {
+      logger.info('Saving template', {
         storeId: selectedStore.id,
         templateId: templateData.id,
         isPublished: false
-      });
+      }, 'useTemplateActions');
 
       await saveTemplate(selectedStore.id, templateData.id, templateData, false);
       setHasUnsavedChanges(false);
@@ -66,7 +67,7 @@ export const useTemplateActions = ({
         });
       }
 
-      console.log('✅ Template saved successfully');
+      logger.info('Template saved successfully', { storeId: selectedStore.id, templateId: templateData.id }, 'useTemplateActions');
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error);
       toast({
@@ -88,10 +89,10 @@ export const useTemplateActions = ({
   }, [setShowPreview, toast]);
 
   const handlePublish = useCallback(async () => {
-    console.log('🚀 handlePublish called:', {
+    logger.debug('handlePublish called', {
       selectedStore: selectedStore?.id,
       templateId: templateData.id
-    });
+    }, 'useTemplateActions');
 
     if (!selectedStore?.id) {
       console.error('❌ No selectedStore found for publish');
@@ -116,11 +117,11 @@ export const useTemplateActions = ({
     }
 
     try {
-      console.log('📤 Publishing template...', {
+      logger.info('Publishing template', {
         storeId: selectedStore.id,
         templateId: templateData.id,
         isPublished: true
-      });
+      }, 'useTemplateActions');
 
       await saveTemplate(selectedStore.id, templateData.id, templateData, true);
       setHasUnsavedChanges(false);
@@ -130,7 +131,7 @@ export const useTemplateActions = ({
         description: "Votre site est maintenant en ligne avec toutes vos modifications !",
       });
 
-      console.log('✅ Template published successfully');
+      logger.info('Template published successfully', { storeId: selectedStore.id, templateId: templateData.id }, 'useTemplateActions');
     } catch (error) {
       console.error('❌ Erreur lors de la publication:', error);
       toast({

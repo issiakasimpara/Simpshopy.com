@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Template } from '@/types/template';
+import { logger } from '@/utils/logger';
 
 interface BrandingData {
   logo?: string;
@@ -16,23 +17,25 @@ export const useBranding = (template: Template | null) => {
   // 🚀 OPTIMISATION: Mémoriser l'extraction du bloc branding
   const brandingBlock = useMemo(() => {
     if (!template) {
-      console.log('🔍 useBranding: Pas de template');
+      logger.debug('useBranding: Pas de template', undefined, 'useBranding');
       return null;
     }
 
-    console.log('🔍 useBranding: Recherche bloc branding dans template:', template.id);
+    logger.debug('useBranding: Recherche bloc branding dans template', { templateId: template?.id || 'unknown' }, 'useBranding');
 
     // Chercher le bloc branding dans toutes les pages du template
     let foundBlock = null;
 
     // Chercher dans toutes les pages
-    Object.entries(template.pages).forEach(([pageName, pageBlocks]) => {
-      const block = pageBlocks.find(block => block.type === 'branding');
-      if (block) {
-        console.log(`✅ Bloc branding trouvé dans la page: ${pageName}`, block.content);
-        foundBlock = block;
-      }
-    });
+    if (template.pages) {
+      Object.entries(template.pages).forEach(([pageName, pageBlocks]) => {
+        const block = pageBlocks.find(block => block.type === 'branding');
+        if (block) {
+          logger.debug('Bloc branding trouvé dans la page', { pageName, blockContent: block.content }, 'useBranding');
+          foundBlock = block;
+        }
+      });
+    }
 
     return foundBlock;
   }, [template?.id, template?.pages]);
@@ -40,7 +43,7 @@ export const useBranding = (template: Template | null) => {
   // 🚀 OPTIMISATION: Mémoriser les données branding extraites
   const extractedBrandingData = useMemo(() => {
     if (!brandingBlock) {
-      console.log('⚠️ Aucun bloc branding trouvé dans le template');
+      logger.warn('Aucun bloc branding trouvé dans le template', { templateId: template?.id || 'unknown' }, 'useBranding');
       return {};
     }
 
@@ -53,7 +56,7 @@ export const useBranding = (template: Template | null) => {
       logoPosition: brandingBlock.content.logoPosition || 'left'
     };
 
-    console.log('🎨 Données branding extraites:', newBrandingData);
+    logger.debug('Données branding extraites', { brandingData: newBrandingData }, 'useBranding');
     return newBrandingData;
   }, [brandingBlock]);
 

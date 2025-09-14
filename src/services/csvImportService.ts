@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import type { Tables } from '@/integrations/supabase/types';
 
 export interface CSVProduct {
@@ -139,7 +140,7 @@ export class CSVImportService {
      onProgress?: (progress: number) => void,
      defaultStatus: 'active' | 'draft' | 'inactive' = 'draft'
    ): Promise<ImportResult> {
-     console.log('🔍 CSV Import - Début de l\'import:', { csvDataLength: csvData.length, storeId, defaultStatus });
+     logger.info('CSV Import - Début de l\'import', { csvDataLength: csvData.length, storeId, defaultStatus }, 'csvImportService');
     const result: ImportResult = {
       success: false,
       imported: 0,
@@ -150,7 +151,7 @@ export class CSVImportService {
          try {
        // Détecter si c'est un format Shopify
        const isShopifyFormat = this.detectShopifyFormat(csvData);
-       console.log('🔍 CSV Import - Format détecté:', { isShopifyFormat, firstRow: csvData[0] });
+       logger.debug('CSV Import - Format détecté', { isShopifyFormat, firstRow: csvData[0] }, 'csvImportService');
       
       let processedData: any[];
       
@@ -221,7 +222,7 @@ export class CSVImportService {
                .eq('sku', productData.sku)
                .single();
 
-             console.log('🔍 CSV Import - Vérification SKU:', { sku: productData.sku, existingProduct });
+             logger.debug('CSV Import - Vérification SKU', { sku: productData.sku, existingProduct }, 'csvImportService');
 
              if (existingProduct) {
                result.warnings.push(`SKU ${productData.sku} existe déjà, produit ignoré`);
@@ -260,12 +261,12 @@ export class CSVImportService {
              result.success = true;
        result.imported = importedCount;
 
-       console.log('🔍 CSV Import - Import terminé:', { 
-         success: result.success, 
-         imported: result.imported, 
-         errors: result.errors.length, 
-         warnings: result.warnings.length 
-       });
+       logger.info('CSV Import - Import terminé', {
+         success: result.success,
+         imported: result.imported,
+         errors: result.errors.length,
+         warnings: result.warnings.length
+       }, 'csvImportService');
 
      } catch (error) {
        console.error('🔍 CSV Import - Erreur générale:', error);

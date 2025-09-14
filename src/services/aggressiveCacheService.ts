@@ -3,6 +3,8 @@
 // Objectif: Cache ultra-rapide pour éliminer le skeleton
 // Intégré avec monitoring et cache intelligent
 
+import { logger } from '@/utils/logger';
+
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -48,7 +50,7 @@ export class AggressiveCacheService {
     // 1. Vérifier le cache mémoire (ultra-rapide)
     const memoryEntry = this.memoryCache.get(key);
     if (memoryEntry && this.isValid(memoryEntry)) {
-      console.log('⚡ Cache HIT - Mémoire:', key);
+      logger.debug('Cache HIT - Mémoire', { key }, 'aggressiveCacheService');
       return memoryEntry.data;
     }
 
@@ -60,7 +62,7 @@ export class AggressiveCacheService {
         if (this.isValid(entry)) {
           // Remettre en cache mémoire
           this.memoryCache.set(key, entry);
-          console.log('⚡ Cache HIT - Session:', key);
+          logger.debug('Cache HIT - Session', { key }, 'aggressiveCacheService');
           return entry.data;
         }
       }
@@ -77,7 +79,7 @@ export class AggressiveCacheService {
           // Remettre en cache mémoire et session
           this.memoryCache.set(key, entry);
           sessionStorage.setItem(`cache_${key}`, localData);
-          console.log('⚡ Cache HIT - LocalStorage:', key);
+          logger.debug('Cache HIT - LocalStorage', { key }, 'aggressiveCacheService');
           return entry.data;
         }
       }
@@ -85,7 +87,7 @@ export class AggressiveCacheService {
       console.warn('LocalStorage cache error:', error);
     }
 
-    console.log('❌ Cache MISS:', key);
+    logger.debug('Cache MISS', { key }, 'aggressiveCacheService');
     
     // Enregistrer le miss pour le monitoring
     try {
@@ -128,7 +130,7 @@ export class AggressiveCacheService {
       console.warn('LocalStorage cache write error:', error);
     }
 
-    console.log('💾 Cache SET:', key);
+    logger.debug('Cache SET', { key, ttl }, 'aggressiveCacheService');
   }
 
   /**
@@ -159,7 +161,7 @@ export class AggressiveCacheService {
     this.memoryCache.delete(key);
     sessionStorage.removeItem(`cache_${key}`);
     localStorage.removeItem(`cache_${key}`);
-    console.log('🗑️ Cache DELETE:', key);
+    logger.debug('Cache DELETE', { key }, 'aggressiveCacheService');
   }
 
   /**
@@ -176,7 +178,7 @@ export class AggressiveCacheService {
     const localKeys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));
     localKeys.forEach(key => localStorage.removeItem(key));
     
-    console.log('🧹 Cache CLEARED');
+    logger.info('Cache CLEARED', undefined, 'aggressiveCacheService');
   }
 
   /**
