@@ -51,7 +51,7 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
     const cacheKey = CACHE_KEYS.STOREFRONT(storeSlug);
     const cachedData = await AggressiveCacheService.get<StorefrontData>(cacheKey);
     if (cachedData) {
-      console.log('⚡ Données en cache trouvées, affichage immédiat');
+      // Données en cache trouvées
       setInitialData(cachedData);
       setHasInitialData(true);
     }
@@ -82,14 +82,14 @@ export function useAggressiveStorefront(): UseAggressiveStorefrontReturn {
       }
 
       // Sinon, récupérer depuis Supabase
-      console.log('⏳ Récupération depuis Supabase pour:', storeSlug);
+      // Récupération depuis Supabase
       const freshData = await OptimizedStorefrontService.getStorefrontBySlug(storeSlug);
       
       // Mettre en cache agressif
       if (freshData) {
         const cacheKey = CACHE_KEYS.STOREFRONT(storeSlug);
         AggressiveCacheService.set(cacheKey, freshData, CACHE_DURATIONS.STOREFRONT);
-        console.log('💾 Storefront mis en cache agressif');
+        // Storefront mis en cache agressif
       }
       
       return freshData;

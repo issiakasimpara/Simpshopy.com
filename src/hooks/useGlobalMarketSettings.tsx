@@ -24,7 +24,7 @@ export function useGlobalMarketSettings(storeId: string | null) {
         return globalMarketSettingsCache.get(storeId)!;
       }
 
-      console.log(`🌐 Requête globale market_settings pour store ${storeId}`);
+      // Requête globale market_settings
       
       // Utiliser le service existant au lieu d'appels directs à Supabase
       const data = await StoreCurrencyService.getStoreCurrencySettings(storeId);

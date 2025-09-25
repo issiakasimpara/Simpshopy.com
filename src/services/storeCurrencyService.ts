@@ -23,7 +23,7 @@ export class StoreCurrencyService {
     try {
       // Log seulement en développement et seulement la première fois
       if (import.meta.env.DEV && !window.__CURRENCY_LOGGED__) {
-        console.log('🔍 StoreCurrencyService - Récupération devise pour storeId:', storeId);
+        // Récupération devise pour storeId
         window.__CURRENCY_LOGGED__ = true;
       }
       
@@ -46,7 +46,7 @@ export class StoreCurrencyService {
       const currency = (data?.default_currency as Currency) || 'XOF';
       // Log seulement en cas de succès et seulement la première fois
       if (import.meta.env.DEV && !window.__CURRENCY_SUCCESS_LOGGED__) {
-        console.log('✅ StoreCurrencyService - Devise récupérée:', currency, 'pour storeId:', storeId);
+        // Devise récupérée
         window.__CURRENCY_SUCCESS_LOGGED__ = true;
       }
       

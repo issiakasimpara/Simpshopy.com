@@ -69,7 +69,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   // Définir la boutique active avec persistance
   const setStoreId = (newStoreId: string) => {
-    console.log('CartContext: setStoreId called with:', newStoreId);
     if (newStoreId !== storeId) {
       setStoreIdState(newStoreId);
       // Persister le storeId avec le stockage isolé
@@ -85,7 +84,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         // Récupérer le storeId persistant avec le stockage isolé
         const savedStoreId = isolatedStorage.getItem('cart_store_id');
         if (savedStoreId) {
-          console.log('CartContext: Restauration du storeId depuis le stockage isolé:', savedStoreId);
           setStoreIdState(savedStoreId);
           await loadCart(savedStoreId);
         }

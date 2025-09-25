@@ -54,7 +54,7 @@ const BlockRenderer = memo(({
 }: BlockRendererProps) => {
   // Log seulement en développement et très rarement
   if (import.meta.env.DEV && Math.random() < 0.01) {
-    console.log('BlockRenderer - Rendering block:', block.type, 'with productId:', productId);
+    // Rendering block
   }
 
   // 🚀 OPTIMISATION: Mémoriser les props pour éviter les re-renders
@@ -83,7 +83,7 @@ const BlockRenderer = memo(({
     case 'product-detail':
       // Log seulement en développement et très rarement
       if (import.meta.env.DEV && Math.random() < 0.01) {
-        console.log('BlockRenderer - Rendering ProductDetailBlock with productId:', productId);
+        // Rendering ProductDetailBlock
       }
       return <ProductDetailBlock {...blockProps} products={products} />;
     case 'text-image':

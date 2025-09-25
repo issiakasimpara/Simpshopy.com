@@ -13,8 +13,8 @@ import { performanceManager } from './utils/performanceManager'
 import { errorRecoveryManager } from './utils/errorRecovery'
 // 🔍 Système de monitoring avancé (DÉSACTIVÉ TEMPORAIREMENT)
 // import { monitoring } from './utils/monitoring'
-// 🔍 Système de diagnostic pour identifier les problèmes
-import { systemDiagnostic } from './utils/systemDiagnostic'
+// 🔍 Système de diagnostic pour identifier les problèmes (DÉSACTIVÉ - cause des violations de performance)
+// import { systemDiagnostic } from './utils/systemDiagnostic'
 // 🗄️ Migration de la base de données
 import { checkMarketSettingsTable, applyMarketSettingsMigration } from './scripts/applyMarketSettingsMigration'
 // 🔐 Nouvelles sécurités
@@ -40,6 +40,11 @@ if (import.meta.env.DEV && Math.random() < 0.01) {
     // Log silencieux en production
   }
 }
+
+// 🔍 DÉSACTIVÉ : Système de diagnostic cause des violations de performance
+// if (import.meta.env.DEV) {
+//   systemDiagnostic.runDiagnostic();
+// }
 
 // 🛡️ Initialiser le système de récupération d'erreurs (silencieux)
 

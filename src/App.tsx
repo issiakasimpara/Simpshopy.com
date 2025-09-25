@@ -8,6 +8,7 @@ import { useSessionOptimizer } from './hooks/useSessionOptimizer';
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from './components/ui/toaster';
 import OptimizedPreloader from './components/OptimizedPreloader';
+import './App.css';
 import LoadingFallback from './components/LoadingFallback';
 import StorageInitializer from './components/StorageInitializer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -105,7 +106,7 @@ function PreloadInitializer() {
   React.useEffect(() => {
     // Activer le préchargement intelligent
     // 🚀 PLUS BESOIN DE PRÉCHARGEMENT COMPLEXE - Le cache agressif suffit !
-    console.log('🚀 Préchargement intelligent activé');
+    // Préchargement intelligent activé
   }, []);
 
   return null;

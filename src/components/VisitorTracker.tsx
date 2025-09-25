@@ -19,12 +19,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
     // Générer un ID de session stable pour ce visiteur
     sessionIdRef.current = generateSessionId(userAgent, ipAddress);
 
-    console.log('👤 VisitorTracker initialisé:', {
-      storeId,
-      storeSlug,
-      sessionId: sessionIdRef.current,
-      trackingState
-    });
+    // VisitorTracker initialisé
 
     // Tracker le visiteur initial
     const trackInitialVisit = async () => {
@@ -40,7 +35,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
         heartbeatIntervalRef.current = setInterval(async () => {
           await trackVisitor(sessionIdRef.current, userAgent, ipAddress);
         }, 15 * 1000);
-        console.log('💓 Heartbeat démarré (mode actif)');
+        // Heartbeat démarré
       }
     };
 
@@ -48,7 +43,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
-        console.log('💓 Heartbeat arrêté');
+        // Heartbeat arrêté
       }
     };
 
@@ -66,8 +61,8 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
       }
     };
 
-    // Écouter les événements d'activité utilisateur
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    // Écouter seulement les événements essentiels (réduire la charge)
+    const events = ['click', 'scroll'];
     
     events.forEach(event => {
       document.addEventListener(event, handleUserActivity, { passive: true });
@@ -97,7 +92,7 @@ const VisitorTracker: React.FC<VisitorTrackerProps> = ({ storeId, storeSlug }) =
         window.removeEventListener('popstate', handlePageChange);
       }
 
-      console.log('🧹 VisitorTracker cleanup terminé');
+      // VisitorTracker cleanup terminé
     };
   }, [storeId, trackVisitor, generateSessionId, trackingState]);
 

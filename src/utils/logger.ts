@@ -83,7 +83,7 @@ class Logger {
       timestamp: new Date().toISOString(),
       level,
       message,
-      data: this.sanitizeData ? this.sanitize(data) : data,
+      data: this.config.sanitizeData ? this.sanitize(data) : data,
       source: source || this.getSource(),
       userId: this.getCurrentUserId(),
       sessionId: this.getCurrentSessionId()
@@ -139,7 +139,11 @@ class Logger {
       /apikey['":\s]*([a-zA-Z0-9\-_]+)/gi,
       /secret['":\s]*([a-zA-Z0-9\-_]+)/gi,
       /key['":\s]*([a-zA-Z0-9\-_]+)/gi,
-      /bearer['":\s]*([a-zA-Z0-9\-_]+)/gi
+      /bearer['":\s]*([a-zA-Z0-9\-_]+)/gi,
+      /storeId['":\s]*([a-zA-Z0-9\-_]+)/gi,
+      /storeSlug['":\s]*([a-zA-Z0-9\-_]+)/gi,
+      /store_id['":\s]*([a-zA-Z0-9\-_]+)/gi,
+      /store_slug['":\s]*([a-zA-Z0-9\-_]+)/gi
     ];
 
     let sanitized = str;
@@ -163,7 +167,9 @@ class Logger {
     const sensitiveKeys = [
       'token', 'password', 'apikey', 'secret', 'key', 'bearer',
       'authorization', 'auth', 'credential', 'access_token',
-      'refresh_token', 'session_id', 'cookie', 'jwt'
+      'refresh_token', 'session_id', 'cookie', 'jwt',
+      'storeId', 'storeSlug', 'store_id', 'store_slug',
+      'id', 'slug', 'userId', 'user_id'
     ];
 
     const sanitized: any = {};
@@ -219,19 +225,33 @@ class Logger {
     const prefix = `[${entry.timestamp}] [${entry.level}]`;
     const source = entry.source ? ` [${entry.source}]` : '';
     const message = `${prefix}${source} ${entry.message}`;
+    
+    // Sanitiser les données avant l'affichage
+    const sanitizedData = this.config.sanitizeData ? this.sanitize(entry.data) : entry.data;
 
     switch (entry.level) {
       case 'DEBUG':
-        console.log(message, entry.data);
+        // Désactiver complètement les logs DEBUG en développement
+        if (import.meta.env.DEV) {
+          // Ne pas afficher les logs DEBUG en développement
+          return;
+        }
+        console.log(message, sanitizedData);
         break;
       case 'INFO':
-        console.info(message, entry.data);
+        // Désactiver complètement les logs INFO du tracking en développement
+        if (import.meta.env.DEV && !message.includes('useSmartVisitorTracking')) {
+          console.info(message, sanitizedData);
+        }
         break;
       case 'WARN':
-        console.warn(message, entry.data);
+        // Réduire les logs WARN répétitifs
+        if (import.meta.env.DEV && Math.random() < 0.3) {
+          console.warn(message, sanitizedData);
+        }
         break;
       case 'ERROR':
-        console.error(message, entry.data);
+        console.error(message, sanitizedData);
         break;
     }
   }

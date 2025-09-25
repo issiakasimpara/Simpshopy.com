@@ -32,25 +32,9 @@ const ProductsBlock = ({
   const { products, isLoading } = useProducts(selectedStore?.id, 'active');
   const { formatPrice } = useStoreCurrency(selectedStore?.id);
   
-  // Log pour debug
-  if (import.meta.env.DEV && Math.random() < 0.1) {
-    console.log('ProductsBlock Debug:', {
-      selectedStoreId: selectedStore?.id,
-      productsCount: products?.length,
-      firstProduct: products?.[0] ? {
-        id: products[0].id,
-        name: products[0].name,
-        price: products[0].price,
-        formattedPrice: formatPrice(products[0].price || 0)
-      } : null
-    });
-  }
+  // ProductsBlock Debug
   
-  // Log seulement en développement et très rarement
-  if (import.meta.env.DEV && Math.random() < 0.01) {
-    console.log('ProductsBlock - onProductClick available:', !!onProductClick);
-    console.log('ProductsBlock - products count:', products.length);
-  }
+  // ProductsBlock debug info
 
   const getGridCols = () => {
     const layout = block.content.layout || 'grid';

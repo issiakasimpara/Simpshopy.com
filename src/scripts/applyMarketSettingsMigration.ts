@@ -78,11 +78,11 @@ export async function checkMarketSettingsTable() {
       .limit(1);
 
     if (error) {
-      console.log('❌ Table market_settings n\'existe pas:', error.message);
+      // Table market_settings n'existe pas
       return false;
     }
 
-    console.log('✅ Table market_settings existe');
+    // Table market_settings existe
     return true;
 
   } catch (error) {

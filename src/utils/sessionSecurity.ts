@@ -173,7 +173,7 @@ class SessionSecurity {
       const data = await response.json();
       return data.ip;
     } catch (error) {
-      console.warn('Impossible de récupérer l\'IP du client:', error);
+      // Impossible de récupérer l'IP du client
       return undefined;
     }
   }
