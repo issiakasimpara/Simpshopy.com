@@ -208,13 +208,19 @@ class SecureStorage {
    * 🔐 Récupérer une valeur JSON de manière sécurisée
    */
   public async getItemJSON<T = any>(key: string): Promise<T | null> {
-    const value = await this.getItem(key);
-    
-    if (!value) {
-      return null;
-    }
-
     try {
+      const value = await this.getItem(key);
+      
+      if (!value) {
+        return null;
+      }
+
+      // Vérifier si la valeur ressemble à du JSON
+      if (typeof value !== 'string' || (!value.startsWith('{') && !value.startsWith('['))) {
+        // La valeur n'est pas du JSON, retourner null
+        return null;
+      }
+
       return JSON.parse(value) as T;
     } catch (error) {
       console.error('Erreur lors du parsing JSON:', error);

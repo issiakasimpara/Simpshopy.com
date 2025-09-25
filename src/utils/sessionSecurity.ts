@@ -77,7 +77,7 @@ class SessionSecurity {
       lastActivity: now,
       expiresAt: now + this.config.maxDuration,
       userAgent: navigator.userAgent,
-      ipAddress: await this.getClientIP(),
+      ipAddress: await this.getClientIP().catch(() => undefined),
       permissions: this.getDefaultPermissions()
     };
 
